@@ -30,43 +30,58 @@ enum AnisetteProvider {
         let lastServer = UserDefaults.standard.menuAnisetteURL
         let startIndex = servers.firstIndex(where: { $0.absoluteString == lastServer }) ?? 0
 
-        let provider = SideSign.AnisetteDataManager.shared
-        let existingBlob = AnisetteConfigManager.shared.anisetteAdiBlob.flatMap { Data(base64Encoded: $0) }
-        let identifier = await AnisetteConfigManager.shared.resolveDeviceIdentifier()
-        let headers = await AnisetteConfigManager.shared.makeRequestHeaders()
+        func attempt() async throws -> ALTAnisetteData {
+            let provider = SideSign.AnisetteDataManager.shared
+            let existingBlob = AnisetteConfigManager.shared.anisetteAdiBlob.flatMap { Data(base64Encoded: $0) }
+            let identifier = await AnisetteConfigManager.shared.resolveDeviceIdentifier()
+            let headers = await AnisetteConfigManager.shared.makeRequestHeaders()
 
-        let (anisetteData, newAdiBlob) = try await provider.fetchAnisetteDataWithFailover(
-            servers: UserDefaults.standard.disableAnisetteRotation ? [servers[startIndex]] : servers,
-            startIndex: startIndex,
-            identifier: identifier,
-            existingAdiBlob: existingBlob,
-            headers: headers,
-            onError: { error in
-                if let anisetteError = error as? SideSign.AnisetteError,
-                   case .outdatedV1Server(let serverURL, _) = anisetteError {
-                    if UserDefaults.standard.defaultServerURL == serverURL.absoluteString {
-                        return true
-                    }
-                    if let handler = handler {
-                        let shouldContinue = try await handler.warnOutdatedAnisetteServer()
-                        if shouldContinue {
-                            UserDefaults.standard.defaultServerURL = serverURL.absoluteString
+            let (anisetteData, newAdiBlob) = try await provider.fetchAnisetteDataWithFailover(
+                servers: UserDefaults.standard.disableAnisetteRotation ? [servers[startIndex]] : servers,
+                startIndex: startIndex,
+                identifier: identifier,
+                existingAdiBlob: existingBlob,
+                headers: headers,
+                onError: { error in
+                    if let anisetteError = error as? SideSign.AnisetteError,
+                       case .outdatedV1Server(let serverURL, _) = anisetteError {
+                        if UserDefaults.standard.defaultServerURL == serverURL.absoluteString {
+                            return true
                         }
-                        return shouldContinue
+                        if let handler = handler {
+                            let shouldContinue = try await handler.warnOutdatedAnisetteServer()
+                            if shouldContinue {
+                                UserDefaults.standard.defaultServerURL = serverURL.absoluteString
+                            }
+                            return shouldContinue
+                        }
                     }
+                    return false
+                },
+                onSuccess: { successfulServer in
+                    UserDefaults.standard.menuAnisetteURL = successfulServer.absoluteString
+                    debugLog("[AnisetteProvider] Successfully fetched Anisette data from \(successfulServer.absoluteString)")
                 }
-                return false
-            },
-            onSuccess: { successfulServer in
-                UserDefaults.standard.menuAnisetteURL = successfulServer.absoluteString
-                debugLog("[AnisetteProvider] Successfully fetched Anisette data from \(successfulServer.absoluteString)")
-            }
-        )
+            )
 
-        if let freshBlob = newAdiBlob {
-            AnisetteConfigManager.shared.anisetteAdiBlob = freshBlob.base64EncodedString()
+            if let freshBlob = newAdiBlob {
+                AnisetteConfigManager.shared.anisetteAdiBlob = freshBlob.base64EncodedString()
+            }
+
+            return anisetteData
         }
 
-        return anisetteData
+        do {
+            return try await attempt()
+        } catch {
+            // -45061 means the ADI identity in the Keychain was minted by a different server, and
+            // every server now selected has its own. Dropping it makes the next attempt provision
+            // a fresh machine against the current one. Needs proper testing.
+            guard error.localizedDescription.contains("-45061") else { throw error }
+            debugLog("[AnisetteProvider] Stored ADI identity is not valid for this server (-45061), provisioning a fresh one.")
+            AnisetteConfigManager.shared.anisetteAdiBlob = nil
+            AnisetteConfigManager.shared.anisetteIdentifier = nil
+            return try await attempt()
+        }
     }
 }
