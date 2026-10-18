@@ -122,13 +122,7 @@ public actor AnisetteConfigManager {
         let udSerialNumber = ud.customAnisetteSerialNumber
         let udRoutingInfo  = ud.customAnisetteRoutingInfo
 
-        let fileConfig: AnisetteConfig? = {
-            guard let data = try? Data(contentsOf: configFileURL),
-                  let config = try? Foundation.JSONDecoder().decode(AnisetteConfig.self, from: data) else {
-                return nil
-            }
-            return config
-        }()
+        let fileConfig = fileAnisetteConfig()
 
         let resolvedClientInfo   = (udClientInfo?.isEmpty == false ? udClientInfo : fileConfig?.clientInfo) ?? AppConstants.Anisette.defaultClientInfo
         let resolvedUserAgent    = (udUserAgent?.isEmpty == false ? udUserAgent : fileConfig?.userAgent) ?? AppConstants.Anisette.defaultUserAgent
@@ -153,11 +147,40 @@ public actor AnisetteConfigManager {
         )
     }
 
+    private func fileAnisetteConfig() -> AnisetteConfig? {
+        guard let data = try? Data(contentsOf: configFileURL),
+              let config = try? Foundation.JSONDecoder().decode(AnisetteConfig.self, from: data) else {
+            return nil
+        }
+        return config
+    }
+
+    /// The machine identity the user pinned, or `nil` when they never set one. Leaving it unset
+    /// lets the anisette server's own identity be used, which is what Apple requires now: the
+    /// client declared on the wire has to match the ADI that produced `X-Apple-I-MD`.
+    public func pinnedIdentity() -> (clientInfo: String, userAgent: String)? {
+        let ud = UserDefaults.standard
+        let file = fileAnisetteConfig()
+
+        let clientInfo = [ud.customAnisetteClientInfo, file?.clientInfo]
+            .compactMap { $0 }
+            .first { !$0.isEmpty }
+        let userAgent = [ud.customAnisetteUserAgent, file?.userAgent]
+            .compactMap { $0 }
+            .first { !$0.isEmpty }
+
+        guard clientInfo != nil || userAgent != nil else { return nil }
+        return (clientInfo ?? AppConstants.Anisette.defaultClientInfo,
+                userAgent ?? AppConstants.Anisette.defaultUserAgent)
+    }
+
     public func makeRequestHeaders() -> AnisetteRequestHeaders {
         let config = loadConfig()
         return AnisetteRequestHeaders().with {
-            $0.clientInfo = config.clientInfo.isEmpty ? AppConstants.Anisette.defaultClientInfo : config.clientInfo
-            $0.userAgent  = config.userAgent.isEmpty ? AppConstants.Anisette.defaultUserAgent : config.userAgent
+            if let pinned = pinnedIdentity() {
+                $0.clientInfo = pinned.clientInfo
+                $0.userAgent  = pinned.userAgent
+            }
             if let customLU = config.customLocalUserID, !customLU.isEmpty { $0.localUserID = customLU }
             if let customDev = config.customDeviceID, !customDev.isEmpty { $0.deviceID = customDev }
             if let loc = config.customLocale, !loc.isEmpty { $0.locale = loc }

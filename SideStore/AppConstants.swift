@@ -96,7 +96,9 @@ public enum AppConstants {
 
         public enum Servers {
             public static let defaultSource        = "https://servers.sidestore.io/servers.json"
-            public static let defaultServerURL     = "https://ani.sidestore.io"
+            // The other SideStore hosts provision with Android's CoreADI while declaring a Mac
+            // client, which Apple has rejected since October 2026; this one serves Windows ADI.
+            public static let defaultServerURL     = "https://win.ani.sidestore.io"
             public static let connectivityCheckURL = URL(string: "https://www.apple.com/library/test/success.html")!
         }
 

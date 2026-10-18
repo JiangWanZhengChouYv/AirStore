@@ -256,6 +256,18 @@ class DeveloperPortalProxyWithAuth: DeveloperPortalProxy {
                 accountRepairHandler: DeveloperPortal.AccountRepairHandler = DeveloperPortal.defaultAccountRepairHandler,
                 verificationHandler: DeveloperPortal.VerificationHandler?) async throws -> (ALTAccount, ALTAppleAPISession) 
     {
+        ALTAppleAPI.shared.anisetteResyncHandler = { sim in
+            try await SideSign.AnisetteDataManager.shared.resyncHeaders(sim: sim)
+        }
+        ALTAppleAPI.shared.anisetteDataRefreshHandler = {
+            do {
+                return try await SideSign.AnisetteDataManager.shared.refreshHeaders()
+            } catch {
+                // On-device anisette has no server to re-mint from, so regenerate locally.
+                return try await AnisetteProvider.fetch()
+            }
+        }
+
         let authSession = try await ALTAppleAPI.shared.authenticate(
             appleID: appleID,
             password: password,
