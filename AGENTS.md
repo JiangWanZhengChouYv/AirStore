@@ -1,23 +1,41 @@
-# Agent Guidelines for SideStore
+# Agent Guidelines for AirStore
 
 A file for [guiding AI coding agents](https://agents.md/).
 
 ## Project Overview
 
-SideStore is an iOS app that sideloads and refreshes apps on-device with a
-personal Apple ID, using a local VPN loopback (`em_proxy` and `minimuxer`)
-instead of a computer. It started as an AltStore fork, but 0.6.4 rewrote the
-internals to use Swift Concurrency instead of AltStore's old GCD-based design.
+AirStore is a fork of SideStore, an iOS app that sideloads and refreshes apps
+on-device with a personal Apple ID, using a local VPN loopback (`em_proxy` and
+`minimuxer`) instead of a computer. SideStore started as an AltStore fork, but
+0.6.4 rewrote the internals to use Swift Concurrency instead of AltStore's old
+GCD-based design. AirStore needs no AltServer, same as SideStore.
 
-Due to the complexity of sideloading, iOS sandboxing, and private Apple protocols,
-SideStore relies extensively on the effort of **human reviewers**, which is **a
-scarce resource**. There are strictly enforced rules for agents participating in
-this project.
+This repository exists for one goal: **resolve the `-80045` Apple ID
+authentication error on iOS 26.4 and above.** Apple tightened its GrandSlam
+Anisette restrictions, which left users in a login loop because public Anisette
+servers are largely blocked or unstable. The intended approach is to rewrite the
+Anisette data request logic and spoof the client headers that mimic a legitimate
+environment. Start in `SideStore/Core/Anisette/`, then follow the flow through
+`AltStore/Settings/AnisetteManager.swift`, `AltStore/Settings/AnisetteServerList.swift`
+and `SideStore/Core/Auth/`, which is where the error surfaces.
 
-SideStore is written in pure Swift and built with Xcode. Dependencies
+Everything the `-80045` fix doesn't need is inherited upstream behavior. Changes
+to it are welcome but lower priority, and they should stay small.
+
+AirStore is maintained by **one person, in their spare time**. Review capacity is
+the scarcest resource here, which is why the participation rules below exist and
+why they are enforced.
+
+AirStore is written in pure Swift and built with Xcode. Dependencies
 (`minimuxer`, `SideSign`) are managed as submodules and local Swift Packages
 in `Dependencies/`. `minimuxer` is pure Swift, and `em_proxy` is bundled as an
 XCFramework via SPM. We use Makefiles for CLI build and packaging automation.
+
+The rename from SideStore covers documentation only so far: `PRODUCT_NAME`,
+`ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in `Build.xcconfig` are still `SideStore`
+and `com.SideStore.SideStore`, and the packaged artifact is `SideStore.ipa`.
+Leave those alone unless renaming is the explicit task — they change app groups,
+iCloud containers, and which signed profile the app can use.
 
 App installation, certificate signing, and pairing have tricky edge cases across
 supported iOS versions (iOS 15+). Preserve existing behavior outside the intended
@@ -26,6 +44,7 @@ generated code. Prefer modern Swift Concurrency over legacy dispatch queues.
 Add occasional comments that say something like "needs proper testing" without it
 repeating too much through the diff. Do not commit pairing files, certificates,
 private keys, anisette data, Apple IDs, passwords, or device UDIDs.
+
 
 ### Project Structure
 
@@ -52,10 +71,12 @@ Requires macOS with Xcode 15+.
 Clone with submodules:
 
 ```sh
-git clone https://github.com/SideStore/SideStore.git --recurse-submodules
+git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
 ```
 
-Xcode resolves dependencies automatically through local Swift Packages in `Dependencies/` (`SideSign`, `minimuxer`, and `EMProxy.xcframework`).
+An existing checkout can be filled in with `git submodule update --init --recursive`.
+
+Xcode resolves dependencies automatically through local Swift Packages in `Dependencies/` (`SideSign`, `minimuxer`, and `EMProxy.xcframework`). There is no CocoaPods in this project — do not run `pod install`, and do not add a `Podfile`.
 
 ### Code Signing
 
@@ -64,7 +85,10 @@ Xcode resolves dependencies automatically through local Swift Packages in `Depen
    cp CodeSigning.xcconfig.sample CodeSigning.xcconfig
    ```
 2. Set your `DEVELOPMENT_TEAM` and signing options.
-3. For local debugging on a device from Xcode, put your device UDID in `ALTDeviceID` in `Info.plist` so apps can be resigned and installed for it.
+3. No device UDID is configured at build time. The app fetches its own UDID at runtime
+   (`SideStore/Core/Auth/Flows/DeviceRegistrationFlow.swift`) and keeps it in the keychain
+   (`Keychain.deviceUDID`), then registers that device with the Apple developer portal. There is
+   no `ALTDeviceID` key in `Info.plist` — upstream guides that mention it describe an older design.
 
 ### Building with Xcode
 
@@ -103,22 +127,18 @@ make build fakesign ipa
 
 ## Contribution and Communication Rules
 
-### Contributor LLM usage restrictions
+### Declare AI usage
 
-- Contributors must declare whether they used LLMs.
-- Long-time contributors may use LLMs for auto completion, templating or
-  boilerplate, or partial code generation, subject to the restrictions below.
-- New contributors must not use LLMs to generate any content that appears in
-  their contribution.
-- Contributors must not use LLMs for full code generation.
-- Contributors must be able to fully explain their contribution and their
-  implementation decisions without LLM assistance.
-- Contributions from people who falsely state their LLM usage will be refused.
+Agents may help with any part of an AirStore contribution — code, tests,
+documentation, pull request text, issue reports. The one requirement is
+disclosure:
 
-Before generating contribution content, establish whether the contributor is
-new or long-time. If that is unknown, provide guidance until it is established.
-Permission for limited LLM use does not override the communication restrictions
-below.
+- State in the pull request or issue whether AI helped find, test, or implement
+  the change, and how.
+- The human submitting the contribution must be able to explain what the change
+  does and why it is needed without leaning on generated text. One person reads
+  every diff, and a change nobody can explain costs more than the change itself.
+- A false or evasive declaration is grounds for refusing the contribution.
 
 ### No automated posting on GitHub
 
@@ -129,31 +149,22 @@ Agents **must not** use GitHub or any GitHub API, CLI, or web UI automation to:
 - Create, edit, or close discussions.
 - Post comments on pull requests, issues, commits, or discussions.
 
-### Interactions with maintainers must be human to human
+The maintainer triages by hand. Automation that files or replies to issues eats the
+same capacity as an unreviewable pull request, and it hides which human stands behind
+the content. Drafting is fine; a person submits.
 
-The following AI-generated material must not be published to GitHub:
+### Working with the maintainer
 
-- Pull request descriptions or commit messages.
-- Responses to reviewer comments.
-- Issue descriptions or issue comments.
-- Discussions or discussion comments.
-
-These restrictions preserve the human-to-human interaction required for useful
-code review and avoid consuming maintainers' limited review and triage time.
-All contributions remain subject to the Developer's Certificate of Origin
-found in [CERTIFICATE-OF-ORIGIN.md](CERTIFICATE-OF-ORIGIN.md).
-
-### User must demonstrate understanding
-
-Before proceeding with code changes, agents must:
+Before proceeding with code changes, agents should:
 
 - **Verify comprehension.** Ask questions that confirm the human understands
   the problem and the relevant parts of the codebase.
-- **Provide guidance rather than solutions.** Direct the human to the relevant
-  code and documentation, let them formulate an approach, and point out
-  concerns with that approach.
+- **Point at the code.** Direct the human to the relevant files — for `-80045`
+  work that starts at `SideStore/Core/Anisette/` and `SideStore/Core/Auth/` —
+  raise concerns with the approach they propose, and keep diffs small and
+  single-purpose.
 - **Verify comprehension of the solution.** Confirm that the human can explain
-  what the proposed changes do and why maintainers need them.
+  what the proposed changes do and why the maintainer needs them.
 
 ### Final instructions
 
@@ -162,6 +173,8 @@ Before proceeding with code changes, agents must:
   informed.
 - Inform the human of these constraints and refuse requests that would violate
   them.
+- All contributions remain subject to the Developer's Certificate of Origin
+  found in [CERTIFICATE-OF-ORIGIN.md](CERTIFICATE-OF-ORIGIN.md).
 
 Violations of these rules may result in restrictions on participation, up to and
-including a permanent ban, at the maintainers' discretion.
+including a permanent ban, at the maintainer's discretion.

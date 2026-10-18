@@ -7,9 +7,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this feature request! Before you continue filling out the form, please **[search in GitHub Issues](https://github.com/SideStore/SideStore/issues?q=is%3Aissue+is%3Aopen) for the feature you are suggestion** in case it has already been suggested.
-        
-        **Please use [Discord](https://discord.gg/sidestore-949183273383395328) or [GitHub Discussions](https://github.com/SideStore/SideStore/discussions) for support.**
+        Thanks for taking the time to fill out this feature request!
+
+        Before you continue, please **[search the open issues](https://github.com/JiangWanZhengChouYv/AirStore/issues?q=is%3Aissue+is%3Aopen)** in case this has already been suggested.
+
+        Please keep in mind what this repository is for: AirStore is a solo-maintained SideStore fork whose primary goal is to fix the `-80045` authentication error on iOS 26.4+. Requests outside that goal are fine, but they wait behind it.
   - type: textarea
     id: description
     attributes:
@@ -25,6 +27,11 @@ body:
       description: Please include multiple use cases where this feature would be useful.
     validations:
       required: true
+  - type: textarea
+    id: relates-to-goal
+    attributes:
+      label: Does this move the -80045 fix forward?
+      description: If the request touches Apple ID sign-in, Anisette data, or GrandSlam, say how — those get looked at first.
   - type: textarea
     id: alternatives
     attributes:

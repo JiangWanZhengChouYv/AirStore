@@ -7,10 +7,12 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## Please note that the issue tracker is not for support
-        Thanks for taking the time to fill out this bug report! Before you continue filling out the report, please **[search in GitHub Issues](https://github.com/SideStore/SideStore/issues?q=is%3Aissue+is%3Aopen) for the bug you are experiencing** in case it has already been reported.
-        
-        **Please use [Discord](https://discord.gg/sidestore-949183273383395328) or [GitHub Discussions](https://github.com/SideStore/SideStore/discussions) for support.**
+        Thanks for taking the time to fill out this bug report!
+        AirStore is maintained by one person in their spare time, so the details below are what make an issue possible to act on.
+
+        Before you continue, please **[search the open issues](https://github.com/JiangWanZhengChouYv/AirStore/issues?q=is%3Aissue+is%3Aopen)** in case this has already been reported.
+
+        Issues are the only support channel for this project. The SideStore Discord and Discussions are run by upstream and are not monitored by this maintainer.
   - type: textarea
     id: description
     attributes:
@@ -23,14 +25,47 @@ body:
     id: how-to-reproduce
     attributes:
       label: Instructions to reproduce
-      description: Please include clear and consistent instructions for reproducing the bug to make it easier for us to fix it.
+      description: Please include clear and consistent instructions for reproducing the bug to make it easier to fix.
     validations:
       required: true
   - type: input
     id: app-version
     attributes:
-      label: What version of SideStore are you using?
-      description: To retrieve this, go to `Settings` in the SideStore app and scroll down to the bottom.
+      label: What version of AirStore are you using?
+      description: Go to `Settings` in the app and scroll down to the bottom. Builds off `develop` are still labeled `SideStore` on the Home Screen.
+    validations:
+      required: true
+  - type: input
+    id: ios-version
+    attributes:
+      label: What iOS version and build are you on?
+      description: For example, `26.4 (23E251)`. The `-80045` error is version specific, so the exact build matters.
+      placeholder: 26.4 (23E251)
+    validations:
+      required: true
+  - type: dropdown
+    id: anisette-error
+    attributes:
+      label: Is this the `-80045` authentication error?
+      description: Fixing `-80045` on iOS 26.4+ is the primary goal of this repository, so these reports get looked at first.
+      options:
+        - "Yes — `-80045` when signing in with an Apple ID"
+        - "No — a different error"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: anisette-config
+    attributes:
+      label: Apple ID and Anisette configuration
+      description: Two-factor on or off, whether `On-Device Anisette` is enabled under `Settings > Advanced > User Customizations`, and which Anisette server or provider you selected.
+      placeholder: "2FA: yes / On-Device Anisette: off / Server: <the URL or list entry you used>"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Open `Settings > Error Log`, tap `Export Log`, and attach or paste the result. An issue without logs usually cannot be triaged.
+      render: text
     validations:
       required: true
   - type: textarea
@@ -38,3 +73,12 @@ body:
     attributes:
       label: Other info
       description: If you have any other comments, other info that might be useful, or if you found a workaround, please put it here.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the open issues and this has not already been reported.
+          required: true
+        - label: I removed my Apple ID, any passwords, pairing files, and device UDID from the report.
+          required: true

@@ -1,111 +1,139 @@
-# Contributing to SideStore
+# Contributing to AirStore
 
-Thank you for your interest in contributing to SideStore! SideStore is a community driven project, and it's made possible by people like you.
+Thanks for your interest in contributing to AirStore!
 
-By contributing to this Project (SideStore), you agree to the Developer's Certificate of Origin found in [CERTIFICATE-OF-ORIGIN.md](CERTIFICATE-OF-ORIGIN.md). Any contributions to this project after the addition of the Developer's Certificate of Origin are subject to its policy.
+AirStore is a fork of [SideStore](https://github.com/SideStore/SideStore), which itself is a fork of
+[AltStore](https://github.com/altstoreio/AltStore). Like SideStore, it sideloads and refreshes apps on-device with a
+personal Apple ID and needs no AltServer.
 
-There are many ways to contribute to SideStore, so if you aren't a developer, there are still many other ways you can help out:
+This repository exists for one specific reason: **resolve the `-80045` Apple ID authentication error on iOS 26.4 and
+above.** Apple tightened its GrandSlam Anisette restrictions, which left users stuck in a login loop because public
+Anisette servers are blocked or unstable. AirStore works around this by rewriting the Anisette data request logic and
+sending the client headers Apple expects.
 
--   [Writing documentation](https://github.com/SideStore/SideStore-Docs)
--   [Submitting detailed bug reports and suggesting new features](https://github.com/SideStore/SideStore/issues/new/choose)
--   Helping out with support
-    -   [Discord](https://discord.gg/sidestore-949183273383395328)
-    -   [GitHub Discussions](https://github.com/SideStore/SideStore/discussions)
+Everything else here is inherited from upstream. Other changes are welcome, but they are lower priority and may wait a
+long time for review.
 
-However, this guide will focus on the development side of things. For now, we will only have setup information here, but you can [join our Discord](https://discord.gg/RgpFBX3Q3k) if you need help
-after setup.
+## Maintenance reality
+
+AirStore is maintained by one person in their spare time, so review capacity is the bottleneck:
+
+-   Open an issue before starting work that is more than a few lines, so you don't build something that can't be
+    reviewed.
+-   Keep pull requests small and single-purpose. Changes that spread across signing or networking code cost far more
+    review time than focused ones.
+-   Bug reports need logs and reproduction steps to be actionable. Search existing issues before opening one.
+
+By contributing to this project, you agree to the Developer's Certificate of Origin found in
+[CERTIFICATE-OF-ORIGIN.md](CERTIFICATE-OF-ORIGIN.md). Contributions after the addition of that file are subject to its
+policy.
+
+## Other ways to help
+
+If you aren't writing code, these are just as useful:
+
+-   Reproducing `-80045` across iOS builds and reporting which iOS version, Apple ID type, and Anisette server
+    configuration you used.
+-   Submitting detailed bug reports through [GitHub Issues](https://github.com/JiangWanZhengChouYv/AirStore/issues).
+-   Testing pull requests from other contributors and posting the results, including the iOS version and build you
+    tested on.
 
 ## Requirements
 
 This guide assumes you:
 
 -   are on a Mac
--   have Xcode installed
+-   have Xcode 15 or newer installed
 -   have basic command line knowledge (know how to run commands, cd into a directory)
--   have basic Git knowledge ([GitHub Desktop](https://desktop.github.com) is a great tool for beginners, and greatly simplifies working with Git)
+-   have basic Git knowledge ([GitHub Desktop](https://desktop.github.com) is a great tool for beginners, and greatly
+    simplifies working with Git)
 -   have basic Swift/iOS development knowledge
 
 ## Setup
 
-1. Fork the SideStore repo on GitHub.
-2. Clone the fork: `git clone https://github.com/<your github username>/SideStore.git --recurse-submodules`
+1.  Fork this repository on GitHub.
+2.  Clone the fork **with submodules**. `Dependencies/minimuxer` and `Dependencies/SideSign` are submodules and are
+    empty directories without this:
+
+    ```sh
+    git clone https://github.com/<your github username>/AirStore.git --recurse-submodules
+    ```
+
+    Already cloned without the flag? Run `git submodule update --init --recursive`.
 
     If you are using GitHub Desktop, refer to
     [this guide](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/adding-and-cloning-repositories/cloning-and-forking-repositories-from-github-desktop).
 
-3. Copy `CodeSigning.xcconfig.sample` to `CodeSigning.xcconfig` and fill in the values.
-4. **(Development only)** Change the value for `ALTDeviceID` in the Info.plist to your device's UDID. Normally, SideServer embeds the device's UDID in SideStore's Info.plist during installation. When
-   running through Xcode you'll need to set the value yourself or else SideStore won't resign (or even install) apps for the proper device. You can achieve this by changing a few things to be able to
-   build and use SideStore.
-5. Finally, open `AltStore.xcodeproj` in Xcode.
+3.  Copy `CodeSigning.xcconfig.sample` to `CodeSigning.xcconfig` and fill in your `DEVELOPMENT_TEAM` and signing
+    options.
+4.  Open `AltStore.xcodeproj`. Xcode resolves dependencies on its own: `SideSign` and `minimuxer` are local Swift
+    Packages, and the remaining libraries (MarkdownKit, KeychainAccess, Nuke, Starscream, SemanticVersion, CodeSignKit)
+    are remote Swift Packages.
 
-Next, make and test your changes. Then, commit and push your changes using git and make a pull request.
+    There is no CocoaPods in this project. If an older guide tells you to run `pod install`, it is out of date — there
+    is no `Podfile`.
 
-## Prebuilt binary information
+Next, make and test your changes. Then commit and push them and open a pull request against `develop`.
 
-minimuxer and em_proxy use prebuilt static library binaries built by GitHub Actions to speed up builds and remove the need for Rust to be installed when working on SideStore.
-[`SideStore/fetch-prebuilt.sh`](./SideStore/fetch-prebuilt.sh) will be run before each build by Xcode, and it will check if the downloaded binaries are up-to-date once every 6 hours. If you want
-to force it to check for new binaries, run `bash ./SideStore/fetch-prebuilt.sh force`.
+## Where the `-80045` work lives
 
-## Building with Xcode
+Start with these if you want to help with the Anisette logic:
 
-Install cocoapods if required using: `brew install cocoapods`  
-Now using commandline on the repository workspace root, perform Pod-Install using: `pod install` command to install the cocoapod dependencies.  
-After this you can do regular builds within Xcode.
+-   `SideStore/Core/Anisette/` — `AnisetteProvider.swift`, `AnisetteServersManager.swift`,
+    `OnDeviceAnisetteManager.swift` and `AnisetteConfigManager.swift`: how Anisette data is obtained, and which
+    provider or server supplies it.
+-   `AltStore/Settings/AnisetteManager.swift` and `AltStore/Settings/AnisetteServerList.swift`: the settings-side
+    entry point and the server list used by the providers above.
+-   `SideStore/Views/Settings/Advanced/Anisette/`: the runtime UI for inspecting and changing this.
+-   `SideStore/Core/Auth/`: the Apple ID authentication flow where `-80045` surfaces.
+
+App installation, certificate signing, and pairing have tricky edge cases across the supported iOS versions (iOS 15+).
+Preserve existing behavior outside the fix you intend to make, and avoid broad refactors in signing or networking code.
 
 ## Building an IPA for distribution
 
-Install cocoapods if required using: `brew install cocoapods`  
-Now using commandline on the repository workspace root, perform Pod-Install using: `pod install` command to install the cocoapod dependencies.  
-
-You can then use the Makefile command: `make build fakesign ipa` in the root directory.  
-By default the config for build is: `Release`  
-For debug builds: `export BUILD_CONFIG=Debug;make build fakesign ipa` in the root directory.  
-For alpha/beta builds: `export IS_ALPHA=1;` or `export IS_BETA=1;` before invoking the build command.  
-This will create SideStore.ipa.
+From the repository root, after the setup above:
 
 ```sh
-Examples: 
+# stable release build
+make build fakesign ipa
 
-    # cocoapods
-    brew install cocoapods
-    # perform installation of the pods
-    pod install
+# stable debug build
+export BUILD_CONFIG=Debug; make build fakesign ipa
 
-    # alpha release build
-    export IS_ALPHA=1;make build fakesign ipa
-    # alpha debug build
-    export IS_ALPHA=1;export BUILD_CONFIG=Debug;make build fakesign ipa
+# alpha / beta builds
+export IS_ALPHA=1; make build fakesign ipa
+export IS_BETA=1; make build fakesign ipa
 
-    # beta release build
-    export IS_BETA=1;make build fakesign ipa
-    # beta debug build
-    export IS_BETA=1;export BUILD_CONFIG=Debug;make build fakesign ipa
-
-    # stable release build
-    make build fakesign ipa
-    # stable debug build
-    export BUILD_CONFIG=Debug;make build fakesign ipa
+# custom bundle ID suffix
+export BUNDLE_ID_SUFFIX=XYZ0123456; make build fakesign ipa
 ```
-By default sidestore will build for its default bundleIdentifier `com.SideStore.SideStore` but if you need to set a custom bundleID for commandline builds, once can do so by exporting `BUNDLE_ID_SUFFIX` env var  
-```sh
-    # stable release build
-    export BUNDLE_ID_SUFFIX=XYZ0123456;make build fakesign ipa
-    # stable debug build
-    export BUNDLE_ID_SUFFIX=XYZ0123456;export BUILD_CONFIG=Debug;make build fakesign ipa
-```
-NOTE: When building from XCode, the `BUNDLE_ID_SUFFIX` is set by default with the value of `DEVELOPMENT_TEAM`  
-  
-This can be customized by setting/removing the BUNDLE_ID_SUFFIX in overriding CodeSigning.xcconfig created from CodeSigning.xcconfig.sample  
-  
-    
+
+When building from Xcode, `BUNDLE_ID_SUFFIX` defaults to the value of `DEVELOPMENT_TEAM`; override it in your
+`CodeSigning.xcconfig` if you want something else.
+
+Two things to know while the rename from SideStore is still in progress:
+
+-   The build output is `SideStore.ipa`, because `PRODUCT_NAME`, `ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in
+    `Build.xcconfig` are still `SideStore` and `com.SideStore.SideStore`. Only the name in the documentation is
+    AirStore so far.
+-   The bundle ID used for the device's app group, iCloud container and provisioning follows from those same settings,
+    so a `BUNDLE_ID_SUFFIX` change is not cosmetic — it changes which containers the app can reach.
 
 > **Warning**
 >
-> The binary created will contain paths to Xcode's DerivedData, and if you built minimuxer on your machine, paths to $HOME/.cargo. This will include your username. If you want to keep your user's
-> username private, you might want to get GitHub Actions to build the IPA instead.
-> 
+> The binary that is created will contain paths to Xcode's DerivedData and, if you built `minimuxer` on your machine,
+> paths to `$HOME/.cargo`. This includes your username. If you want to keep your username private, have GitHub Actions
+> build the IPA instead.
 
-## Developing minimuxer alongside SideStore
+## Developing minimuxer alongside AirStore
 
-Please see [minimuxer's README](https://github.com/SideStore/minimuxer) for development instructions.
+`minimuxer` and `em_proxy` come from upstream SideStore as a submodule pinned to its `develop` branch. See
+[minimuxer's README](https://github.com/SideStore/minimuxer) for development instructions. Keep dependency bumps out of
+feature pull requests so each change stays reviewable.
+
+## Using AI in your contribution
+
+Declare in your pull request whether AI helped you find, test, or implement the change, and how. That is the only
+requirement, but you must be able to explain the change and your own decisions about it without leaning on generated
+text: one human reads every diff.
