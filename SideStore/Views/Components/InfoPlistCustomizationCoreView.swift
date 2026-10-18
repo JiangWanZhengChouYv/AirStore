@@ -464,7 +464,7 @@ public struct InfoPlistCustomizationCoreView: View {
             ZStack {
                 Circle()
                     .fill(LinearGradient(
-                        colors: [Color.blue.opacity(0.85), Color.purple.opacity(0.85)],
+                        colors: [Color.blue.opacity(0.85), Color.teal.opacity(0.85)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ))

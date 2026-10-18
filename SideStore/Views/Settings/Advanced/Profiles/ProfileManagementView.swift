@@ -134,7 +134,7 @@ struct ProfileManagementView: View {
                                     } label: {
                                         Label("Edit", systemImage: "pencil")
                                     }
-                                    .tint(.purple)
+                                    .tint(Color(uiColor: .altPrimary))
                                 }
                             }
                             .swipeActions(edge: .leading, allowsFullSwipe: false) {

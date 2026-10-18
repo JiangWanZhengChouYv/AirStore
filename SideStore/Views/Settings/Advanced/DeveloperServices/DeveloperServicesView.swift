@@ -126,7 +126,7 @@ struct DeveloperServicesView: View {
                         HStack(spacing: 14) {
                             Image(systemName: "iphone.and.arrow.forward")
                                 .font(.system(size: 20))
-                                .foregroundColor(.purple)
+                                .foregroundColor(Color(uiColor: .altPrimary))
                                 .frame(width: 28)
 
                             VStack(alignment: .leading, spacing: 2) {

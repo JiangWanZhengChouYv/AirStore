@@ -199,8 +199,8 @@ private struct ProfileRow: View {
                         .fontWeight(.medium)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(isTeam ? Color.blue.opacity(0.12) : Color.purple.opacity(0.12))
-                        .foregroundColor(isTeam ? .blue : .purple)
+                        .background(isTeam ? Color.blue.opacity(0.12) : Color.teal.opacity(0.12))
+                        .foregroundColor(isTeam ? .blue : .teal)
                         .cornerRadius(6)
                 }
             }
