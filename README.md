@@ -17,7 +17,7 @@
 
 Recently, Apple tightened its GrandSlam Anisette restrictions. This caused countless users to get stuck at the `-80045` login error when trying to sign in with their Apple ID on SideStore, especially on newer iOS versions (26.4+). 
 
-Public Anisette servers are largely blocked or unstable. AirStore aims to bypass these restrictions by rewriting the Anisette data request logic and spoofing proper client headers to mimic a legitimate environment.
+Public Anisette servers are largely blocked or unstable. AirStore gets past this by matching the client headers to the identity of the v3 Anisette server that mints them, and by signing in with that server's own client declaration. Apple ID sign-in is verified working on iOS 27.2 with a free personal account.
 
 ## ✨ Features
 
