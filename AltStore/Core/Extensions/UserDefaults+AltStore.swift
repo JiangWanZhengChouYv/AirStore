@@ -551,7 +551,9 @@ public extension UserDefaults
             #keyPath(UserDefaults.menuAnisetteList): AppConstants.Anisette.Servers.defaultSource,
             #keyPath(UserDefaults.menuAnisetteURL): AppConstants.Anisette.Servers.defaultServerURL,
             #keyPath(UserDefaults.isAnisetteOfflineMode): false,
-            #keyPath(UserDefaults.disableAnisetteRotation): false,
+            // Rotating on failure walks the list until it lands on a server that still answers,
+            // which hides the real error and ends in a 503 from Apple. Pin the chosen server.
+            #keyPath(UserDefaults.disableAnisetteRotation): true,
             // On-device anisette runs Android's CoreADI, which Apple no longer accepts behind a
             // Mac declaration; start on the remote v3 server instead. Needs proper testing.
             #keyPath(UserDefaults.useOnDeviceAnisette): false,
