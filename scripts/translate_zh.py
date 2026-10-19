@@ -56,6 +56,16 @@ PLACEHOLDER = re.compile(r"%(\d+\$)?[@dlsfui]|\{[^{}]+\}")
 INTERPOLATION = re.compile(r"\\\(")
 THINK_BLOCK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
+# These reach the screen as plain Swift strings, so the catalog cannot translate them until each
+# call site is wrapped in NSLocalizedString. Listed separately from the SwiftUI literals so a
+# coverage number does not hide them.
+UIKIT_PATTERNS = [
+    re.compile(r'\btext\s*=\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bsetTitle\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bplaceholder\s*=\s*"((?:[^"\\]|\\.)+)"'),
+]
+STORYBOARD_TITLE = re.compile(r'title="([^"]+)"')
+
 CJK = "[\\u4e00-\\u9fff\\u3000-\\u303f\\uff01-\\uff5e]"
 CJK_THEN_LATIN = re.compile(f"({CJK})([A-Za-z0-9])")
 LATIN_THEN_CJK = re.compile(f"([A-Za-z0-9%)])([\\u4e00-\\u9fff])")
@@ -248,6 +258,116 @@ def cmd_polish(args):
         save_catalog(catalog)
 
 
+def other_surfaces():
+    """Count everything the catalog cannot reach yet, so the coverage number is honest.
+
+    A literal only translates on its own when it reaches the runtime through LocalizedStringKey or
+    NSLocalizedString. Interpolated strings need their interpolation folded into %@ first, UIKit
+    labels and alert titles are plain Swift strings, storyboard text lives in the .storyboard file,
+    and the permission prompts are read from Info.plist.
+    """
+    interpolated = set()
+    uikit = set()
+    storyboard = set()
+    infoplist = set()
+
+    for top in SOURCE_LANGS:
+        for base, _, files in os.walk(os.path.join(ROOT, top)):
+            for name in files:
+                path = os.path.join(base, name)
+                if os.sep + "Tests" + os.sep in path:
+                    continue
+
+                if name.endswith(".swift"):
+                    text = open(path, encoding="utf-8", errors="replace").read()
+                    for pattern in LITERAL_PATTERNS:
+                        for match in pattern.finditer(text):
+                            if INTERPOLATION.search(match.group(1)):
+                                interpolated.add(match.group(1))
+                    for pattern in UIKIT_PATTERNS:
+                        for match in pattern.finditer(text):
+                            literal = match.group(1)
+                            if INTERPOLATION.search(literal) or len(literal) < 3:
+                                continue
+                            uikit.add(literal.replace(chr(92) + chr(34), chr(34)))
+                elif name.endswith((".storyboard", ".xib")):
+                    text = open(path, encoding="utf-8", errors="replace").read()
+                    for value in STORYBOARD_TITLE.findall(text):
+                        if len(value) > 2 and not value.startswith("$"):
+                            storyboard.add(value)
+                elif name.endswith("Info.plist"):
+                    result = subprocess.run(
+                        ["plutil", "-convert", "json", "-o", "-", path],
+                        capture_output=True, text=True,
+                    )
+                    if result.returncode:
+                        continue
+                    try:
+                        plist = json.loads(result.stdout)
+                    except json.JSONDecodeError:
+                        continue
+                    for key, value in plist.items():
+                        if isinstance(value, str) and (
+                            key.endswith("UsageDescription") or key.endswith("PurposeString")
+                        ):
+                            infoplist.add(value)
+
+    return {"interpolated": interpolated, "uikit": uikit,
+            "storyboard": storyboard, "infoplist": infoplist}
+
+
+def bar(fraction):
+    filled = int(round(BAR_WIDTH * fraction))
+    return "#" * filled + "." * (BAR_WIDTH - filled)
+
+
+BAR_WIDTH = 20
+
+
+def cmd_report(args):
+    literals = literals_in_repo()
+    entries = load_catalog()["strings"]
+
+    def chinese(key):
+        unit = entries.get(key, {}).get("localizations", {}).get("zh-Hans", {}).get("stringUnit", {})
+        return unit.get("value")
+
+    surfaces = {"swiftui literals": set(literals)}
+    other = other_surfaces()
+    surfaces.update({
+        "interpolated": other["interpolated"],
+        "uikit": other["uikit"] - set(literals),
+        "storyboard": other["storyboard"],
+        "infoplist": other["infoplist"],
+    })
+
+    total = sum(len(keys) for keys in surfaces.values())
+    covered = 0
+    print("每类能自动翻的字符串有多少已经进了中文表：")
+    for name, keys in surfaces.items():
+        done = sum(1 for key in keys if chinese(key))
+        covered += done
+        fraction = done / len(keys) if keys else 0
+        note = NOTES.get(name, "")
+        print(f"  {name:<18} {bar(fraction)} {done:>4}/{len(keys):<4} {int(fraction * 100):>3}%  {note}")
+    print(f"  {'合计':<18} {bar(covered / total)} {covered:>4}/{total:<4} {int(100 * covered / total):>3}%")
+
+    missing = sorted(key for key in literals if not chinese(key))
+    print(f"\nSwiftUI 里还没中文的 {len(missing)} 条：")
+    for key in missing[: args.show]:
+        print(f"  - {key!r}")
+
+
+NOTES = {
+    "swiftui literals": "Text/Button/Label 字面量，加进表就自动生效",
+    "interpolated": "带插值，先要把 \\(x) 归一化成 %@ 形态",
+    "uikit": "UIKit 直接拼的串，得先包 NSLocalizedString",
+    "storyboard": "tab 与导航标题，需要 zh-Hans.lproj/Main.i18n.strings",
+    "infoplist": "权限弹窗文案，需要 InfoPlist.xcstrings，且不跟 App 内切换",
+}
+
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -264,11 +384,16 @@ def main():
     polish = sub.add_parser("polish")
     polish.add_argument("--dry-run", action="store_true")
 
+    report = sub.add_parser("report")
+    report.add_argument("--show", type=int, default=12)
+
     args = parser.parse_args()
     if args.command == "scan":
         cmd_scan(args)
     elif args.command == "translate":
         cmd_translate(args)
+    elif args.command == "report":
+        cmd_report(args)
     else:
         cmd_polish(args)
 
