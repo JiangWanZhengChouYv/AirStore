@@ -67,7 +67,14 @@ while true; do
 
   elapsed=$(( $(now_epoch) - start_epoch ))
   [ "$elapsed" -lt 0 ] && elapsed=0
-  pct=$(( elapsed * 100 / estimate ))
+  if [ "$total" -eq 0 ]; then
+    # No steps at all means no runner has taken the job; letting the bar creep would be a lie.
+    pct=0
+    label="排队中（等 runner）"
+  else
+    pct=$(( elapsed * 100 / estimate ))
+    label="${current:-等待中}"
+  fi
   [ "$pct" -gt 99 ] && pct=99
   if [ "$status" = "completed" ]; then pct=100; fi
   filled=$(( pct * BAR_WIDTH / 100 ))
@@ -78,7 +85,7 @@ while true; do
     i=$((i + 1))
   done
 
-  printf '\r[%s] %3d%%  %d/%d 步  %ds  · %s' "$bar" "$pct" "$done_steps" "$total" "$elapsed" "${current:-等待中}"
+  printf '\r[%s] %3d%%  %d/%d 步  %ds  · %s' "$bar" "$pct" "$done_steps" "$total" "$elapsed" "$label"
 
   if [ "$status" = "completed" ]; then
     printf '\n'
