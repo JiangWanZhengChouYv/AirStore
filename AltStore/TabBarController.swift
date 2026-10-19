@@ -49,14 +49,15 @@ final class TabBarController: UITabBarController
         self.sourcesViewController = sourcesNavigationController.viewControllers.first as? SourcesViewController
 
         // Tab and navigation titles are storyboard literals, so no catalog lookup happens for them.
-        for navigationController in self.viewControllers ?? []
+        for viewController in self.viewControllers ?? []
         {
-            if let title = navigationController.tabBarItem.title
+            if let title = viewController.tabBarItem.title
             {
-                navigationController.tabBarItem.title = NSLocalizedString(title, comment: "")
+                viewController.tabBarItem.title = NSLocalizedString(title, comment: "")
             }
 
-            if let title = navigationController.topViewController?.navigationItem.title
+            if let navigationController = viewController as? UINavigationController,
+               let title = navigationController.topViewController?.navigationItem.title
             {
                 navigationController.topViewController?.navigationItem.title = NSLocalizedString(title, comment: "")
             }
