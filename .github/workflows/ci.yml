@@ -90,16 +90,11 @@ jobs:
             exit 1
           fi
 
-          # The Settings rows, tab bar and sign-in sheet are storyboard text, which is not in the
-          # string catalog. A localized storyboard compiles to a storyboardc under zh-Hans.lproj;
-          # an ignored .strings file leaves only the unlocalized one and the screen still reads
-          # English, so this is the check that says whether the layout Xcode expects is met.
-          storyboards=$(find SideStore.xcarchive -type d -path '*zh-Hans.lproj/*.storyboardc' | head -5)
-          echo "localized storyboards: ${storyboards:-none}"
-          if [ -z "$storyboards" ]; then
-            echo "::error::no zh-Hans storyboard variant was built, so Settings, the tab bar and the sign-in sheet stay English"
-            exit 1
-          fi
+          # Interface Builder only emits a localized variant when the storyboard sits in Base.lproj,
+          # and these storyboards are referenced by explicit path from there, so the localized text
+          # is applied at runtime instead (UIView.localizingStoryboardText). The table is the part
+          # that path depends on: if it ever stops compiling, the runtime pass has nothing to
+          # look up and every screen silently goes back to English.
 
       - uses: actions/upload-artifact@v4
         with:

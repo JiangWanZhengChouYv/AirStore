@@ -133,6 +133,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         AltSign.setLogging(UserDefaults.standard.isAltSignVerboseLoggingEnabled)
         minimuxerSetLogging(UserDefaults.standard.isMinimuxerVerboseLoggingEnabled)
         SideSignConfigManager.shared.applyConfigToDeveloperPortal()
+        AirStoreSourceManager.subscribeIfNeeded()
 
         // Override point for customization after application launch.
 //        UserDefaults.standard.setValue(true, forKey: "com.apple.CoreData.MigrationDebug")

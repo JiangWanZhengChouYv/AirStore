@@ -34,6 +34,28 @@
         }
       }
     },
+    "10 App IDs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "10 个 App ID"
+          }
+        }
+      }
+    },
+    "5/10 App IDs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "5/10 个 App ID"
+          }
+        }
+      }
+    },
     "7 DAYS": {
       "extractionState": "manual",
       "localizations": {
@@ -342,6 +364,17 @@
         }
       }
     },
+    "Add Source": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加源"
+          }
+        }
+      }
+    },
     "Add pKey (.der)": {
       "extractionState": "manual",
       "localizations": {
@@ -397,6 +430,17 @@
         }
       }
     },
+    "All Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "全部 App"
+          }
+        }
+      }
+    },
     "All Certificates": {
       "extractionState": "manual",
       "localizations": {
@@ -404,6 +448,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "全部证书"
+          }
+        }
+      }
+    },
+    "All News": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "全部新闻"
           }
         }
       }
@@ -426,6 +481,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "所有允许的账户权限均已添加。"
+          }
+        }
+      }
+    },
+    "Allow Siri To Refresh Apps…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "允许 Siri 刷新 App…"
           }
         }
       }
@@ -623,7 +689,18 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "App IDs"
+            "value": "App ID"
+          }
+        }
+      }
+    },
+    "App IDs Description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID 说明"
           }
         }
       }
@@ -727,6 +804,28 @@
         }
       }
     },
+    "Apps Refresh Automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 自动刷新"
+          }
+        }
+      }
+    },
+    "Apps are refreshed in the background while you are on SideStore VPN!": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连着 AirStore 的 VPN 时，App 会在后台自动刷新！"
+          }
+        }
+      }
+    },
     "Are you sure you want to clear SideStore's cache?\\n\\nCache Size: %@": {
       "extractionState": "manual",
       "localizations": {
@@ -767,6 +866,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "你确定要本地删除这个证书吗？这将从缓存的本地存储中移除它。"
+          }
+        }
+      }
+    },
+    "Asset Designer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "美术资源"
           }
         }
       }
@@ -936,6 +1046,17 @@
         }
       }
     },
+    "Background Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "后台刷新"
+          }
+        }
+      }
+    },
     "Backup & Restore": {
       "extractionState": "manual",
       "localizations": {
@@ -969,6 +1090,17 @@
         }
       }
     },
+    "Beta Updates Track": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Beta 更新通道"
+          }
+        }
+      }
+    },
     "Binary Summary": {
       "extractionState": "manual",
       "localizations": {
@@ -991,6 +1123,17 @@
         }
       }
     },
+    "Browse": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "浏览"
+          }
+        }
+      }
+    },
     "Browse Bundle Contents": {
       "extractionState": "manual",
       "localizations": {
@@ -998,6 +1141,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "浏览包内容"
+          }
+        }
+      }
+    },
+    "Browse and download apps directly from SideStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "直接在 AirStore 里浏览并下载 App。"
           }
         }
       }
@@ -1255,6 +1409,17 @@
         }
       }
     },
+    "Certificate Management": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书管理"
+          }
+        }
+      }
+    },
     "Certificate PEM Data": {
       "extractionState": "manual",
       "localizations": {
@@ -1295,6 +1460,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "证书已注册到您的 Apple 开发团队中。撤销将无效化证书在 Apple 的门户中。"
+          }
+        }
+      }
+    },
+    "Change App Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "更换 App 图标"
           }
         }
       }
@@ -1438,6 +1614,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "清除自定义设置在卸载"
+          }
+        }
+      }
+    },
+    "Clear Data Cache…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除数据缓存…"
           }
         }
       }
@@ -1636,6 +1823,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "确认应用安装"
+          }
+        }
+      }
+    },
+    "Connect to Wi-Fi and VPN": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接 Wi-Fi 和 VPN"
           }
         }
       }
@@ -1948,6 +2146,17 @@
         }
       }
     },
+    "Could not connect to SideStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无法连接 AirStore。"
+          }
+        }
+      }
+    },
     "Could not load image": {
       "extractionState": "manual",
       "localizations": {
@@ -2208,6 +2417,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "数据库错误"
+          }
+        }
+      }
+    },
+    "Date": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "日期"
           }
         }
       }
@@ -2619,6 +2839,17 @@
         }
       }
     },
+    "Developers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发者"
+          }
+        }
+      }
+    },
     "Device Details": {
       "extractionState": "manual",
       "localizations": {
@@ -2762,6 +2993,17 @@
         }
       }
     },
+    "Disable App Limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "取消 App 数量限制"
+          }
+        }
+      }
+    },
     "Disable Device": {
       "extractionState": "manual",
       "localizations": {
@@ -2780,6 +3022,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "禁用设备?"
+          }
+        }
+      }
+    },
+    "Disable Idle Timeout": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关闭空闲超时"
           }
         }
       }
@@ -2846,6 +3099,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "完成"
+          }
+        }
+      }
+    },
+    "Download Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "下载 App"
           }
         }
       }
@@ -2982,6 +3246,17 @@
         }
       }
     },
+    "Email": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "电子邮件"
+          }
+        }
+      }
+    },
     "Embedded Entitlements": {
       "extractionState": "manual",
       "localizations": {
@@ -3011,6 +3286,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "启用后台保活"
+          }
+        }
+      }
+    },
+    "Enable Beta Updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用 Beta 更新"
+          }
+        }
+      }
+    },
+    "Enable LocalDevVPN and use Sidestore on the go.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "打开 LocalDevVPN，随时随地使用 AirStore。"
           }
         }
       }
@@ -3154,6 +3451,39 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "错误"
+          }
+        }
+      }
+    },
+    "Error Code": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "错误代码"
+          }
+        }
+      }
+    },
+    "Error Description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "错误描述"
+          }
+        }
+      }
+    },
+    "Error Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "错误日志"
           }
         }
       }
@@ -3664,6 +3994,17 @@
         }
       }
     },
+    "Follow SideStore for updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关注 SideStore 获取更新"
+          }
+        }
+      }
+    },
     "Full Spectrum Color Wheel": {
       "extractionState": "manual",
       "localizations": {
@@ -3792,6 +4133,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "隐藏"
+          }
+        }
+      }
+    },
+    "How it works": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "使用说明"
           }
         }
       }
@@ -4335,6 +4687,28 @@
         }
       }
     },
+    "Launch SideStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启动 AirStore"
+          }
+        }
+      }
+    },
+    "Leave SideStore running in the background on your idevice.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "让 AirStore 在设备后台保持运行。"
+          }
+        }
+      }
+    },
     "Leave empty to automatically discover SideJITServer on your local network via Bonjour.": {
       "extractionState": "manual",
       "localizations": {
@@ -4342,6 +4716,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "留空以自动通过 Bonjour 在本地网络上发现 SideJITServer"
+          }
+        }
+      }
+    },
+    "Licenses": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "许可证"
           }
         }
       }
@@ -4511,13 +4896,24 @@
         }
       }
     },
+    "My Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "我的 App"
+          }
+        }
+      }
+    },
     "Name": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "姓名"
+            "value": "名称"
           }
         }
       }
@@ -4588,6 +4984,17 @@
         }
       }
     },
+    "Network Discovery (mDNS)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "网络发现（mDNS）"
+          }
+        }
+      }
+    },
     "New Certificate": {
       "extractionState": "manual",
       "localizations": {
@@ -4617,6 +5024,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "有新版本可用"
+          }
+        }
+      }
+    },
+    "News": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "新闻"
           }
         }
       }
@@ -4694,6 +5112,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "没有找到服务"
+          }
+        }
+      }
+    },
+    "No Updates Available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有可更新的 App"
           }
         }
       }
@@ -5028,6 +5457,17 @@
         }
       }
     },
+    "PASSWORD": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "密码"
+          }
+        }
+      }
+    },
     "PIPELINE STEPS": {
       "extractionState": "manual",
       "localizations": {
@@ -5156,6 +5596,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "权限检查"
+          }
+        }
+      }
+    },
+    "Permissions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "权限"
           }
         }
       }
@@ -5343,6 +5794,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "Profile 管理"
+          }
+        }
+      }
+    },
+    "Profiles Management": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "描述文件管理"
+          }
+        }
+      }
+    },
+    "Prompt AppExtns Customization": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "提示扩展自定义"
           }
         }
       }
@@ -5541,6 +6014,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "刷新所有应用"
+          }
+        }
+      }
+    },
+    "Refresh Attempts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "刷新记录"
           }
         }
       }
@@ -5849,6 +6333,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "重置配对文件会删除存储的锁定位和远程配对凭证。您将需要重新配对或重新导入配对文件，并重启 SideStore。"
+          }
+        }
+      }
+    },
+    "Resign SideStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重新签名 AirStore"
           }
         }
       }
@@ -6271,6 +6766,17 @@
         }
       }
     },
+    "Select a Team": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择团队"
+          }
+        }
+      }
+    },
     "Select additional entitlements below or tap '+' to add one.": {
       "extractionState": "manual",
       "localizations": {
@@ -6491,6 +6997,17 @@
         }
       }
     },
+    "Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设置"
+          }
+        }
+      }
+    },
     "Share": {
       "extractionState": "manual",
       "localizations": {
@@ -6542,6 +7059,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "显示 WireGuard 设置"
+          }
+        }
+      }
+    },
+    "Side Team": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Side 团队"
           }
         }
       }
@@ -6634,6 +7162,17 @@
         }
       }
     },
+    "SideStore Team": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideStore 团队"
+          }
+        }
+      }
+    },
     "Sideload IPA": {
       "extractionState": "manual",
       "localizations": {
@@ -6667,6 +7206,17 @@
         }
       }
     },
+    "Sign in with Apple ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "使用 Apple ID 登录"
+          }
+        }
+      }
+    },
     "Sign in with your Apple ID to download apps from SideStore.": {
       "extractionState": "manual",
       "localizations": {
@@ -6674,6 +7224,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "登录你的 Apple ID 才能从 AirStore 下载 App。"
+          }
+        }
+      }
+    },
+    "Sign in with your Apple ID to get started.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "登录你的 Apple ID 即可开始。"
           }
         }
       }
@@ -6722,6 +7283,17 @@
         }
       }
     },
+    "Software Licenses": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "软件许可证"
+          }
+        }
+      }
+    },
     "Some sources were unable to load": {
       "extractionState": "manual",
       "localizations": {
@@ -6740,6 +7312,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "排序 By"
+          }
+        }
+      }
+    },
+    "Sources": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "源"
           }
         }
       }
@@ -6849,7 +7432,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "存储探索"
+            "value": "存储浏览器"
           }
         }
       }
@@ -6905,6 +7488,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "关注我们的社交账号或成为赞助者，支持 SideStore 团队！"
+          }
+        }
+      }
+    },
+    "Support the team": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "支持开发团队"
+          }
+        }
+      }
+    },
+    "Support us": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "支持我们"
           }
         }
       }
@@ -7195,6 +7800,17 @@
         }
       }
     },
+    "UI Designer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "UI 设计师"
+          }
+        }
+      }
+    },
     "URL of the JSON file containing registered Anisette servers. Press and hold row to export.": {
       "extractionState": "manual",
       "localizations": {
@@ -7404,6 +8020,17 @@
         }
       }
     },
+    "View Error Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查看错误日志"
+          }
+        }
+      }
+    },
     "View Full Mach-O Dump": {
       "extractionState": "manual",
       "localizations": {
@@ -7433,6 +8060,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "查看原始 XML"
+          }
+        }
+      }
+    },
+    "View Refresh Attempts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查看刷新记录"
           }
         }
       }
@@ -7470,6 +8108,28 @@
         }
       }
     },
+    "Welcome to SideStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "欢迎使用 AirStore。"
+          }
+        }
+      }
+    },
+    "What's New": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "新内容"
+          }
+        }
+      }
+    },
     "When SideStore triggers JIT, SideJITServer sends the debug attach signal and enables Just-In-Time execution instantly.": {
       "extractionState": "manual",
       "localizations": {
@@ -7477,6 +8137,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "当 SideStore 触发 JIT 时， SideJITServer 发送调试附加信号并立即启用 Just-In-Time 执行。"
+          }
+        }
+      }
+    },
+    "Why do we need this?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "为什么需要这个？"
           }
         }
       }

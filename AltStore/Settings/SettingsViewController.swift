@@ -117,6 +117,7 @@ extension SettingsViewController
     }
 }
 
+@objc(SettingsViewController)
 final class SettingsViewController: UITableViewController
 {
     private var activeTeam: ALTTeam?
@@ -1018,6 +1019,7 @@ extension SettingsViewController
                 ?? AccountVerificationRow()
             cell.configure(with: self.accountStatus)
             cell.style = .bottom
+            cell.localizingStoryboardText()
             return cell
         }
         
@@ -1056,7 +1058,7 @@ extension SettingsViewController
             cell.setValue(3, forKey: "style")
         }
         
-        
+        cell.localizingStoryboardText()
         return cell
     }
     
@@ -1071,6 +1073,7 @@ extension SettingsViewController
         case .signIn, .account, .patreon, .display, .appRefresh, .techyThings, .credits, .advancedSettings, .betaTesting, .diagnostics /* ,.macDirtyCow */:
             let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "HeaderFooterView") as! SettingsHeaderFooterView
             self.prepare(headerView, for: section, isHeader: true)
+            headerView.localizingStoryboardText()
             return headerView
             
         case .instructions: return nil

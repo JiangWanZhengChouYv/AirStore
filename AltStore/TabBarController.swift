@@ -47,6 +47,20 @@ final class TabBarController: UITabBarController
         
         let sourcesNavigationController = self.viewControllers![Tab.sources.rawValue] as! UINavigationController
         self.sourcesViewController = sourcesNavigationController.viewControllers.first as? SourcesViewController
+
+        // Tab and navigation titles are storyboard literals, so no catalog lookup happens for them.
+        for navigationController in self.viewControllers ?? []
+        {
+            if let title = navigationController.tabBarItem.title
+            {
+                navigationController.tabBarItem.title = NSLocalizedString(title, comment: "")
+            }
+
+            if let title = navigationController.topViewController?.navigationItem.title
+            {
+                navigationController.topViewController?.navigationItem.title = NSLocalizedString(title, comment: "")
+            }
+        }
     }
     
     override func viewDidAppear(_ animated: Bool)
