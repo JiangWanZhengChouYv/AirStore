@@ -97,8 +97,10 @@ public enum AppConstants {
         public enum Servers {
             public static let defaultSource        = "https://servers.sidestore.io/servers.json"
             // The other SideStore hosts provision with Android's CoreADI while declaring a Mac
-            // client, which Apple has rejected since October 2026; this one serves Windows ADI.
-            public static let defaultServerURL     = "https://win.ani.sidestore.io"
+            // client, which Apple has rejected since October 2026. This one is StikStore's Mac ADI:
+            // verified end to end on device on 2026-10-19, and unlike the SideStore Windows host it
+            // kept answering while `win.ani.sidestore.io` was throwing `spawn engine worker`.
+            public static let defaultServerURL     = "https://ani3.stikstore.app"
             public static let connectivityCheckURL = URL(string: "https://www.apple.com/library/test/success.html")!
 
             /// Servers whose `/v3/client_info` declaration matches the ADI that mints their headers:

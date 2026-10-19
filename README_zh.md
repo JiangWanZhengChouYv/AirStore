@@ -24,7 +24,7 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 
 - **已验证**：iPhone，iOS 27.2，免费个人 Apple ID。登录走完 2FA 和取 Team，Settings 里能看到账号。
 - **未验证**：登录成功之后，安装和刷新第三方 App 的完整链路。这条验证过了我会把 0.8.0 的发布说明里那句「Not verified」改掉。
-- **单点依赖**：登录要经过第三方服务器 `win.ani.sidestore.io`。它挂了或者换成安卓 ADI，登录会再次坏掉，本地没有替代方案（手机本地那套就是被苹果拒的那套）。设置里可以换服务器，同源候选见下面。
+- **单点依赖**：登录要经过第三方服务器 `ani3.stikstore.app`（默认）。它挂了或者换成苹果不认的 ADI，登录会再次坏掉，手机本地那套就是被苹果拒的那套，没有本地替代。设置里可以换服务器，同源候选见下面。
 
 ## 安装
 
@@ -33,7 +33,7 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 从 SideStore 或旧版 AirStore 升级过的，两个设置必须自己确认（新的默认值只在全新安装时生效，老安装里你存过的值优先）：
 
 1. Settings > Advanced > User Customizations：**On-Device Anisette 关掉**。本地那套跑的是苹果不认的安卓 ADI。
-2. Anisette 服务器页：**你钉住的那台服务器优先级高于新默认值**。请选 **SideStore (Windows ADI)**，也就是 `https://win.ani.sidestore.io`；**Enable Auto Rotation 保持关闭**。症状区分：服务器不对时报的是苹果 503（App 里显示成 unparseable format），不是 `-80045`。
+2. Anisette 服务器页：**你钉住的那台服务器优先级高于新默认值**。请选 **StikStore (Mac)**，也就是 `https://ani3.stikstore.app`；**Enable Auto Rotation 保持关闭**。症状区分：服务器不对时报的是苹果 503（App 里显示成 unparseable format），不是 `-80045`。
 
 ## 更新
 
