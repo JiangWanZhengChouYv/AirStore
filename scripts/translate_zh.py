@@ -21,6 +21,7 @@ run picks it up again. Re-running translate is how a batch retries itself.
 
 
 import argparse
+import html
 import json
 import os
 import re
@@ -79,6 +80,8 @@ UIKIT_PATTERNS = [
     re.compile(r'\bplaceholder\s*=\s*"((?:[^"\\]|\\.)+)"'),
 ]
 STORYBOARD_TITLE = re.compile(r'title="([^"]+)"')
+# A storyboard row shows its UILabel, not its title attribute: the Settings rows are all text=.
+STORYBOARD_LABEL = re.compile(r'text="([^"]+)"')
 
 # A space goes between a Han character and Latin/digits. Matching on Han only: the wider CJK class
 # included fullwidth punctuation, so "隧道（utun）" came back as "隧道（ utun）".
@@ -323,9 +326,13 @@ def other_surfaces():
                             uikit.add(swift_key(literal))
                 elif name.endswith((".storyboard", ".xib")):
                     text = open(path, encoding="utf-8", errors="replace").read()
-                    for value in STORYBOARD_TITLE.findall(text):
-                        if len(value) > 2 and not value.startswith("$"):
-                            storyboard.add(value)
+                    for pattern in (STORYBOARD_TITLE, STORYBOARD_LABEL):
+                        for value in pattern.findall(text):
+                            # The label reads "&amp;" in XML but "&" on screen, so the key has to
+                            # be the unescaped form or the runtime lookup misses it.
+                            value = html.unescape(value)
+                            if len(value) > 2 and not value.startswith("$"):
+                                storyboard.add(value)
                 elif name.endswith("Info.plist"):
                     result = subprocess.run(
                         ["plutil", "-convert", "json", "-o", "-", path],
