@@ -118,6 +118,35 @@ public final class AuthManager: @unchecked Sendable {
         }
     }
 
+    /// Apple expires the Developer portal session of a free personal account within minutes. The
+    /// password is already in the keychain, so renew without UI: no verification handler means
+    /// SideSign throws `requiresTwoFactorAuthentication` rather than waiting for a code nobody is
+    /// around to type, and the caller keeps the error.
+    ///
+    /// The token is written straight into the keychain, which is where getAuthenticatedSession()
+    /// reads it from. That is what lets a retrying caller pick the new token up without touching
+    /// the coalesced session path below.
+    public func renewPortalSession() async throws {
+        guard let appleID = currentAppleID, let password else {
+            debugLog("[AuthManager] renewPortalSession: no stored credentials to renew with.")
+            throw OperationError.notAuthenticated
+        }
+
+        let anisetteData = try await AnisetteProvider.fetch()
+        let xcodeVersion = await AnisetteConfigManager.shared.resolvedXcodeVersion()
+        let (_, session) = try await portalProxy.signIn(
+            appleID: appleID,
+            password: password,
+            anisetteData: anisetteData,
+            xcodeVersion: xcodeVersion,
+            verificationHandler: nil
+        )
+
+        self.adsid = session.dsid
+        self.xcodeToken = session.authToken
+        debugLog("[AuthManager] Renewed the Developer portal session without user interaction.")
+    }
+
     public func getAuthenticatedTeam() async throws -> ALTTeam {
         if let team = self.team {
             return team
