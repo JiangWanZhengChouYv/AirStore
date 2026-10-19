@@ -33,7 +33,9 @@ CATALOG = os.path.join(ROOT, "SideStore", "Resources", "Localizable.xcstrings")
 SOURCE_LANGS = ("SideStore", "AltStore", "Shared")
 
 # SwiftUI APIs whose first string argument is a LocalizedStringKey, plus the in-project row
-# helpers that forward their literals into Text.
+# helpers that forward their literals into Text, plus the explicit NSLocalizedString calls the
+# UIKit screens use. Missing that last group once made this report claim the UIKit surface was
+# three strings when it is several hundred.
 LITERAL_PATTERNS = [
     re.compile(r'\bText\(\s*"((?:[^"\\]|\\.)+)"'),
     re.compile(r'\bButton\(\s*"((?:[^"\\]|\\.)+)"'),
@@ -44,6 +46,7 @@ LITERAL_PATTERNS = [
     re.compile(r'title:\s*"((?:[^"\\]|\\.)+)"'),
     re.compile(r'subtitle:\s*"((?:[^"\\]|\\.)+)"'),
     re.compile(r'message:\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bNSLocalizedString\(\s*"((?:[^"\\]|\\.)+)"'),
 ]
 
 # Left alone on purpose: brand and protocol names that would read worse translated.
