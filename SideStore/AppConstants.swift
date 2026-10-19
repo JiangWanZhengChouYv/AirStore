@@ -100,6 +100,21 @@ public enum AppConstants {
             // client, which Apple has rejected since October 2026; this one serves Windows ADI.
             public static let defaultServerURL     = "https://win.ani.sidestore.io"
             public static let connectivityCheckURL = URL(string: "https://www.apple.com/library/test/success.html")!
+
+            /// Servers whose `/v3/client_info` declaration matches the ADI that mints their headers:
+            /// a real Windows ADI, or the older Mac one. Twelve of the nineteen hosts on
+            /// `servers.sidestore.io` declare `<MacBookPro13,2> <macOS;13.1>` from Android CoreADI,
+            /// which Apple rejects, so these stay pickable even when the public list drops them.
+            /// Census of 2026-10-19; re-check with `curl -s https://<host>/v3/client_info` before
+            /// adding anything here.
+            public static let curated: [(name: String, address: String)] = [
+                ("SideStore (Windows ADI)", "https://win.ani.sidestore.io"),
+                ("jkcoxson (Windows ADI)",  "https://ani.jkcoxson.com"),
+                ("StikStore (Windows ADI)", "https://ani2.stikstore.app"),
+                ("SideStore (New)",         "https://new.ani.sidestore.io"),
+                ("jkcoxson",                "https://mac-ani.jkcoxson.com"),
+                ("StikStore (Mac)",         "https://ani3.stikstore.app"),
+            ]
         }
 
         public static let remoteCacheDuration     = Constants.Anisette.remoteCacheDuration

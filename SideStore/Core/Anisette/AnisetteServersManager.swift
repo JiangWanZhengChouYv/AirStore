@@ -107,8 +107,13 @@ public actor AnisetteServersManager {
 
         let active = items.filter { !$0.isHidden }.map(\.address)
         let currentURL = UserDefaults.standard.menuAnisetteURL
-        if !active.contains(currentURL), let first = active.first {
-            UserDefaults.standard.menuAnisetteURL = first
+        if !active.contains(currentURL) {
+            // Falling back to index 0 used to pin `ani.sidestore.io`, a host Apple answers with
+            // 503. Prefer the curated default, and only then whatever the list starts with.
+            let fallback = active.first(where: { $0 == AppConstants.Anisette.Servers.defaultServerURL }) ?? active.first
+            if let fallback {
+                UserDefaults.standard.menuAnisetteURL = fallback
+            }
         }
     }
 
@@ -366,6 +371,12 @@ public actor AnisetteServersManager {
         // 2. Append newly added remote servers
         for newRemote in remainingRemote {
             mergedItems.append(AnisetteServerItem(name: newRemote.name, address: newRemote.address, isHidden: false))
+        }
+
+        // 3. Keep the curated candidates pickable. Two of them were never published to
+        // servers.sidestore.io, and the rest can disappear from it at any time.
+        for curated in AppConstants.Anisette.Servers.curated where !mergedItems.contains(where: { $0.address == curated.address }) {
+            mergedItems.append(AnisetteServerItem(name: curated.name, address: curated.address))
         }
 
         saveLocalServers(mergedItems)
