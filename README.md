@@ -37,6 +37,19 @@ replaces an existing SideStore rather than sitting beside it. The Home Screen la
 Read the release notes before installing. Sign-in is the only path that has been re-tested, and
 logins depend on a third-party Anisette server staying online.
 
+### Updates
+
+The SideStore community source lists SideStore itself as an updatable app and points that entry at
+upstream's build. AirStore keeps the same bundle id, so accepting that update installs upstream
+over AirStore and undoes the `-80045` fix. Add this source instead (Settings > Sources > Add Source):
+
+```
+https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json
+```
+
+It carries only AirStore releases. If you have the SideStore source already, leave it for other
+apps and ignore the SideStore update row.
+
 ## Building from source
 
 Requires macOS with Xcode 15+. There is no CocoaPods in this project: do not run `pod install`,

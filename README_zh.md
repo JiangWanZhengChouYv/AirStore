@@ -35,6 +35,16 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 1. Settings > Advanced > User Customizations：**On-Device Anisette 关掉**。本地那套跑的是苹果不认的安卓 ADI。
 2. Anisette 服务器页：**你钉住的那台服务器优先级高于新默认值**。请选 **SideStore (Windows ADI)**，也就是 `https://win.ani.sidestore.io`；**Enable Auto Rotation 保持关闭**。症状区分：服务器不对时报的是苹果 503（App 里显示成 unparseable format），不是 `-80045`。
 
+## 更新
+
+SideStore 社区源里 SideStore 自己也是一条可更新条目，它的 `downloadURL` 指向上游构建。AirStore 沿用同一个 bundle id，所以点那条更新会把上游 SideStore 装回来盖掉 AirStore，`-80045` 的修复当场没了。请改加这个源（Settings > Sources > Add Source）：
+
+```
+https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json
+```
+
+它只发 AirStore 的版本。已经加了 SideStore 社区的，别的 App 照常用，SideStore 那一行的更新提示忽略掉。
+
 ## 自己查服务器能不能用
 
 不用凭据就能看个大概，判据是它声明的身份：
