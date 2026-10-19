@@ -105,3 +105,5 @@ tmp
 
 scratch*.sh
 *.sh
+# The blanket rule above is for throwaway scripts; this one is a shared dev tool.
+!scripts/ci-watch.sh
