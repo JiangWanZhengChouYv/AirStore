@@ -2,6 +2,8 @@
 
 **AirStore is a fork of SideStore that does not require an AltServer. Our primary goal is to resolve the notorious `-80045` authentication error for iOS 26.4 and above.**
 
+中文说明见 [README_zh.md](README_zh.md)。
+
 ## ⚠️ Maintenance Notice & Disclaimer
 
 > **Maintained by a Solo Developer**
@@ -25,13 +27,30 @@ Public Anisette servers are largely blocked or unstable. AirStore gets past this
 - **`-80045` Bypass:** Fixes the Apple server restrictions and login loops on iOS 26.4+.
 - **Lightweight:** Minimal footprint on your device.
 
-## 🛠️ Build & Installation
+## 🛠️ Installation
 
-*(WIP - Work in Progress)*
-Currently, this project is in active development. You can build it from source using Xcode.
-- Requires macOS, Xcode, and CocoaPods.
-- Clone the repo and run `pod install`.
-- Open `.xcworkspace` and build.
+The current build is the [0.8.0 pre-release](https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/0.8.0).
+Download `SideStore-0.8.0.ipa` and install it the way you already install SideStore: iloader, or the
+in-app remote pairing flow. AirStore keeps SideStore's bundle id on purpose, so installing it
+replaces an existing SideStore rather than sitting beside it. The Home Screen label is AirStore.
+
+Read the release notes before installing. Sign-in is the only path that has been re-tested, and
+logins depend on a third-party Anisette server staying online.
+
+## Building from source
+
+Requires macOS with Xcode 15+. There is no CocoaPods in this project: do not run `pod install`,
+and there is no `.xcworkspace` to open.
+
+```sh
+git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
+cd AirStore
+make build fakesign ipa        # produces SideStore.ipa
+```
+
+`fakesign` means the build carries no developer certificate, which is what you want: the app gets
+its own identity from your Apple ID at first sign-in. CI builds the same way, so a packaged IPA is
+also available from the Actions run for any commit.
 
 ## 🤝 Contributing
 
