@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "name": "AirStore Official",
+  "identifier": "com.AirStore.AirStore",
+  "sourceURL": "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json",
+  "apps": [
+    {
+      "name": "AirStore",
+      "bundleIdentifier": "com.SideStore.SideStore",
+      "developerName": "JiangWanZhengChouYv",
+      "subtitle": "Sideload and refresh apps with your own Apple ID",
+      "iconURL": "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
+      "tintColor": "3B82F6",
+      "screenshotURLs": [],
+      "version": "0.8.0",
+      "date": "2026-10-19T10:01:45Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.0/SideStore-0.8.0.ipa",
+      "size": 31158352,
+      "sha256": "33aece754b8784435fa885b178c4c233162ab3c173781b7e90d5b0cb7df6d0ea",
+      "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in no longer ends in -80045 on iOS 26.4 and above: the client identity sent to Apple now matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is one backed by a real Windows ADI.\n\nVerified on one iPhone on iOS 27.2 with a free personal Apple ID. Installing and refreshing third-party apps after sign-in has not been re-tested. Sign-in depends on the third-party server win.ani.sidestore.io staying online.",
+      "versions": [
+        {
+          "version": "0.8.0",
+          "date": "2026-10-19T10:01:45Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.0/SideStore-0.8.0.ipa",
+          "size": 31158352,
+          "sha256": "33aece754b8784435fa885b178c4c233162ab3c173781b7e90d5b0cb7df6d0ea",
+          "localizedDescription": "Fixes -80045 Apple ID sign-in on iOS 26.4 and above. See the 0.8.0 release notes for what is verified and what is not."
+        }
+      ],
+      "releaseChannels": [
+        {
+          "track": "stable",
+          "releases": [
+            {
+              "version": "0.8.0",
+              "date": "2026-10-19T10:01:45Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.0/SideStore-0.8.0.ipa",
+              "size": 31158352,
+              "sha256": "33aece754b8784435fa885b178c4c233162ab3c173781b7e90d5b0cb7df6d0ea",
+              "localizedDescription": "Fixes -80045 Apple ID sign-in on iOS 26.4 and above."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "news": []
+}
