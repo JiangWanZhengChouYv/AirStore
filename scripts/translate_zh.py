@@ -275,7 +275,9 @@ def cmd_polish(args):
             continue
         spaced = CJK_THEN_LATIN.sub(r"\1 \2", value)
         spaced = LATIN_THEN_CJK.sub(r"\1 \2", spaced)
-        spaced = re.sub(r"\s{2,}", " ", spaced).strip()
+        # Spaces and tabs only. A run of "\s" matched the newlines a multi-line prompt is built
+        # out of, and polish quietly turned "a\n\nb" into "a b".
+        spaced = re.sub(r"[ \t]{2,}", " ", spaced)
         if spaced != value:
             changed += 1
             print(f"  {value!r} -> {spaced!r}")
