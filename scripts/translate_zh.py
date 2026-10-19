@@ -30,6 +30,7 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CATALOG = os.path.join(ROOT, "SideStore", "Resources", "Localizable.xcstrings")
+INFOPLIST_CATALOG = os.path.join(ROOT, "SideStore", "Resources", "InfoPlist.xcstrings")
 SOURCE_LANGS = ("SideStore", "AltStore", "Shared")
 
 # SwiftUI APIs whose first string argument is a LocalizedStringKey, plus the in-project row
@@ -57,6 +58,16 @@ PLACEHOLDER = re.compile(r"%(\d+\$)?[@dlsfui]|\{[^{}]+\}")
 # they are skipped until a --interpolated pass handles them; translating the raw form would add a
 # key nothing ever looks up.
 INTERPOLATION = re.compile(r"\\\(")
+SWIFT_ESCAPES = {"n": "\n", "t": "\t", "r": "\r", '"': '"', "'": "'", "\\": "\\"}
+
+
+def swift_key(literal):
+    """Turn a code literal into the string the runtime actually looks up.
+
+    Text("a\\nb") is looked up with a real newline, so a catalog key holding the two characters
+    backslash-n matches nothing and becomes a permanent dead entry.
+    """
+    return re.sub(r"\\(.)", lambda m: SWIFT_ESCAPES.get(m.group(1), m.group(0)), literal)
 THINK_BLOCK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 # These reach the screen as plain Swift strings, so the catalog cannot translate them until each
@@ -69,9 +80,10 @@ UIKIT_PATTERNS = [
 ]
 STORYBOARD_TITLE = re.compile(r'title="([^"]+)"')
 
-CJK = "[\\u4e00-\\u9fff\\u3000-\\u303f\\uff01-\\uff5e]"
-CJK_THEN_LATIN = re.compile(f"({CJK})([A-Za-z0-9])")
-LATIN_THEN_CJK = re.compile(f"([A-Za-z0-9%)])([\\u4e00-\\u9fff])")
+# A space goes between a Han character and Latin/digits. Matching on Han only: the wider CJK class
+# included fullwidth punctuation, so "隧道（utun）" came back as "隧道（ utun）".
+CJK_THEN_LATIN = re.compile("([\\u4e00-\\u9fff])([A-Za-z0-9])")
+LATIN_THEN_CJK = re.compile("([A-Za-z0-9%)])([\\u4e00-\\u9fff])")
 
 SYSTEM_PROMPT = (
     "You translate iOS app UI strings from English into Simplified Chinese.\n"
@@ -107,7 +119,7 @@ def literals_in_repo():
                             continue
                         if INTERPOLATION.search(literal):
                             continue
-                        found.setdefault(literal.replace('\\"', '"'), []).append(
+                        found.setdefault(swift_key(literal), []).append(
                             os.path.relpath(path, ROOT)
                         )
     return found
@@ -116,6 +128,20 @@ def literals_in_repo():
 def load_catalog():
     with open(CATALOG, encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def load_infoplist_catalog():
+    if not os.path.exists(INFOPLIST_CATALOG):
+        return {}
+    with open(INFOPLIST_CATALOG, encoding="utf-8") as handle:
+        raw = json.load(handle).get("strings", {})
+    return {
+        key: {
+            lang: entry.get("localizations", {}).get(lang, {}).get("stringUnit", {}).get("value", "")
+            for lang in ("en", "zh-Hans")
+        }
+        for key, entry in raw.items()
+    }
 
 
 def save_catalog(catalog):
@@ -292,7 +318,7 @@ def other_surfaces():
                             literal = match.group(1)
                             if INTERPOLATION.search(literal) or len(literal) < 3:
                                 continue
-                            uikit.add(literal.replace(chr(92) + chr(34), chr(34)))
+                            uikit.add(swift_key(literal))
                 elif name.endswith((".storyboard", ".xib")):
                     text = open(path, encoding="utf-8", errors="replace").read()
                     for value in STORYBOARD_TITLE.findall(text):
@@ -335,6 +361,18 @@ def cmd_report(args):
         unit = entries.get(key, {}).get("localizations", {}).get("zh-Hans", {}).get("stringUnit", {})
         return unit.get("value")
 
+    # InfoPlist.xcstrings is keyed by plist key, not by the English sentence, so the lookup above
+    # can never match it. Build English value -> Chinese value from that catalog instead.
+    plist_catalog = load_infoplist_catalog()
+    plist_by_value = {}
+    for unit in plist_catalog.values():
+        en = unit.get("en", "")
+        if en:
+            plist_by_value[en] = unit.get("zh-Hans", "")
+
+    def chinese_plist(value):
+        return plist_by_value.get(value)
+
     surfaces = {"swiftui literals": set(literals)}
     other = other_surfaces()
     surfaces.update({
@@ -348,7 +386,8 @@ def cmd_report(args):
     covered = 0
     print("每类能自动翻的字符串有多少已经进了中文表：")
     for name, keys in surfaces.items():
-        done = sum(1 for key in keys if chinese(key))
+        lookup = chinese_plist if name == "infoplist" else chinese
+        done = sum(1 for key in keys if lookup(key))
         covered += done
         fraction = done / len(keys) if keys else 0
         note = NOTES.get(name, "")
@@ -365,7 +404,7 @@ NOTES = {
     "swiftui literals": "Text/Button/Label 字面量，加进表就自动生效",
     "interpolated": "带插值，先要把 \\(x) 归一化成 %@ 形态",
     "uikit": "UIKit 直接拼的串，得先包 NSLocalizedString",
-    "storyboard": "tab 与导航标题，需要 zh-Hans.lproj/Main.i18n.strings",
+    "storyboard": "storyboard 里的标签，靠运行时 NSLocalizedString 重新查表",
     "infoplist": "权限弹窗文案，需要 InfoPlist.xcstrings，且不跟 App 内切换",
 }
 
