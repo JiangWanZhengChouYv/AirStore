@@ -326,7 +326,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "一次配对文件连接 SideStore 至 %@ 设备服务。"
+            "value": "一次配对文件连接 AirStore 至 %@ 设备服务。"
           }
         }
       }
@@ -887,7 +887,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "所有配对文件已重置，请重启 SideStore。"
+            "value": "所有配对文件已重置，请重启 AirStore。"
           }
         }
       }
@@ -1404,7 +1404,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "确定要清除 SideStore 的缓存吗？\n\n缓存大小：%@"
+            "value": "确定要清除 AirStore 的缓存吗？\n\n缓存大小：%@"
           }
         }
       }
@@ -2019,8 +2019,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "Cache 管理"
+            "state": "translated",
+            "value": "缓存管理"
           }
         }
       }
@@ -2328,7 +2328,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "重启 SideStore 以更改 EMProxy 设置。若取消，更改将不会保存。"
+            "value": "重启 AirStore 以更改 EMProxy 设置。若取消，更改将不会保存。"
           }
         }
       }
@@ -2339,7 +2339,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "重启 SideStore 以更改 Minimuxer 后端。若取消，更改将不会保存。"
+            "value": "重启 AirStore 以更改 Minimuxer 后端。若取消，更改将不会保存。"
           }
         }
       }
@@ -2966,7 +2966,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "控制 SideStore 在失败后自动旋转/重试服务器。"
+            "value": "控制 AirStore 在失败后自动旋转/重试服务器。"
           }
         }
       }
@@ -4011,7 +4011,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "删除数据库将从 SideStore 移除所有应用条目和来源。"
+            "value": "删除数据库将从 AirStore 移除所有应用条目和来源。"
           }
         }
       }
@@ -4429,7 +4429,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "你是否要清除与这个 SideStore 实例相关的所有 Keychain 项？"
+            "value": "你是否要清除与这个 AirStore 实例相关的所有 Keychain 项？"
           }
         }
       }
@@ -4759,7 +4759,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "启用后台刷新：连接 Wi-Fi 时自动在后台刷新应用。\n\n启用禁用空闲超时：让 SideStore 在刷新或安装应用期间保持设备唤醒。"
+            "value": "启用后台刷新：连接 Wi-Fi 时自动在后台刷新应用。\n\n启用禁用空闲超时：让 AirStore 在刷新或安装应用期间保持设备唤醒。"
           }
         }
       }
@@ -5055,8 +5055,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "Error 启动 SideStore"
+            "state": "translated",
+            "value": "启动 AirStore 时出错"
           }
         }
       }
@@ -5660,8 +5660,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "失败了无法重新签名校验 SideStore"
+            "state": "translated",
+            "value": "为 AirStore 重签名失败"
           }
         }
       }
@@ -6134,7 +6134,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "免费开发账号限于 1 个激活的签名证书。由于激活证书的私钥未在该设备上找到，SideStore 将创建一个新的证书。这将自动撤销当前激活的证书，这可能会禁用其他设备或由 Xcode 生成的安装。"
+            "value": "免费开发账号限于 1 个激活的签名证书。由于激活证书的私钥未在该设备上找到，AirStore 将创建一个新的证书。这将自动撤销当前激活的证书，这可能会禁用其他设备或由 Xcode 生成的安装。"
           }
         }
       }
@@ -8323,7 +8323,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "没有有效的迁移路径来降级此数据库。请更新 SideStore 或重置您的数据库。"
+            "value": "没有有效的迁移路径来降级此数据库。请更新 AirStore 或重置您的数据库。"
           }
         }
       }
@@ -8366,8 +8366,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "非開發者 Apple ID 最多只能啟用 3 個活動應用程式和應用程式擴充功能"
+            "state": "translated",
+            "value": "非开发者 Apple ID 最多只能启用 3 个 App 和 App 扩展。"
           }
         }
       }
@@ -8421,8 +8421,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "非開發者 Apple ID 每週限製創建 10 個 App ID"
+            "state": "translated",
+            "value": "非开发者 Apple ID 每周只能创建 10 个 App ID。"
           }
         }
       }
@@ -8543,7 +8543,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "一个或多个源“%@”的应用缺少市场 ID。这最有可能意味着它们没有经过审核，这不被当前版本的 SideStore 支持。"
+            "value": "一个或多个源“%@”的应用缺少市场 ID。这最有可能意味着它们没有经过审核，这不被当前版本的 AirStore 支持。"
           }
         }
       }
@@ -8620,7 +8620,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "打开 SideStore"
+            "value": "打开 AirStore"
           }
         }
       }
@@ -10016,8 +10016,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "取消“%@”从 SideStore"
+            "state": "translated",
+            "value": "从 AirStore 移除“%@”？"
           }
         }
       }
@@ -10258,8 +10258,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "重置配对文件会删除存储的锁定位和远程配对凭证。您将需要重新配对或重新导入配对文件，并重启 SideStore。"
+            "state": "translated",
+            "value": "重置配对文件会删除已存储的 Lockdown 与远程配对凭据。你需要重新配对或重新导入配对文件，并重启 AirStore。"
           }
         }
       }
@@ -11403,7 +11403,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SideStore 准备好了"
+            "value": "AirStore 准备好了"
           }
         }
       }
@@ -11425,7 +11425,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "SideStore 详细日志"
+            "value": "AirStore 详细日志"
           }
         }
       }
@@ -11447,7 +11447,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SideStore 无法管理现有的证书，除非拥有其私钥。使用现有证书签名的应用将在不久的将来过期，除非它们被 SideStore 显式重新签署并更新。"
+            "value": "AirStore 无法管理现有的证书，除非拥有其私钥。使用现有证书签名的应用将在不久的将来过期，除非它们被 AirStore 显式重新签署并更新。"
           }
         }
       }
@@ -11458,7 +11458,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SideStore 通过本地回环 VPN 与设备上的服务通信。在验证前，请先启用 LocalDevVPN。"
+            "value": "AirStore 通过本地回环 VPN 与设备上的服务通信。在验证前，请先启用 LocalDevVPN。"
           }
         }
       }
@@ -11469,7 +11469,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SideStore 不提供这些权限的详细信息。"
+            "value": "AirStore 不提供这些权限的详细信息。"
           }
         }
       }
@@ -11479,8 +11479,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "SideStore 需要 Apple ID 来创建签名应用所需的开发证书和 provisioning 文件。"
+            "state": "translated",
+            "value": "AirStore 需要 Apple ID 来创建签名应用所需的开发证书和描述文件。"
           }
         }
       }
@@ -11502,7 +11502,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SideStore 使用由你的计算机生成的配对文件（.mobiledevicepairing 或 .plist）与 %@ 设备服务通信。"
+            "value": "AirStore 使用由你的计算机生成的配对文件（.mobiledevicepairing 或 .plist）与 %@ 设备服务通信。"
           }
         }
       }
@@ -11512,8 +11512,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "不同的簽署工具（如 Xcode 或 AltStore）安裝了 SideStore。"
+            "state": "translated",
+            "value": "AirStore 是由其他签名工具（如 Xcode 或 AltStore）安装的。"
           }
         }
       }
@@ -11524,7 +11524,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SideStore 的数据库无法保存。"
+            "value": "AirStore 的数据库无法保存。"
           }
         }
       }
@@ -11865,7 +11865,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "源决定 SideStore 里有哪些应用可以安装。添加的源越多，可用的应用就越多。\n\n不知道从哪开始？试试添加我们推荐的源！"
+            "value": "源决定 AirStore 里有哪些应用可以安装。添加的源越多，可用的应用就越多。\n\n不知道从哪开始？试试添加我们推荐的源！"
           }
         }
       }
@@ -12359,8 +12359,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "数据库在 newer 版本的 SideStore 上创建。降级数据库模式不被支持，请更新 SideStore 或重置你的数据库。"
+            "state": "translated",
+            "value": "磁盘上的数据库由更新版本的 AirStore 创建。不支持降级数据库结构，请更新 AirStore 或重置数据库。"
           }
         }
       }
@@ -12459,7 +12459,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "你打开 SideStore 的次数越多，后台刷新后台安装的应用的机会就越大。"
+            "value": "你打开 AirStore 的次数越多，后台刷新后台安装的应用的机会就越大。"
           }
         }
       }
@@ -12470,7 +12470,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "使用 SideStore 越多，iOS 越常允许它在后台更新应用。"
+            "value": "使用 AirStore 越多，iOS 越常允许它在后台更新应用。"
           }
         }
       }
@@ -12558,7 +12558,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "已过期的签名证书用于安装 SideStore。"
+            "value": "已过期的签名证书用于安装 AirStore。"
           }
         }
       }
@@ -12602,7 +12602,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "源“%@”包含已公证的应用，本版本 SideStore 不支持。"
+            "value": "源“%@”包含已公证的应用，本版本 AirStore 不支持。"
           }
         }
       }
@@ -12613,7 +12613,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "出于安全原因，SideStore 已屏蔽源“%@”。"
+            "value": "出于安全原因，AirStore 已屏蔽源“%@”。"
           }
         }
       }
@@ -12623,8 +12623,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "目标 “%@” 不被此版本的 SideStore 支持。"
+            "state": "translated",
+            "value": "源“%@”不被本版本 AirStore 支持。"
           }
         }
       }
@@ -12646,7 +12646,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "这些是“%@”所需，而 SideStore 不认的权限。在继续之前，请确保理解它们。"
+            "value": "这些是“%@”所需，而 AirStore 不认的权限。在继续之前，请确保理解它们。"
           }
         }
       }
@@ -12657,7 +12657,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "必须在源中声明这些权限，以便 SideStore 安装此应用："
+            "value": "必须在源中声明这些权限，以便 AirStore 安装此应用："
           }
         }
       }
@@ -12701,7 +12701,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "此重新安装将新的签名注册到 OS 中，并将终止 SideStore。完成重新安装后，您可以立即重新打开 SideStore。"
+            "value": "此重新安装将新的签名注册到 OS 中，并将终止 AirStore。完成重新安装后，您可以立即重新打开 AirStore。"
           }
         }
       }
@@ -12734,7 +12734,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "这将从 SideStore 移除“%@”，并清除该应用的所有备份数据。"
+            "value": "这将从 AirStore 移除“%@”，并清除该应用的所有备份数据。"
           }
         }
       }
@@ -12756,7 +12756,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "这将替换任何之前的备份。请保持 SideStore 打开直到备份完成。"
+            "value": "这将替换任何之前的备份。请保持 AirStore 打开直到备份完成。"
           }
         }
       }
@@ -12789,7 +12789,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "这将从 SideStore 中注销你的 Apple ID 并从 Keychain 中清除已编配的 adi.pb 数据。你的活动签名证书将被保留。"
+            "value": "这将从 AirStore 中注销你的 Apple ID 并从 Keychain 中清除已编配的 adi.pb 数据。你的活动签名证书将被保留。"
           }
         }
       }
@@ -12833,7 +12833,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "为了让你继续使用 SideStore，必须现在用新证书重新安装本应用。\n否则旧证书过期后，你将无法刷新或打开 SideStore。"
+            "value": "为了让你继续使用 AirStore，必须现在用新证书重新安装本应用。\n否则旧证书过期后，你将无法刷新或打开 AirStore。"
           }
         }
       }
@@ -13129,8 +13129,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "无法访问共享的 App Group 容器。拒绝创建或使用私有沙盒 fallback 数据库。"
+            "state": "translated",
+            "value": "无法访问共享的 App Group 容器，已拒绝创建或使用私有沙盒回退数据库。"
           }
         }
       }
@@ -13757,7 +13757,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "欢迎来到 SideStore"
+            "value": "欢迎来到 AirStore"
           }
         }
       }
@@ -13800,8 +13800,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "当 SideStore 触发 JIT 时， SideJITServer 发送调试附加信号并立即启用 Just-In-Time 执行。"
+            "state": "translated",
+            "value": "当 AirStore 触发 JIT 时，SideJITServer 发送调试附加信号，立即开启 Just-In-Time 执行。"
           }
         }
       }
@@ -13999,7 +13999,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "你可以进入 SideStore，但在安装或刷新应用前需要一个配对文件。"
+            "value": "你可以进入 AirStore，但在安装或刷新应用前需要一个配对文件。"
           }
         }
       }
@@ -14285,7 +14285,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "“%@” 无法添加到 SideStore。"
+            "value": "“%@” 无法添加到 AirStore。"
           }
         }
       }
