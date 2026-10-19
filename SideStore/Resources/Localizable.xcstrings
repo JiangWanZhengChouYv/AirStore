@@ -953,7 +953,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "Bundle ID"
+            "value": "Bundle Identifier"
           }
         }
       }
@@ -2471,7 +2471,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "UDID"
+            "value": "设备标识符（UDID）"
           }
         }
       }
@@ -2482,7 +2482,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "UDID"
+            "value": "设备标识符（UDID）"
           }
         }
       }
@@ -2955,7 +2955,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "entitlement Key"
+            "value": "权限键（entitlement）"
           }
         }
       }
@@ -3626,7 +3626,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "ID:"
+            "value": "ID："
           }
         }
       }
@@ -4055,7 +4055,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "Invalid provisioning profile"
+            "value": "描述文件无效"
           }
         }
       }
@@ -4858,7 +4858,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "provisioning profiles"
+            "value": "描述文件"
           }
         }
       }
@@ -5177,7 +5177,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "provisioning profile"
+            "value": "描述文件"
           }
         }
       }
@@ -5188,7 +5188,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "provisioning profiles"
+            "value": "描述文件"
           }
         }
       }
@@ -5210,7 +5210,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "PublicKey"
+            "value": "公钥"
           }
         }
       }
@@ -5463,7 +5463,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "requester"
+            "value": "申请人："
           }
         }
       }
@@ -5837,7 +5837,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "SN:"
+            "value": "序列号："
           }
         }
       }
@@ -6904,7 +6904,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "utun"
+            "value": "VPN 隧道（utun）"
           }
         }
       }

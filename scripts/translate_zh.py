@@ -189,11 +189,11 @@ def cmd_translate(args):
         if not translated:
             failures.append((key, "empty response"))
             continue
-        if translated == key:
-            # A small model answers by echoing when it does not know what to do with the string.
-            # Recording it as untranslated keeps it in the next batch instead of hiding it.
-            failures.append((key, "echoed back unchanged"))
-            print(f"[{index}/{len(todo)}] SKIP {key!r}: echoed back unchanged")
+        if translated.lower() == key.lower():
+            # Covers both the plain echo and the worse variant where the model only lowercased the
+            # term: 'Provisioning Profile' came back as 'provisioning profile'.
+            failures.append((key, f"no translation, only casing: {translated!r}"))
+            print(f"[{index}/{len(todo)}] SKIP {key!r}: no translation, only casing")
             continue
         if not placeholder_check(key, translated):
             failures.append((key, f"placeholder mismatch: {translated!r}"))
