@@ -34,8 +34,12 @@ XCFramework via SPM. We use Makefiles for CLI build and packaging automation.
 The rename from SideStore covers documentation only so far: `PRODUCT_NAME`,
 `ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in `Build.xcconfig` are still `SideStore`
 and `com.SideStore.SideStore`, and the packaged artifact is `SideStore.ipa`.
-Leave those alone unless renaming is the explicit task — they change app groups,
-iCloud containers, and which signed profile the app can use.
+Note that `PRODUCT_NAME` in `Build.xcconfig` never took effect anyway — every
+target sets `PRODUCT_NAME = "$(TARGET_NAME)"` in the project file, which wins.
+The user-facing name comes from `CFBundleDisplayName = AirStore` in
+`AltStore/Info.plist`; changing the bundle id or app group is a different,
+breaking job — they change which signed profile the app can use and would
+orphan existing installs.
 
 App installation, certificate signing, and pairing have tricky edge cases across
 supported iOS versions (iOS 15+). Preserve existing behavior outside the intended
