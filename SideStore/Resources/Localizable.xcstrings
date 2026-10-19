@@ -1,13 +1,24 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "**Settings -> apps -> AirStore -> LocalNetworkAccess = toggle on**": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设置 -> 应用 -> AirStore -> 本地网络访问 = 开启"
+          }
+        }
+      }
+    },
     "7 DAYS": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "7天"
+            "value": "7 天"
           }
         }
       }
@@ -23,6 +34,72 @@
         }
       }
     },
+    "ACCOUNT, CERTIFICATE, & PAIRING DATA": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "账户，证书，及配对数据"
+          }
+        }
+      }
+    },
+    "ACTIVE PROTOCOL": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "生效协议"
+          }
+        }
+      }
+    },
+    "ALL RAW KEYS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "全部原始键"
+          }
+        }
+      }
+    },
+    "ANISETTE": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "ANISETTE"
+          }
+        }
+      }
+    },
+    "APP IDENTITY": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 身份信息"
+          }
+        }
+      }
+    },
+    "APP VERIFICATION": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "APP 验证"
+          }
+        }
+      }
+    },
     "APPEARANCE & THEMES": {
       "extractionState": "manual",
       "localizations": {
@@ -30,6 +107,468 @@
           "stringUnit": {
             "state": "translated",
             "value": "外观与主题"
+          }
+        }
+      }
+    },
+    "About": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关于"
+          }
+        }
+      }
+    },
+    "Accept IPv6 Config": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "接受 IPv6 配置"
+          }
+        }
+      }
+    },
+    "Account Imported": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "账号已导入"
+          }
+        }
+      }
+    },
+    "Action Required": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "需要处理"
+          }
+        }
+      }
+    },
+    "Actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "操作"
+          }
+        }
+      }
+    },
+    "Activate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "激活"
+          }
+        }
+      }
+    },
+    "Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "激活"
+          }
+        }
+      }
+    },
+    "Active Network Interfaces": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Active 网络接口"
+          }
+        }
+      }
+    },
+    "Active Protocol": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Active 协议"
+          }
+        }
+      }
+    },
+    "Active Signing Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "当前签名证书"
+          }
+        }
+      }
+    },
+    "Active Theme Accent": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "活跃主题强调色"
+          }
+        }
+      }
+    },
+    "Add": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "Add Custom Entitlement Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加自定义 entitlement 键"
+          }
+        }
+      }
+    },
+    "Add Entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加 entitlement"
+          }
+        }
+      }
+    },
+    "Add PEM Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加 PEM 密钥"
+          }
+        }
+      }
+    },
+    "Add Plist Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加 Plist 键"
+          }
+        }
+      }
+    },
+    "Add Private Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加私钥"
+          }
+        }
+      }
+    },
+    "Add pKey (.der)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加 pKey (.der)"
+          }
+        }
+      }
+    },
+    "Add pKey (.pem)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加 pKey (.pem)"
+          }
+        }
+      }
+    },
+    "Added": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "Address unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "地址不可用"
+          }
+        }
+      }
+    },
+    "Advanced / Custom Keys": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "高级 / 自定义钥匙"
+          }
+        }
+      }
+    },
+    "All Certificates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "全部证书"
+          }
+        }
+      }
+    },
+    "All pairing files have been reset. Please restart SideStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "所有配对文件已重置，请重启 SideStore。"
+          }
+        }
+      }
+    },
+    "All permitted account entitlements have been added.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "所有允许的账户权限均已添加。"
+          }
+        }
+      }
+    },
+    "Allows Files app to edit documents directly": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "允许文件 app 直接编辑文档"
+          }
+        }
+      }
+    },
+    "Anisette Client Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Anisette Client 配置"
+          }
+        }
+      }
+    },
+    "Anisette Servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Anisette 服务器"
+          }
+        }
+      }
+    },
+    "App Default": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 默认"
+          }
+        }
+      }
+    },
+    "App Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 详情"
+          }
+        }
+      }
+    },
+    "App Extensions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 扩展"
+          }
+        }
+      }
+    },
+    "App File Size Check": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 文件大小检查"
+          }
+        }
+      }
+    },
+    "App Group Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App Group 详情"
+          }
+        }
+      }
+    },
+    "App Groups": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App Groups"
+          }
+        }
+      }
+    },
+    "App Groups enable data sharing across multiple apps and extensions within the same developer team. Tap a group to edit its name or delete it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App Group 支持同一开发团队内的多个应用和扩展之间的数据共享。点击一个组编辑其名称或删除它。"
+          }
+        }
+      }
+    },
+    "App ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID"
+          }
+        }
+      }
+    },
+    "App ID Association": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID 关联"
+          }
+        }
+      }
+    },
+    "App ID ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID 标识"
+          }
+        }
+      }
+    },
+    "App ID Information": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID 信息"
+          }
+        }
+      }
+    },
+    "App ID Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID 键值"
+          }
+        }
+      }
+    },
+    "App ID Metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App ID 元数据"
+          }
+        }
+      }
+    },
+    "App IDs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App IDs"
           }
         }
       }
@@ -45,6 +584,413 @@
         }
       }
     },
+    "App Storage Containers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 存储容器"
+          }
+        }
+      }
+    },
+    "App Storage Used:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "存储使用已："
+          }
+        }
+      }
+    },
+    "App Version Check": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "App 版本检查"
+          }
+        }
+      }
+    },
+    "Append Team ID to Bundle Identifier": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "添加 Team ID 到 Bundle Identifier"
+          }
+        }
+      }
+    },
+    "Apple ID Password": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Apple ID 密码"
+          }
+        }
+      }
+    },
+    "Apple TV": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Apple TV"
+          }
+        }
+      }
+    },
+    "Apple Watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Apple Watch"
+          }
+        }
+      }
+    },
+    "Are you sure you want to clear all existing refresh attempt entries?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你确定要清除所有现有的刷新尝试记录吗？"
+          }
+        }
+      }
+    },
+    "Are you sure you want to deactivate the active signing certificate locally?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你确定要本地停用当前的签名证书吗？"
+          }
+        }
+      }
+    },
+    "Are you sure you want to delete this certificate locally? This will remove it from the cached local store.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你确定要本地删除这个证书吗？这将从缓存的本地存储中移除它。"
+          }
+        }
+      }
+    },
+    "Associated App Groups": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关联应用组"
+          }
+        }
+      }
+    },
+    "Auth App": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "认证 App"
+          }
+        }
+      }
+    },
+    "Auto Discovered from network": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自动发现 from 网络"
+          }
+        }
+      }
+    },
+    "Auto Retry RemotePairing Port": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自动重试远程配对端口"
+          }
+        }
+      }
+    },
+    "Auto-Fix AppGroup IDs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Auto-Fix 应用组 ID"
+          }
+        }
+      }
+    },
+    "Auto-Launch App After Install": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自动安装后启动应用"
+          }
+        }
+      }
+    },
+    "Auto-Rotation": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自动轮替"
+          }
+        }
+      }
+    },
+    "Automatically open apps after installation completes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自动打开安装完成后的应用"
+          }
+        }
+      }
+    },
+    "Automatically toggle cellular data via Shortcuts during refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自动通过 Shortcuts 切换蜂窝数据在刷新时"
+          }
+        }
+      }
+    },
+    "Available Servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "可用服务器"
+          }
+        }
+      }
+    },
+    "Available Servers (OFFLINE)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "可用服务器 (离线)"
+          }
+        }
+      }
+    },
+    "Available Space:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "可用空间："
+          }
+        }
+      }
+    },
+    "BACKGROUND SERVICE": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "背景服务"
+          }
+        }
+      }
+    },
+    "Background Modes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "背景模式"
+          }
+        }
+      }
+    },
+    "Backup & Restore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "备份与恢复"
+          }
+        }
+      }
+    },
+    "Base wait time after turning off data (seconds, ≥ 0)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "最低关闭数据后等待时间（秒，≥ 0）"
+          }
+        }
+      }
+    },
+    "Base wait time after turning on data (seconds, ≥ 0)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "最低开机后数据启用等待时间（秒，≥ 0）"
+          }
+        }
+      }
+    },
+    "Binary Summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "二进制摘要"
+          }
+        }
+      }
+    },
+    "Browsable Domains": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "可浏览域名"
+          }
+        }
+      }
+    },
+    "Browse Bundle Contents": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "浏览包内容"
+          }
+        }
+      }
+    },
+    "Build": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "构建"
+          }
+        }
+      }
+    },
+    "Bundle Contents": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Bundle 内容"
+          }
+        }
+      }
+    },
+    "Bundle ID must match reverse-DNS format (e.g. com.example.myapp).": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Bundle ID 必须匹配 reverse-DNS 格式 (例如 com.example.myapp)"
+          }
+        }
+      }
+    },
+    "Bundle Identifier": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Bundle ID"
+          }
+        }
+      }
+    },
+    "Bundle Identifier Check": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Bundle Identifier 校验"
+          }
+        }
+      }
+    },
+    "Bundle Metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Bundle 元数据"
+          }
+        }
+      }
+    },
+    "CAPABILITIES & SHARING": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "能力与共享"
+          }
+        }
+      }
+    },
     "CELLULAR REFRESH": {
       "extractionState": "manual",
       "localizations": {
@@ -52,6 +998,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "蜂窝网络刷新"
+          }
+        }
+      }
+    },
+    "COLOR SELECTION & WHEEL": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "色彩选择与色轮"
+          }
+        }
+      }
+    },
+    "CONFIGURED ENDPOINT": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配置的端点"
+          }
+        }
+      }
+    },
+    "CONNECTION CONFIG": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接配置"
+          }
+        }
+      }
+    },
+    "Cache Management": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Cache 管理"
+          }
+        }
+      }
+    },
+    "Cached unzipped app bundles stored in SideStore's private container. These are used during automatic background refreshes and resigns.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "缓存在 AirStore 私有容器里的未解压 App 包，后台自动刷新和重新签名时会用到。"
           }
         }
       }
@@ -67,6 +1068,2437 @@
         }
       }
     },
+    "Cancel All": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "取消全部"
+          }
+        }
+      }
+    },
+    "Catalog File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Catalog 文件"
+          }
+        }
+      }
+    },
+    "Cellular Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "蜂窝网络刷新"
+          }
+        }
+      }
+    },
+    "Certificate Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书详情"
+          }
+        }
+      }
+    },
+    "Certificate ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书 ID"
+          }
+        }
+      }
+    },
+    "Certificate Information": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书信息"
+          }
+        }
+      }
+    },
+    "Certificate PEM Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书 PEM 数据"
+          }
+        }
+      }
+    },
+    "Certificate Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书类型"
+          }
+        }
+      }
+    },
+    "Certificates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书"
+          }
+        }
+      }
+    },
+    "Certificates registered on your Apple Developer team. Revoking invalidates the certificate on Apple's portal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "证书已注册到您的 Apple 开发团队中。撤销将无效化证书在 Apple 的门户中。"
+          }
+        }
+      }
+    },
+    "Changes saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存更改"
+          }
+        }
+      }
+    },
+    "Changing Anisette config will invalidate your current provisioned Anisette data and you will be signed out.\\n\\nThis action will require a restart, do you want to proceed?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "修改 Anisette 配置将无效化您当前的 Anisette 配置数据并且您将被签出。\\n\\n 此操作需要重启，请确认是否继续?"
+          }
+        }
+      }
+    },
+    "Changing the EMProxy setting requires restarting SideStore. If canceled, changes will not be saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重启 SideStore 以更改 EMProxy 设置。若取消，更改将不会保存。"
+          }
+        }
+      }
+    },
+    "Changing the Minimuxer backend requires restarting SideStore. If canceled, changes will not be saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重启 SideStore 以更改 Minimuxer 后端。若取消，更改将不会保存。"
+          }
+        }
+      }
+    },
+    "Check Version Info (/ver/)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "检查版本信息 (/ver/)"
+          }
+        }
+      }
+    },
+    "Checksum (SHA-256) Check": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "校验码 (SHA-256) 校验"
+          }
+        }
+      }
+    },
+    "Choose App ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择 App ID"
+          }
+        }
+      }
+    },
+    "Choose a method to send feedback:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择一种反馈方式："
+          }
+        }
+      }
+    },
+    "Choose from registered team App IDs or specify a custom App ID / identifier.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择已注册团队的 App ID 或者指定自定义的 App ID / 识别码。"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除"
+          }
+        }
+      }
+    },
+    "Clear All": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清空全部"
+          }
+        }
+      }
+    },
+    "Clear Customizations on Uninstall": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除自定义设置在卸载"
+          }
+        }
+      }
+    },
+    "Clear Imported File?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除导入文件？"
+          }
+        }
+      }
+    },
+    "Clear Keychain Items": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除密钥链项目"
+          }
+        }
+      }
+    },
+    "Clear Preferred Protocol": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除首选协议"
+          }
+        }
+      }
+    },
+    "Clear Private Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Clear 私钥"
+          }
+        }
+      }
+    },
+    "Clear Refresh Attempts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除刷新尝试"
+          }
+        }
+      }
+    },
+    "Clear local Anisette provisioning data from Keychain": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除本地 Anisette 配置数据从 Keychain"
+          }
+        }
+      }
+    },
+    "Clear pKey": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除 pKey"
+          }
+        }
+      }
+    },
+    "Client Config": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Client 配置"
+          }
+        }
+      }
+    },
+    "Client Info": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Client 信息"
+          }
+        }
+      }
+    },
+    "Client Time": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Client 时间"
+          }
+        }
+      }
+    },
+    "Close": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "Code Signature Seal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Code 签名 印记"
+          }
+        }
+      }
+    },
+    "CodeResources": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Code 资源"
+          }
+        }
+      }
+    },
+    "CodeResources XML": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "代码资源 XML"
+          }
+        }
+      }
+    },
+    "Configured": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配置了"
+          }
+        }
+      }
+    },
+    "Configured Target": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配置目标"
+          }
+        }
+      }
+    },
+    "Configures the local UDP loopback host and port bound by EMProxy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配置 EMProxy 绑定的本地 UDP 回环主机和端口。"
+          }
+        }
+      }
+    },
+    "Confirm App Installation": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "确认应用安装"
+          }
+        }
+      }
+    },
+    "Connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接"
+          }
+        }
+      }
+    },
+    "Connection Config": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接配置"
+          }
+        }
+      }
+    },
+    "Connection Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接配置"
+          }
+        }
+      }
+    },
+    "Connection Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接详情"
+          }
+        }
+      }
+    },
+    "Connection Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接模式"
+          }
+        }
+      }
+    },
+    "Connection Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "连接状态"
+          }
+        }
+      }
+    },
+    "Console Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Console 日志"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "继续"
+          }
+        }
+      }
+    },
+    "Control if SideStore automatically rotates/retries servers upon failure.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "控制 SideStore 在失败后自动旋转/重试服务器。"
+          }
+        }
+      }
+    },
+    "Copied Visible Logs to Clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制可见日志到剪贴板"
+          }
+        }
+      }
+    },
+    "Copied to Clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "已复制到剪贴板"
+          }
+        }
+      }
+    },
+    "Copies of signed app bundles exported to your Documents folder. These can be shared or retrieved via the Files app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "共享或通过文件 app 拍摄的已签名应用包副本可保存到文档文件夹中。"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制"
+          }
+        }
+      }
+    },
+    "Copy Address": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制地址"
+          }
+        }
+      }
+    },
+    "Copy Details as JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制为 JSON 格式"
+          }
+        }
+      }
+    },
+    "Copy Host:Port Endpoint": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制主机:端口 终点"
+          }
+        }
+      }
+    },
+    "Copy Identifier": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制标识符"
+          }
+        }
+      }
+    },
+    "Copy Interface": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制界面"
+          }
+        }
+      }
+    },
+    "Copy Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制键"
+          }
+        }
+      }
+    },
+    "Copy Response": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制响应"
+          }
+        }
+      }
+    },
+    "Copy S/N": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制 SN"
+          }
+        }
+      }
+    },
+    "Copy SSH Command": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制 SSH 命令"
+          }
+        }
+      }
+    },
+    "Copy UDID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制 UDID"
+          }
+        }
+      }
+    },
+    "Copy Value": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制值"
+          }
+        }
+      }
+    },
+    "Copy as New Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "新建名称"
+          }
+        }
+      }
+    },
+    "Copy pKey (.pem)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制 pKey (.pem)"
+          }
+        }
+      }
+    },
+    "Copy pubK (.pem)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "复制 pubK (.pem)"
+          }
+        }
+      }
+    },
+    "Core Requirements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "核心要求"
+          }
+        }
+      }
+    },
+    "Could not load image": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无法加载图片"
+          }
+        }
+      }
+    },
+    "Create": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "创建"
+          }
+        }
+      }
+    },
+    "Create App Group": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "创建应用组"
+          }
+        }
+      }
+    },
+    "Create on Developer Portal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "创建在开发者门户"
+          }
+        }
+      }
+    },
+    "Created By": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "创建者"
+          }
+        }
+      }
+    },
+    "Created By: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "创建者："
+          }
+        }
+      }
+    },
+    "Currently Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "当前激活"
+          }
+        }
+      }
+    },
+    "Custom URL Schemes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自定义 URL Scheme"
+          }
+        }
+      }
+    },
+    "Custom third-party certificate (different team)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "第三方自定义证书（不同团队）"
+          }
+        }
+      }
+    },
+    "Customization": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "定制化"
+          }
+        }
+      }
+    },
+    "Customize App Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自定义应用图标"
+          }
+        }
+      }
+    },
+    "Customize AppID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "自定义 AppID"
+          }
+        }
+      }
+    },
+    "Customize Entitlements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "定制 entitlements"
+          }
+        }
+      }
+    },
+    "Customize Extensions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "定制扩展"
+          }
+        }
+      }
+    },
+    "Customize Info.plist": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "定制 Info.plist"
+          }
+        }
+      }
+    },
+    "Customize Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "定制 provisioning 文件"
+          }
+        }
+      }
+    },
+    "DATABASE OPTIONS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "DATABASE 选项"
+          }
+        }
+      }
+    },
+    "DEVICE (TCP) PROBE TIMEOUT": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "DEVICE (TCP) probe 超时"
+          }
+        }
+      }
+    },
+    "DISCOVERED NEARBY": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "发现附近"
+          }
+        }
+      }
+    },
+    "DNS-SD Records": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "DNS-SD 记录"
+          }
+        }
+      }
+    },
+    "Deactivate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "停用"
+          }
+        }
+      }
+    },
+    "Deactivate Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "停用证书"
+          }
+        }
+      }
+    },
+    "Deactivate Locally": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "停用本地"
+          }
+        }
+      }
+    },
+    "Decrypt": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "解密"
+          }
+        }
+      }
+    },
+    "Decrypt Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "解密备份"
+          }
+        }
+      }
+    },
+    "Default Import Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "默认导入模式"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "Delete & Exit": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除 & 退出"
+          }
+        }
+      }
+    },
+    "Delete All": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除所有"
+          }
+        }
+      }
+    },
+    "Delete All Profiles on Portal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除所有 profiles 在 Portal"
+          }
+        }
+      }
+    },
+    "Delete App Group?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除应用组?"
+          }
+        }
+      }
+    },
+    "Delete Cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清空缓存"
+          }
+        }
+      }
+    },
+    "Delete Cached App?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除缓存的应用？"
+          }
+        }
+      }
+    },
+    "Delete Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除证书"
+          }
+        }
+      }
+    },
+    "Delete Database": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Delete 数据库"
+          }
+        }
+      }
+    },
+    "Delete Device": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除设备"
+          }
+        }
+      }
+    },
+    "Delete Device?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除设备?"
+          }
+        }
+      }
+    },
+    "Delete Local Profile?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除本地配置文件？"
+          }
+        }
+      }
+    },
+    "Delete Locally Only": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除本地仅"
+          }
+        }
+      }
+    },
+    "Delete Pairing File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除配对文件"
+          }
+        }
+      }
+    },
+    "Delete Pairing File?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除配对文件?"
+          }
+        }
+      }
+    },
+    "Delete Portal Profile?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除门户配置？"
+          }
+        }
+      }
+    },
+    "Delete Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除 Profile"
+          }
+        }
+      }
+    },
+    "Delete Profile from Portal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除从门户"
+          }
+        }
+      }
+    },
+    "Delete Provisioning Profile?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除 provisioning profile?"
+          }
+        }
+      }
+    },
+    "Delete and Reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除和重置"
+          }
+        }
+      }
+    },
+    "Delete from Portal & Locally": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除自门户及本地"
+          }
+        }
+      }
+    },
+    "Deleting profiles on the developer portal allows Apple to issue fresh profiles with updated certificates and unflagged UUIDs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除开发 portal 上的配置文件允许 Apple 发行带有更新证书和未标记 UUID 的新配置文件。"
+          }
+        }
+      }
+    },
+    "Deleting the database will remove all app entries and sources from SideStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "删除数据库将从 SideStore 移除所有应用条目和来源。"
+          }
+        }
+      }
+    },
+    "Description": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "描述"
+          }
+        }
+      }
+    },
+    "Developer Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发者账号"
+          }
+        }
+      }
+    },
+    "Developer Disk Image (DDI)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发者磁盘图像 (DDI)"
+          }
+        }
+      }
+    },
+    "Developer Options": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发选项"
+          }
+        }
+      }
+    },
+    "Developer Portal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发者门户"
+          }
+        }
+      }
+    },
+    "Developer Portal Error": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发者门户错误"
+          }
+        }
+      }
+    },
+    "Developer Portal Info": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发人员门户信息"
+          }
+        }
+      }
+    },
+    "Developer Portal Services": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开发者门户服务"
+          }
+        }
+      }
+    },
+    "Device Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备详情"
+          }
+        }
+      }
+    },
+    "Device IDs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备 ID"
+          }
+        }
+      }
+    },
+    "Device Identifier": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "UDID"
+          }
+        }
+      }
+    },
+    "Device Identifier (UDID)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "UDID"
+          }
+        }
+      }
+    },
+    "Device Info": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备信息"
+          }
+        }
+      }
+    },
+    "Device Information": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备信息"
+          }
+        }
+      }
+    },
+    "Device Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备名称"
+          }
+        }
+      }
+    },
+    "Device Reachability (Ping)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备可达性（ Ping）"
+          }
+        }
+      }
+    },
+    "Devices": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备"
+          }
+        }
+      }
+    },
+    "Devices registered on your developer team can run development-signed apps. Tap any device to edit its name, disable, or delete it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备在您的开发团队中注册后可以运行开发签名的应用。点击任何设备编辑其名称，禁用或删除它。"
+          }
+        }
+      }
+    },
+    "Diagnostics & Tools": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "诊断与工具"
+          }
+        }
+      }
+    },
+    "Disable": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "禁用"
+          }
+        }
+      }
+    },
+    "Disable All Verifications": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关闭所有验证"
+          }
+        }
+      }
+    },
+    "Disable Device": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "禁用设备"
+          }
+        }
+      }
+    },
+    "Disable Device?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "禁用设备?"
+          }
+        }
+      }
+    },
+    "Disable URL Response Caching": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Disable URL 响应缓存"
+          }
+        }
+      }
+    },
+    "Disabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "禁用"
+          }
+        }
+      }
+    },
+    "Discovery": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "发现"
+          }
+        }
+      }
+    },
+    "Display Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "显示名称"
+          }
+        }
+      }
+    },
+    "Do you want to clear all keychain items related to this SideStore instance?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你是否要清除与这个 SideStore 实例相关的所有 Keychain 项？"
+          }
+        }
+      }
+    },
+    "Done": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "完成"
+          }
+        }
+      }
+    },
+    "Download Profile (.mobileprovision)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "下载 Profile (.mobileprovision)"
+          }
+        }
+      }
+    },
+    "Download Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "下载 provisioning 文件"
+          }
+        }
+      }
+    },
+    "Drag to reorder server priority. Swipe left on a server to hide or unhide it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "拖拽以重新排序服务器优先级。向左滑动服务器以隐藏或显示它。"
+          }
+        }
+      }
+    },
+    "Dump Profiles": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出配置文件"
+          }
+        }
+      }
+    },
+    "Dump Provisioning Profiles": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出描述文件"
+          }
+        }
+      }
+    },
+    "EMPROXY & WIREGUARD": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "代理和 WireGuard"
+          }
+        }
+      }
+    },
+    "EMProxy (WireGuard) Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "EMProxy (WireGuard) 服务器"
+          }
+        }
+      }
+    },
+    "Edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "编辑"
+          }
+        }
+      }
+    },
+    "Edit Device": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "编辑设备"
+          }
+        }
+      }
+    },
+    "Edit Identifier Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "编辑标识配置"
+          }
+        }
+      }
+    },
+    "Edit Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "编辑名称"
+          }
+        }
+      }
+    },
+    "Edit on Developer Portal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "编辑在开发者门户中"
+          }
+        }
+      }
+    },
+    "Embedded Entitlements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "嵌入式 entitlements"
+          }
+        }
+      }
+    },
+    "Enable Auto Rotation": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用自动旋转"
+          }
+        }
+      }
+    },
+    "Enable Background Keepalive": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用后台保活"
+          }
+        }
+      }
+    },
+    "Enable Minimuxer Backend Hotswap": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用 Minimuxer 后端热替换"
+          }
+        }
+      }
+    },
+    "Enable SideJITServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用 SideJIT 服务器"
+          }
+        }
+      }
+    },
+    "Enable iTunes File Sharing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用 iTunes 文件共享"
+          }
+        }
+      }
+    },
+    "Ensure **Local Network Access** is provided otherwise this function may not work as intended since it is based on L N A...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "确保**本地网络访问**提供否则此功能可能无法按预期工作..."
+          }
+        }
+      }
+    },
+    "Ensure both devices are on the same Wi-Fi network.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "确保两部设备都在同一个 Wi-Fi 网络上。"
+          }
+        }
+      }
+    },
+    "Enter Pairing PIN": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "输入配对 PIN"
+          }
+        }
+      }
+    },
+    "Enter a new name for this item:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "请输入此项目的新的名称："
+          }
+        }
+      }
+    },
+    "Enter the 6-digit code displayed on your Apple TV / device screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "输入您 Apple TV / 设备屏幕上显示的 6 位码。"
+          }
+        }
+      }
+    },
+    "Enter the password used to encrypt this backup file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "输入用于加密此备份文件的密码。"
+          }
+        }
+      }
+    },
+    "Enter this 6-digit code on the connecting device to complete pairing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "输入连接设备上的 6 位码完成配对。"
+          }
+        }
+      }
+    },
+    "Entitlement Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "entitlement Key"
+          }
+        }
+      }
+    },
+    "Entitlements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "权限"
+          }
+        }
+      }
+    },
+    "Error": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "错误"
+          }
+        }
+      }
+    },
+    "Error launching SideStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Error 启动 SideStore"
+          }
+        }
+      }
+    },
+    "Experimental Features": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "实验功能"
+          }
+        }
+      }
+    },
+    "Expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "过期"
+          }
+        }
+      }
+    },
+    "Export": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出"
+          }
+        }
+      }
+    },
+    "Export (.der)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出 (.der)"
+          }
+        }
+      }
+    },
+    "Export (.pem)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出 (.pem)"
+          }
+        }
+      }
+    },
+    "Export Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出账号"
+          }
+        }
+      }
+    },
+    "Export Account JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出账户 JSON"
+          }
+        }
+      }
+    },
+    "Export Anisette Servers JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出 Anisette 服务器 JSON"
+          }
+        }
+      }
+    },
+    "Export App Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出应用备份"
+          }
+        }
+      }
+    },
+    "Export Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出证书"
+          }
+        }
+      }
+    },
+    "Export Certificate / Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出证书/密钥"
+          }
+        }
+      }
+    },
+    "Export Certificate Password": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出证书密码"
+          }
+        }
+      }
+    },
+    "Export Config JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出配置 JSON"
+          }
+        }
+      }
+    },
+    "Export Current": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出当前"
+          }
+        }
+      }
+    },
+    "Export Database": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出数据库"
+          }
+        }
+      }
+    },
+    "Export Error": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出错误"
+          }
+        }
+      }
+    },
+    "Export File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出文件"
+          }
+        }
+      }
+    },
+    "Export Full (.p12)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出全量 (.p12)"
+          }
+        }
+      }
+    },
+    "Export Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出日志"
+          }
+        }
+      }
+    },
+    "Export Original": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出原始"
+          }
+        }
+      }
+    },
+    "Export Private Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出私钥"
+          }
+        }
+      }
+    },
+    "Export Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出 provisioning 文件"
+          }
+        }
+      }
+    },
+    "Export Public (.der)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出公共 (.der)"
+          }
+        }
+      }
+    },
+    "Export Public (.pem)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出公共 (.pem)"
+          }
+        }
+      }
+    },
+    "Export Public Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出公钥"
+          }
+        }
+      }
+    },
+    "Export Resigned IPAs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出替换 IPA"
+          }
+        }
+      }
+    },
+    "Export Sources": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出源码"
+          }
+        }
+      }
+    },
+    "Export WireGuard Config": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出 WireGuard 配置"
+          }
+        }
+      }
+    },
+    "Export/Share": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出/分享"
+          }
+        }
+      }
+    },
+    "Exported Resigned Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出已辞职的应用"
+          }
+        }
+      }
+    },
+    "Exports SideStore.conf to import into WireGuard VPN app": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导出 SideStore.conf 到 WireGuard VPN 应用中导入"
+          }
+        }
+      }
+    },
+    "Exposes Documents directory via Finder/iTunes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "暴露文档目录于 Finder/iTunes"
+          }
+        }
+      }
+    },
+    "Extension Metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "扩展元数据"
+          }
+        }
+      }
+    },
+    "Extension bundle identifier is managed relative to the main application.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "扩展包标识符相对于主应用进行管理。"
+          }
+        }
+      }
+    },
+    "Extraction Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "提取失败"
+          }
+        }
+      }
+    },
+    "FILE INFORMATION": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "文件信息"
+          }
+        }
+      }
+    },
+    "Fetch": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "获取"
+          }
+        }
+      }
+    },
+    "Fetch Current Device UDID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "获取当前设备 UDID"
+          }
+        }
+      }
+    },
+    "Fetching certificates...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "获取证书..."
+          }
+        }
+      }
+    },
+    "File Already Exists": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "File 已经存在"
+          }
+        }
+      }
+    },
+    "File password cannot be empty.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "文件密码不能为空。"
+          }
+        }
+      }
+    },
+    "Fill Current Device Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "填写当前设备名称"
+          }
+        }
+      }
+    },
+    "Finish Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "完成刷新"
+          }
+        }
+      }
+    },
+    "First Letter": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "首字母"
+          }
+        }
+      }
+    },
+    "Folders First": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "文件夹优先"
+          }
+        }
+      }
+    },
+    "Full Spectrum Color Wheel": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "全色色轮"
+          }
+        }
+      }
+    },
     "GENERAL": {
       "extractionState": "manual",
       "localizations": {
@@ -74,6 +3506,600 @@
           "stringUnit": {
             "state": "translated",
             "value": "通用"
+          }
+        }
+      }
+    },
+    "General Info": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "基本信息"
+          }
+        }
+      }
+    },
+    "General Metadata": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "基本信息"
+          }
+        }
+      }
+    },
+    "Generate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "生成"
+          }
+        }
+      }
+    },
+    "Group By": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "分组"
+          }
+        }
+      }
+    },
+    "Group identifier must start with 'group.' prefix (e.g. group.com.example.shared).": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "组标识必须以 'group.' 前缀开始（例如： group.com.example.shared）。"
+          }
+        }
+      }
+    },
+    "Hardware identifier computed from adi.pb and device identity": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "硬件标识由 adi.pb 和设备身份计算"
+          }
+        }
+      }
+    },
+    "Has Private Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Has 私钥"
+          }
+        }
+      }
+    },
+    "Header Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "版本"
+          }
+        }
+      }
+    },
+    "Health Check": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "健康检查"
+          }
+        }
+      }
+    },
+    "Hidden": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "隐藏"
+          }
+        }
+      }
+    },
+    "ID: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "ID:"
+          }
+        }
+      }
+    },
+    "IPA File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "IPA 文件"
+          }
+        }
+      }
+    },
+    "IPSec/IKEv2 Tunnel": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "IPSec/IKEv2 隧道"
+          }
+        }
+      }
+    },
+    "IPv4 First": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "IPv4 第一"
+          }
+        }
+      }
+    },
+    "IPv6 First": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "IPv6 第一"
+          }
+        }
+      }
+    },
+    "ISO8601 UTC timestamp locked to OTP generation time": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "ISO8601 UTC 时间戳锁定到 OTP 生成时间"
+          }
+        }
+      }
+    },
+    "If the bundle ID is not present in the database, it will install as a separate app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "如果 bundle ID 不存在于数据库中，它将作为独立的应用安装。"
+          }
+        }
+      }
+    },
+    "Iface:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "接口:"
+          }
+        }
+      }
+    },
+    "Import": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入"
+          }
+        }
+      }
+    },
+    "Import / Replace File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入 / 替换文件"
+          }
+        }
+      }
+    },
+    "Import Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入账号"
+          }
+        }
+      }
+    },
+    "Import Account JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入账户 JSON"
+          }
+        }
+      }
+    },
+    "Import Anisette Client Config JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入 Anisette 客户端配置 JSON"
+          }
+        }
+      }
+    },
+    "Import Anisette Servers JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入 Anisette 服务器 JSON"
+          }
+        }
+      }
+    },
+    "Import Anyway": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入不管"
+          }
+        }
+      }
+    },
+    "Import App Backup": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入应用备份"
+          }
+        }
+      }
+    },
+    "Import Certificate Password": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入证书密码"
+          }
+        }
+      }
+    },
+    "Import Certificates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入证书"
+          }
+        }
+      }
+    },
+    "Import Config JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入配置 JSON"
+          }
+        }
+      }
+    },
+    "Import Error": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Import 错误"
+          }
+        }
+      }
+    },
+    "Import Failures": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Import 失败"
+          }
+        }
+      }
+    },
+    "Import File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入文件"
+          }
+        }
+      }
+    },
+    "Import Log File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入日志文件"
+          }
+        }
+      }
+    },
+    "Import Log...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入日志..."
+          }
+        }
+      }
+    },
+    "Import PEM Private Key File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入 PEM 私钥文件"
+          }
+        }
+      }
+    },
+    "Import Pairing File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入配对文件"
+          }
+        }
+      }
+    },
+    "Import Private Key (.der/.pem)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入私钥 (.der/.pem)"
+          }
+        }
+      }
+    },
+    "Import Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入 provisioning 文件"
+          }
+        }
+      }
+    },
+    "Import Server Catalog?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入服务器目录？"
+          }
+        }
+      }
+    },
+    "Import SideSign Config JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入 SideSign 配置 JSON"
+          }
+        }
+      }
+    },
+    "Import Sources": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入源"
+          }
+        }
+      }
+    },
+    "Import Summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入概要"
+          }
+        }
+      }
+    },
+    "Import from File": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入文件"
+          }
+        }
+      }
+    },
+    "Import from Files": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "导入文件"
+          }
+        }
+      }
+    },
+    "Interactive": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "互动"
+          }
+        }
+      }
+    },
+    "Internal App Cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "内部应用缓存"
+          }
+        }
+      }
+    },
+    "Invalid Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Invalid 配置"
+          }
+        }
+      }
+    },
+    "Invalid Mach-O Binary": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Invalid Mach-O 二进制文件"
+          }
+        }
+      }
+    },
+    "Invalid Property List": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无效的属性列表"
+          }
+        }
+      }
+    },
+    "Invalid Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Invalid provisioning profile"
+          }
+        }
+      }
+    },
+    "JIT Requirements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "JIT 要求"
+          }
+        }
+      }
+    },
+    "Key Added": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "新增关键"
+          }
+        }
+      }
+    },
+    "Key Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Key 名称"
+          }
+        }
+      }
+    },
+    "Keys: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "键："
           }
         }
       }
@@ -89,6 +4115,138 @@
         }
       }
     },
+    "LIVE INTERFACE PREVIEW": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "实时界面预览"
+          }
+        }
+      }
+    },
+    "LOCAL NETWORK INTERFACES": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "本地网络接口"
+          }
+        }
+      }
+    },
+    "LOGGING & DIAGNOSTICS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "日志 & 调试"
+          }
+        }
+      }
+    },
+    "Latest Server Response": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "最新服务器响应"
+          }
+        }
+      }
+    },
+    "Leave empty to automatically discover SideJITServer on your local network via Bonjour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "留空以自动通过 Bonjour 在本地网络上发现 SideJITServer"
+          }
+        }
+      }
+    },
+    "Link & Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "链接 & 保存"
+          }
+        }
+      }
+    },
+    "Link Signing Certificate?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "链接签名证书?"
+          }
+        }
+      }
+    },
+    "Loading directory contents...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "加载目录内容..."
+          }
+        }
+      }
+    },
+    "Local": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "本地"
+          }
+        }
+      }
+    },
+    "Local User ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "本地用户 ID"
+          }
+        }
+      }
+    },
+    "Locale": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "地区"
+          }
+        }
+      }
+    },
+    "MANAGEMENT": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "管理"
+          }
+        }
+      }
+    },
     "MINIMUXER BACKEND": {
       "extractionState": "manual",
       "localizations": {
@@ -96,6 +4254,435 @@
           "stringUnit": {
             "state": "translated",
             "value": "Minimuxer 后端"
+          }
+        }
+      }
+    },
+    "Make sure you're connected to a local network.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "确保您连接到本地网络。"
+          }
+        }
+      }
+    },
+    "Managed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "管理"
+          }
+        }
+      }
+    },
+    "Minimum iOS Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "最低 iOS 版本"
+          }
+        }
+      }
+    },
+    "Missing .p12": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "缺少 .p12"
+          }
+        }
+      }
+    },
+    "Missing Cert": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "缺失证书"
+          }
+        }
+      }
+    },
+    "Missing Private Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "丢失私钥"
+          }
+        }
+      }
+    },
+    "Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "姓名"
+          }
+        }
+      }
+    },
+    "Name (A to Z)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "名称 (A 到 Z)"
+          }
+        }
+      }
+    },
+    "Name (Z to A)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "名称 (Z 到 A)"
+          }
+        }
+      }
+    },
+    "Name of the shortcut in Apple Shortcuts app": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "快捷方式名称在 Apple Shortcuts 应用"
+          }
+        }
+      }
+    },
+    "Name: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "名称："
+          }
+        }
+      }
+    },
+    "Network Connectivity": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "网络连接"
+          }
+        }
+      }
+    },
+    "New Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "新证书"
+          }
+        }
+      }
+    },
+    "New Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "新 Profile"
+          }
+        }
+      }
+    },
+    "No App Groups available on this team. Create an App Group first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有可用的应用组在该团队中。首先创建一个应用组。"
+          }
+        }
+      }
+    },
+    "No App IDs found. Create an App ID first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No App IDs found. 创建 App ID 首先。"
+          }
+        }
+      }
+    },
+    "No Bonjour services are currently advertised in this domain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有当前在本域内推广 Bonjour 服务。"
+          }
+        }
+      }
+    },
+    "No Domains Found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有找到域名"
+          }
+        }
+      }
+    },
+    "No Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无钥匙"
+          }
+        }
+      }
+    },
+    "No Matching Signing Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有匹配的签名证书"
+          }
+        }
+      }
+    },
+    "No Services Found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有找到服务"
+          }
+        }
+      }
+    },
+    "No active entitlements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No 激活权限"
+          }
+        }
+      }
+    },
+    "No active interfaces scanned.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无激活界面扫描"
+          }
+        }
+      }
+    },
+    "No active local interfaces detected.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No active 本地接口检测到。"
+          }
+        }
+      }
+    },
+    "No cached internal apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No 缓存内部应用"
+          }
+        }
+      }
+    },
+    "No certificates found on this team.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无证书在该团队中发现。"
+          }
+        }
+      }
+    },
+    "No devices are currently advertising this service.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "当前没有设备正在推广此服务。"
+          }
+        }
+      }
+    },
+    "No exported resigned apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "未导出已撤销的应用"
+          }
+        }
+      }
+    },
+    "No files or subfolders found in this directory.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No 文件或子文件夹在本目录中找到。"
+          }
+        }
+      }
+    },
+    "No local certificates found.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No local 证书找到。"
+          }
+        }
+      }
+    },
+    "No matching keys found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No 匹配的键未找到"
+          }
+        }
+      }
+    },
+    "No pairing file installed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有配对文件安装。"
+          }
+        }
+      }
+    },
+    "No pairing targets found via Bonjour.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "没有通过 Bonjour 找到配对目标。"
+          }
+        }
+      }
+    },
+    "No registered devices found on this team.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "未在本团队中找到已注册设备。"
+          }
+        }
+      }
+    },
+    "No special features enabled for this App ID.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "No 特殊功能已启用此 App ID。"
+          }
+        }
+      }
+    },
+    "No values (empty array)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "空值（空数组）"
+          }
+        }
+      }
+    },
+    "Note: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "注意："
+          }
+        }
+      }
+    },
+    "ONBOARDING": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "上 boarding"
+          }
+        }
+      }
+    },
+    "Omit": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "剔除"
           }
         }
       }
@@ -111,6 +4698,875 @@
         }
       }
     },
+    "One-Time Password (OTP)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "一次性密码 (OTP)"
+          }
+        }
+      }
+    },
+    "Open Documents In Place": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "打开文件在 place"
+          }
+        }
+      }
+    },
+    "Operations Logging": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "操作日志"
+          }
+        }
+      }
+    },
+    "Operations Logging Control": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "操作日志控制"
+          }
+        }
+      }
+    },
+    "Operations Verbose Logging": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "操作 Verbose 日志"
+          }
+        }
+      }
+    },
+    "Optional": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "可选"
+          }
+        }
+      }
+    },
+    "Override Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Override 状态"
+          }
+        }
+      }
+    },
+    "Overview": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "概述"
+          }
+        }
+      }
+    },
+    "Owner Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Owner 姓名"
+          }
+        }
+      }
+    },
+    "PAIRING FILES": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对文件"
+          }
+        }
+      }
+    },
+    "PAIRING METHODS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对方法"
+          }
+        }
+      }
+    },
+    "PIPELINE STEPS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "PIPELINE 步骤"
+          }
+        }
+      }
+    },
+    "PRECISE COLOR METRICS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "精确色彩指标"
+          }
+        }
+      }
+    },
+    "PRESET THEMES": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "预设主题"
+          }
+        }
+      }
+    },
+    "PROVISIONING PROFILES": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "provisioning profiles"
+          }
+        }
+      }
+    },
+    "Pair": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对"
+          }
+        }
+      }
+    },
+    "Pairing Code": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对码"
+          }
+        }
+      }
+    },
+    "Pairing File Management": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对文件管理"
+          }
+        }
+      }
+    },
+    "Pairing Files Reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对文件重置"
+          }
+        }
+      }
+    },
+    "Pairing file": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配对文件"
+          }
+        }
+      }
+    },
+    "Parse Error": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Parse 错误"
+          }
+        }
+      }
+    },
+    "Paste your PEM-formatted private key below, or import it from a text file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "请粘贴您的 PEM 格式私钥 below，或从文本文件中导入。"
+          }
+        }
+      }
+    },
+    "Permission Checks": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "权限检查"
+          }
+        }
+      }
+    },
+    "Platform": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "平台"
+          }
+        }
+      }
+    },
+    "Platform Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "平台名称"
+          }
+        }
+      }
+    },
+    "Please enter a password for the certificate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "请输入证书的密码。"
+          }
+        }
+      }
+    },
+    "Please enter your Apple ID password to complete sign-in.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "请输入您的 Apple ID 密码完成登录。"
+          }
+        }
+      }
+    },
+    "Prefer IPA (speed) vs App (storage) efficiency": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "优选 IPA (速度) vs App (存储) 效率"
+          }
+        }
+      }
+    },
+    "Prefer Resigned IPA": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "弃置 resign IPA"
+          }
+        }
+      }
+    },
+    "Prefer Sheet for Entitlements": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "优选 entitlements 式设置"
+          }
+        }
+      }
+    },
+    "Prefer Sheet for Info.plist": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "偏好表单 for Info.plist"
+          }
+        }
+      }
+    },
+    "Preferred": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "首选"
+          }
+        }
+      }
+    },
+    "Preferred Protocol": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "首选协议"
+          }
+        }
+      }
+    },
+    "Privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "隐私"
+          }
+        }
+      }
+    },
+    "Private Key Data": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Private Key 数据"
+          }
+        }
+      }
+    },
+    "Proceed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "继续"
+          }
+        }
+      }
+    },
+    "Profile Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Profile 详情"
+          }
+        }
+      }
+    },
+    "Profile Information": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Profile 信息"
+          }
+        }
+      }
+    },
+    "Profile Management": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Profile 管理"
+          }
+        }
+      }
+    },
+    "Prompt for confirmation before installing or importing an app": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "提示确认是否安装或导入应用"
+          }
+        }
+      }
+    },
+    "Prompt to choose a custom icon before installing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "提示选择自定义图标后安装"
+          }
+        }
+      }
+    },
+    "Prompt to select a provisioning profile before installing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "提示在安装前选择一个 provisioning profile"
+          }
+        }
+      }
+    },
+    "Protocol Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "协议版本"
+          }
+        }
+      }
+    },
+    "Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "provisioning profile"
+          }
+        }
+      }
+    },
+    "Provisioning Profiles": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "provisioning profiles"
+          }
+        }
+      }
+    },
+    "Provisioning profiles dictate entitlements, device permissions, and expiration dates. Profiles sync automatically with your developer account.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "配置文件规定 entitlements , 设备权限以及过期日期。配置文件会自动与你的开发者账户同步。"
+          }
+        }
+      }
+    },
+    "Public Key": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "PublicKey"
+          }
+        }
+      }
+    },
+    "Purge All Profiles?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除所有配置文件？"
+          }
+        }
+      }
+    },
+    "Queries Schemes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查询方案"
+          }
+        }
+      }
+    },
+    "Quick Actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "快速操作"
+          }
+        }
+      }
+    },
+    "Raw Dump": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "原始导出内容"
+          }
+        }
+      }
+    },
+    "Raw Inspection": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Raw 检验"
+          }
+        }
+      }
+    },
+    "Raw JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "JSON 原始"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "准备好了"
+          }
+        }
+      }
+    },
+    "Ready to Sign": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "待签名"
+          }
+        }
+      }
+    },
+    "Refresh All Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "刷新所有应用"
+          }
+        }
+      }
+    },
+    "Refresh Device Cache (/re/)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "刷新设备缓存 (/re/)"
+          }
+        }
+      }
+    },
+    "Register": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "注册"
+          }
+        }
+      }
+    },
+    "Register App ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "注册应用 ID"
+          }
+        }
+      }
+    },
+    "Register Device": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "注册设备"
+          }
+        }
+      }
+    },
+    "Registered Devices": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "注册设备"
+          }
+        }
+      }
+    },
+    "Remote Endpoint": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "远程端点"
+          }
+        }
+      }
+    },
+    "Remote Server Sync": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "远程服务器同步"
+          }
+        }
+      }
+    },
+    "Remove App Group": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "移除 App Group"
+          }
+        }
+      }
+    },
+    "Remove Imported": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清除导入"
+          }
+        }
+      }
+    },
+    "Remove as Preferred": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "取消作为首选"
+          }
+        }
+      }
+    },
+    "Rename": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重命名"
+          }
+        }
+      }
+    },
+    "Replay Onboarding": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重播引导"
+          }
+        }
+      }
+    },
+    "Requester Email": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Requester 邮箱"
+          }
+        }
+      }
+    },
+    "Requester: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "requester"
+          }
+        }
+      }
+    },
+    "Required for JIT on iOS 17+": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "需要在 iOS 17+上启用 JIT"
+          }
+        }
+      }
+    },
+    "Reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置"
+          }
+        }
+      }
+    },
+    "Reset Catalog": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置目录"
+          }
+        }
+      }
+    },
+    "Reset Onboarding State": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置引导状态"
+          }
+        }
+      }
+    },
+    "Reset Pairing Files": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置配对文件"
+          }
+        }
+      }
+    },
+    "Reset Pairing Files?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置配对文件？"
+          }
+        }
+      }
+    },
+    "Reset Source to Default": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置源为默认"
+          }
+        }
+      }
+    },
+    "Reset adi.pb": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置 adi.pb"
+          }
+        }
+      }
+    },
+    "Reset assigned profiles, custom certificates, and metadata when an app is deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置分配的配置文件、自定义证书和元数据，当应用程序被删除时"
+          }
+        }
+      }
+    },
     "Reset to Defaults": {
       "extractionState": "manual",
       "localizations": {
@@ -118,6 +5574,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢复默认设置"
+          }
+        }
+      }
+    },
+    "Reset to Defaults?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置为默认？"
+          }
+        }
+      }
+    },
+    "Reset to SideStore Classic": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置为 SideStore 经典"
+          }
+        }
+      }
+    },
+    "Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart SideStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置配对文件会删除存储的锁定位和远程配对凭证。您将需要重新配对或重新导入配对文件，并重启 SideStore。"
+          }
+        }
+      }
+    },
+    "Resolution Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "分辨率失败"
+          }
+        }
+      }
+    },
+    "Resolution Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "分辨率模式"
+          }
+        }
+      }
+    },
+    "Resolving IP address…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "解析 IP 地址…"
+          }
+        }
+      }
+    },
+    "Resolving service…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "解析服务中…"
+          }
+        }
+      }
+    },
+    "Resources": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "资源"
           }
         }
       }
@@ -144,6 +5688,919 @@
         }
       }
     },
+    "Restart required to apply changes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重启以应用更改"
+          }
+        }
+      }
+    },
+    "Retry Connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重连"
+          }
+        }
+      }
+    },
+    "Retrying...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重试..."
+          }
+        }
+      }
+    },
+    "Review and adjust app metadata before installing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "审核并调整应用元数据 before 安装"
+          }
+        }
+      }
+    },
+    "Revoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "撤销"
+          }
+        }
+      }
+    },
+    "Revoke Certificate on Portal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "撤销证书 on 脖子"
+          }
+        }
+      }
+    },
+    "Revoke Certificate?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "撤销证书？"
+          }
+        }
+      }
+    },
+    "Revoking a certificate permanently invalidates it on Apple's servers. Any provisioning profiles tied exclusively to this certificate may need to be re-generated.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "撤销证书永久无效化它在 Apple 的服务器上。与此证书绑定的任何专用 provisioning profile 可能需要重新生成。"
+          }
+        }
+      }
+    },
+    "Rotate Logs on Startup": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置日志在启动时"
+          }
+        }
+      }
+    },
+    "Routing Info": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "路由信息"
+          }
+        }
+      }
+    },
+    "Run ADI emulation directly on device instead of remote servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "运行 ADI 模拟直接在设备上，而不是远程服务器"
+          }
+        }
+      }
+    },
+    "SHA-1 Fingerprint": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SHA-1 指纹"
+          }
+        }
+      }
+    },
+    "SHA-256 Fingerprint": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SHA-256 指纹"
+          }
+        }
+      }
+    },
+    "SN: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SN:"
+          }
+        }
+      }
+    },
+    "SOURCES DATA": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "数据来源"
+          }
+        }
+      }
+    },
+    "STANDALONE FEATURES": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "独立功能"
+          }
+        }
+      }
+    },
+    "STANDALONE STEPS": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "独立步骤"
+          }
+        }
+      }
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "Save Changes (Regenerate Profile)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存更改（重新生成配置文件）"
+          }
+        }
+      }
+    },
+    "Save Group Associations": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存组关联"
+          }
+        }
+      }
+    },
+    "Save Overrides": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存 Overrides"
+          }
+        }
+      }
+    },
+    "Save Raw JSON": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存原始 JSON"
+          }
+        }
+      }
+    },
+    "Save as Overrides": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "保存为覆盖"
+          }
+        }
+      }
+    },
+    "Scroll to Bottom": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "滚动到底部"
+          }
+        }
+      }
+    },
+    "Seal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "封印"
+          }
+        }
+      }
+    },
+    "Searching local network for devices…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查找本地网络中的设备…"
+          }
+        }
+      }
+    },
+    "Searching…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "正在搜索…"
+          }
+        }
+      }
+    },
+    "Select": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择"
+          }
+        }
+      }
+    },
+    "Select additional entitlements below or tap '+' to add one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择下方的附加权限，或点击“+”添加一个。"
+          }
+        }
+      }
+    },
+    "Select devices allowed to run apps with this profile, or enter a custom Device ID / UDID.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择可以运行此配置文件的设备，或输入自定义设备 ID / UDID"
+          }
+        }
+      }
+    },
+    "Select registered test devices that can install apps signed with this profile.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择已注册的测试设备，这些设备可以安装使用此配置文件签名的应用。"
+          }
+        }
+      }
+    },
+    "Select the App Groups to associate with this App ID, then tap Save.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择要关联的 App Group，然后保存。"
+          }
+        }
+      }
+    },
+    "Select which certificates are authorized to sign with this profile, or add custom certificate IDs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择哪些证书被授权使用此配置文件签名，或者添加自定义的证书 ID。"
+          }
+        }
+      }
+    },
+    "Select which certificates are permitted to sign applications with this profile.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选择哪些证书可以使用此配置文件签名应用程序。"
+          }
+        }
+      }
+    },
+    "Send Email": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "发送邮件"
+          }
+        }
+      }
+    },
+    "Send Feedback": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "提交反馈"
+          }
+        }
+      }
+    },
+    "Serial Number": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "序列号"
+          }
+        }
+      }
+    },
+    "Serial Number (dec)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "序列号（十进制）"
+          }
+        }
+      }
+    },
+    "Serial Number (hex)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "十六进制序列号"
+          }
+        }
+      }
+    },
+    "Serial: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "序列号"
+          }
+        }
+      }
+    },
+    "Server Address": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "服务器地址"
+          }
+        }
+      }
+    },
+    "Server Catalog Source": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "服务器目录来源"
+          }
+        }
+      }
+    },
+    "Server List URL": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "服务器列表 URL"
+          }
+        }
+      }
+    },
+    "Service": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "服务"
+          }
+        }
+      }
+    },
+    "Service Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "服务详情"
+          }
+        }
+      }
+    },
+    "Services Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "服务版本"
+          }
+        }
+      }
+    },
+    "Set a password to encrypt the exported .p12 certificate file.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设置密码以加密导出的.p12 证书文件"
+          }
+        }
+      }
+    },
+    "Set as Preferred": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设置为首选"
+          }
+        }
+      }
+    },
+    "Share": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "分享"
+          }
+        }
+      }
+    },
+    "Share Info.plist": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "分享 Info.plist"
+          }
+        }
+      }
+    },
+    "Share Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "分享 profile"
+          }
+        }
+      }
+    },
+    "Show Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "显示失败"
+          }
+        }
+      }
+    },
+    "Show WireGuard Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "显示 WireGuard 设置"
+          }
+        }
+      }
+    },
+    "SideJITServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideJIT 服务器"
+          }
+        }
+      }
+    },
+    "SideJITServer Detected": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideJIT 服务器检测到"
+          }
+        }
+      }
+    },
+    "SideJITServer attaches Apple's debugserver service on macOS to running apps on iOS 17+ over local Wi-Fi or USB.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "侧边 JIT 服务器在 macOS 上将 Apple 的 debugserver 服务附加到 iOS 17+上的运行中应用程序上，通过本地 Wi-Fi 或 USB"
+          }
+        }
+      }
+    },
+    "SideSign Client Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideSign 客户端配置"
+          }
+        }
+      }
+    },
+    "SideSign Config": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideSign 配置"
+          }
+        }
+      }
+    },
+    "SideSign Verbose Logging": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideSign 详细日志"
+          }
+        }
+      }
+    },
+    "SideStore Ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "SideStore 准备好了"
+          }
+        }
+      }
+    },
+    "Sideload IPA": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "侧载 IPA"
+          }
+        }
+      }
+    },
+    "Sign In": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "登录"
+          }
+        }
+      }
+    },
+    "Signature & Public Key Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "签名与公钥详情"
+          }
+        }
+      }
+    },
+    "Signature Algorithm": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "签名算法"
+          }
+        }
+      }
+    },
+    "Signed HMAC token dynamically calculated by ADI engine per request": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "动态计算的 ADI 引擎每请求生成的签名 HMAC 令牌"
+          }
+        }
+      }
+    },
+    "Skip Uncopyable Backup Files": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "跳过不可复制的备份文件"
+          }
+        }
+      }
+    },
+    "Sort By": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "排序 By"
+          }
+        }
+      }
+    },
+    "Start Background Service": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启动背景服务"
+          }
+        }
+      }
+    },
+    "Start EMProxy": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启动 EMProxy"
+          }
+        }
+      }
+    },
+    "Start Pairing Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开始配对服务器"
+          }
+        }
+      }
+    },
+    "Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "状态"
+          }
+        }
+      }
+    },
+    "Status: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "状态："
+          }
+        }
+      }
+    },
+    "Stop Background Service": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "停止后台服务"
+          }
+        }
+      }
+    },
+    "Stop EMProxy": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "停止 EMProxy"
+          }
+        }
+      }
+    },
+    "Stop Pairing Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "停止配对服务器"
+          }
+        }
+      }
+    },
+    "Storage Explorer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "存储探索"
+          }
+        }
+      }
+    },
+    "Storage Explorer Error": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "存储探索错误"
+          }
+        }
+      }
+    },
+    "Subject": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "主题"
+          }
+        }
+      }
+    },
+    "Success": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "成功"
+          }
+        }
+      }
+    },
+    "Suffix (R) indicates the certificate is registered remotely on Apple's developer portal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "后缀（ R）表示证书已远程注册到 Apple 的开发者门户。"
+          }
+        }
+      }
+    },
+    "Switch": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "切换"
+          }
+        }
+      }
+    },
+    "Switching to App Bundle prioritizes storage efficiency by transferring the app bundle directly without packaging a temporary IPA, but transfer speeds will be noticeably slower.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "切换到 App Bundle 优先考虑存储效率，直接转移应用包而无需打包一个临时的 IPA，但转移速度会 noticeably 变慢。"
+          }
+        }
+      }
+    },
+    "Switching to Resigned IPA prioritizes install speed (~40% faster) by packaging an uncompressed IPA for fast transfer, but temporarily uses additional disk space during packaging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "使用已签名的 IPA 优先加快安装速度（快 40%）通过打包一个未压缩的 IPA 以便快速传输，但在打包期间会暂时占用额外的磁盘空间。"
+          }
+        }
+      }
+    },
     "System Language": {
       "extractionState": "manual",
       "localizations": {
@@ -151,6 +6608,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "跟随系统语言"
+          }
+        }
+      }
+    },
+    "Tap a permission to learn more.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "点击一个权限以了解更多信息。"
+          }
+        }
+      }
+    },
+    "Test Connection (Ping)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Ping 测试"
           }
         }
       }
@@ -173,6 +6652,600 @@
           "stringUnit": {
             "state": "translated",
             "value": "主题管理"
+          }
+        }
+      }
+    },
+    "This item will be permanently removed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "这个项目将被永久删除。"
+          }
+        }
+      }
+    },
+    "This will restore the SideSign headers to their default recommended values.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "这将恢复 SideSign 标题为推荐的默认值。"
+          }
+        }
+      }
+    },
+    "This will restore the client headers to the default recommended values.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "这将恢复客户端头到默认推荐值。"
+          }
+        }
+      }
+    },
+    "Time Zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "时区"
+          }
+        }
+      }
+    },
+    "Timeout (ms)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "超时 (ms)"
+          }
+        }
+      }
+    },
+    "Total": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "总数"
+          }
+        }
+      }
+    },
+    "Total Space:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "总空间："
+          }
+        }
+      }
+    },
+    "Turn Off Base Delay": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关闭基础延迟"
+          }
+        }
+      }
+    },
+    "Turn Off Cellular Shortcut": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "关闭 Cellular 短信快捷方式"
+          }
+        }
+      }
+    },
+    "Turn On Base Delay": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "开启基础延迟"
+          }
+        }
+      }
+    },
+    "Turn On Cellular Shortcut": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "打开 Cellular 短信"
+          }
+        }
+      }
+    },
+    "Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "类型"
+          }
+        }
+      }
+    },
+    "Type Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "类型名称"
+          }
+        }
+      }
+    },
+    "Type Name: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "类型名称："
+          }
+        }
+      }
+    },
+    "Type: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "类型："
+          }
+        }
+      }
+    },
+    "UDID is a 25-character or 40-character unique device identifier.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备标识符是 25 位或 40 位的唯一设备标识。"
+          }
+        }
+      }
+    },
+    "URL of the JSON file containing registered Anisette servers. Press and hold row to export.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "URL of the JSON 文件 containing registered Anisette 服务器。长按行以导出。"
+          }
+        }
+      }
+    },
+    "Upload Custom App Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "上传自定义应用图标"
+          }
+        }
+      }
+    },
+    "Use sheet instead of dialog": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "使用表单代替对话"
+          }
+        }
+      }
+    },
+    "User Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "用户配置"
+          }
+        }
+      }
+    },
+    "User Customizations": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "用户自定义"
+          }
+        }
+      }
+    },
+    "VERSIONING": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "版本控制"
+          }
+        }
+      }
+    },
+    "VPN Tunnel (utun)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "utun"
+          }
+        }
+      }
+    },
+    "Valid From": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "从"
+          }
+        }
+      }
+    },
+    "Valid Until": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "有效期至"
+          }
+        }
+      }
+    },
+    "Validity Days": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "有效期天数"
+          }
+        }
+      }
+    },
+    "Validity Period": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "有效期"
+          }
+        }
+      }
+    },
+    "Validity Progress": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "有效性进度"
+          }
+        }
+      }
+    },
+    "Validity: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "有效期："
+          }
+        }
+      }
+    },
+    "Value": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "价值"
+          }
+        }
+      }
+    },
+    "Value Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "值类型"
+          }
+        }
+      }
+    },
+    "Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "版本"
+          }
+        }
+      }
+    },
+    "View Full Mach-O Dump": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查看完整 Mach-O 打印"
+          }
+        }
+      }
+    },
+    "View Provisioned Devices": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查看已绑定设备"
+          }
+        }
+      }
+    },
+    "View Raw XML": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "查看原始 XML"
+          }
+        }
+      }
+    },
+    "WARNING: Outdated anisette server": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "警告：过时的 Anisette 服务器"
+          }
+        }
+      }
+    },
+    "WIREGUARD CONFIGURATION": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "WIREGUARD 配置"
+          }
+        }
+      }
+    },
+    "We've detected you are using an older anisette server. Using this server has a higher likelihood of locking your account and causing other issues. Are you sure you want to continue?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "我们检测到您正在使用一个较旧的 Anisette 服务器。使用这个服务器有更高的可能性锁定您的账户并导致其他问题。您确定要继续吗？"
+          }
+        }
+      }
+    },
+    "When SideStore triggers JIT, SideJITServer sends the debug attach signal and enables Just-In-Time execution instantly.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "当 SideStore 触发 JIT 时， SideJITServer 发送调试附加信号并立即启用 Just-In-Time 执行。"
+          }
+        }
+      }
+    },
+    "Widget Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Widget 日志"
+          }
+        }
+      }
+    },
+    "Wipe Database on Next Start": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "清空数据库在下次启动时"
+          }
+        }
+      }
+    },
+    "WireGuard Server Parameters": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "WireGuard 服务器参数"
+          }
+        }
+      }
+    },
+    "Wireless Pairing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "无线配对"
+          }
+        }
+      }
+    },
+    "Would you like to enable SideJITServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你想启用 SideJIT 服务器"
+          }
+        }
+      }
+    },
+    "Wrap File Names": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "打包文件名"
+          }
+        }
+      }
+    },
+    "X.509 Fields": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "X.509 字段"
+          }
+        }
+      }
+    },
+    "Xcode Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "Xcode 版本"
+          }
+        }
+      }
+    },
+    "YES": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "是"
+          }
+        }
+      }
+    },
+    "You can edit the profile name and regenerate the profile with updated certificate or device associations.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你可以编辑个人资料名称并使用更新后的证书或设备关联重新生成个人资料。"
+          }
+        }
+      }
+    },
+    "You cannot use special characters such as @, &, *, ', \", -, .": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "你不能使用特殊字符 such as @, &, *, ', \", - ."
+          }
+        }
+      }
+    },
+    "iOS Version Check": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "iOS 版本检查"
+          }
+        }
+      }
+    },
+    "public + private": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "公共 + 私人"
+          }
+        }
+      }
+    },
+    "v0.6.0 • Installed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "v0.6.0 • 安装了"
+          }
+        }
+      }
+    },
+    "⚠️ ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "⚠️"
           }
         }
       }
