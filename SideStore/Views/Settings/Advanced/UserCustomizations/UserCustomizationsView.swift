@@ -20,6 +20,8 @@ struct UserCustomizationsView: View {
     @State private var selectedBackgroundServiceMode: BackgroundServiceMode = UserDefaults.standard.backgroundServiceMode
     @State private var useOnDeviceAnisette: Bool = UserDefaults.standard.useOnDeviceAnisette
     @State private var showAnisetteRestartConfirmation: Bool = false
+    @State private var appLanguage: AppLanguage = AppLanguage.current
+    @State private var showLanguageRestartConfirmation: Bool = false
     @State private var customizeInfoPlist: Bool = UserDefaults.standard.customizeInfoPlist
     @State private var preferSheetForInfoPlistCustomization: Bool = UserDefaults.standard.preferSheetForInfoPlistCustomization
     @State private var customizeEntitlements: Bool = UserDefaults.standard.customizeEntitlements
@@ -77,6 +79,19 @@ struct UserCustomizationsView: View {
     @State private var editDialog: EditDialogState? = nil
     @State private var editingValueText: String = ""
 
+    /// Stored and applied on selection, but `Bundle.preferredLocalizations` is only consulted at
+    /// launch, so the picker prompts for the restart that actually makes it visible.
+    private var appLanguageBinding: Binding<AppLanguage> {
+        Binding(
+            get: { appLanguage },
+            set: { newValue in
+                appLanguage = newValue
+                newValue.apply()
+                showLanguageRestartConfirmation = true
+            }
+        )
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -105,6 +120,33 @@ struct UserCustomizationsView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
                     }
+                    .background(Color.settingsRowBackground)
+                    .cornerRadius(14)
+                }
+
+                // Section: LANGUAGE
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("LANGUAGE")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color.white.opacity(0.6))
+                        .padding(.horizontal, 16)
+
+                    HStack {
+                        Text("App Language")
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Picker("", selection: appLanguageBinding) {
+                            ForEach(AppLanguage.allCases) { (option: AppLanguage) in
+                                option.title.tag(option)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(Color.white.opacity(0.7))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .frame(minHeight: 50)
                     .background(Color.settingsRowBackground)
                     .cornerRadius(14)
                 }
@@ -479,6 +521,14 @@ struct UserCustomizationsView: View {
             }
         } message: {
             Text("Changing the Minimuxer backend requires restarting SideStore. If canceled, changes will not be saved.")
+        }
+        .alert("Restart Required", isPresented: $showLanguageRestartConfirmation) {
+            SwiftUI.Button("Restart Now", role: .destructive) {
+                exit(0)
+            }
+            SwiftUI.Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The new language is saved and takes effect the next time the app starts.")
         }
         .alert(pendingPreferIPAOngoing ? "Prefer Resigned IPA" : "Prefer App Bundle", isPresented: $showPreferIPAToggleAlert) {
             SwiftUI.Button("Switch") {
