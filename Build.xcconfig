@@ -22,6 +22,12 @@ MAIN_BUNDLE_IDENTIFIER[config=Release]          = $(BASE_BUNDLE_ID)
 APP_GROUP_IDENTIFIER                            = $(MAIN_BUNDLE_IDENTIFIER)
 ICLOUD_CONTAINER_IDENTIFIER                     = iCloud.$(ORG_IDENTIFIER).$(PROJECT_NAME)
 
+// String Catalogs also synthesise Swift symbols from every key. Nothing here uses them, and the
+// literal keys collide: "ACTIVE PROTOCOL" and "Active Protocol" would both generate the same
+// symbol, and a key like "Type" is refused for sitting on a Swift keyword. Turning generation off
+// keeps the tables and drops the errors.
+STRING_CATALOG_GENERATE_SYMBOLS = NO
+
 // Suppress noise from os activity in xcode console log for release builds
 DEBUG_ACTIVITY_MODE = disable
 
