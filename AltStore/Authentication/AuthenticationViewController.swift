@@ -30,6 +30,10 @@ final class AuthenticationViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+
+        // The headers and the Sign in button are literals baked into Authentication.storyboard, so
+        // they only reach the string catalog through the same second lookup the Settings rows use.
+        self.view.localizingStoryboardText()
         
         // fetch anisette servers asap when loading Auth Screen (if list is empty)
         Task {

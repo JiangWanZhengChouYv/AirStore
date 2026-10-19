@@ -496,6 +496,17 @@
         }
       }
     },
+    "APPLE ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple ID"
+          }
+        }
+      }
+    },
     "About": {
       "extractionState": "manual",
       "localizations": {
