@@ -1,4 +1,6 @@
 # AirStore
+<p align="center"><img src="assets/airstore-header-1280x640.png" alt="AirStore - on-device sideloading and refresh. No AltServer." width="860"></p>
+
 
 中文说明（与 [README.md](README.md) 同步维护，两份内容有出入时以英文为准）。
 

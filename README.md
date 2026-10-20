@@ -1,4 +1,6 @@
 # AirStore
+<p align="center"><img src="assets/airstore-header-1280x640.png" alt="AirStore - on-device sideloading and refresh. No AltServer." width="860"></p>
+
 
 **AirStore is a fork of SideStore that does not require an AltServer. Our primary goal is to resolve the notorious `-80045` authentication error for iOS 26.4 and above.**
 
