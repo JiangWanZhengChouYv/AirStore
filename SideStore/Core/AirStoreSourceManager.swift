@@ -34,8 +34,50 @@ import Foundation
             }
 
             let source = Source.make(name: "AirStore Official", groupID: identifier, sourceURL: sourceURL, context: context)
+
+            do
+            {
+                try context.save()
+            }
+            catch
+            {
+                debugLog("[AirStoreSourceManager] Could not save the new source: \(error.localizedDescription)")
+                return
+            }
+
+            // An entry with nothing behind it is worse than no entry: the Sources list would show a
+            // permanently empty "AirStore Official". Fetch it the way adding a source by hand does,
+            // and take the row back out if that fails.
+            let objectID = source.objectID
+
+            do
+            {
+                _ = try AppManager.shared.fetchSource(sourceURL: sourceURL, managedObjectContext: context) { result in
+                    switch result
+                    {
+                    case .success(let fetched):
+                        debugLog("[AirStoreSourceManager] Subscribed to the AirStore source with \(fetched.apps.count) apps.")
+
+                    case .failure(let error):
+                        debugLog("[AirStoreSourceManager] Fetching \(sourceURL.absoluteString) failed: \(error.localizedDescription). Removing the empty source.")
+                        unsubscribe(objectID)
+                    }
+                }
+            }
+            catch
+            {
+                debugLog("[AirStoreSourceManager] Could not start fetching the source: \(error.localizedDescription)")
+                unsubscribe(objectID)
+            }
+        }
+    }
+
+    private static func unsubscribe(_ objectID: NSManagedObjectID)
+    {
+        DatabaseManager.shared.persistentContainer.performBackgroundTask { context in
+            guard let object = try? context.existingObject(with: objectID), let source = object as? Source else { return }
+            context.delete(source)
             try? context.save()
-            debugLog("[AirStoreSourceManager] Subscribed to the AirStore source at \(sourceURL.absoluteString). Found \(source.identifier).")
         }
     }
 }
