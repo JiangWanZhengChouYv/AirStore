@@ -2091,6 +2091,17 @@
         }
       }
     },
+    "Blue": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蓝色"
+          }
+        }
+      }
+    },
     "Boolean Value": {
       "extractionState": "manual",
       "localizations": {
@@ -3836,6 +3847,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "DNS-SD 记录"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色"
           }
         }
       }
@@ -6755,6 +6777,17 @@
         }
       }
     },
+    "Honeydew": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蜜瓜绿"
+          }
+        }
+      }
+    },
     "How do I get a pairing file?": {
       "extractionState": "manual",
       "localizations": {
@@ -9164,6 +9197,17 @@
         }
       }
     },
+    "Original": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原始"
+          }
+        }
+      }
+    },
     "Other": {
       "extractionState": "manual",
       "localizations": {
@@ -9798,6 +9842,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "首选协议"
+          }
+        }
+      }
+    },
+    "Pride": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彩虹"
           }
         }
       }
@@ -11243,6 +11298,17 @@
         }
       }
     },
+    "Sandy": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沙色"
+          }
+        }
+      }
+    },
     "Save": {
       "extractionState": "manual",
       "localizations": {
@@ -12211,6 +12277,28 @@
         }
       }
     },
+    "Sky": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天蓝"
+          }
+        }
+      }
+    },
+    "Snow": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "雪白"
+          }
+        }
+      }
+    },
     "Social": {
       "extractionState": "manual",
       "localizations": {
@@ -12317,6 +12405,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "源决定 AirStore 里有哪些应用可以安装。添加的源越多，可用的应用就越多。\n\n不知道从哪开始？试试添加我们推荐的源！"
+          }
+        }
+      }
+    },
+    "Starburst": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "星爆"
           }
         }
       }
@@ -12493,6 +12592,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "存储探索错误"
+          }
+        }
+      }
+    },
+    "Storm": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "风暴"
           }
         }
       }
@@ -14180,6 +14290,17 @@
         }
       }
     },
+    "Vista": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "远景"
+          }
+        }
+      }
+    },
     "Visualization Mode": {
       "extractionState": "manual",
       "localizations": {
@@ -14319,6 +14440,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "Widget 日志"
+          }
+        }
+      }
+    },
+    "Winter": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "冰蓝"
           }
         }
       }
