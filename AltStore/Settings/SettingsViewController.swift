@@ -283,6 +283,13 @@ final class SettingsViewController: UITableViewController
             button.setImage(image, for: .normal)
             button.imageView?.contentMode = .scaleAspectFit
         }
+
+        // AirStore has no Mastodon, Threads or Twitter account. Hiding them inside the stack view
+        // leaves GitHub as the only icon in that row.
+        for upstream in [self.mastodonButton, self.threadsButton, self.twitterButton]
+        {
+            upstream?.isHidden = true
+        }
         
         configureReleaseChannelButton()
     }
@@ -508,7 +515,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Sign in with your Apple ID to download apps from SideStore.", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Sign in with your Apple ID to download apps from AirStore.", comment: "")
             }
             
         case .patreon:
@@ -518,7 +525,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Support the SideStore Team by following our socials or becoming a patron!", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Support the AirStore Team by following our socials or becoming a patron!", comment: "")
             }
 
         case .account:
@@ -535,7 +542,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow SideStore to keep your device awake during a refresh or install of any apps.", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow AirStore to keep your device awake during a refresh or install of any apps.", comment: "")
             }
             
         case .display:
@@ -545,7 +552,7 @@ private extension SettingsViewController
             }
             else
             {
-                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Personalize your SideStore experience by choosing an alternate app icon.", comment: "")
+                settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Personalize your AirStore experience by choosing an alternate app icon.", comment: "")
             }
             
             
@@ -794,7 +801,7 @@ private extension SettingsViewController
     func clearCache()
     {
         let makeCacheTitle: (String) -> String = { sizeString in
-            String(format: NSLocalizedString("Are you sure you want to clear SideStore's cache?\n\nCache Size: %@", comment: ""), sizeString)
+            String(format: NSLocalizedString("Are you sure you want to clear AirStore's cache?\n\nCache Size: %@", comment: ""), sizeString)
         }
         let alertController = UIAlertController(title: makeCacheTitle(NSLocalizedString("Calculating…", comment: "")),
                                                 message: NSLocalizedString("This will remove all temporary files as well as backups for uninstalled apps.", comment: ""),
@@ -914,7 +921,7 @@ private extension SettingsViewController
     
     @IBAction func followAltStoreGitHub()
     {
-        UIApplication.shared.open(AppConstants.URLs.sideStoreGitHub, options: [:])
+        UIApplication.shared.open(AppConstants.URLs.airStoreGitHub, options: [:])
     }
 }
 
@@ -1224,42 +1231,46 @@ extension SettingsViewController
             switch row
             {
             case .sendFeedback:
-                let alertController = UIAlertController(title: "Send Feedback", message: "Choose a method to send feedback:", preferredStyle: .actionSheet)
-                
-                // Option 1: GitHub
+                let alertController = UIAlertController(title: NSLocalizedString("Send Feedback", comment: ""),
+                                                        message: NSLocalizedString("Choose a method to send feedback:", comment: ""),
+                                                        preferredStyle: .actionSheet)
+
+                // AirStore is maintained by one person, so these are the only two channels. Upstream's
+                // Discord, Mastodon, Threads, Twitter and Patreon are deliberately not offered.
                 alertController.addAction(UIAlertAction(title: "GitHub", style: .default) { _ in
-                    self.openWebURL(AppConstants.URLs.sideStoreIssues, preferredTintColor: .altPrimary)
+                    self.openWebURL(AppConstants.URLs.airStoreIssues, preferredTintColor: .altPrimary)
                 })
-                
-                // Option 2: Discord
-                alertController.addAction(UIAlertAction(title: "Discord", style: .default) { _ in
-                    self.openWebURL(AppConstants.URLs.sideStoreDiscord, preferredTintColor: .altPrimary)
-                })
-                
+
                 #if !os(tvOS)
-                // Option 3: Mail
-                alertController.addAction(UIAlertAction(title: "Send Email", style: .default) { _ in
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Send Email", comment: ""), style: .default) { _ in
                     if MFMailComposeViewController.canSendMail() {
                         let mailViewController = MFMailComposeViewController()
                         mailViewController.mailComposeDelegate = self
-                        mailViewController.setToRecipients(["support@sidestore.io"])
+                        mailViewController.setToRecipients([AppConstants.URLs.supportEmail])
 
                         // TODO: MARKETING_VERSION is going to be set anyways so this needs to be fixed for beta
                         if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
-                            mailViewController.setSubject("SideStore Beta \(version) Feedback")
+                            mailViewController.setSubject("AirStore \(version) Feedback")
                         } else {
-                            mailViewController.setSubject("SideStore Beta Feedback")
+                            mailViewController.setSubject("AirStore Feedback")
                         }
 
                        self.present(mailViewController, animated: true, completion: nil)
                     } else {
-                      let toastView = ToastView(text: NSLocalizedString("Cannot Send Mail", comment: ""), detailText: nil)
-                      toastView.show(in: self)
+                      // mailto: is the only fallback that works when the device cannot send mail itself.
+                      if let url = URL(string: "mailto:" + AppConstants.URLs.supportEmail), UIApplication.shared.canOpenURL(url) {
+                          UIApplication.shared.open(url, options: [:])
+                      } else {
+                          let toastView = ToastView(text: NSLocalizedString("Cannot Send Mail", comment: ""),
+                                                    detailText: AppConstants.URLs.supportEmail)
+                          toastView.show(in: self)
+                      }
                     }
                 })
                 #endif
-                
+
                 // Cancel action
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel, handler: nil))
                 alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
                 
                 // For iPad: Set the source view if presenting on iPad to avoid crashes
@@ -1300,7 +1311,7 @@ extension SettingsViewController
                     selected: UserDefaults.standard.menuAnisetteURL,
                     onResetAdiPb: { [weak self] in
                         guard let self = self else { return }
-                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in SideStore.")
+                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in AirStore.")
                             .show(in: self)
                     }
                 )
