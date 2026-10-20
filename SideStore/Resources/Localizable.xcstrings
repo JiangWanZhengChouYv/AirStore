@@ -287,6 +287,17 @@
         }
       }
     },
+    "1.0.0": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1.0.0"
+          }
+        }
+      }
+    },
     "10 App IDs": {
       "extractionState": "manual",
       "localizations": {
@@ -294,6 +305,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "10 个 App ID"
+          }
+        }
+      }
+    },
+    "15.0": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15.0"
           }
         }
       }
@@ -309,6 +331,17 @@
         }
       }
     },
+    "6-digit PIN": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6 位 PIN"
+          }
+        }
+      }
+    },
     "7 DAYS": {
       "extractionState": "manual",
       "localizations": {
@@ -320,7 +353,7 @@
         }
       }
     },
-    "A one-time pairing file connects SideStore to %@ device services.": {
+    "A one-time pairing file connects AirStore to %@ device services.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -628,6 +661,17 @@
         }
       }
     },
+    "Active Local Certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地有效证书"
+          }
+        }
+      }
+    },
     "Active Network Interfaces": {
       "extractionState": "manual",
       "localizations": {
@@ -705,6 +749,28 @@
         }
       }
     },
+    "Add Custom Certificate ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加自定义证书 ID"
+          }
+        }
+      }
+    },
+    "Add Custom Device ID / UDID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加自定义设备 ID / UDID"
+          }
+        }
+      }
+    },
     "Add Custom Entitlement Key": {
       "extractionState": "manual",
       "localizations": {
@@ -771,6 +837,17 @@
         }
       }
     },
+    "Add Provisioning Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加描述文件"
+          }
+        }
+      }
+    },
     "Add Source": {
       "extractionState": "manual",
       "localizations": {
@@ -778,6 +855,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "添加源"
+          }
+        }
+      }
+    },
+    "Add item (e.g. group.id)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加项目（例如 group.id）"
           }
         }
       }
@@ -848,6 +936,160 @@
         }
       }
     },
+    "AirStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore"
+          }
+        }
+      }
+    },
+    "AirStore News": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 新闻"
+          }
+        }
+      }
+    },
+    "AirStore Ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 准备好了"
+          }
+        }
+      }
+    },
+    "AirStore Team": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 团队"
+          }
+        }
+      }
+    },
+    "AirStore Verbose Logging": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 详细日志"
+          }
+        }
+      }
+    },
+    "AirStore can only install marketplace apps that have been notarized by Apple.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "侧店只能安装已由苹果验证的市场应用。"
+          }
+        }
+      }
+    },
+    "AirStore cannot manage the existing certificate without owning its private key. The apps signed with the existing certificate will expire soon unless they are resigned and renewed explicitly by AirStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 无法管理现有的证书，除非拥有其私钥。使用现有证书签名的应用将在不久的将来过期，除非它们被 AirStore 显式重新签署并更新。"
+          }
+        }
+      }
+    },
+    "AirStore communicates with on-device services over a local loopback VPN. Enable LocalDevVPN before verifying.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 通过本地回环 VPN 与设备上的服务通信。在验证前，请先启用 LocalDevVPN。"
+          }
+        }
+      }
+    },
+    "AirStore does not have detailed information for these entitlements.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 不提供这些权限的详细信息。"
+          }
+        }
+      }
+    },
+    "AirStore requires an Apple ID to create development certificates and provisioning profiles for signing apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 需要 Apple ID 来创建签名应用所需的开发证书和描述文件。"
+          }
+        }
+      }
+    },
+    "AirStore setup is complete. You can now install and refresh apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "侧店设置已完成。您可以现在安装并刷新应用。"
+          }
+        }
+      }
+    },
+    "AirStore uses a pairing file (.mobiledevicepairing or .plist) generated by your computer to talk to %@ device services.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 使用由你的计算机生成的配对文件（.mobiledevicepairing 或 .plist）与 %@ 设备服务通信。"
+          }
+        }
+      }
+    },
+    "AirStore was installed by a different signing tool (like Xcode or AltStore).": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 是由其他签名工具（如 Xcode 或 AltStore）安装的。"
+          }
+        }
+      }
+    },
+    "AirStore's database could not be saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "AirStore 的数据库无法保存。"
+          }
+        }
+      }
+    },
     "All Apps": {
       "extractionState": "manual",
       "localizations": {
@@ -892,7 +1134,7 @@
         }
       }
     },
-    "All pairing files have been reset. Please restart SideStore.": {
+    "All pairing files have been reset. Please restart AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -1167,6 +1409,17 @@
         }
       }
     },
+    "App ID Identifier (e.g. R7V954WR9W)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App ID 标识符（例如 R7V954WR9W）"
+          }
+        }
+      }
+    },
     "App ID Information": {
       "extractionState": "manual",
       "localizations": {
@@ -1398,7 +1651,7 @@
         }
       }
     },
-    "Apps are refreshed in the background while you are on SideStore VPN!": {
+    "Apps are refreshed in the background while you are on AirStore VPN!": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -1409,7 +1662,7 @@
         }
       }
     },
-    "Are you sure you want to clear SideStore's cache?\n\nCache Size: %@": {
+    "Are you sure you want to clear AirStore's cache?\n\nCache Size: %@": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -1838,6 +2091,17 @@
         }
       }
     },
+    "Boolean Value": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "布尔值"
+          }
+        }
+      }
+    },
     "Browsable Domains": {
       "extractionState": "manual",
       "localizations": {
@@ -1871,7 +2135,7 @@
         }
       }
     },
-    "Browse and download apps directly from SideStore.": {
+    "Browse and download apps directly from AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -2036,7 +2300,7 @@
         }
       }
     },
-    "Cached unzipped app bundles stored in SideStore's private container. These are used during automatic background refreshes and resigns.": {
+    "Cached unzipped app bundles stored in AirStore's private container. These are used during automatic background refreshes and resigns.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -2333,7 +2597,7 @@
         }
       }
     },
-    "Changing the EMProxy setting requires restarting SideStore. If canceled, changes will not be saved.": {
+    "Changing the EMProxy setting requires restarting AirStore. If canceled, changes will not be saved.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -2344,7 +2608,7 @@
         }
       }
     },
-    "Changing the Minimuxer backend requires restarting SideStore. If canceled, changes will not be saved.": {
+    "Changing the Minimuxer backend requires restarting AirStore. If canceled, changes will not be saved.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -2872,6 +3136,17 @@
         }
       }
     },
+    "Connecting to Developer Portal...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在连接开发者门户…"
+          }
+        }
+      }
+    },
     "Connection": {
       "extractionState": "manual",
       "localizations": {
@@ -2971,7 +3246,7 @@
         }
       }
     },
-    "Control if SideStore automatically rotates/retries servers upon failure.": {
+    "Control if AirStore automatically rotates/retries servers upon failure.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -3235,7 +3510,7 @@
         }
       }
     },
-    "Could not connect to SideStore.": {
+    "Could not connect to AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -4016,7 +4291,7 @@
         }
       }
     },
-    "Deleting the database will remove all app entries and sources from SideStore.": {
+    "Deleting the database will remove all app entries and sources from AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -4258,6 +4533,28 @@
         }
       }
     },
+    "Device Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备类型"
+          }
+        }
+      }
+    },
+    "Device UDID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "设备 UDID"
+          }
+        }
+      }
+    },
     "Device registration pending": {
       "extractionState": "manual",
       "localizations": {
@@ -4412,6 +4709,17 @@
         }
       }
     },
+    "Display Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "显示模式"
+          }
+        }
+      }
+    },
     "Display Name": {
       "extractionState": "manual",
       "localizations": {
@@ -4434,7 +4742,7 @@
         }
       }
     },
-    "Do you want to clear all keychain items related to this SideStore instance?": {
+    "Do you want to clear all keychain items related to this AirStore instance?": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -4764,7 +5072,7 @@
         }
       }
     },
-    "Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow SideStore to keep your device awake during a refresh or install of any apps.": {
+    "Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow AirStore to keep your device awake during a refresh or install of any apps.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -4848,6 +5156,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "启用 iTunes 文件共享"
+          }
+        }
+      }
+    },
+    "Enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "启用"
           }
         }
       }
@@ -5061,7 +5380,7 @@
         }
       }
     },
-    "Error launching SideStore": {
+    "Error launching AirStore": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -5666,7 +5985,7 @@
         }
       }
     },
-    "Failed to Resign SideStore": {
+    "Failed to Resign AirStore": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -6040,6 +6359,28 @@
         }
       }
     },
+    "Filter & Sort": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "筛选 & 排序"
+          }
+        }
+      }
+    },
+    "Filter keys...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "筛选键…"
+          }
+        }
+      }
+    },
     "Finish Refresh": {
       "extractionState": "manual",
       "localizations": {
@@ -6073,13 +6414,13 @@
         }
       }
     },
-    "Follow SideStore for updates": {
+    "Follow AirStore for updates": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "关注 SideStore 获取更新"
+            "value": "关注 AirStore 获取更新"
           }
         }
       }
@@ -6139,7 +6480,7 @@
         }
       }
     },
-    "Free developer accounts are limited to 1 active signing certificate. Since the private key for the active certificate was not found on this device, SideStore will create a new certificate. This will automatically revoke the active certificate, which may disable installations on other devices or made by Xcode.": {
+    "Free developer accounts are limited to 1 active signing certificate. Since the private key for the active certificate was not found on this device, AirStore will create a new certificate. This will automatically revoke the active certificate, which may disable installations on other devices or made by Xcode.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -6311,6 +6652,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "分组"
+          }
+        }
+      }
+    },
+    "Group Certificates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "证书分组"
+          }
+        }
+      }
+    },
+    "Group Identifier": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Group 标识符"
           }
         }
       }
@@ -7129,6 +7492,17 @@
         }
       }
     },
+    "Items (comma-separated)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "项目（逗号分隔）"
+          }
+        }
+      }
+    },
     "JIT Enabled For %@": {
       "extractionState": "manual",
       "localizations": {
@@ -7426,7 +7800,7 @@
         }
       }
     },
-    "Launch SideStore": {
+    "Launch AirStore": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -7437,7 +7811,7 @@
         }
       }
     },
-    "Leave SideStore running in the background on your idevice.": {
+    "Leave AirStore running in the background on your idevice.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -7521,6 +7895,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "加载仅限"
+          }
+        }
+      }
+    },
+    "Loading Cache...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载缓存…"
           }
         }
       }
@@ -7624,6 +8009,17 @@
         }
       }
     },
+    "Logs Menu": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "日志菜单"
+          }
+        }
+      }
+    },
     "MACDIRTYCOW": {
       "extractionState": "manual",
       "localizations": {
@@ -7701,6 +8097,17 @@
         }
       }
     },
+    "Machine Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "机器名称"
+          }
+        }
+      }
+    },
     "Make sure LocalDevVPN is connected and running!": {
       "extractionState": "manual",
       "localizations": {
@@ -7741,6 +8148,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "管理"
+          }
+        }
+      }
+    },
+    "Manual Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "手动配置"
           }
         }
       }
@@ -7833,6 +8251,17 @@
         }
       }
     },
+    "My App": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "我的应用"
+          }
+        }
+      }
+    },
     "My Apps": {
       "extractionState": "manual",
       "localizations": {
@@ -7873,6 +8302,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "名称 (Z 到 A)"
+          }
+        }
+      }
+    },
+    "Name (e.g. My App)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称（例如 My App）"
+          }
+        }
+      }
+    },
+    "Name (e.g. Shared Storage)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "名称（例如 共享存储）"
           }
         }
       }
@@ -8328,7 +8779,7 @@
         }
       }
     },
-    "No valid migration path exists to downgrade this database. Please update SideStore or reset your database.": {
+    "No valid migration path exists to downgrade this database. Please update AirStore or reset your database.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -8548,7 +8999,7 @@
         }
       }
     },
-    "One or more apps in source “%@” are missing a marketplaceID. This most likely means they are not notarized, which is not supported by this version of SideStore.": {
+    "One or more apps in source “%@” are missing a marketplaceID. This most likely means they are not notarized, which is not supported by this version of AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -8592,6 +9043,17 @@
         }
       }
     },
+    "Open AirStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "打开 AirStore"
+          }
+        }
+      }
+    },
     "Open Apple Account": {
       "extractionState": "manual",
       "localizations": {
@@ -8621,17 +9083,6 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "打开文件在 place"
-          }
-        }
-      }
-    },
-    "Open SideStore": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "打开 AirStore"
           }
         }
       }
@@ -8687,6 +9138,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "可选"
+          }
+        }
+      }
+    },
+    "Options": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "选项"
           }
         }
       }
@@ -8977,6 +9439,17 @@
         }
       }
     },
+    "Parsing Mach-O...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在解析 Mach-O…"
+          }
+        }
+      }
+    },
     "Paste your PEM-formatted private key below, or import it from a text file.": {
       "extractionState": "manual",
       "localizations": {
@@ -8984,6 +9457,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "请粘贴您的 PEM 格式私钥 below，或从文本文件中导入。"
+          }
+        }
+      }
+    },
+    "Performing Diagnostic Check...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "执行诊断检查..."
           }
         }
       }
@@ -9032,7 +9516,7 @@
         }
       }
     },
-    "Personalize your SideStore experience by choosing an alternate app icon.": {
+    "Personalize your AirStore experience by choosing an alternate app icon.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -9406,6 +9890,28 @@
         }
       }
     },
+    "Profile Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描述文件名称"
+          }
+        }
+      }
+    },
+    "Profile Type": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描述文件类型"
+          }
+        }
+      }
+    },
     "Profiles": {
       "extractionState": "manual",
       "localizations": {
@@ -9655,6 +10161,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "JSON 原始"
+          }
+        }
+      }
+    },
+    "Reading CodeResources...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取 CodeResources…"
           }
         }
       }
@@ -10022,7 +10539,7 @@
         }
       }
     },
-    "Remove “%@” from SideStore?": {
+    "Remove “%@” from AirStore?": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -10231,6 +10748,17 @@
         }
       }
     },
+    "Reset to AirStore Classic": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重置为 AirStore 经典"
+          }
+        }
+      }
+    },
     "Reset to Defaults": {
       "extractionState": "manual",
       "localizations": {
@@ -10253,18 +10781,7 @@
         }
       }
     },
-    "Reset to SideStore Classic": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "重置为 SideStore 经典"
-          }
-        }
-      }
-    },
-    "Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart SideStore.": {
+    "Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -10297,6 +10814,17 @@
         }
       }
     },
+    "Resign AirStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "重新签名 AirStore"
+          }
+        }
+      }
+    },
     "Resign Later": {
       "extractionState": "manual",
       "localizations": {
@@ -10315,17 +10843,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "立即重签名"
-          }
-        }
-      }
-    },
-    "Resign SideStore": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "重新签名 AirStore"
           }
         }
       }
@@ -10814,6 +11331,17 @@
         }
       }
     },
+    "Search": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "搜索"
+          }
+        }
+      }
+    },
     "Search FAQ": {
       "extractionState": "manual",
       "localizations": {
@@ -10821,6 +11349,61 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "查找常见问题"
+          }
+        }
+      }
+    },
+    "Search entitlements...": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索权限…"
+          }
+        }
+      }
+    },
+    "Search keys": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "搜索关键词"
+          }
+        }
+      }
+    },
+    "Searching for domains…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在搜索域名…"
+          }
+        }
+      }
+    },
+    "Searching for instances…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在搜索实例…"
+          }
+        }
+      }
+    },
+    "Searching for service types…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在搜索服务类型…"
           }
         }
       }
@@ -11386,160 +11969,6 @@
         }
       }
     },
-    "SideStore": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SideStore"
-          }
-        }
-      }
-    },
-    "SideStore News": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "SideStore 新闻"
-          }
-        }
-      }
-    },
-    "SideStore Ready": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "AirStore 准备好了"
-          }
-        }
-      }
-    },
-    "SideStore Team": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "SideStore 团队"
-          }
-        }
-      }
-    },
-    "SideStore Verbose Logging": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AirStore 详细日志"
-          }
-        }
-      }
-    },
-    "SideStore can only install marketplace apps that have been notarized by Apple.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "侧店只能安装已由苹果验证的市场应用。"
-          }
-        }
-      }
-    },
-    "SideStore cannot manage the existing certificate without owning its private key. The apps signed with the existing certificate will expire soon unless they are resigned and renewed explicitly by SideStore.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "AirStore 无法管理现有的证书，除非拥有其私钥。使用现有证书签名的应用将在不久的将来过期，除非它们被 AirStore 显式重新签署并更新。"
-          }
-        }
-      }
-    },
-    "SideStore communicates with on-device services over a local loopback VPN. Enable LocalDevVPN before verifying.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "AirStore 通过本地回环 VPN 与设备上的服务通信。在验证前，请先启用 LocalDevVPN。"
-          }
-        }
-      }
-    },
-    "SideStore does not have detailed information for these entitlements.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "AirStore 不提供这些权限的详细信息。"
-          }
-        }
-      }
-    },
-    "SideStore requires an Apple ID to create development certificates and provisioning profiles for signing apps.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AirStore 需要 Apple ID 来创建签名应用所需的开发证书和描述文件。"
-          }
-        }
-      }
-    },
-    "SideStore setup is complete. You can now install and refresh apps.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "侧店设置已完成。您可以现在安装并刷新应用。"
-          }
-        }
-      }
-    },
-    "SideStore uses a pairing file (.mobiledevicepairing or .plist) generated by your computer to talk to %@ device services.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "AirStore 使用由你的计算机生成的配对文件（.mobiledevicepairing 或 .plist）与 %@ 设备服务通信。"
-          }
-        }
-      }
-    },
-    "SideStore was installed by a different signing tool (like Xcode or AltStore).": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AirStore 是由其他签名工具（如 Xcode 或 AltStore）安装的。"
-          }
-        }
-      }
-    },
-    "SideStore's database could not be saved.": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "AirStore 的数据库无法保存。"
-          }
-        }
-      }
-    },
     "SideStore.conf missing!": {
       "extractionState": "manual",
       "localizations": {
@@ -11639,7 +12068,7 @@
         }
       }
     },
-    "Sign in with your Apple ID to download apps from SideStore.": {
+    "Sign in with your Apple ID to download apps from AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -11826,6 +12255,17 @@
         }
       }
     },
+    "Sort Certificates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "证书排序"
+          }
+        }
+      }
+    },
     "Sort by…": {
       "extractionState": "manual",
       "localizations": {
@@ -11870,7 +12310,7 @@
         }
       }
     },
-    "Sources determine what apps are available in SideStore. The more sources you add, the better your SideStore experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!": {
+    "Sources determine what apps are available in AirStore. The more sources you add, the better your AirStore experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12090,13 +12530,13 @@
         }
       }
     },
-    "Support the SideStore Team by following our socials or becoming a patron!": {
+    "Support the AirStore Team by following our socials or becoming a patron!": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "关注我们的社交账号或成为赞助者，支持 SideStore 团队！"
+            "value": "关注我们的社交账号或成为赞助者，支持 AirStore 团队！"
           }
         }
       }
@@ -12218,6 +12658,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "点击查看源错误。"
+          }
+        }
+      }
+    },
+    "Team App ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "团队应用 ID"
           }
         }
       }
@@ -12365,7 +12816,7 @@
         }
       }
     },
-    "The database on disk was created with a newer version of SideStore. Downgrading the database schema is not supported. Please update SideStore or reset your database.": {
+    "The database on disk was created with a newer version of AirStore. Downgrading the database schema is not supported. Please update AirStore or reset your database.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12376,7 +12827,7 @@
         }
       }
     },
-    "The default SideStore source cannot be removed.": {
+    "The default AirStore source cannot be removed.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12464,7 +12915,7 @@
         }
       }
     },
-    "The more you open SideStore, the more chances it's given to refresh apps in the background.": {
+    "The more you open AirStore, the more chances it's given to refresh apps in the background.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12475,7 +12926,7 @@
         }
       }
     },
-    "The more you use SideStore, the more often iOS will allow it to refresh apps in the background.": {
+    "The more you use AirStore, the more often iOS will allow it to refresh apps in the background.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12530,7 +12981,7 @@
         }
       }
     },
-    "The provisioning profile for SideStore is missing or invalid.": {
+    "The provisioning profile for AirStore is missing or invalid.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12552,7 +13003,7 @@
         }
       }
     },
-    "The signing certificate could not be extracted from SideStore's binary.": {
+    "The signing certificate could not be extracted from AirStore's binary.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12563,7 +13014,7 @@
         }
       }
     },
-    "The signing certificate used to install SideStore has expired.": {
+    "The signing certificate used to install AirStore has expired.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12574,7 +13025,7 @@
         }
       }
     },
-    "The signing certificate used to install SideStore was revoked on the Apple Developer portal.": {
+    "The signing certificate used to install AirStore was revoked on the Apple Developer portal.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12607,7 +13058,7 @@
         }
       }
     },
-    "The source “%@” contains notarized apps, which are not supported by this version of SideStore.": {
+    "The source “%@” contains notarized apps, which are not supported by this version of AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12618,7 +13069,7 @@
         }
       }
     },
-    "The source “%@” has been blocked by SideStore for security reasons.": {
+    "The source “%@” has been blocked by AirStore for security reasons.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12629,7 +13080,7 @@
         }
       }
     },
-    "The source “%@” is not supported by this version of SideStore.": {
+    "The source “%@” is not supported by this version of AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12651,7 +13102,7 @@
         }
       }
     },
-    "These are permissions required by “%@” that SideStore does not recognize. Make sure you understand them before continuing.": {
+    "These are permissions required by “%@” that AirStore does not recognize. Make sure you understand them before continuing.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12662,7 +13113,7 @@
         }
       }
     },
-    "These permissions must be declared by the source in order for SideStore to install this app:": {
+    "These permissions must be declared by the source in order for AirStore to install this app:": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12706,7 +13157,7 @@
         }
       }
     },
-    "This reinstallation registers the new signature with the OS and will terminate SideStore. You can reopen SideStore immediately once reinstallation is completed.": {
+    "This reinstallation registers the new signature with the OS and will terminate AirStore. You can reopen AirStore immediately once reinstallation is completed.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12739,7 +13190,7 @@
         }
       }
     },
-    "This will remove “%@” from SideStore and erase any backup data for this app.": {
+    "This will remove “%@” from AirStore and erase any backup data for this app.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12761,7 +13212,7 @@
         }
       }
     },
-    "This will replace any previous backups. Please leave SideStore open until the backup is complete.": {
+    "This will replace any previous backups. Please leave AirStore open until the backup is complete.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12794,7 +13245,7 @@
         }
       }
     },
-    "This will sign you out of Apple ID in SideStore and clear the provisioned adi.pb data from your Keychain. Your active signing certificate will be preserved.": {
+    "This will sign you out of Apple ID in AirStore and clear the provisioned adi.pb data from your Keychain. Your active signing certificate will be preserved.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -12838,7 +13289,7 @@
         }
       }
     },
-    "To ensure you can continue using SideStore, \nthe app must be reinstalled now using the new certificate. Otherwise, you will be unable to refresh or open SideStore once the old certificate expires.": {
+    "To ensure you can continue using AirStore, \nthe app must be reinstalled now using the new certificate. Otherwise, you will be unable to refresh or open AirStore once the old certificate expires.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -13080,7 +13531,7 @@
         }
       }
     },
-    "Unable to Launch SideStore": {
+    "Unable to Launch AirStore": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -13329,6 +13780,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "上传 via 网络"
+          }
+        }
+      }
+    },
+    "Use Local VPN": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用本地 VPN"
           }
         }
       }
@@ -13641,6 +14103,17 @@
         }
       }
     },
+    "View Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "视图模式"
+          }
+        }
+      }
+    },
     "View More Details": {
       "extractionState": "manual",
       "localizations": {
@@ -13707,6 +14180,17 @@
         }
       }
     },
+    "Visualization Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "needs-review",
+            "value": "可视化模式"
+          }
+        }
+      }
+    },
     "WARNING: Outdated anisette server": {
       "extractionState": "manual",
       "localizations": {
@@ -13762,7 +14246,7 @@
         }
       }
     },
-    "Welcome to SideStore": {
+    "Welcome to AirStore": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -13773,7 +14257,7 @@
         }
       }
     },
-    "Welcome to SideStore.": {
+    "Welcome to AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -13806,7 +14290,7 @@
         }
       }
     },
-    "When SideStore triggers JIT, SideJITServer sends the debug attach signal and enables Just-In-Time execution instantly.": {
+    "When AirStore triggers JIT, SideJITServer sends the debug attach signal and enables Just-In-Time execution instantly.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -14004,7 +14488,7 @@
         }
       }
     },
-    "You can enter SideStore, but a pairing file is required before you can install or refresh apps.": {
+    "You can enter AirStore, but a pairing file is required before you can install or refresh apps.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
@@ -14132,6 +14616,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "重复版本"
+          }
+        }
+      }
+    },
+    "e.g. CFBundleURLTypes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "例如 CFBundleURLTypes"
+          }
+        }
+      }
+    },
+    "e.g. com.apple.security.application-groups": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "例如 com.apple.security.application-groups"
           }
         }
       }
@@ -14290,7 +14796,7 @@
         }
       }
     },
-    "“%@” could not be added to SideStore.": {
+    "“%@” could not be added to AirStore.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {

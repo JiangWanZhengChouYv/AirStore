@@ -462,7 +462,9 @@ struct InfoRow: View {
     
     var body: some View {
         HStack {
-            Text(label)
+            // Labels are literals at the call sites, values are device data, so only the label is
+            // looked up.
+            Text(NSLocalizedString(label, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
@@ -481,7 +483,7 @@ struct ProfileInfoRow: View {
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(NSLocalizedString(label, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()

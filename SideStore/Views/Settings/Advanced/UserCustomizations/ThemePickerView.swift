@@ -61,7 +61,7 @@ struct ThemePickerView: View {
             VStack(spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("SideStore")
+                        Text("AirStore")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.white)
                         Text("v0.6.0 • Installed")
@@ -234,7 +234,7 @@ struct ThemePickerView: View {
         }) {
             HStack {
                 Spacer()
-                Text("Reset to SideStore Classic")
+                Text("Reset to AirStore Classic")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.red)
                 Spacer()
@@ -251,7 +251,7 @@ struct ThemePickerView: View {
 
     private func metricRow(label: String, value: String) -> some View {
         HStack {
-            Text(label)
+            Text(NSLocalizedString(label, comment: ""))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(Color.white.opacity(0.8))
             Spacer()

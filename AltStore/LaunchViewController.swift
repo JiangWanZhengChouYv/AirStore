@@ -96,7 +96,7 @@ final class LaunchViewController: UIViewController {
     @MainActor
     func displayError(_ msg: String) {
         debugLog("[SideStore] \(msg)")
-        let alert = UIAlertController(title: "Error launching SideStore", message: msg, preferredStyle: .alert)
+        let alert = UIAlertController(title: "Error launching AirStore", message: msg, preferredStyle: .alert)
         self.present(alert, animated: true)
     }
     
@@ -154,7 +154,7 @@ final class LaunchViewController: UIViewController {
         }
 
         let nsError = error as NSError
-        let title = nsError.userInfo[NSLocalizedFailureErrorKey] as? String ?? NSLocalizedString("Unable to Launch SideStore", comment: "")
+        let title = nsError.userInfo[NSLocalizedFailureErrorKey] as? String ?? NSLocalizedString("Unable to Launch AirStore", comment: "")
         let desc = ([nsError.debugDescription] + nsError.underlyingErrors.map { ($0 as NSError).debugDescription }).joined(separator: "\n\n")
         return (title: title, message: desc, extraActions: [])
     }

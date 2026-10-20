@@ -49,7 +49,33 @@ LITERAL_PATTERNS = [
     re.compile(r'subtitle:\s*"((?:[^"\\]|\\.)+)"'),
     re.compile(r'message:\s*"((?:[^"\\]|\\.)+)"'),
     re.compile(r'\bNSLocalizedString\(\s*"((?:[^"\\]|\\.)+)"'),
+    # More SwiftUI APIs whose first argument reaches the catalog as a LocalizedStringKey.
+    re.compile(r'\bTextField\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bToggle\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bPicker\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bStepper\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bMenu\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bProgressView\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bLabeledContent\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bSection\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bconfirmationDialog\(\s*"((?:[^"\\]|\\.)+)"'),
+    # Project helpers that take a plain String but are made to look it up at their one render point
+    # (ToastView, InfoRow, metricRow, sectionHeader), so their literals are catalog keys too. These
+    # sit on argument names that also carry non-UI strings, so they are matched separately and put
+    # through IDENTIFIER_SHAPED.
 ]
+
+BROAD_PATTERNS = [
+    re.compile(r'\blabel:\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\btext:\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bdetailText:\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bsectionHeader\(\s*"((?:[^"\\]|\\.)+)"'),
+    re.compile(r'\bshowToastMessage\(\s*"((?:[^"\\]|\\.)+)"'),
+]
+
+# Rejecting identifier shapes (SF Symbol names, file names, camelCase arguments) keeps sentences and
+# single words like "Cancel".
+IDENTIFIER_SHAPED = re.compile(r"[./_\\]|%[K@ldsf]|^[a-z]+[A-Z]|\.(app|ipa|json|plist|nib|storyboard)$")
 
 # Left alone on purpose: brand and protocol names that would read worse translated.
 KEEP_AS_IS = re.compile(r"^(https?://|\(.*\)$)")

@@ -82,7 +82,7 @@ struct DeveloperOptionsView: View {
                         
                         divider
                         
-                        toggleRow(title: "SideStore Verbose Logging", isOn: Binding(
+                        toggleRow(title: "AirStore Verbose Logging", isOn: Binding(
                             get: { isSideStoreVerboseLoggingEnabled },
                             set: { newValue in
                                 isSideStoreVerboseLoggingEnabled = newValue
@@ -649,7 +649,7 @@ struct DeveloperOptionsView: View {
             }
             SwiftUI.Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Deleting the database will remove all app entries and sources from SideStore.")
+            Text("Deleting the database will remove all app entries and sources from AirStore.")
         }
         .alert("Clear Refresh Attempts", isPresented: $showClearRefreshAttemptsConfirmation) {
             SwiftUI.Button("Clear", role: .destructive) {
@@ -676,7 +676,7 @@ struct DeveloperOptionsView: View {
             }
             SwiftUI.Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Do you want to clear all keychain items related to this SideStore instance?")
+            Text("Do you want to clear all keychain items related to this AirStore instance?")
         }
         .alert("Dump Profiles", isPresented: $showDumpProfilesAlert) {
             SwiftUI.Button("OK", role: .cancel) {}
@@ -714,7 +714,7 @@ struct DeveloperOptionsView: View {
                 do {
                     try await ImportExport.importAccountJSON(from: url)
                     let email = AuthManager.shared.currentAppleID ?? ""
-                    let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+                    let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(email)'!", comment: ""), detailText: "AirStore should be fully operational!")
                     toastView.show(in: top)
                 } catch {
                     let toastView = ToastView(text: NSLocalizedString("Failed to import account JSON!", comment: ""), detailText: error.localizedDescription)
@@ -735,7 +735,7 @@ struct DeveloperOptionsView: View {
                 do {
                     try await ImportExport.importAccountJSON(from: url)
                     let email = AuthManager.shared.currentAppleID ?? ""
-                    let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+                    let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(email)'!", comment: ""), detailText: "AirStore should be fully operational!")
                     toastView.show(in: top)
                 } catch {
                     let toastView = ToastView(text: NSLocalizedString("Failed to import account JSON!", comment: ""), detailText: error.localizedDescription)

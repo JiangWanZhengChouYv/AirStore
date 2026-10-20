@@ -84,8 +84,11 @@ class ToastView: UIControl
 
         self.initialize()
 
-        self.textLabel.text = text
-        self.detailTextLabel.text = detailedText
+        // Every toast in the app goes through this initializer, so it is the one place that can turn
+        // a baked-in English literal into a catalog lookup. Strings built from device data (app
+        // names, bundle ids) have no entry and come back unchanged.
+        self.textLabel.text = NSLocalizedString(text, comment: "")
+        self.detailTextLabel.text = detailedText.map { NSLocalizedString($0, comment: "") }
 
         self.backgroundColor = .altPrimary
         self.textLabel.textColor = .white

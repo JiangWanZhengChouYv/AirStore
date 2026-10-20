@@ -717,7 +717,7 @@ struct AnisetteDataView: View {
     }
     
     private func sectionHeader(_ title: String) -> some View {
-        Text(title)
+        Text(NSLocalizedString(title, comment: ""))
             .font(.system(size: 13, weight: .semibold))
             .foregroundColor(Color.white.opacity(0.6))
             .padding(.horizontal, 16)
