@@ -171,7 +171,6 @@ final class SettingsViewController: UITableViewController
     {
         super.init(coder: aDecoder)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(SettingsViewController.openPatreonSettings(_:)), name: AppDelegate.openPatreonSettingsDeepLinkNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(SettingsViewController.openErrorLog(_:)), name: ToastView.openErrorLogNotification, object: nil)
     }
     
@@ -625,6 +624,11 @@ private extension SettingsViewController
     {
         switch section
         {
+        case .patreon:
+            // AirStore takes no Patreon money; the screen only pointed at upstream's page. Hiding the
+            // section collapses its rows, header and footer through the same path macDirtyCow uses.
+            return true
+
         // case .macDirtyCow:
         //     let isHidden = !(UserDefaults.standard.isCowExploitSupported && UserDefaults.standard.isDebugModeEnabled)
         //     return isHidden
@@ -927,16 +931,6 @@ private extension SettingsViewController
 
 private extension SettingsViewController
 {
-    @objc func openPatreonSettings(_ notification: Notification)
-    {
-        guard self.presentedViewController == nil else { return }
-                
-        UIView.performWithoutAnimation {
-            self.navigationController?.popViewController(animated: false)
-            self.performSegue(withIdentifier: "showPatreon", sender: nil)
-        }
-    }
-
     @objc func openErrorLog(_: Notification) {
         guard self.presentedViewController == nil else { return }
 
