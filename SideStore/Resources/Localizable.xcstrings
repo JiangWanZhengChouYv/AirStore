@@ -7569,6 +7569,17 @@
         }
       }
     },
+    "Keep All": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部保留"
+          }
+        }
+      }
+    },
     "Keep Anisette data": {
       "extractionState": "manual",
       "localizations": {
@@ -7597,7 +7608,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "保持应用扩展 (为每个扩展注册应用 ID )"
+            "value": "保留应用扩展（为每个扩展注册 App ID）"
           }
         }
       }
@@ -7608,7 +7619,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "保持应用扩展（使用主配置文件）"
+            "value": "保留应用扩展（使用主描述文件）"
           }
         }
       }
@@ -10000,6 +10011,17 @@
         }
       }
     },
+    "Prompt User": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "询问我"
+          }
+        }
+      }
+    },
     "Prompt for confirmation before installing or importing an app": {
       "extractionState": "manual",
       "localizations": {
@@ -10528,13 +10550,24 @@
         }
       }
     },
+    "Remove All": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部移除"
+          }
+        }
+      }
+    },
     "Remove App Extensions": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "卸载应用扩展"
+            "value": "移除应用扩展"
           }
         }
       }
@@ -13901,6 +13934,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用本地 VPN"
+          }
+        }
+      }
+    },
+    "Use Main Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用主描述文件"
           }
         }
       }

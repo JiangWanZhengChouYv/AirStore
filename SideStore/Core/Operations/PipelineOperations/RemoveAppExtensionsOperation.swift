@@ -21,13 +21,13 @@ public enum AppExtensionCustomization: String, CaseIterable, Identifiable, Senda
     public var displayName: String {
         switch self {
         case .promptUser:
-            return "Prompt User"
+            return NSLocalizedString("Prompt User", comment: "")
         case .removeAll:
-            return "Remove All"
+            return NSLocalizedString("Remove All", comment: "")
         case .keepAll:
-            return "Keep All"
+            return NSLocalizedString("Keep All", comment: "")
         case .useMainProfile:
-            return "Use Main Profile"
+            return NSLocalizedString("Use Main Profile", comment: "")
         }
     }
 
