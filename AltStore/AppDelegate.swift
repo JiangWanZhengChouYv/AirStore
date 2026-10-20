@@ -133,7 +133,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         AltSign.setLogging(UserDefaults.standard.isAltSignVerboseLoggingEnabled)
         minimuxerSetLogging(UserDefaults.standard.isMinimuxerVerboseLoggingEnabled)
         SideSignConfigManager.shared.applyConfigToDeveloperPortal()
-        AirStoreSourceManager.subscribeIfNeeded()
 
         // Override point for customization after application launch.
 //        UserDefaults.standard.setValue(true, forKey: "com.apple.CoreData.MigrationDebug")
@@ -179,6 +178,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 debugLog("Starting DatabaseManager...")
                 try await DatabaseManager.shared.start()
                 debugLog("Started DatabaseManager.")
+
+                // Subscribing writes to CoreData, so it can only run once the store is actually open.
+                await MainActor.run { AirStoreSourceManager.subscribeIfNeeded() }
                 
                 debugLog("Reconciling any staged drafts started...")
                 await Self.reconcileSelfReinstallationIfNeeded()

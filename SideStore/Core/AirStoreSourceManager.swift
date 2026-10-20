@@ -23,17 +23,19 @@ import Foundation
 
     @objc public static func subscribeIfNeeded()
     {
-        let context = DatabaseManager.shared.persistentContainer.viewContext
+        // A background context, not viewContext: the first version of this ran in didFinishLaunching,
+        // before DatabaseManager.start() had opened the store, and asking for viewContext there makes
+        // CoreData load the store out of turn.
+        DatabaseManager.shared.persistentContainer.performBackgroundTask { context in
+            guard let identifier = try? Source.sourceID(from: sourceURL) else { return }
+            guard Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), identifier), in: context) == nil
+            else {
+                return
+            }
 
-        let identifier = try! Source.sourceID(from: sourceURL)
-        guard Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), identifier), in: context) == nil
-        else {
-            return
+            let source = Source.make(name: "AirStore Official", groupID: identifier, sourceURL: sourceURL, context: context)
+            try? context.save()
+            debugLog("[AirStoreSourceManager] Subscribed to the AirStore source at \(sourceURL.absoluteString). Found \(source.identifier).")
         }
-
-        let source = Source.make(name: "AirStore Official", groupID: identifier, sourceURL: sourceURL, context: context)
-        debugLog("[AirStoreSourceManager] Subscribed to the AirStore source at \(sourceURL.absoluteString). Found \(source.identifier).")
-
-        try? context.save()
     }
 }
