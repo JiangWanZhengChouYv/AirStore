@@ -65,6 +65,13 @@ LITERAL_PATTERNS = [
     # through IDENTIFIER_SHAPED.
 ]
 
+# title: isFree ? "A" : "B" -- both branches are screen text, and a pattern that wants a literal
+# right after the argument name misses all of them.
+TERNARY_PATTERNS = [
+    re.compile(r'\b(?:title|subtitle|message|text|placeholder|label)\s*:\s*[^"\n]{0,80}\?'
+               r'\s*"((?:[^"\\]|\\.)+)"\s*:\s*"((?:[^"\\]|\\.)+)"'),
+]
+
 BROAD_PATTERNS = [
     re.compile(r'\blabel:\s*"((?:[^"\\]|\\.)+)"'),
     re.compile(r'\btext:\s*"((?:[^"\\]|\\.)+)"'),
@@ -147,6 +154,14 @@ def literals_in_repo():
                         if KEEP_AS_IS.match(literal):
                             continue
                         if INTERPOLATION.search(literal):
+                            continue
+                        found.setdefault(swift_key(literal), []).append(
+                            os.path.relpath(path, ROOT)
+                        )
+            for pattern in TERNARY_PATTERNS:
+                for branches in pattern.findall(text):
+                    for literal in branches:
+                        if len(literal) < 3 or INTERPOLATION.search(literal):
                             continue
                         found.setdefault(swift_key(literal), []).append(
                             os.path.relpath(path, ROOT)

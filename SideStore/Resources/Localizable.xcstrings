@@ -1882,6 +1882,17 @@
         }
       }
     },
+    "Automatically fix App Group casing mismatches": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动修正 App Group 大小写不一致"
+          }
+        }
+      }
+    },
     "Automatically open apps after installation completes": {
       "extractionState": "manual",
       "localizations": {
@@ -4089,6 +4100,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "删除应用组?"
+          }
+        }
+      }
+    },
+    "Delete App ID?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 App ID？"
           }
         }
       }
@@ -8295,6 +8317,17 @@
         }
       }
     },
+    "Mounted": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已挂载"
+          }
+        }
+      }
+    },
     "My App": {
       "extractionState": "manual",
       "localizations": {
@@ -8951,6 +8984,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "未配置"
+          }
+        }
+      }
+    },
+    "Not Mounted (JIT unavailable)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未挂载（无法开启 JIT）"
           }
         }
       }
@@ -10700,6 +10744,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "需要在 iOS 17+上启用 JIT"
+          }
+        }
+      }
+    },
+    "Required for free developer accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费开发者账号需要这一项"
           }
         }
       }
@@ -14385,6 +14440,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "警告"
+          }
+        }
+      }
+    },
+    "Warning: Delete App ID?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告：要删除 App ID 吗？"
           }
         }
       }
