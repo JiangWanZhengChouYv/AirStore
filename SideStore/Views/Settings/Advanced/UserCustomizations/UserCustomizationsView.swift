@@ -584,12 +584,12 @@ struct UserCustomizationsView: View {
     private func toggleRow(title: String, subtitle: String? = nil, isOn: Binding<Bool>) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(NSLocalizedString(title, comment: ""))
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
                     .fixedSize(horizontal: false, vertical: true)
                 if let subtitle = subtitle {
-                    Text(subtitle)
+                    Text(NSLocalizedString(subtitle, comment: ""))
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color.white.opacity(0.6))
                         .fixedSize(horizontal: false, vertical: true)
@@ -616,12 +616,12 @@ struct UserCustomizationsView: View {
         SwiftUI.Button(action: onTap) {
             VStack(alignment: .leading, spacing: 6) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
+                    Text(NSLocalizedString(title, comment: ""))
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .fixedSize(horizontal: false, vertical: true)
                     if let subtitle = subtitle {
-                        Text(subtitle)
+                        Text(NSLocalizedString(subtitle, comment: ""))
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color.white.opacity(0.6))
                             .fixedSize(horizontal: false, vertical: true)
@@ -629,7 +629,7 @@ struct UserCustomizationsView: View {
                 }
 
                 HStack {
-                    Text(value.isEmpty ? placeholder : (unit != nil ? "\(value) \(unit!)" : value))
+                    Text(value.isEmpty ? NSLocalizedString(placeholder, comment: "") : (unit != nil ? "\(value) \(unit!)" : value))
                         .font(.system(size: 15))
                         .foregroundColor(value.isEmpty ? Color.white.opacity(0.3) : .white)
                     Spacer()
