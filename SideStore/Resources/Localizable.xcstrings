@@ -1854,8 +1854,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "Auto-Fix 应用组 ID"
+            "state": "translated",
+            "value": "自动修正 App Group ID"
           }
         }
       }
@@ -1887,8 +1887,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "自动打开安装完成后的应用"
+            "state": "translated",
+            "value": "安装完成后自动打开 App"
           }
         }
       }
@@ -3713,8 +3713,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "自定义应用图标"
+            "state": "translated",
+            "value": "自定义 App 图标"
           }
         }
       }
@@ -3724,8 +3724,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "自定义 AppID"
+            "state": "translated",
+            "value": "定制 App ID"
           }
         }
       }
@@ -3735,8 +3735,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "定制 entitlements"
+            "state": "translated",
+            "value": "定制权限（entitlements）"
           }
         }
       }
@@ -3768,8 +3768,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "定制 provisioning 文件"
+            "state": "translated",
+            "value": "定制描述文件"
           }
         }
       }
@@ -5759,8 +5759,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "导出替换 IPA"
+            "state": "translated",
+            "value": "导出重签名 IPA"
           }
         }
       }
@@ -9796,8 +9796,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "优选 IPA (速度) vs App (存储) 效率"
+            "state": "translated",
+            "value": "优先用 IPA（更快），而不是 App（更省存储）"
           }
         }
       }
@@ -9807,8 +9807,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "弃置 resign IPA"
+            "state": "translated",
+            "value": "优先使用重签名 IPA"
           }
         }
       }
@@ -9818,8 +9818,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "优选 entitlements 式设置"
+            "state": "translated",
+            "value": "权限改用表单编辑"
           }
         }
       }
@@ -9829,8 +9829,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "偏好表单 for Info.plist"
+            "state": "translated",
+            "value": "Info.plist 改用表单编辑"
           }
         }
       }
@@ -10027,8 +10027,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "提示确认是否安装或导入应用"
+            "state": "translated",
+            "value": "安装或导入 App 前先确认一次"
           }
         }
       }
@@ -10038,8 +10038,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "提示选择自定义图标后安装"
+            "state": "translated",
+            "value": "安装前提示选择自定义图标"
           }
         }
       }
@@ -10049,8 +10049,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "提示在安装前选择一个 provisioning profile"
+            "state": "translated",
+            "value": "安装前提示选择描述文件"
           }
         }
       }
@@ -10830,8 +10830,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "重置分配的配置文件、自定义证书和元数据，当应用程序被删除时"
+            "state": "translated",
+            "value": "删除 App 时一并重置其描述文件、自定义证书和元数据"
           }
         }
       }
@@ -11028,8 +11028,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "重启以应用更改"
+            "state": "translated",
+            "value": "需要重启才能生效"
           }
         }
       }
@@ -11226,8 +11226,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "运行 ADI 模拟直接在设备上，而不是远程服务器"
+            "state": "translated",
+            "value": "在本机跑 ADI 模拟，不用远程服务器"
           }
         }
       }
@@ -12304,8 +12304,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "跳过不可复制的备份文件"
+            "state": "translated",
+            "value": "跳过无法复制的备份文件"
           }
         }
       }
@@ -13954,8 +13954,8 @@
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
-            "value": "使用表单代替对话"
+            "state": "translated",
+            "value": "用表单代替弹窗"
           }
         }
       }
