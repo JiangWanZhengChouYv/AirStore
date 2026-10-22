@@ -1,7 +1,7 @@
 default: build			# default target for the "make" command
 
 SHELL := /bin/bash
-.PHONY: help ios update tvos
+.PHONY: help ios update tvos build
 
 RUBY := $(shell command -v ruby 2>/dev/null)
 HOMEBREW := $(shell command -v brew 2>/dev/null)
