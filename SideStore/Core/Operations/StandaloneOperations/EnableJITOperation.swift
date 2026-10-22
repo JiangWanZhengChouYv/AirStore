@@ -84,27 +84,40 @@ final class EnableJITOperation: BaseStandaloneOperation<StandaloneOperationConte
                 }
             }
         } else {
-            self.setProgress(30)
-
-            var lastError: Error?
-            let maxRetries = 3
-            for retry in 0..<maxRetries {
-                let percent = 30 + Int64(Double(retry) / Double(maxRetries) * 60.0)
-                self.setProgress(percent)
-                do {
-                    await CellularRefreshManager.shared.turnOffDataIfNeeded()
-                    try await safeDebugApp(targetBundleId)
-                    await CellularRefreshManager.shared.turnOnDataIfNeeded()
-                    await notifyJITSuccess(appName: appName)
-                    return
-                } catch {
-                    await CellularRefreshManager.shared.turnOnDataIfNeeded()
-                    lastError = error
-                }
-            }
-            if let error = lastError { throw error }
+            try await enableJITOnDevice(bundleIdentifier: targetBundleId, appName: appName,
+                                       progress: { self.setProgress($0) })
         }
     }
+}
+
+/// Turns JIT on without leaving the phone: this attaches debugserver to the already-running app
+/// through the local pairing, which is the step StikDebug and SideJITServer otherwise do for us.
+/// Takes a bare bundle id rather than an InstalledApp because the callers are the store's own
+/// context menu and the `sidestore://enable-jit` deep link, and a guest inside the container has a
+/// bundle id but no row in our database. Needs proper testing on a device with the DDI mounted.
+func enableJITOnDevice(bundleIdentifier: String, appName: String, pid: UInt32? = nil,
+                       progress: (@Sendable (Int64) -> Void)? = nil) async throws
+{
+    var lastError: Error?
+    let maxRetries = 3
+    for retry in 0..<maxRetries {
+        progress?(30 + Int64(Double(retry) / Double(maxRetries) * 60.0))
+        do {
+            await CellularRefreshManager.shared.turnOffDataIfNeeded()
+            if let pid {
+                try await safeAttachDebugger(pid)
+            } else {
+                try await safeDebugApp(bundleIdentifier)
+            }
+            await CellularRefreshManager.shared.turnOnDataIfNeeded()
+            await notifyJITSuccess(appName: appName)
+            return
+        } catch {
+            await CellularRefreshManager.shared.turnOnDataIfNeeded()
+            lastError = error
+        }
+    }
+    if let error = lastError { throw error }
 }
 
 func notifyJITSuccess(appName: String) async {

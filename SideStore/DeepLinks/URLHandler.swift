@@ -91,6 +91,28 @@ class URLHandler {
             }
             return true
             
+        case "enable-jit":
+            // LiveContainer asks for this when a guest needs an executable heap, which is the job
+            // StikDebug used to do from a second app. pid is optional: with it we attach to that
+            // process directly, without it minimuxer finds the running app by bundle id.
+            let queryItems = components.queryItems?.reduce(into: [String: String]()) { $0[$1.name.lowercased()] = $1.value } ?? [:]
+            guard let bundleIdentifier = queryItems["bundle-id"] ?? queryItems["bundleid"], !bundleIdentifier.isEmpty else { return false }
+            let pid = queryItems["pid"].flatMap { UInt32($0) }
+
+            Task {
+                do {
+                    try await enableJITOnDevice(bundleIdentifier: bundleIdentifier,
+                                                appName: queryItems["appname"] ?? bundleIdentifier,
+                                                pid: pid)
+                } catch {
+                    if let window = UIApplication.shared.connectedScenes
+                        .compactMap({ ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) }).first {
+                        ToastView(error: error).show(in: window)
+                    }
+                }
+            }
+            return true
+
         default:
             return false
         }
