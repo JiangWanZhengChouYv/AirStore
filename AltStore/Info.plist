@@ -58,6 +58,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>sidestore</string>
+				<string>stikjit</string>
 			</array>
 		</dict>
 		<dict>

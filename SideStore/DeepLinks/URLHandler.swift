@@ -91,10 +91,12 @@ class URLHandler {
             }
             return true
             
-        case "enable-jit":
-            // LiveContainer asks for this when a guest needs an executable heap, which is the job
-            // StikDebug used to do from a second app. pid is optional: with it we attach to that
-            // process directly, without it minimuxer finds the running app by bundle id.
+        case "enable-jit", "enablejit":
+            // Emulators (MeloNX) and LiveContainer open stikjit://enable-jit?bundle-id=<their own id>
+            // to get an executable heap, which used to mean installing StikDebug; Info.plist registers
+            // that scheme here so the same link reaches us. StosDebug's camelCase host is taken too.
+            // pid is optional: with it we attach to that process directly, without it minimuxer finds
+            // the running app by bundle id.
             let queryItems = components.queryItems?.reduce(into: [String: String]()) { $0[$1.name.lowercased()] = $1.value } ?? [:]
             guard let bundleIdentifier = queryItems["bundle-id"] ?? queryItems["bundleid"], !bundleIdentifier.isEmpty else { return false }
             let pid = queryItems["pid"].flatMap { UInt32($0) }
