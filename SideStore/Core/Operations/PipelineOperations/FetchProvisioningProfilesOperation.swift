@@ -241,6 +241,16 @@ private extension FetchProvisioningProfilesOperation{
         guard let allowedFeatures = team.type.allowedFeatures else {
             throw OperationError.invalidParameters("Cannot update features for unknown team type.")
         }
+
+        // The memory and address-space capabilities are not part of the legacy form call's
+        // vocabulary: updateAppId answers with a fixed set of feature keys and drops anything else
+        // without complaining, which is how a requested memory limit used to vanish silently. Those
+        // go to the v1 capability endpoint instead.
+        let capabilityIDs = Set(entitlements.keys.compactMap { key -> String? in
+            guard let rawValue = key as? String else { return nil }
+            return ALTEntitlement(rawValue: rawValue).capabilityID
+        })
+        await applyCapabilities(capabilityIDs, for: appID, team: team)
         
         var targetFeatures: [ALTFeature: String] = [:]
         var droppedFeatures: Set<ALTFeature> = []
@@ -299,6 +309,35 @@ private extension FetchProvisioningProfilesOperation{
         }
     }
     
+    /// Switch the given capabilities on for this App ID, but only the ones Apple offers this team.
+    ///
+    /// The capability list doubles as the answer to whether a free personal account can have an
+    /// increased memory limit at all, so whatever is not offered gets logged and skipped rather than
+    /// sent off and ignored.
+    func applyCapabilities(_ capabilityIDs: Set<String>, for appID: ALTAppID, team: ALTTeam) async
+    {
+        guard !capabilityIDs.isEmpty else { return }
+
+        do {
+            let offered = Set(try await DeveloperPortalProxy.shared.fetchCapabilities(team: team).map(\.id))
+            let sendable = capabilityIDs.intersection(offered)
+
+            let unavailable = capabilityIDs.subtracting(offered)
+            if !unavailable.isEmpty {
+                self.debugLog("[FetchProvisioningProfiles] Apple offers this team no \(unavailable.sorted()); it listed \(offered.sorted()). Skipping them.")
+            }
+
+            guard !sendable.isEmpty else { return }
+
+            try await DeveloperPortalProxy.shared.setBundleIDCapabilities(Array(sendable), for: appID, team: team)
+            self.debugLog("[FetchProvisioningProfiles] Enabled \(sendable.sorted()) on App ID \(appID.bundleIdentifier).")
+        } catch {
+            // Not being able to raise the limit is not a reason to fail the install: the app still
+            // runs, just at Apple's default memory ceiling. Needs proper testing on a paid team.
+            self.debugLog("[FetchProvisioningProfiles] Failed to apply capabilities for \(appID.bundleIdentifier): \(error)")
+        }
+    }
+
     func updateAppGroups(for appID: ALTAppID, targetAppBundle: ALTApplication, team: ALTTeam) async throws -> ALTAppID {
         let bundleID = targetAppBundle.bundleIdentifier
         var entitlements = self.context.customEntitlementsByBundleID[bundleID]

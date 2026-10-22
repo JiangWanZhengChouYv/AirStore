@@ -164,6 +164,25 @@ public class DeveloperPortalProxy {
         }
     }
 
+    /// What this team may switch on for an App ID. Apple's own answer, so nothing here is guessed.
+    public func fetchCapabilities(team: ALTTeam? = nil) async throws -> [DeveloperCapability] {
+        try await retryingOnExpiredSession {
+            let session = try await self.getSession()
+            let team = try await self.getTeam(team)
+            return try await ALTAppleAPI.shared.fetchCapabilities(for: team, session: session)
+        }
+    }
+
+    @discardableResult
+    public func setBundleIDCapabilities(_ capabilityIDs: [String], for appID: ALTAppID, team: ALTTeam? = nil) async throws -> Bool {
+        try await retryingOnExpiredSession {
+            let session = try await self.getSession()
+            let team = try await self.getTeam(team)
+            try await ALTAppleAPI.shared.setBundleIDCapabilities(capabilityIDs, for: appID, team: team, session: session)
+            return true
+        }
+    }
+
     @discardableResult
     public func deleteAppID(_ appID: ALTAppID, team: ALTTeam? = nil) async throws -> Bool {
         try await retryingOnExpiredSession {
