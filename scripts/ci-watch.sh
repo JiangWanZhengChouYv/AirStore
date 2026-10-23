@@ -49,8 +49,31 @@ else
 fi
 
 COLS=${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}
-BAR_WIDTH=$(( COLS - 58 )); [ "$BAR_WIDTH" -lt 10 ] && BAR_WIDTH=10
-[ "$BAR_WIDTH" -gt 36 ] && BAR_WIDTH=36
+
+# Everything before the bar is a fixed 57 cells: state(4) name(12) branch(10) sha(8) percent(4)
+# steps(7) elapsed(5) plus the separators. Whatever is left gets split between the bar and the
+# step name, so a row always ends on one line -- a wrapped row breaks the redraw accounting.
+FIXED_CELLS=57
+rest=$(( COLS - FIXED_CELLS - 3 ))
+[ "$rest" -lt 16 ] && rest=16
+BAR_WIDTH=$(( rest * 6 / 10 ))
+[ "$BAR_WIDTH" -lt 6 ] && BAR_WIDTH=6
+[ "$BAR_WIDTH" -gt 40 ] && BAR_WIDTH=40
+STEP_WIDTH=$(( rest - BAR_WIDTH ))
+[ "$STEP_WIDTH" -lt 8 ] && STEP_WIDTH=8
+
+# "Nightly AirStore Build" and friends are all the same shape; the suffix carries no information
+# once several workflows are on one screen, so show just the part that tells them apart.
+shorten_workflow() {
+  local name="$1"
+  case "$name" in
+    *"AirStore build") name="${name%"AirStore build"}" ;;
+    *"AirStore Build") name="${name%"AirStore Build"}" ;;
+    "CI build on push") name="CI" ;;
+  esac
+  name="${name% }"             # the suffix left a trailing space behind
+  printf '%s' "${name:0:12}"   # cap it, or an unfamiliar workflow name shifts the whole column
+}
 
 now_epoch() { date +%s; }
 
@@ -159,11 +182,12 @@ draw_run() {
 
   # Two CJK characters per state, so the column is a fixed four cells wide without asking printf
   # to pad by display width (it counts bytes, and a Chinese character is three of them).
-  printf '%s%s%s %-15s %-10s %s %s%3d%%%s %2d/%-2d步 %02d:%02d ' \
-    "$colour" "$state" "$C_OFF" "${workflow:0:15}" "${branch:0:10}" "${sha:0:8}" \
+  local label="${current:-}"
+  printf '%s%s%s %-12s %-10s %s %s%3d%%%s %2d/%-2d步 %02d:%02d ' \
+    "$colour" "$state" "$C_OFF" "$(shorten_workflow "$workflow")" "${branch:0:10}" "${sha:0:8}" \
     "$colour" "$pct" "$C_OFF" "$done_steps" "$total" "$mm" "$ss"
   printf '[%s] ' "$bar"
-  printf '%s%.30s%s' "$C_DIM" "${current:-}" "$C_OFF"
+  printf '%s%s%s' "$C_DIM" "${label:0:$STEP_WIDTH}" "$C_OFF"
   [ "$attempt" != "1" ] && printf ' %s(第%s次)%s' "$C_DIM" "$attempt" "$C_OFF"
 }
 
