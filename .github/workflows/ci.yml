@@ -6,15 +6,9 @@ name: CI build on push
 # on the fork and would leave every single commit looking failed.
 
 on:
-  push:
-    branches: [develop]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
-      - '.editorconfig'
-      - '.gitignore'
-      - '.gitmodules'
-      - '.github/**'
+  # Kept for manual runs only. develop.yml builds every push to develop, publishes the
+  # artifact and checks the Chinese resources, so leaving the push trigger here just paid for
+  # a second identical nine-minute build.
   workflow_dispatch:
 
 concurrency:

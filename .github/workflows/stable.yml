@@ -6,6 +6,12 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
+# Without this the job's token is read-only and the last step dies with
+# "HTTP 403: Resource not accessible by integration" -- develop.yml has had this
+# permission since the first run and creates its release fine.
+permissions:
+  contents: write
+
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true

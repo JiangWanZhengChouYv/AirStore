@@ -97,6 +97,15 @@ jobs:
             ~/Library/Caches/org.swift.swiftpm
           key: xcode-build-cache-develop-${{ github.sha }}
 
+      - name: Verify the Chinese resources compiled
+        run: |
+          found=$(find SideStore.xcarchive -type d -name 'zh-Hans.lproj' | head -3)
+          echo "zh-Hans.lproj: ${found:-none}"
+          if [ -z "$found" ]; then
+            echo "::error::zh-Hans.lproj is missing from the built app, so Localizable.xcstrings did not produce a Chinese table"
+            exit 1
+          fi
+
       - name: Publish onto the rolling prerelease
         run: |
           gh release view develop-latest >/dev/null 2>&1 || \
