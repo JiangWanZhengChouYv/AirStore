@@ -94,20 +94,23 @@ list_ids() {
   fi
 }
 
-# One line per run. Reads the run plus its job steps, so two API calls per run per pass.
-draw_run() {
-  local id="$1" line
-  line=$(gh api "repos/$REPO/actions/runs/$id" --jq \
-    '[.name, .display_title, .head_branch, .head_sha, .status, (.conclusion // ""), .run_started_at, .updated_at, .event, (.run_attempt // 1|tostring), .path] | join("\u001f")' \
-    2>/dev/null) || return 1
-  [ -z "$line" ] && return 1
+# One API call per run per pass; the caller keeps the fields around so the row and the loop's own
+# status check do not each fetch the same run.
+run_fields() {
+  gh api "repos/$REPO/actions/runs/$1" --jq \
+    '[.status, (.conclusion // ""), .name, .head_branch, .head_sha, .run_started_at, .updated_at, (.run_attempt // 1|tostring), .path] | join("\u001f")' \
+    2>/dev/null
+}
 
+# Prints one row, with no trailing newline: the caller assembles the frame.
+draw_run() {
+  local id="$1" line="$2"
   local IFS=$'\037'
   # shellcheck disable=SC2086
   set -- $line
-  local workflow="$1" title="$2" branch="$3" sha="$4" status="$5" conclusion="$6"
-  local started="$7" updated="$8" event="$9" attempt="${10}" wf_path="${11}"
   unset IFS
+  local status="$1" conclusion="$2" workflow="$3" branch="$4" sha="$5"
+  local started="$6" updated="$7" attempt="$8" wf_path="$9"
 
   local steps done_steps total current
   steps=$(gh api "repos/$REPO/actions/runs/$id/jobs" --jq \
@@ -162,7 +165,6 @@ draw_run() {
   printf '[%s] ' "$bar"
   printf '%s%.30s%s' "$C_DIM" "${current:-}" "$C_OFF"
   [ "$attempt" != "1" ] && printf ' %s(第%s次)%s' "$C_DIM" "$attempt" "$C_OFF"
-  printf '\n'
 }
 
 report_finished() {
@@ -190,6 +192,7 @@ live=""
 reported=""
 failed_any=0
 first=1
+LINES=0          # rows the previous frame took, so the next one can move back over them
 
 while :; do
   ids=$(list_ids)
@@ -201,41 +204,51 @@ while :; do
       MODE=running
       ONCE=1        # a history snapshot is not something to keep refreshing
     else
-      echo
+      printf '\n'
       echo "${C_GRN}全部结束。${C_OFF}"
       break
     fi
   fi
   first=0
 
-  echo "${C_CYN}AirStore CI${C_OFF}  $(date '+%H:%M:%S')  ${C_DIM}(每 ${INTERVAL}s 刷新，Ctrl-C 退出)${C_OFF}"
-  still_running=0
+  frame="${C_CYN}AirStore CI${C_OFF}  $(date '+%H:%M:%S')  ${C_DIM}(每 ${INTERVAL}s 刷新，Ctrl-C 退出)${C_OFF}"$'\n'
+  finished=""
   for id in $ids; do
-    draw_run "$id" || continue
-    st=$(gh api "repos/$REPO/actions/runs/$id" --jq '.status' 2>/dev/null)
-    if [ "$st" != "completed" ]; then
-      still_running=1
+    fields=$(run_fields "$id")
+    [ -z "$fields" ] && continue
+    status=${fields%%$'\037'*}
+
+    row=$(draw_run "$id" "$fields")
+    [ -n "$row" ] && frame="${frame}${row}"$'\n'
+
+    if [ "$status" != "completed" ]; then
       case "|$live|" in *"|$id|"*) ;; *) live="$live|$id" ;; esac
     else
-      # Only summarise a run that this session actually saw going. A snapshot of the history would
+      # Only summarise a run this session actually saw going -- a snapshot of the history would
       # otherwise print an artifact block for every finished run on screen.
       case "|$live|" in *"|$id|"*)
-        case "|$reported|" in *"|$id|"*) ;; *)
-          reported="$reported|$id"
-          concl=$(gh api "repos/$REPO/actions/runs/$id" --jq '.conclusion // ""' 2>/dev/null)
-          [ "$concl" = "failure" ] && failed_any=1
-          echo
-          report_finished "$id"
-          echo
-        ;; esac
+        case "|$reported|" in *"|$id|"*) ;; *) finished="$finished $id" ;; esac
       ;; esac
     fi
   done
 
+  # Move back over the previous frame rather than clearing the screen: the summary of a run that
+  # just finished stays readable above, and the scrollback does not fill up with repeated headers.
+  [ "$LINES" -gt 0 ] && printf '\033[%dA' "$LINES"
+  printf '%s\033[J' "$frame"
+  LINES=$(printf '%s' "$frame" | wc -l | tr -d '[:space:]')
+
+  for id in $finished; do
+    reported="$reported|$id"
+    concl=$(gh api "repos/$REPO/actions/runs/$id" --jq '.conclusion // ""' 2>/dev/null)
+    [ "$concl" = "failure" ] && failed_any=1
+    printf '\n'
+    report_finished "$id"
+    LINES=0          # from here the frame redraws below what we just committed to the scrollback
+  done
+
   [ "$ONCE" = 1 ] && break
-  [ "$still_running" = 0 ] && continue
   sleep "$INTERVAL"
-  clear
 done
 
 exit "$failed_any"
