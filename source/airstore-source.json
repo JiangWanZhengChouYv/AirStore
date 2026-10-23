@@ -2,7 +2,7 @@
   "version": 2,
   "name": "AirStore Official",
   "identifier": "com.AirStore.AirStore",
-  "sourceURL": "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json",
+  "sourceURL": "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json",
   "apps": [
     {
       "name": "AirStore",

@@ -1,0 +1,143 @@
+name: Develop AirStore build
+
+# Every push to develop produces an installable build that AirStore can offer as an update to
+# itself, so keeping the phone current no longer needs a computer: subscribe to the source, turn
+# on beta updates, pick the develop track, tap update.
+#
+# Two things this deliberately does not do:
+#   - It does not touch the checked-in source JSON. The generated one is committed to the
+#     develop-source branch, which is what the app fetches, so a machine never rewrites what a
+#     human wrote on develop.
+#   - It does not publish to a normal release. All builds land on one rolling prerelease tagged
+#     develop-latest, whose asset name never changes, so the download URL in that JSON stays
+#     valid across builds and no one has to prune old releases.
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.editorconfig'
+      - '.gitignore'
+      - '.gitmodules'
+      - '.github/**'
+      - 'source/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: develop-latest
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and publish the develop channel
+    runs-on: macos-26
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - run: brew install ldid xcbeautify
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: "26.4"
+
+      - name: Version this build
+        run: |
+          BASE=$(python3 scripts/ci/workflow.py get-marketing-version)
+          SHORT=$(python3 scripts/ci/workflow.py commit-id)
+          # The word "develop" in the version is what ReleaseTrackType.from(version:) reads to
+          # classify an installed build, and the timestamp keeps the ordering meaningful --
+          # a commit sha is unique but does not sort. Deliberately no `+`: this string goes into
+          # CFBundleShortVersionString, and semver build metadata is not valid there.
+          echo "VERSION=${BASE}-develop-$(date -u +%Y%m%d.%H%M).${GITHUB_RUN_NUMBER}-${SHORT}" | tee -a $GITHUB_ENV
+          echo "SHORT_COMMIT=${SHORT}" | tee -a $GITHUB_ENV
+
+      - name: Restore Cache (exact)
+        id: xcode-cache-exact
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: xcode-build-cache-develop-${{ github.sha }}
+
+      - name: Restore Cache (last)
+        if: steps.xcode-cache-exact.outputs.cache-hit != 'true'
+        id: xcode-cache-fallback
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: xcode-build-cache-develop-
+
+      - name: Build
+        env:
+          MARKETING_VERSION: ${{ env.VERSION }}
+        run: python3 scripts/ci/workflow.py build
+
+      - name: Save Cache
+        if: ${{ steps.xcode-cache-fallback.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: xcode-build-cache-develop-${{ github.sha }}
+
+      - name: Publish onto the rolling prerelease
+        run: |
+          gh release view develop-latest >/dev/null 2>&1 || \
+            gh release create develop-latest --prerelease \
+              --title "Develop builds" \
+              --notes "Every build here is a snapshot of develop, replaced by the next push. \
+          AirStore offers these as updates when the develop track is selected in Settings. \
+          Not for distribution -- sign with your own Apple ID and expect breakage."
+          gh release upload develop-latest AirStore.ipa --clobber
+
+      - name: Generate the source feed
+        run: |
+          python3 scripts/ci/develop_source.py \
+            --source source/airstore-source.json \
+            --ipa AirStore.ipa \
+            --bundle-id "$(python3 scripts/ci/workflow.py get-bundle-id)" \
+            --version "$VERSION" \
+            --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirStore.ipa" \
+            --track develop \
+            --description "Development build $VERSION from commit $SHORT_COMMIT." \
+            --out build/airstore-source.json
+
+      - name: Commit the feed to its own branch
+        run: |
+          git fetch origin develop-source 2>/dev/null || true
+          if git rev-parse --verify -q origin/develop-source >/dev/null; then
+            git checkout -b develop-source origin/develop-source
+          else
+            git checkout -b develop-source
+          fi
+          cp build/airstore-source.json source/airstore-source.json
+          git add source/airstore-source.json
+          # --allow-empty because re-running the same commit produces an identical feed, and a
+          # workflow that goes red on "nothing to commit" teaches the wrong lesson.
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit --allow-empty -m "Develop build $VERSION"
+          git push origin develop-source
+
+      - name: Upload the feed for debugging
+        uses: actions/upload-artifact@v4
+        with:
+          name: airstore-source-${{ env.SHORT_COMMIT }}.json
+          path: build/airstore-source.json
