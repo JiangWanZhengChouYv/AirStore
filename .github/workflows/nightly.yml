@@ -1,15 +1,8 @@
 name: Nightly AirStore Build
 
 on:
-  push:
-    branches: [develop]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
-      - '.editorconfig'
-      - '.gitignore'
-      - '.gitmodules'
-      - '.github/**'
+  # No push trigger: this built the same thing as ci.yml on every push and then failed on
+  # Upload Release, which a fork cannot do. The daily schedule and the manual run are its job.
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
