@@ -189,9 +189,8 @@ jobs:
       - name: Generate Metadata
         run: |
           python3 scripts/ci/workflow.py dump-project-settings
-          PRODUCT_NAME=$(python3 scripts/ci/workflow.py read-product-name)
           BUNDLE_ID=$(python3 scripts/ci/workflow.py read-bundle-id)
-          IPA_NAME="$PRODUCT_NAME.ipa"
+          IPA_NAME="AirStore.ipa"
 
           python3 scripts/ci/workflow.py generate-metadata \
             "$CHANNEL" \
