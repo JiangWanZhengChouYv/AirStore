@@ -1,4 +1,4 @@
-name: Nightly SideStore Build
+name: Nightly AirStore Build
 
 on:
   push:

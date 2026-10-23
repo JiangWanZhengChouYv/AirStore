@@ -1,4 +1,4 @@
-name: Pull Request SideStore build
+name: Pull Request AirStore build
 
 on:
   pull_request:

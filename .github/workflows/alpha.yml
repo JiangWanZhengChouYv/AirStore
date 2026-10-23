@@ -1,4 +1,4 @@
-name: Alpha SideStore Build
+name: Alpha AirStore Build
 
 on:
   push:
