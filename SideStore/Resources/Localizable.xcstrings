@@ -4995,6 +4995,28 @@
         }
       }
     },
+    "Each app and app extension installed with AirStore must register an App ID with Apple.\n\nApp IDs for paid developer accounts never expire, and there is no limit to how many you can create.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 AirStore 安装的每个 app 和 app 扩展，都需要向苹果注册一个 App ID。\n\n付费开发者账号的 App ID 永不过期，数量也没有上限。"
+          }
+        }
+      }
+    },
+    "Each app and app extension installed with AirStore must register an App ID with Apple. Apple limits non-developer Apple IDs to 10 App IDs at a time.\n\n**App IDs can't be deleted**, but they do expire after one week. AirStore will automatically renew App IDs for all active apps once they've expired.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 AirStore 安装的每个 app 和 app 扩展，都需要向苹果注册一个 App ID。苹果限制非开发者 Apple ID 同时最多注册 10 个 App ID。\n\n**App ID 无法删除**，但一周后会自动过期。过期之后，AirStore 会为所有仍在使用的 app 自动续期。"
+          }
+        }
+      }
+    },
     "Edit": {
       "extractionState": "manual",
       "localizations": {
@@ -9215,6 +9237,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "操作 Verbose 日志"
+          }
+        }
+      }
+    },
+    "Opt in for beta testing to receive regular updates and early previews of upcoming releases.\n\nPlease note that these builds are experimental and may be unstable or break unexpectedly.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入 Beta 测试，就能持续收到更新，并提前拿到还没正式发布的版本。\n\n注意：这些构建属于实验性质，可能不稳定，也可能毫无征兆地失效。"
           }
         }
       }
