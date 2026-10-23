@@ -680,13 +680,13 @@ public extension StoreApp
             }
         }
         
-        return AppConstants.Sources.sideStoreFallbackIconURL
+        return AppConstants.Sources.airStoreIconURL
     }
     
     class func makeAltStoreApp(version: String, buildVersion: String?, in context: NSManagedObjectContext) -> StoreApp
     {
         let placeholderBundleId = StoreApp.altstoreAppID
-        let placeholderDownloadURL = AppConstants.Sources.sideStoreWebsite
+        let placeholderDownloadURL = AppConstants.URLs.airStoreGitHub
         let placeholderSourceID = Source.altStoreIdentifier
         let placeholderVersion = "0.0.0"
         let placeholderDate = Date.distantPast

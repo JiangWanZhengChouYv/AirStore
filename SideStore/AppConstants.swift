@@ -38,9 +38,15 @@ public enum AppConstants {
     public enum Sources {
         public static let fetchTimeout: TimeInterval  = 3.0
         public static let defaultSourcesURL           = URL(string: "https://sidestore.io/default-sources")!
-        public static let sideStoreCommunitySourceURL = URL(string: "https://sidestore.io/apps-v2.json/")!
-        public static let sideStoreFallbackIconURL    = URL(string: "https://sidestore.io/apps-v2.json/apps/sidestore/icon.png")!
-        public static let sideStoreWebsite            = URL(string: "https://sidestore.io")!
+
+        /// AirStore's own feed, written onto its own branch by the develop workflow. This is the
+        /// built-in official source, so the app ships knowing where its updates come from.
+        public static let airStoreFeedURL             = URL(string: "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json")!
+        public static let airStoreIconURL             = URL(string: "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png")!
+
+        /// What the built-in slot used to point at. It lists upstream SideStore as an update for our
+        /// bundle id, so installing it replaces AirStore and the sign-in fix goes with it.
+        public static let retiredCommunityFeedURL     = URL(string: "https://sidestore.io/apps-v2.json/")!
     }
     
     public enum Bonjour {

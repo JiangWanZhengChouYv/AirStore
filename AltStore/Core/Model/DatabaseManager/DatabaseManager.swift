@@ -215,6 +215,14 @@ public class DatabaseManager: @unchecked Sendable
             
             let altStoreSource: Source
             
+            // The feed this slot used to point at lists upstream SideStore as an update for our
+            // bundle id, and installing that replaces AirStore and loses the sign-in fix. Anyone who
+            // has it gets it deleted rather than migrated -- there is nothing in it worth keeping.
+            if let retired = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.retiredIdentifier), in: context)
+            {
+                context.delete(retired)
+            }
+            
             if let source = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.altStoreIdentifier), in: context)
             {
                 altStoreSource = source
@@ -226,6 +234,7 @@ public class DatabaseManager: @unchecked Sendable
             
             // Make sure to always update source URL to be current.
             try! altStoreSource.setSourceURL(Source.altStoreSourceURL)
+            altStoreSource.name = "AirStore Official"
             
             let storeApp: StoreApp
             

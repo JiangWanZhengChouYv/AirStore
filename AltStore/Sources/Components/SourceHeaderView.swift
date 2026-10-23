@@ -113,7 +113,7 @@ extension SourceHeaderView
 {
     func configure(for source: Source)
     {
-        self.titleLabel.text = source.name
+        self.titleLabel.text = source.displayName
         self.subtitleLabel.text = source.subtitle
         
         self.websiteImageView.tintColor = source.effectiveTintColor
@@ -133,8 +133,8 @@ extension SourceHeaderView
             self.websiteImageView.isHidden = true
         }
         
-        self.iconImageView.image = nil
-        if let iconURL = source.effectiveIconURL
+        self.iconImageView.image = source.bundledIcon
+        if self.iconImageView.image == nil, let iconURL = source.effectiveIconURL
         {
             Task { [weak self] in
                 guard let self else { return }

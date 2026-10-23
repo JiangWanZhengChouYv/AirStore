@@ -75,7 +75,7 @@ class SourceDetailViewController: HeaderContentViewController<SourceHeaderView, 
         
         super.init(coder: coder)
         
-        self.title = source.name
+        self.title = source.displayName
         self.tintColor = source.effectiveTintColor
     }
     
@@ -90,7 +90,8 @@ class SourceDetailViewController: HeaderContentViewController<SourceHeaderView, 
         
         self.navigationBarButton.addTarget(self, action: #selector(SourceDetailViewController.addSource), for: .primaryActionTriggered)
         
-        if let iconURL = self.source.effectiveIconURL
+        self.navigationBarIconView.image = self.source.bundledIcon
+        if self.navigationBarIconView.image == nil, let iconURL = self.source.effectiveIconURL
         {
             Task { [weak self] in
                 guard let self else { return }

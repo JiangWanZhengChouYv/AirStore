@@ -958,6 +958,17 @@
         }
       }
     },
+    "AirStore Official Source": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 官方源"
+          }
+        }
+      }
+    },
     "AirStore Ready": {
       "extractionState": "manual",
       "localizations": {

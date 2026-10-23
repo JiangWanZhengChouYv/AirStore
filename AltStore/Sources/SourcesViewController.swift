@@ -281,7 +281,7 @@ private extension SourcesViewController
             let attributedOutput = AttributedString(localized: "^[\(numberOfApps) app](inflect: true)")
             let numberOfAppsText = String(attributedOutput.characters)
             
-            let accessibilityLabel = source.name + "\n" + text + ".\n" + numberOfAppsText
+            let accessibilityLabel = source.displayName + "\n" + text + ".\n" + numberOfAppsText
             cell.bannerView.accessibilityLabel = accessibilityLabel
                         
             if source.identifier != Source.altStoreIdentifier

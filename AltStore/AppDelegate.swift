@@ -177,9 +177,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 debugLog("Starting DatabaseManager...")
                 try await DatabaseManager.shared.start()
                 debugLog("Started DatabaseManager.")
-
-                // Subscribing writes to CoreData, so it can only run once the store is actually open.
-                await MainActor.run { AirStoreSourceManager.subscribeIfNeeded() }
                 
                 debugLog("Reconciling any staged drafts started...")
                 await Self.reconcileSelfReinstallationIfNeeded()

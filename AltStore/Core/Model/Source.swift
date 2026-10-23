@@ -13,17 +13,38 @@ public extension Source
 {
 
     // @livecontainer
-    @objc dynamic static let altStoreSourceURL = AppConstants.Sources.sideStoreCommunitySourceURL
+    @objc dynamic static let altStoreSourceURL = AppConstants.Sources.airStoreFeedURL
     static let altStoreGroupIdentifier = Bundle.Info.appbundleIdentifier
     
     // normalized url is the source identifier (or) p-key!
     static let altStoreIdentifier = try! Source.sourceID(from: altStoreSourceURL)
+
+    /// The upstream feed this slot used to point at, kept only so installs that already subscribed
+    /// to it can be dropped. Its name is still "SideStore Offical" in those databases.
+    static let retiredIdentifier = try! Source.sourceID(from: AppConstants.Sources.retiredCommunityFeedURL)
 }
 
  public extension Source
  {
      // Fallbacks for optional JSON values.
-    
+
+     /// The built-in feed is first-party, so it is presented from the bundle rather than from
+     /// whatever the JSON happens to call itself -- the name in the database stays English for
+     /// anyone reading it programmatically, and the icon never has to come over the network.
+     var isAirStoreOfficial: Bool {
+         return self.identifier == Source.altStoreIdentifier
+     }
+
+     var displayName: String {
+         guard isAirStoreOfficial else { return self.name }
+         return NSLocalizedString("AirStore Official Source", comment: "")
+     }
+
+     var bundledIcon: UIImage? {
+         guard isAirStoreOfficial else { return nil }
+         return UIImage(named: "App")
+     }
+
      var effectiveIconURL: URL? {
          return self.iconURL ?? self.apps.first?.iconURL
      }
@@ -361,7 +382,7 @@ public extension Source
     class func makeAltStoreSource(in context: NSManagedObjectContext) -> Source
     {
         let source = Source(context: context)
-        source.name = "SideStore Offical"
+        source.name = "AirStore Official"
         source.groupID = Source.altStoreGroupIdentifier
         source.identifier = Source.altStoreIdentifier
         try! source.setSourceURL(Source.altStoreSourceURL)
