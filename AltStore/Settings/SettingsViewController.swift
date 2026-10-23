@@ -86,6 +86,7 @@ extension SettingsViewController
         case certificateManagement  // row 9 - Certificate Management
         case backupAndRestore       // row 10 - Backup & Restore
         case userCustomizations     // row 11 - User Customizations
+        case checkForUpdates        // row 12 - Check for Updates (built in code, not in the storyboard)
 
         static var allCases: [AdvancedSettingsRow] {
             var rows: [AdvancedSettingsRow] = [.sendFeedback, .refreshAttempts, .refreshSideJITServer, .pairingFileManagement]
@@ -99,7 +100,8 @@ extension SettingsViewController
                 .profileManagement,
                 .certificateManagement,
                 .backupAndRestore,
-                .userCustomizations
+                .userCustomizations,
+                .checkForUpdates
             ])
             return rows
         }
@@ -121,6 +123,10 @@ extension SettingsViewController
 final class SettingsViewController: UITableViewController
 {
     private var activeTeam: ALTTeam?
+
+    /// Only affects the label of the Check for Updates row, which is the sole feedback the user gets
+    /// while every source is being refetched.
+    private var isCheckingForUpdates = false
     private var accountStatus: AccountVerificationRow.Status = .completed
     private var accountVerificationTask: Task<Void, Never>?
     
@@ -961,8 +967,17 @@ extension SettingsViewController
             return AccountVerificationRow.preferredHeight
         }
         let effectiveIndexPath: IndexPath
-        if Section.allCases[indexPath.section] == .advancedSettings {
+        if Section.allCases[indexPath.section] == .advancedSettings
+        {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
+
+            if row == .checkForUpdates
+            {
+                // This row is built in code, so there is no storyboard cell to measure. Borrow the
+                // height of the one above it, which is what it has to match to look like a pair.
+                return super.tableView(tableView, heightForRowAt: IndexPath(row: AdvancedSettingsRow.userCustomizations.rawValue, section: indexPath.section))
+            }
+
             effectiveIndexPath = IndexPath(row: row.rawValue, section: indexPath.section)
         } else {
             effectiveIndexPath = indexPath
@@ -982,6 +997,14 @@ extension SettingsViewController
                 actionCell.backgroundConfiguration = .clear()
             }
         }
+        else if Section.allCases[indexPath.section] == .advancedSettings,
+                indexPath.row == AdvancedSettingsRow.allCases.count - 2,
+                let insetCell = cell as? InsetGroupTableViewCell
+        {
+            // The storyboard draws this row as the end of the group; once Check for Updates is
+            // appended below it, the group actually ends there, so the corners move.
+            insetCell.style = .middle
+        }
     }
 
     override func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int
@@ -992,6 +1015,12 @@ extension SettingsViewController
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
+
+            if row == .checkForUpdates
+            {
+                return super.tableView(tableView, indentationLevelForRowAt: IndexPath(row: AdvancedSettingsRow.userCustomizations.rawValue, section: indexPath.section))
+            }
+
             effectiveIndexPath = IndexPath(row: row.rawValue, section: indexPath.section)
         } else {
             effectiveIndexPath = indexPath
@@ -1024,6 +1053,22 @@ extension SettingsViewController
             return cell
         }
         
+        if Section.allCases[indexPath.section] == .advancedSettings,
+           AdvancedSettingsRow.allCases[indexPath.row] == .checkForUpdates
+        {
+            // The storyboard has twelve cells in this section; this one is ours, so it is built here
+            // instead of adding a thirteenth cell to a file nobody can review as text.
+            let cell = InsetGroupTableViewCell(style: .default, reuseIdentifier: "checkForUpdates")
+            cell.style = .bottom
+            cell.isSelectable = true
+            cell.textLabel?.text = self.isCheckingForUpdates
+                ? NSLocalizedString("Checking for Updates…", comment: "")
+                : NSLocalizedString("Check for Updates", comment: "")
+            cell.imageView?.image = UIImage(systemName: "arrow.triangle.2.circlepath")
+            cell.imageView?.tintColor = .altPrimary
+            return cell
+        }
+
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
@@ -1362,6 +1407,9 @@ extension SettingsViewController
                 vc.title = NSLocalizedString("User Customizations", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
                 
+            case .checkForUpdates:
+                self.checkForUpdates()
+
             case .refreshAttempts: break
             }
         
@@ -1390,6 +1438,58 @@ extension SettingsViewController
         
         // deselect the row before returning (so that it doesn't look like stuck selected)
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+
+    /// Refetch every subscribed source, then say how many installed apps that turned up as out of date.
+    ///
+    /// This is the same fetch pull-to-refresh already does. The row exists because "did you ship
+    /// something?" is a question this screen cannot otherwise answer without the user guessing which
+    /// page to drag down.
+    private func checkForUpdates()
+    {
+        guard !self.isCheckingForUpdates else { return }
+
+        let advancedSection = IndexSet(integer: Section.advancedSettings.rawValue)
+        self.isCheckingForUpdates = true
+        self.tableView.reloadSections(advancedSection, with: .none)
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            var failure: Error?
+            do
+            {
+                _ = try await AppManager.shared.fetchSources()
+            }
+            catch
+            {
+                failure = error
+            }
+
+            let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+            let updates = context.performAndWait {
+                InstalledApp.all(satisfying: nil, in: context).filter { $0.hasUpdate }.count
+            }
+
+            await MainActor.run {
+                self.isCheckingForUpdates = false
+                self.tableView.reloadSections(advancedSection, with: .none)
+
+                if let failure
+                {
+                    ToastView(error: failure).show(in: self)
+                    return
+                }
+
+                let message = updates == 0
+                    ? NSLocalizedString("No Updates Available", comment: "")
+                    : String(format: NSLocalizedString("%d Updates Available", comment: ""), updates)
+
+                let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
+                self.present(alert, animated: true)
+            }
+        }
     }
 }
 
