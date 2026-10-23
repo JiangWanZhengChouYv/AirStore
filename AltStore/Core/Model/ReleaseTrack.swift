@@ -16,6 +16,7 @@ public enum ReleaseTrackType: String, CaseIterable, CustomStringConvertible
     
     case alpha
     case nightly = "nightly"
+    case develop
     case stable
     
     public static var betaTracks: [ReleaseTrackType] {
@@ -27,7 +28,7 @@ public enum ReleaseTrackType: String, CaseIterable, CustomStringConvertible
     }
 
     private static func isBetaTrack(_ key: ReleaseTrackType) -> Bool {
-        key == .alpha || key == .nightly
+        key == .alpha || key == .nightly || key == .develop
     }
 
     public var description: String {
@@ -39,6 +40,8 @@ public enum ReleaseTrackType: String, CaseIterable, CustomStringConvertible
         let lowercased = version.lowercased()
         if lowercased.contains("alpha") {
             return .alpha
+        } else if lowercased.contains("develop") {
+            return .develop
         } else if lowercased.contains("nightly") || lowercased.contains("beta") {
             return .nightly
         } else if lowercased.contains("local") || lowercased.contains("xcode") {

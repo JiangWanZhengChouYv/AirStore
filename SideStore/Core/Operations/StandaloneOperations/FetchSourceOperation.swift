@@ -66,11 +66,7 @@ final class FetchSourceOperation: BaseStandaloneOperation<StandaloneOperationCon
             }
         }
         
-        var request = URLRequest(url: self.sourceURL)
-        request.cachePolicy = .reloadIgnoringLocalCacheData     // don't use local caching
-        request.timeoutInterval = AppConstants.Sources.fetchTimeout
-
-        let (data, response) = try await self.fetchSourceData(with: request)
+        let (data, response) = try await self.fetchSourceData(mirroring: self.sourceURL)
         
         let childContext = DatabaseManager.shared.persistentContainer.newBackgroundContext(parent: dbContext)
         childContext.mergePolicy = NSOverwriteMergePolicy
@@ -92,6 +88,77 @@ final class FetchSourceOperation: BaseStandaloneOperation<StandaloneOperationCon
         return fetchedSource
     }
     
+    /// Fetch the source, preferring a jsDelivr mirror when the URL is a raw.githubusercontent.com one.
+    ///
+    /// The URL kept in CoreData stays exactly what the user subscribed to, because `Source.identifier`
+    /// is derived from it -- rewriting it here instead of there is what stops everyone from ending up
+    /// with a second "AirStore Official" after this ships. Anything the mirror cannot serve falls back
+    /// to the origin, so a miss costs one extra round trip and never a failed fetch.
+    private func fetchSourceData(mirroring url: URL) async throws -> (Data, URLResponse)
+    {
+        guard let mirror = Self.jsdelivrMirror(for: url) else {
+            return try await self.fetchSourceData(with: self.request(for: url))
+        }
+
+        do
+        {
+            let (data, response) = try await self.fetchSourceData(with: self.request(for: mirror))
+            guard let status = (response as? HTTPURLResponse)?.statusCode, (200...299).contains(status) else {
+                // A 404 from the mirror still comes back as a response with a body, so without this
+                // check the fallback would never run and the decode would fail on error text.
+                let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+                throw OperationError.invalidResponse(reason: "jsDelivr answered HTTP \(code)")
+            }
+
+            self.debugLog("[FetchSourceOperation] Fetched \(url.absoluteString) from the jsDelivr mirror.")
+            return (data, response)
+        }
+        catch let error as URLError where error.code == .cancelled
+        {
+            throw error
+        }
+        catch
+        {
+            self.debugLog("[FetchSourceOperation] Mirror could not serve \(url.absoluteString) (\(error.localizedDescription)); falling back to the origin.")
+            return try await self.fetchSourceData(with: self.request(for: url))
+        }
+    }
+
+    private func request(for url: URL) -> URLRequest
+    {
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData     // don't use local caching
+        request.timeoutInterval = AppConstants.Sources.fetchTimeout
+        return request
+    }
+
+    /// `raw.githubusercontent.com/OWNER/REPO/REF/PATH` becomes `cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH`.
+    ///
+    /// Only that host and only files: jsDelivr will not proxy release assets or anything above its
+    /// 20 MB limit, and third-party hosts are none of its business.
+    static func jsdelivrMirror(for url: URL) -> URL?
+    {
+        guard url.host?.lowercased() == "raw.githubusercontent.com" else { return nil }
+
+        let components = url.pathComponents.filter { $0 != "/" }
+        guard components.count >= 4 else { return nil }
+
+        let owner = components[0]
+        let repository = components[1]
+        let reference = components[2]
+        let path = components[3...].joined(separator: "/")
+
+        // A branch name can itself contain slashes, and there is no way to tell where the ref ends
+        // and the path begins, so leave those to the origin rather than guess a URL that 404s.
+        guard !reference.contains("/") else { return nil }
+
+        var mirror = URLComponents()
+        mirror.scheme = "https"
+        mirror.host = "cdn.jsdelivr.net"
+        mirror.path = "/gh/\(owner)/\(repository)@\(reference)/\(path)"
+        return mirror.url
+    }
+
     private func fetchSourceData(with request: URLRequest) async throws -> (Data, URLResponse) {
         try await withCheckedThrowingContinuation { continuation in
             let dataTask = self.session.dataTask(with: request) { (data, response, error) in

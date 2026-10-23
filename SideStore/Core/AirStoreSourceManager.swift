@@ -17,7 +17,15 @@ import Foundation
 {
     @objc public static let shared = AirStoreSourceManager()
 
-    static let sourceURL = URL(string: "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json")!
+    /// The feed lives on its own branch so a machine can rewrite it on every push without ever
+    /// touching what a human wrote on develop. Fetching it goes through the jsDelivr mirror, which
+    /// is done at the request layer precisely because Source.identifier is derived from this URL:
+    /// swapping the host here would leave every existing install with a second, stale source.
+    static let sourceURL = URL(string: "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json")!
+
+    /// Where the feed was before the develop channel existed. Same reason as above -- the identifier
+    /// comes from the URL -- so the old row has to go, not be migrated.
+    static let retiredSourceURL = URL(string: "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json")!
 
     private override init() {}
 
@@ -27,6 +35,14 @@ import Foundation
         // before DatabaseManager.start() had opened the store, and asking for viewContext there makes
         // CoreData load the store out of turn.
         DatabaseManager.shared.persistentContainer.performBackgroundTask { context in
+            if let retired = try? Source.sourceID(from: retiredSourceURL),
+               let stale = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), retired), in: context)
+            {
+                context.delete(stale)
+                try? context.save()
+                debugLog("[AirStoreSourceManager] Removed the subscription to the retired feed at \(retiredSourceURL.absoluteString).")
+            }
+
             guard let identifier = try? Source.sourceID(from: sourceURL) else { return }
             guard Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), identifier), in: context) == nil
             else {
