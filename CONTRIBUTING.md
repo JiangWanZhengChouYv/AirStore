@@ -114,9 +114,9 @@ When building from Xcode, `BUNDLE_ID_SUFFIX` defaults to the value of `DEVELOPME
 
 Two things to know while the rename from SideStore is still in progress:
 
--   The build output is `SideStore.ipa`, because `PRODUCT_NAME`, `ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in
-    `Build.xcconfig` are still `SideStore` and `com.SideStore.SideStore`. Only the name in the documentation is
-    AirStore so far.
+-   The build output is `AirStore.ipa`, even though `PRODUCT_NAME`, `ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in
+    `Build.xcconfig` are still `SideStore` and `com.SideStore.SideStore`. The packaging name is cosmetic and is
+    ours to choose; the identifiers are not.
 -   The bundle ID used for the device's app group, iCloud container and provisioning follows from those same settings,
     so a `BUNDLE_ID_SUFFIX` change is not cosmetic — it changes which containers the app can reach.
 

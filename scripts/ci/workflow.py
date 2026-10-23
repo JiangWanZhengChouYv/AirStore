@@ -443,7 +443,7 @@ def upload_release(release_name, release_tag, commit_sha, repo, upstream_tag_rec
 
     run(
         f'gh release upload "{release_tag}" '
-        f'SideStore.ipa SideStore.dSYMs.zip build-logs.zip '
+        f'AirStore.ipa SideStore.dSYMs.zip build-logs.zip '
         f'--clobber'
     )
 

@@ -272,8 +272,8 @@ ipa:
 	@echo "fake-signing sidestore"
 	mkdir -p Payload/SideStore.app
 	cp -R SideStore.xcarchive/Products/Applications/SideStore.app/ Payload/SideStore.app/
-	rm -f     SideStore.ipa
-	zip -r SideStore.ipa Payload
+	rm -f     AirStore.ipa
+	zip -r AirStore.ipa Payload
 	rm -rf Payload*/
 
 # Global Variables
@@ -383,5 +383,5 @@ clean-sidebackup:
     #@rm -f AltStore/Resources/SideBackup.ipa
 
 clean: clean-sidebackup
-	@rm -rf SideStore.ipa
+	@rm -rf AirStore.ipa
 	@rm -rf build/

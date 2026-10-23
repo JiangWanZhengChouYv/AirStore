@@ -31,9 +31,9 @@ AirStore is written in pure Swift and built with Xcode. Dependencies
 in `Dependencies/`. `minimuxer` is pure Swift, and `em_proxy` is bundled as an
 XCFramework via SPM. We use Makefiles for CLI build and packaging automation.
 
-The rename from SideStore covers documentation only so far: `PRODUCT_NAME`,
+The rename from SideStore stops at the identifiers: `PRODUCT_NAME`,
 `ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in `Build.xcconfig` are still `SideStore`
-and `com.SideStore.SideStore`, and the packaged artifact is `SideStore.ipa`.
+and `com.SideStore.SideStore`, while the packaged artifact is `AirStore.ipa`.
 Note that `PRODUCT_NAME` in `Build.xcconfig` never took effect anyway — every
 target sets `PRODUCT_NAME = "$(TARGET_NAME)"` in the project file, which wins.
 The user-facing name comes from `CFBundleDisplayName = AirStore` in

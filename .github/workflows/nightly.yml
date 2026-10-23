@@ -208,8 +208,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: steps.build_gate.outputs.should_skip != 'true'
         with:
-          name: SideStore-${{ env.MARKETING_VERSION }}.ipa
-          path: SideStore.ipa
+          name: AirStore-${{ env.MARKETING_VERSION }}.ipa
+          path: AirStore.ipa
       - uses: actions/upload-artifact@v4
         if: steps.build_gate.outputs.should_skip != 'true'
         with:

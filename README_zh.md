@@ -66,14 +66,14 @@ curl -s https://<服务器地址>/v3/client_info
 ```sh
 git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
 cd AirStore
-make build fakesign ipa        # 产出 SideStore.ipa
+make build fakesign ipa        # 产出 AirStore.ipa
 ```
 
 `fakesign` 表示产物里不带开发者证书，这正是想要的：App 在首次登录时用你自己的 Apple ID 拿到身份。CI 也是同一套流程，任意提交的 Actions 运行里都能拿到打包产物。
 
 ## 关于名字
 
-主屏名字、权限弹窗、注册到苹果设备列表里的机器名都已经是 AirStore，但 bundle id（`com.SideStore.SideStore`）、App Group 和产物文件名 `SideStore.ipa` 故意没动：改这些会换签名标识，牵动 App Group、iCloud 容器和能用的描述文件，还会让已有安装变成孤儿。
+主屏名字、权限弹窗、注册到苹果设备列表里的机器名，以及打包产物文件名（`AirStore.ipa`），都已经是 AirStore；但 bundle id（`com.SideStore.SideStore`）和 App Group 故意没动：改这些会换签名标识，牵动 iCloud 容器和能用的描述文件，还会让已有安装变成孤儿。
 
 ## 参与贡献
 

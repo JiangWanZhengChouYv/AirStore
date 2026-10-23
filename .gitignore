@@ -42,6 +42,7 @@ xcuserdata
 
 Payload/
 **/SideStore.ipa
+**/AirStore.ipa
 **/SideBackup.ipa
 **/*.dSYM
 

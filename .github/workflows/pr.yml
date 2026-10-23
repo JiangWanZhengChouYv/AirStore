@@ -69,7 +69,7 @@ jobs:
         run: |
           python3 scripts/ci/workflow.py build; STATUS=$?
           python3 scripts/ci/workflow.py encrypt-build
-          mv SideStore.ipa SideStore-${{ env.MARKETING_VERSION }}.ipa
+          mv AirStore.ipa AirStore-${{ env.MARKETING_VERSION }}.ipa
           exit $STATUS
 
       - name: Save Cache

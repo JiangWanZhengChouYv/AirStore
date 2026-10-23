@@ -60,7 +60,7 @@ and there is no `.xcworkspace` to open.
 ```sh
 git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
 cd AirStore
-make build fakesign ipa        # produces SideStore.ipa
+make build fakesign ipa        # produces AirStore.ipa
 ```
 
 `fakesign` means the build carries no developer certificate, which is what you want: the app gets
