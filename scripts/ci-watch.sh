@@ -1,111 +1,241 @@
 #!/bin/bash
-# Watch a GitHub Actions run with a progress bar instead of silence.
+# Watch every CI run in flight, one line each, instead of silence or a wall of log.
 #
-#   scripts/ci-watch.sh                 # newest run on the current branch
-#   scripts/ci-watch.sh 39244937774     # a specific run
-#   ESTIMATE=600 scripts/ci-watch.sh    # override the time estimate in seconds
+#   ciw                      # all queued/running CI, refresh until they are done
+#   ciw --once               # one snapshot, no waiting
+#   ciw --all                # also include the most recent finished runs
+#   ciw 39786651476 ...      # specific run ids
+#   ciw -b develop -i 5      # one branch, refresh every 5s
+#   ESTIMATE=600 ciw         # override the seconds a build is expected to take
 #
-# The bar is time based, because one xcodebuild step is most of the run: counting steps would
-# sit at 60% for nine minutes and then jump. Elapsed time is compared against the last run of the
-# same workflow, so the estimate follows the repo's real history.
+# Double-click scripts/ci-watch.command for the same thing in a Terminal window.
+#
+# The bar is time based on purpose: one xcodebuild step is most of the run, so counting steps sits
+# at 60% for nine minutes and then jumps. The estimate comes from this workflow's own recent
+# completed runs, so it follows the repo's real history rather than a guess. A run with no steps at
+# all has not been given a runner yet -- drawing a creeping bar there would be a lie, so it shows
+# 排队中 and stays at zero.
 
 set -uo pipefail
 
-RUN="${1:-}"
 REPO="JiangWanZhengChouYv/AirStore"
-BAR_WIDTH=24
 INTERVAL=15
+MODE="running"          # running | ids | all
+ONCE=0
+BRANCH=""
+RUN_IDS=()
 
-if [ -z "$RUN" ]; then
-  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo develop)
-  RUN=$(gh api "repos/$REPO/actions/runs?branch=$BRANCH&per_page=1" --jq '.workflow_runs[0].id')
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o|--once)    ONCE=1 ;;
+    -a|--all)     MODE="all" ;;
+    -b|--branch)  BRANCH="${2:-}"; shift ;;
+    -i|--interval) INTERVAL="${2:-15}"; shift ;;
+    -h|--help)    sed -n '2,17p' "$0"; exit 0 ;;
+    ''|--*)       ;;
+    *[!0-9]*)     echo "ignoring '$1' (not a run id)" >&2 ;;
+    *)            MODE="ids"; RUN_IDS+=("$1") ;;
+  esac
+  shift
+done
+
+[ "$INTERVAL" -gt 0 ] 2>/dev/null || INTERVAL=15
+
+if [ -t 1 ]; then
+  C_DIM=$(tput dim); C_RED=$(tput setaf 1); C_GRN=$(tput setaf 2)
+  C_YEL=$(tput setaf 3); C_CYN=$(tput setaf 6); C_OFF=$(tput sgr0)
+else
+  C_DIM=""; C_RED=""; C_GRN=""; C_YEL=""; C_CYN=""; C_OFF=""
 fi
 
-if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
-  echo "no run found" >&2
-  exit 1
-fi
-
-json() { gh api "repos/$REPO/actions/runs/$RUN" --jq "$1" 2>/dev/null; }
-
-started=$(json '.run_started_at')
-workflow=$(json '.name')
-title=$(json '.display_title')
-status=$(json '.status')
-
-# Estimate from the last completed run of the same workflow, else nine minutes.
-estimate=${ESTIMATE:-}
-if [ -z "$estimate" ]; then
-  estimate=$(gh api "repos/$REPO/actions/workflows/$workflow/runs?status=completed&per_page=6" \
-    --argjson self "$RUN" \
-    '[.workflow_runs[] | select(.id != $self)
-      | ((.updated_at | fromdate) - (.run_started_at | fromdate))]
-     | if length > 0 then (add / length | floor) else 540 end' 2>/dev/null || echo 540)
-fi
-case "$estimate" in (''|*[!0-9]*) estimate=540;; esac
+COLS=${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}
+BAR_WIDTH=$(( COLS - 58 )); [ "$BAR_WIDTH" -lt 10 ] && BAR_WIDTH=10
+[ "$BAR_WIDTH" -gt 36 ] && BAR_WIDTH=36
 
 now_epoch() { date +%s; }
-# BSD date parses a bare timestamp in local time, which for this machine is UTC+8: without -u the
-# elapsed figure starts 8 hours high and the bar sits pinned at 99%.
-start_epoch=$(date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$started" +%s 2>/dev/null || now_epoch)
 
-echo "run $RUN · $workflow · $title"
-echo "estimated ${estimate}s from the last completed run"
-echo
+# BSD date reads a bare timestamp as local time (UTC+8 here); without -u the elapsed figure starts
+# eight hours high and every bar pins at 99%.
+to_epoch() { date -j -u -f "%Y-%m-%dT%H:%M:%SZ" "$1" +%s 2>/dev/null || now_epoch; }
 
-while true; do
-  status=$(json '.status')
-  conclusion=$(json '.conclusion // ""')
+EST_CACHE="${TMPDIR:-/tmp}/ci-watch-estimates.$$"
+trap 'rm -f "$EST_CACHE"' EXIT
 
-  # Recompute the step line each pass; the list is short and gh is cheap here.
-  steps=$(gh api "repos/$REPO/actions/runs/$RUN/jobs" \
-    --jq '.jobs[].steps[] | "\(.status)\t\(.conclusion // "-")\t\(.name)"' 2>/dev/null)
-  total=$(printf '%s\n' "$steps" | grep -c .)
+# Seconds a finished run took, averaged over the last few of the same workflow.
+estimate_for() {
+  local workflow="$1" skip="$2" cached
+  cached=$(awk -F'\t' -v w="$workflow" '$1==w {print $2; exit}' "$EST_CACHE" 2>/dev/null)
+  if [ -n "$cached" ]; then printf '%s' "$cached"; return; fi
+  local secs
+  secs=$(gh api "repos/$REPO/actions/workflows/$workflow/runs?status=completed&per_page=6" \
+    --argjson self "$skip" \
+    '[.workflow_runs[] | select(.id != $self)
+      | ((.updated_at | fromdate) - (.run_started_at | fromdate))]
+     | if length > 0 then (add / length | floor) else 540 end' 2>/dev/null)
+  case "$secs" in (''|*[!0-9]*) secs=540 ;; esac
+  printf '%s\t%s\n' "$workflow" "$secs" >> "$EST_CACHE"
+  printf '%s' "$secs"
+}
+
+list_ids() {
+  if [ "$MODE" = "ids" ]; then
+    printf '%s\n' "${RUN_IDS[@]}"
+    return
+  fi
+  local q="repos/$REPO/actions/runs?per_page=30"
+  [ -n "$BRANCH" ] && q="$q&branch=$BRANCH"
+  if [ "$MODE" = "running" ]; then
+    # The status filter takes exactly one value: `status=queued,in_progress` is accepted by the API
+    # and answers with nothing at all, which reads as "no CI is running".
+    gh api "$q&status=queued" --jq '.workflow_runs[].id' 2>/dev/null
+    gh api "$q&status=in_progress" --jq '.workflow_runs[].id' 2>/dev/null
+  else
+    gh api "$q" --jq '.workflow_runs[:8][].id'
+  fi
+}
+
+# One line per run. Reads the run plus its job steps, so two API calls per run per pass.
+draw_run() {
+  local id="$1" line
+  line=$(gh api "repos/$REPO/actions/runs/$id" --jq \
+    '[.name, .display_title, .head_branch, .head_sha, .status, (.conclusion // ""), .run_started_at, .updated_at, .event, (.run_attempt // 1|tostring), .path] | join("\u001f")' \
+    2>/dev/null) || return 1
+  [ -z "$line" ] && return 1
+
+  local IFS=$'\037'
+  # shellcheck disable=SC2086
+  set -- $line
+  local workflow="$1" title="$2" branch="$3" sha="$4" status="$5" conclusion="$6"
+  local started="$7" updated="$8" event="$9" attempt="${10}" wf_path="${11}"
+  unset IFS
+
+  local steps done_steps total current
+  steps=$(gh api "repos/$REPO/actions/runs/$id/jobs" --jq \
+    '.jobs[].steps[] | "\(.status)\t\(.conclusion // "-")\t\(.name)"' 2>/dev/null)
+  total=$(printf '%s\n' "$steps" | grep -c . )
   done_steps=$(printf '%s\n' "$steps" | grep -cE '^completed')
   current=$(printf '%s\n' "$steps" | awk -F'\t' '$1=="in_progress"{print $3; exit}')
   [ -z "$current" ] && current=$(printf '%s\n' "$steps" | awk -F'\t' '$1!="completed"{print $3; exit}')
 
-  elapsed=$(( $(now_epoch) - start_epoch ))
-  [ "$elapsed" -lt 0 ] && elapsed=0
-  if [ "$total" -eq 0 ]; then
-    # No steps at all means no runner has taken the job; letting the bar creep would be a lie.
-    pct=0
-    label="排队中（等 runner）"
+  local elapsed
+  if [ "$status" = "completed" ]; then
+    elapsed=$(( $(to_epoch "$updated") - $(to_epoch "$started") ))
   else
-    pct=$(( elapsed * 100 / estimate ))
-    label="${current:-等待中}"
+    elapsed=$(( $(now_epoch) - $(to_epoch "$started") ))
   fi
-  [ "$pct" -gt 99 ] && pct=99
-  if [ "$status" = "completed" ]; then pct=100; fi
-  filled=$(( pct * BAR_WIDTH / 100 ))
-  bar=""
-  i=0
-  while [ $i -lt $BAR_WIDTH ]; do
-    if [ $i -lt $filled ]; then bar="${bar}█"; else bar="${bar}░"; fi
-    i=$((i + 1))
+  [ "$elapsed" -lt 0 ] && elapsed=0
+  local mm=$(( elapsed / 60 )) ss=$(( elapsed % 60 ))
+
+  local colour="$C_YEL" state="进行"
+  if [ "$status" = "completed" ]; then
+    case "$conclusion" in
+      success) colour="$C_GRN"; state="通过" ;;
+      cancelled) colour="$C_DIM"; state="取消" ;;
+      *) colour="$C_RED"; state="失败" ;;
+    esac
+  elif [ "$status" = "queued" ] || [ "$status" = "pending" ]; then
+    state="排队"
+  fi
+
+  local bar pct filled i
+  if [ "$status" != "completed" ] && [ "$total" -eq 0 ]; then
+    pct=0; bar=""; current="等 runner"
+  else
+    local est=${ESTIMATE:-}
+    [ -z "$est" ] && est=$(estimate_for "$wf_path" "$id")
+    pct=$(( elapsed * 100 / est ))
+    [ "$pct" -gt 99 ] && [ "$status" != "completed" ] && pct=99
+    [ "$status" = "completed" ] && pct=100
+    filled=$(( pct * BAR_WIDTH / 100 ))
+    bar=""; i=0
+    while [ $i -lt "$BAR_WIDTH" ]; do
+      if [ $i -lt "$filled" ]; then bar="${bar}█"; else bar="${bar}░"; fi
+      i=$((i + 1))
+    done
+  fi
+
+  # Two CJK characters per state, so the column is a fixed four cells wide without asking printf
+  # to pad by display width (it counts bytes, and a Chinese character is three of them).
+  printf '%s%s%s %-15s %-10s %s %s%3d%%%s %2d/%-2d步 %02d:%02d ' \
+    "$colour" "$state" "$C_OFF" "${workflow:0:15}" "${branch:0:10}" "${sha:0:8}" \
+    "$colour" "$pct" "$C_OFF" "$done_steps" "$total" "$mm" "$ss"
+  printf '[%s] ' "$bar"
+  printf '%s%.30s%s' "$C_DIM" "${current:-}" "$C_OFF"
+  [ "$attempt" != "1" ] && printf ' %s(第%s次)%s' "$C_DIM" "$attempt" "$C_OFF"
+  printf '\n'
+}
+
+report_finished() {
+  local id="$1"
+  local conclusion
+  conclusion=$(gh api "repos/$REPO/actions/runs/$id" --jq '.conclusion // "unknown"' 2>/dev/null)
+  case "$conclusion" in ''|null|neutral) conclusion="unknown" ;; esac
+
+  echo "  run $id → $conclusion"
+  local artifacts
+  artifacts=$(gh api "repos/$REPO/actions/runs/$id/artifacts" --jq '.artifacts[].name' 2>/dev/null)
+  if [ -n "$artifacts" ]; then
+    printf '%s    产物:%s\n' "$C_DIM" "$C_OFF"
+    printf '%s\n' "$artifacts" | sed 's/^/      /'
+  fi
+  if [ "$conclusion" = "failure" ]; then
+    printf '%s    报错:%s\n' "$C_DIM" "$C_OFF"
+    gh run view "$id" --log-failed 2>/dev/null \
+      | grep -iE "error:|fatal|The following build commands failed" \
+      | sed -E 's/^[^\t]*\t[^\t]*\t[0-9TZ:.-]+Z? ?//' | sort -u | head -8 | sed 's/^/      /'
+  fi
+}
+
+live=""
+reported=""
+failed_any=0
+first=1
+
+while :; do
+  ids=$(list_ids)
+  if [ -z "$ids" ]; then
+    if [ "$first" = 1 ]; then
+      echo "没有在跑的 CI。最近几条："
+      MODE=all ids=$(list_ids)
+      [ -z "$ids" ] && { echo "  （一条都没有）"; exit 0; }
+      MODE=running
+      ONCE=1        # a history snapshot is not something to keep refreshing
+    else
+      echo
+      echo "${C_GRN}全部结束。${C_OFF}"
+      break
+    fi
+  fi
+  first=0
+
+  echo "${C_CYN}AirStore CI${C_OFF}  $(date '+%H:%M:%S')  ${C_DIM}(每 ${INTERVAL}s 刷新，Ctrl-C 退出)${C_OFF}"
+  still_running=0
+  for id in $ids; do
+    draw_run "$id" || continue
+    st=$(gh api "repos/$REPO/actions/runs/$id" --jq '.status' 2>/dev/null)
+    if [ "$st" != "completed" ]; then
+      still_running=1
+      case "|$live|" in *"|$id|"*) ;; *) live="$live|$id" ;; esac
+    else
+      # Only summarise a run that this session actually saw going. A snapshot of the history would
+      # otherwise print an artifact block for every finished run on screen.
+      case "|$live|" in *"|$id|"*)
+        case "|$reported|" in *"|$id|"*) ;; *)
+          reported="$reported|$id"
+          concl=$(gh api "repos/$REPO/actions/runs/$id" --jq '.conclusion // ""' 2>/dev/null)
+          [ "$concl" = "failure" ] && failed_any=1
+          echo
+          report_finished "$id"
+          echo
+        ;; esac
+      ;; esac
+    fi
   done
 
-  printf '\r[%s] %3d%%  %d/%d 步  %ds  · %s' "$bar" "$pct" "$done_steps" "$total" "$elapsed" "$label"
-
-  if [ "$status" = "completed" ]; then
-    printf '\n'
-    break
-  fi
+  [ "$ONCE" = 1 ] && break
+  [ "$still_running" = 0 ] && continue
   sleep "$INTERVAL"
+  clear
 done
 
-echo
-echo "结论: ${conclusion:-unknown}"
-echo
-printf '%s\n' "$steps" | awk -F'\t' '$2!="success" && $2!="" {printf "  %-9s %s\n", $2, $3}'
-echo
-echo "产物:"
-gh api "repos/$REPO/actions/runs/$RUN/artifacts" --jq '.artifacts[].name' 2>/dev/null | sed 's/^/  /'
-
-if [ "$conclusion" = "failure" ]; then
-  echo
-  echo "报错:"
-  gh run view "$RUN" --log-failed 2>/dev/null \
-    | grep -iE "error:|fatal|The following build commands failed" \
-    | sed -E 's/^[^\t]*\t[^\t]*\t[0-9TZ:.-]+Z? ?//' | sort -u | head -12
-fi
+exit "$failed_any"
