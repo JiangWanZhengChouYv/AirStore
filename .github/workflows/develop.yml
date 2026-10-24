@@ -61,7 +61,13 @@ jobs:
           # classify an installed build, and the timestamp keeps the ordering meaningful --
           # a commit sha is unique but does not sort. Deliberately no `+`: this string goes into
           # CFBundleShortVersionString, and semver build metadata is not valid there.
-          echo "VERSION=${BASE}-develop-$(date -u +%Y%m%d.%H%M).${GITHUB_RUN_NUMBER}-${SHORT}" | tee -a $GITHUB_ENV
+          #
+          # The stamp is one run-together number on purpose: a dotted "HHMM" component keeps its
+          # leading zero before 10:00 UTC, and a numeric semver identifier may not have one. The
+          # strict parser then rejects the whole version, which used to hide the develop channel
+          # and offer the stable build as an "update" over a newer develop install.
+          STAMP=$(python3 -c 'import datetime; print(datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M"))')
+          echo "VERSION=${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}" | tee -a $GITHUB_ENV
           echo "SHORT_COMMIT=${SHORT}" | tee -a $GITHUB_ENV
 
       - name: Restore Cache (exact)

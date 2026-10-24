@@ -173,21 +173,25 @@ final class AppContentViewController: UITableViewController
             // runs from a managed-object-changed notification.
             guard !track.isDeleted, track.managedObjectContext?.deletedObjects.contains(track) == false else { continue }
 
-            for version in track.releases ?? []
-            {
-                guard !version.isDeleted, version.managedObjectContext?.deletedObjects.contains(version) == false else { continue }
-                guard version.isSupported else { continue }
-
-                // The version at the top of the page is already one tap away.
-                guard version.versionID != currentVersionID else { continue }
-                guard seenVersionIDs.insert(version.versionID).inserted else { continue }
-                entries.append((track.type, version))
+            let supportedVersions = (track.releases ?? []).filter { version in
+                !version.isDeleted
+                    && version.managedObjectContext?.deletedObjects.contains(version) == false
+                    && version.isSupported
             }
+
+            // One row per channel. The develop channel points every build at the same rolling
+            // release asset, so an older row would download the newest build under an older label.
+            guard let newestVersion = supportedVersions.max(by: { $0.date < $1.date }) else { continue }
+
+            // The version at the top of the page is already one tap away.
+            guard newestVersion.versionID != currentVersionID else { continue }
+            guard seenVersionIDs.insert(newestVersion.versionID).inserted else { continue }
+            entries.append((track.type, newestVersion))
         }
 
         entries.sort { $0.version.date > $1.version.date }
 
-        return entries.prefix(20).map { entry in
+        return entries.map { entry in
             AppVersionsCard.Entry(
                 version: entry.version,
                 channel: entry.channel,

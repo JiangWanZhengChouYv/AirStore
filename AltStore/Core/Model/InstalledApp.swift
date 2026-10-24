@@ -209,8 +209,16 @@ public class InstalledApp: BaseEntity, InstalledAppProtocol
         let currentSemVer = SemanticVersion(self.version)
         let latestSemVer = SemanticVersion(latestVersion.version)
         
-        // If semantic versions can't be parsed, fall back to string comparison
+        // Develop builds made before the timestamp format was fixed carry a leading-zero numeric
+        // identifier (.0838), which strict semver rejects. Compare the numeric base instead, so a
+        // stable release is not offered as an "update" over a newer develop install.
         if currentSemVer == nil || latestSemVer == nil {
+            if let currentBase = SemanticVersion.numericBase(of: self.version),
+               let latestBase = SemanticVersion.numericBase(of: latestVersion.version),
+               currentBase != latestBase
+            {
+                return latestBase > currentBase
+            }
             return !matches(latestVersion)
         }
         let currentVer = SemanticVersion("\(currentSemVer!.major).\(currentSemVer!.minor).\(currentSemVer!.patch)")
@@ -506,4 +514,21 @@ public extension InstalledApp
         return self.installedAppUTI + ".backup"
     }
 
+}
+
+extension SemanticVersion
+{
+    /// Parses only the `major.minor.patch` prefix. Used for develop builds whose timestamps carry
+    /// a leading-zero identifier, which strict semver rejects as a whole.
+    static func numericBase(of version: String) -> (major: Int, minor: Int, patch: Int)?
+    {
+        let withoutPrerelease = version.split(separator: "-", maxSplits: 1).first ?? Substring(version)
+        let base = withoutPrerelease.split(separator: "+", maxSplits: 1).first ?? withoutPrerelease
+        let components = base.split(separator: ".")
+        guard components.count == 3,
+              let major = Int(components[0]),
+              let minor = Int(components[1]),
+              let patch = Int(components[2]) else { return nil }
+        return (major, minor, patch)
+    }
 }

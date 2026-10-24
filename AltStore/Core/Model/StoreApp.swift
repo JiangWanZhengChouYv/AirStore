@@ -118,9 +118,7 @@ extension StoreApp {
             // Ensure both beta and stable releases are found and supported
             if let latestBeta = betaReleases?.first(where: { $0.isSupported }),
                let latestStable = stableTrack?.releases?.first(where: { $0.isSupported }),
-               let stableSemVer = SemanticVersion(latestStable.version),
-               let betaSemVer = SemanticVersion(latestBeta.version),
-               betaSemVer >= stableSemVer
+               self.isBeta(latestBeta.version, atLeastStable: latestStable.version)
             {
                 return betaReleases
             }
@@ -128,6 +126,19 @@ extension StoreApp {
         return nil
     }
     
+    private func isBeta(_ betaVersion: String, atLeastStable stableVersion: String) -> Bool
+    {
+        if let beta = SemanticVersion(betaVersion), let stable = SemanticVersion(stableVersion)
+        {
+            return beta >= stable
+        }
+
+        // Develop builds made before the timestamp format was fixed fail the strict parse.
+        guard let beta = SemanticVersion.numericBase(of: betaVersion),
+              let stable = SemanticVersion.numericBase(of: stableVersion) else { return false }
+        return beta >= stable
+    }
+
     private func getReleases(default releases: ReleaseTrack?) -> [AppVersion]?
     {
         return betaReleases ?? releases?.releases?.compactMap { $0 }
