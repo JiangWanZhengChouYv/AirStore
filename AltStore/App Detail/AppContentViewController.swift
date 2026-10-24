@@ -352,6 +352,8 @@ private struct AppVersionsCard: View
                     Text(verbatim: entry.version.localizedVersion)
                         .font(.body.weight(.semibold))
                         .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
 
                     Text(verbatim: "\(self.channelName(for: entry.channel)) · \(Date().relativeDateString(since: entry.version.date))")
                         .font(.caption)
