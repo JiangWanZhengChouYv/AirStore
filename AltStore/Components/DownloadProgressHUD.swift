@@ -28,6 +28,7 @@ final class DownloadProgressHUD
         let subtitle = UILabel()
         let details = UILabel()
         let bar = UIProgressView(progressViewStyle: .bar)
+        let chevron = UIImageView(image: UIImage(systemName: "chevron.down"))
 
         var isExpanded = false
         var lastBytes: Int64 = 0
@@ -129,7 +130,12 @@ final class DownloadProgressHUD
 
         card.isExpanded.toggle()
         self.refreshDetails(card)
-        UIView.animate(withDuration: 0.2) { self.stack?.superview?.layoutIfNeeded() }
+        UIView.animate(withDuration: 0.2) {
+            card.chevron.transform = card.isExpanded
+                ? CGAffineTransform(rotationAngle: .pi)
+                : .identity
+            self.stack?.superview?.layoutIfNeeded()
+        }
     }
 
     /// Collapsing by emptying the text rather than hiding the label keeps one required bottom
@@ -182,7 +188,7 @@ final class DownloadProgressHUD
     {
         card.container.translatesAutoresizingMaskIntoConstraints = false
         card.container.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.95)
-        card.container.layer.cornerRadius = 14
+        card.container.layer.cornerRadius = 16
         card.container.layer.masksToBounds = true
 
         card.title.translatesAutoresizingMaskIntoConstraints = false
@@ -199,8 +205,11 @@ final class DownloadProgressHUD
         card.bar.translatesAutoresizingMaskIntoConstraints = false
         card.bar.trackTintColor = UIColor.white.withAlphaComponent(0.3)
         card.bar.progressTintColor = .white
-        card.bar.layer.cornerRadius = 1.5
+        card.bar.layer.cornerRadius = 2
         card.bar.layer.masksToBounds = true
+        // UIProgressView has no height property; scaling it is the usual way to make the line read at
+        // a glance instead of looking like a hairline.
+        card.bar.transform = CGAffineTransform(scaleX: 1, y: 2)
 
         card.subtitle.translatesAutoresizingMaskIntoConstraints = false
         card.subtitle.font = .monospacedDigitSystemFont(ofSize: 11, weight: .regular)
@@ -211,7 +220,11 @@ final class DownloadProgressHUD
         card.details.textColor = UIColor.white.withAlphaComponent(0.75)
         card.details.numberOfLines = 0
 
-        [card.title, card.percent, card.bar, card.subtitle, card.details].forEach(card.container.addSubview)
+        card.chevron.translatesAutoresizingMaskIntoConstraints = false
+        card.chevron.tintColor = UIColor.white.withAlphaComponent(0.6)
+        card.chevron.contentMode = .scaleAspectFit
+
+        [card.title, card.percent, card.bar, card.subtitle, card.details, card.chevron].forEach(card.container.addSubview)
 
         NSLayoutConstraint.activate([
             card.title.topAnchor.constraint(equalTo: card.container.topAnchor, constant: 8),
@@ -227,7 +240,11 @@ final class DownloadProgressHUD
 
             card.subtitle.topAnchor.constraint(equalTo: card.bar.bottomAnchor, constant: 6),
             card.subtitle.leadingAnchor.constraint(equalTo: card.container.leadingAnchor, constant: 12),
-            card.subtitle.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
+            card.subtitle.trailingAnchor.constraint(equalTo: card.chevron.leadingAnchor, constant: -6),
+
+            card.chevron.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
+            card.chevron.centerYAnchor.constraint(equalTo: card.subtitle.centerYAnchor),
+            card.chevron.widthAnchor.constraint(equalToConstant: 12),
 
             card.details.topAnchor.constraint(equalTo: card.subtitle.bottomAnchor, constant: 4),
             card.details.leadingAnchor.constraint(equalTo: card.container.leadingAnchor, constant: 12),
