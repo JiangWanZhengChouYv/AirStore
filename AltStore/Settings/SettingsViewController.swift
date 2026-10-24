@@ -108,7 +108,6 @@ extension SettingsViewController
     private enum BetaTestingRow: Int, CaseIterable {
         case betaUpdates
         case betaTrack
-        case checkForUpdates    // built in code, sits under the track picker
     }
 
     private enum DiagnosticsRow: Int, CaseIterable
@@ -122,10 +121,6 @@ extension SettingsViewController
 final class SettingsViewController: UITableViewController
 {
     private var activeTeam: ALTTeam?
-
-    /// Only affects the label of the Check for Updates row, which is the sole feedback the user gets
-    /// while every source is being refetched.
-    private var isCheckingForUpdates = false
     private var accountStatus: AccountVerificationRow.Status = .completed
     private var accountVerificationTask: Task<Void, Never>?
     
@@ -969,14 +964,6 @@ extension SettingsViewController
         if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
             return AccountVerificationRow.preferredHeight
         }
-        if Section.allCases[indexPath.section] == .betaTesting,
-           indexPath.row == BetaTestingRow.checkForUpdates.rawValue
-        {
-            // This row is built in code, so there is no storyboard cell to measure. Borrow the
-            // height of the one above it, which is what it has to match to look like a pair.
-            return super.tableView(tableView, heightForRowAt: IndexPath(row: BetaTestingRow.betaTrack.rawValue, section: indexPath.section))
-        }
-
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
@@ -999,14 +986,6 @@ extension SettingsViewController
                 actionCell.backgroundConfiguration = .clear()
             }
         }
-        else if Section.allCases[indexPath.section] == .betaTesting,
-                indexPath.row == BetaTestingRow.betaTrack.rawValue,
-                let insetCell = cell as? InsetGroupTableViewCell
-        {
-            // The storyboard draws the track picker as the end of the group; once Check for Updates
-            // is appended below it, the group actually ends there, so the corners move.
-            insetCell.style = .middle
-        }
     }
 
     override func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int
@@ -1014,12 +993,6 @@ extension SettingsViewController
         if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
             return 0
         }
-        if Section.allCases[indexPath.section] == .betaTesting,
-           indexPath.row == BetaTestingRow.checkForUpdates.rawValue
-        {
-            return super.tableView(tableView, indentationLevelForRowAt: IndexPath(row: BetaTestingRow.betaTrack.rawValue, section: indexPath.section))
-        }
-
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
@@ -1040,7 +1013,6 @@ extension SettingsViewController
         case .account: return (self.activeTeam == nil) ? 0 : (self.accountStatus == .completed ? 3 : 4)
         case .appRefresh: return AppRefreshRow.allCases.count
         case .advancedSettings: return AdvancedSettingsRow.allCases.count
-        case .betaTesting: return BetaTestingRow.allCases.count
         default: return super.tableView(tableView, numberOfRowsInSection: section.rawValue)
         }
     }
@@ -1056,34 +1028,6 @@ extension SettingsViewController
             return cell
         }
         
-        if Section.allCases[indexPath.section] == .betaTesting,
-           indexPath.row == BetaTestingRow.checkForUpdates.rawValue
-        {
-            // Built here rather than as a third storyboard cell, but laid out like the two above it:
-            // bold 17pt white label, 30pt margin, no icon. The card background comes from
-            // InsetGroupTableViewCell itself, so it matches without any extra work.
-            let cell = InsetGroupTableViewCell(style: .default, reuseIdentifier: "checkForUpdates")
-            cell.style = .bottom
-            cell.isSelectable = true
-            // No background colour here: the inset card paints itself, and setting one leaves a
-            // second, lighter band behind it -- which is what "covered in gauze" was.
-            cell.layoutMargins = UIEdgeInsets(top: 8, left: 30, bottom: 8, right: 30)
-
-            let label = UILabel()
-            label.translatesAutoresizingMaskIntoConstraints = false
-            label.font = .boldSystemFont(ofSize: 17)
-            label.textColor = .white
-            label.text = self.isCheckingForUpdates
-                ? NSLocalizedString("Checking for Updates…", comment: "")
-                : NSLocalizedString("Check for Updates", comment: "")
-            cell.contentView.addSubview(label)
-            NSLayoutConstraint.activate([
-                label.leadingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.leadingAnchor),
-                label.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-            ])
-            return cell
-        }
-
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
@@ -1425,14 +1369,6 @@ extension SettingsViewController
             case .refreshAttempts: break
             }
         
-        case .betaTesting:
-            // The two storyboard rows own their own controls (a switch and a popup button), so the
-            // only selectable row here is ours.
-            if indexPath.row == BetaTestingRow.checkForUpdates.rawValue
-            {
-                self.checkForUpdates()
-            }
-        
         case .diagnostics:
             let row = DiagnosticsRow.allCases[indexPath.row]
             switch row {
@@ -1460,57 +1396,6 @@ extension SettingsViewController
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-    /// Refetch every subscribed source, then say how many installed apps that turned up as out of date.
-    ///
-    /// This is the same fetch pull-to-refresh already does. The row exists because "did you ship
-    /// something?" is a question this screen cannot otherwise answer without the user guessing which
-    /// page to drag down.
-    private func checkForUpdates()
-    {
-        guard !self.isCheckingForUpdates else { return }
-
-        let advancedSection = IndexSet(integer: Section.advancedSettings.rawValue)
-        self.isCheckingForUpdates = true
-        self.tableView.reloadSections(advancedSection, with: .none)
-
-        Task { [weak self] in
-            guard let self else { return }
-
-            var failure: Error?
-            do
-            {
-                _ = try await AppManager.shared.fetchSources()
-            }
-            catch
-            {
-                failure = error
-            }
-
-            let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
-            let updates = context.performAndWait {
-                InstalledApp.all(satisfying: nil, in: context).filter { $0.hasUpdate }.count
-            }
-
-            await MainActor.run {
-                self.isCheckingForUpdates = false
-                self.tableView.reloadSections(advancedSection, with: .none)
-
-                if let failure
-                {
-                    ToastView(error: failure).show(in: self)
-                    return
-                }
-
-                let message = updates == 0
-                    ? NSLocalizedString("No Updates Available", comment: "")
-                    : String(format: NSLocalizedString("%d Updates Available", comment: ""), updates)
-
-                let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default))
-                self.present(alert, animated: true)
-            }
-        }
-    }
 }
 
 #if !os(tvOS)

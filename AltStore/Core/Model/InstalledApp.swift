@@ -225,11 +225,10 @@ public class InstalledApp: BaseEntity, InstalledAppProtocol
         if UserDefaults.standard.isBetaUpdatesEnabled,
            ReleaseTrackType.betaTracks.contains(latestVersion.channel),
            latestVer == currentVer,         // major.minor.patch are matching
-           // now compare by preRelease and build to break the tie
-           // TODO: since multiple tracks can be independent, when a different version is available on selected track than installed
-           //       we accept it, now ex: if the setup is consistent for upstream merge lets say from alpha to nightly and alpha can never fall behind nightly,
-           //       then the preRelease+build combo will always be incremental and our below not-equals check will still work.
-           (latestSemVer!.build != currentSemVer!.build) || (latestSemVer!.preRelease != currentSemVer!.preRelease)
+           // Newer within the same track only. This used to accept any difference in preRelease,
+           // which meant a feed that had rolled back to an earlier develop build still offered
+           // it as an update -- installing it pointed the app backwards.
+           latestSemVer! > currentSemVer!
         {
             return true
         }
