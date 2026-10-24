@@ -400,6 +400,10 @@ private extension MyAppsViewController
             
             cell.bannerView.button.isIndicatingActivity = false
             cell.bannerView.configure(for: app, action: .update)
+
+            // Worth a line in the log: the update card reads the selected channel, so when it shows
+            // a different version than the feed claims, this is the first thing to look at.
+            debugLog("[MyApps] Update card for \(app.bundleIdentifier): offered=\(latestSupportedVersion.version) channel=\(latestSupportedVersion.channel) installed=\(installedApp.version) beta=\(UserDefaults.standard.isBetaUpdatesEnabled) track=\(UserDefaults.standard.betaUdpatesTrack ?? "nil")")
             
             var versionText = latestSupportedVersion.localizedVersion
 
