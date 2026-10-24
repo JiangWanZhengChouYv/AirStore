@@ -1065,7 +1065,8 @@ extension SettingsViewController
             let cell = InsetGroupTableViewCell(style: .default, reuseIdentifier: "checkForUpdates")
             cell.style = .bottom
             cell.isSelectable = true
-            cell.backgroundColor = UIColor(white: 1, alpha: 0.15)
+            // No background colour here: the inset card paints itself, and setting one leaves a
+            // second, lighter band behind it -- which is what "covered in gauze" was.
             cell.layoutMargins = UIEdgeInsets(top: 8, left: 30, bottom: 8, right: 30)
 
             let label = UILabel()

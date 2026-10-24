@@ -5,137 +5,234 @@
 
 @preconcurrency import UIKit
 
-/// A thin progress card pinned under the status bar for the whole app, not just the screen that
-/// started the download.
+/// Progress cards pinned under the status bar for the whole app, not just the screen that started
+/// the download.
 ///
-/// The install pipeline already reports byte-level progress, but it only ever reached the cell or
-/// button that kicked it off -- switching tabs made a 28 MB download look like nothing was
-/// happening. This sits in the key window instead, so it survives tab changes and navigation.
+/// The install pipeline reports byte-level progress, but it only ever reached the cell or button that
+/// kicked it off -- switching tabs made a 28 MB download look like nothing was happening. These live
+/// in the key window instead, one card per download, so two installs at once are two cards rather
+/// than one that keeps jumping between them.
+///
+/// Speed and size are always on the card; the mirror in use and the full URL are one tap away, which
+/// is the pair of facts that actually explain a download that crawls.
 @MainActor
 final class DownloadProgressHUD
 {
     static let shared = DownloadProgressHUD()
 
-    private var container: UIView?
-    private var titleLabel: UILabel?
-    private var percentLabel: UILabel?
-    private var bar: UIProgressView?
-    private var currentName: String?
+    private final class Card
+    {
+        let container = UIView()
+        let title = UILabel()
+        let percent = UILabel()
+        let subtitle = UILabel()
+        let details = UILabel()
+        let bar = UIProgressView(progressViewStyle: .bar)
+
+        var isExpanded = false
+        var lastBytes: Int64 = 0
+        var lastTime: CFTimeInterval = 0
+        var mirror: String?
+        var url: URL?
+    }
+
+    private var stack: UIStackView?
+    private var cards: [String: Card] = [:]
 
     private init() {}
 
-    func begin(appName: String)
+    func begin(id: String, appName: String, url: URL)
     {
-        if self.currentName == appName, self.container != nil { return }
-
-        self.currentName = appName
-        self.installIfNeeded()
-        self.titleLabel?.text = String(format: NSLocalizedString("Downloading %@…", comment: ""), appName)
-        self.setFraction(0)
-    }
-
-    func update(fraction: Double, appName: String?)
-    {
-        if let appName, appName != self.currentName
+        if let existing = self.cards[id]
         {
-            self.currentName = appName
-            self.titleLabel?.text = String(format: NSLocalizedString("Downloading %@…", comment: ""), appName)
+            existing.url = url
+            existing.title.text = String(format: NSLocalizedString("Downloading %@…", comment: ""), appName)
+            return
         }
 
-        // Retried here as well as at the start: the first update can arrive before a window exists,
-        // and the install flow presents its own full-screen progress layer afterwards, so the card
-        // has to be pulled back to the front on every tick or it ends up underneath it.
+        let card = Card()
+        card.url = url
+        card.lastTime = CACurrentMediaTime()
+        card.title.text = String(format: NSLocalizedString("Downloading %@…", comment: ""), appName)
+        card.percent.text = "0%"
+        card.container.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(toggleExpanded(_:))))
+        self.configure(card)
+        self.cards[id] = card
+
         self.installIfNeeded()
-        guard self.container != nil else { return }
-        self.setFraction(fraction)
+        self.stack?.addArrangedSubview(card.container)
+        card.container.alpha = 0
+        UIView.animate(withDuration: 0.2) { card.container.alpha = 1 }
     }
 
-    func end()
+    /// Which mirror is serving this attempt, so the details can name it instead of guessing.
+    func setMirror(_ host: String, for id: String)
     {
-        self.currentName = nil
-        self.container?.removeFromSuperview()
-        self.container = nil
-        self.titleLabel = nil
-        self.percentLabel = nil
-        self.bar = nil
+        guard let card = self.cards[id] else { return }
+        card.mirror = host
+        self.refreshDetails(card)
     }
 
-    private func setFraction(_ fraction: Double)
+    func update(id: String, bytes: Int64, total: Int64)
     {
-        let clamped = min(max(fraction, 0), 1)
-        self.bar?.setProgress(Float(clamped), animated: true)
-        self.percentLabel?.text = "\(Int(clamped * 100))%"
+        guard let card = self.cards[id] else { return }
+
+        let now = CACurrentMediaTime()
+        let elapsed = now - card.lastTime
+        var speed: Double = 0
+        if elapsed > 0.2
+        {
+            speed = Double(bytes - card.lastBytes) / elapsed
+            card.lastBytes = bytes
+            card.lastTime = now
+        }
+
+        if total > 0
+        {
+            let fraction = min(max(Double(bytes) / Double(total), 0), 1)
+            card.bar.setProgress(Float(fraction), animated: true)
+            card.percent.text = "\(Int(fraction * 100))%"
+        }
+        else
+        {
+            card.percent.text = "…"
+        }
+
+        let speedText = speed > 0
+            ? ByteCountFormatter.string(fromByteCount: Int64(speed), countStyle: .file) + "/s"
+            : "—"
+        let arrived = ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+        let expected = total > 0 ? ByteCountFormatter.string(fromByteCount: total, countStyle: .file) : "?"
+        card.subtitle.text = "\(speedText) · \(arrived) / \(expected)"
+    }
+
+    func end(id: String)
+    {
+        guard let card = self.cards.removeValue(forKey: id) else { return }
+
+        UIView.animate(withDuration: 0.2) {
+            card.container.alpha = 0
+        } completion: { _ in
+            card.container.removeFromSuperview()
+        }
+    }
+
+    func endAll()
+    {
+        for id in Array(self.cards.keys) { self.end(id: id) }
+    }
+
+    @objc private func toggleExpanded(_ gesture: UITapGestureRecognizer)
+    {
+        guard let view = gesture.view,
+              let card = self.cards.values.first(where: { $0.container === view }) else { return }
+
+        card.isExpanded.toggle()
+        self.refreshDetails(card)
+        UIView.animate(withDuration: 0.2) { self.stack?.superview?.layoutIfNeeded() }
+    }
+
+    /// Collapsing by emptying the text rather than hiding the label keeps one required bottom
+    /// constraint in the layout: an empty label is zero-height, a hidden one still reports its size.
+    private func refreshDetails(_ card: Card)
+    {
+        guard card.isExpanded else
+        {
+            card.details.text = nil
+            return
+        }
+
+        let source = card.mirror.map { "\(NSLocalizedString("Source", comment: "")): \($0)" } ?? ""
+        let url = card.url?.absoluteString ?? ""
+        card.details.text = [source, url].filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
     private func installIfNeeded()
     {
-        if let container = self.container, let superview = container.superview
-        {
-            superview.bringSubviewToFront(container)
-            return
-        }
+        guard self.stack?.superview == nil else { return }
 
         let window = UIApplication.shared.connectedScenes
             .compactMap { ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) }
             .first
         guard let window else { return }
 
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        container.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.95)
-        container.layer.cornerRadius = 14
-        container.layer.masksToBounds = true
-        container.isUserInteractionEnabled = false
-        container.alpha = 0
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.spacing = 6
+        // Two installs at once are two cards; let them scroll rather than cover the whole screen.
+        stack.distribution = .fill
 
-        let title = UILabel()
-        title.translatesAutoresizingMaskIntoConstraints = false
-        title.font = .preferredFont(forTextStyle: .footnote)
-        title.textColor = .white
-        title.lineBreakMode = .byTruncatingMiddle
+        window.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 4),
+            stack.leadingAnchor.constraint(equalTo: window.layoutMarginsGuide.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: window.layoutMarginsGuide.trailingAnchor)
+        ])
+        self.stack = stack
 
-        let percent = UILabel()
-        percent.translatesAutoresizingMaskIntoConstraints = false
-        percent.font = .monospacedDigitSystemFont(ofSize: 13, weight: .semibold)
-        percent.textColor = .white
-        percent.textAlignment = .right
-        percent.setContentHuggingPriority(.required, for: .horizontal)
+        // Cards created before the window existed still need a home.
+        for card in self.cards.values where card.container.superview == nil
+        {
+            stack.addArrangedSubview(card.container)
+        }
+    }
 
-        let bar = UIProgressView(progressViewStyle: .bar)
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        bar.trackTintColor = UIColor.white.withAlphaComponent(0.3)
-        bar.progressTintColor = .white
-        bar.layer.cornerRadius = 1.5
-        bar.layer.masksToBounds = true
+    private func configure(_ card: Card)
+    {
+        card.container.translatesAutoresizingMaskIntoConstraints = false
+        card.container.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.95)
+        card.container.layer.cornerRadius = 14
+        card.container.layer.masksToBounds = true
 
-        container.addSubview(title)
-        container.addSubview(percent)
-        container.addSubview(bar)
-        window.addSubview(container)
+        card.title.translatesAutoresizingMaskIntoConstraints = false
+        card.title.font = .preferredFont(forTextStyle: .footnote)
+        card.title.textColor = .white
+        card.title.lineBreakMode = .byTruncatingMiddle
+
+        card.percent.translatesAutoresizingMaskIntoConstraints = false
+        card.percent.font = .monospacedDigitSystemFont(ofSize: 13, weight: .semibold)
+        card.percent.textColor = .white
+        card.percent.textAlignment = .right
+        card.percent.setContentHuggingPriority(.required, for: .horizontal)
+
+        card.bar.translatesAutoresizingMaskIntoConstraints = false
+        card.bar.trackTintColor = UIColor.white.withAlphaComponent(0.3)
+        card.bar.progressTintColor = .white
+        card.bar.layer.cornerRadius = 1.5
+        card.bar.layer.masksToBounds = true
+
+        card.subtitle.translatesAutoresizingMaskIntoConstraints = false
+        card.subtitle.font = .monospacedDigitSystemFont(ofSize: 11, weight: .regular)
+        card.subtitle.textColor = UIColor.white.withAlphaComponent(0.85)
+
+        card.details.translatesAutoresizingMaskIntoConstraints = false
+        card.details.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
+        card.details.textColor = UIColor.white.withAlphaComponent(0.75)
+        card.details.numberOfLines = 0
+
+        [card.title, card.percent, card.bar, card.subtitle, card.details].forEach(card.container.addSubview)
 
         NSLayoutConstraint.activate([
-            container.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 4),
-            container.leadingAnchor.constraint(equalTo: window.layoutMarginsGuide.leadingAnchor),
-            container.trailingAnchor.constraint(equalTo: window.layoutMarginsGuide.trailingAnchor),
+            card.title.topAnchor.constraint(equalTo: card.container.topAnchor, constant: 8),
+            card.title.leadingAnchor.constraint(equalTo: card.container.leadingAnchor, constant: 12),
 
-            title.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-            title.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
+            card.percent.centerYAnchor.constraint(equalTo: card.title.centerYAnchor),
+            card.percent.leadingAnchor.constraint(equalTo: card.title.trailingAnchor, constant: 8),
+            card.percent.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
 
-            percent.centerYAnchor.constraint(equalTo: title.centerYAnchor),
-            percent.leadingAnchor.constraint(equalTo: title.trailingAnchor, constant: 8),
-            percent.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
+            card.bar.topAnchor.constraint(equalTo: card.title.bottomAnchor, constant: 6),
+            card.bar.leadingAnchor.constraint(equalTo: card.container.leadingAnchor, constant: 12),
+            card.bar.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
 
-            bar.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 6),
-            bar.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 12),
-            bar.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -12),
-            bar.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -10)
+            card.subtitle.topAnchor.constraint(equalTo: card.bar.bottomAnchor, constant: 6),
+            card.subtitle.leadingAnchor.constraint(equalTo: card.container.leadingAnchor, constant: 12),
+            card.subtitle.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
+
+            card.details.topAnchor.constraint(equalTo: card.subtitle.bottomAnchor, constant: 4),
+            card.details.leadingAnchor.constraint(equalTo: card.container.leadingAnchor, constant: 12),
+            card.details.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
+            card.details.bottomAnchor.constraint(equalTo: card.container.bottomAnchor, constant: -10)
         ])
-
-        self.container = container
-        self.titleLabel = title
-        self.percentLabel = percent
-        self.bar = bar
-
-        UIView.animate(withDuration: 0.2) { container.alpha = 1 }
     }
 }
