@@ -145,6 +145,13 @@ jobs:
               commit --allow-empty -m "Develop build $VERSION"
           git push origin develop-source
 
+      - name: Purge the CDN copy of the feed
+        run: |
+          # jsDelivr caches a branch URL until told otherwise, so without this the app can keep
+          # reading a feed several builds old -- which is exactly what made an update card offer a
+          # build from the day before. The purge endpoint takes the same path as the CDN URL.
+          curl -fsS "https://purge.jsdelivr.net/gh/$GITHUB_REPOSITORY@develop-source/source/airstore-source.json" || true
+
       - name: Upload the feed for debugging
         uses: actions/upload-artifact@v4
         with:
