@@ -20,12 +20,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in no longer ends in -80045 on iOS 26.4 and above: the client identity sent to Apple now matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is one backed by a real Windows ADI.\n\nVerified on one iPhone on iOS 27.2 with a free personal Apple ID. Installing and refreshing third-party apps after sign-in has not been re-tested. Sign-in depends on the third-party server win.ani.sidestore.io staying online.",
       "versions": [
         {
-          "version": "0.8.1-develop-20261024.0838.18-21d233c9",
-          "date": "2026-10-24T08:46:54Z",
+          "version": "0.8.1-develop-202610240907.19-eeb1252f",
+          "date": "2026-10-24T09:16:43Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-          "size": 28246380,
-          "sha256": "32da268b28992d5537cc558ebc8cdc29cab04bc428adf1c78a43db664584c8ef",
-          "localizedDescription": "Development build 0.8.1-develop-20261024.0838.18-21d233c9 from commit 21d233c9."
+          "size": 28247102,
+          "sha256": "b7ddf68f96fde2781ea0552bff2f9a74bd67b6ccd5bdceaaa6f0c8ea390a88dd",
+          "localizedDescription": "Development build 0.8.1-develop-202610240907.19-eeb1252f from commit eeb1252f."
         },
         {
           "version": "0.8.0",
@@ -41,12 +41,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.1-develop-20261024.0838.18-21d233c9",
-              "date": "2026-10-24T08:46:54Z",
+              "version": "0.8.1-develop-202610240907.19-eeb1252f",
+              "date": "2026-10-24T09:16:43Z",
               "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-              "size": 28246380,
-              "sha256": "32da268b28992d5537cc558ebc8cdc29cab04bc428adf1c78a43db664584c8ef",
-              "localizedDescription": "Development build 0.8.1-develop-20261024.0838.18-21d233c9 from commit 21d233c9."
+              "size": 28247102,
+              "sha256": "b7ddf68f96fde2781ea0552bff2f9a74bd67b6ccd5bdceaaa6f0c8ea390a88dd",
+              "localizedDescription": "Development build 0.8.1-develop-202610240907.19-eeb1252f from commit eeb1252f."
             }
           ]
         },
