@@ -54,12 +54,10 @@ def main() -> None:
         if app.get("bundleIdentifier") != args.bundle_id:
             continue
 
-        # The card shown in Browse is the newest release, so it has to carry the develop build too,
-        # or the app would list an update it cannot describe.
-        app.update(release)
-        if args.description:
-            app["localizedDescription"] = args.description
-
+        # Only the channel is touched. The app-level version/description/downloadURL stay as the
+        # human wrote them for the stable track: overwriting them with the develop build made the
+        # store page contradict itself, with a develop description on top and "What's New: 0.8.0"
+        # underneath as soon as beta updates were switched off.
         app["versions"] = [release] + [
             older for older in app.get("versions", []) if older.get("version") != release["version"]
         ]
