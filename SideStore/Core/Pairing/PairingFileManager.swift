@@ -100,7 +100,9 @@ final class PairingFileManager: NSObject {
     @discardableResult
     nonisolated func syncWithSharedDirectory() -> PairingSyncSummary {
         var summary = PairingSyncSummary()
-        guard !UserDefaults.standard.isPairingReset else { return summary }
+        // No isPairingReset check here: the flag starts true on a fresh install, and a pairing file
+        // placed in the shared folder before first launch is exactly what we want to pick up.
+        // Resetting clears the shared copies too, so there is nothing stale to resurrect.
         guard let sharedDirectory = self.sharedPairingDirectory else {
             debugLog("[PairingFile] Shared app group unavailable; skipping sync.")
             return summary
