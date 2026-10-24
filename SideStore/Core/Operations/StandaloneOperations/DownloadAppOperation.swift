@@ -225,6 +225,8 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
     
     func downloadFile(from downloadURL: URL) async throws -> URL {
         debugLog("[DownloadAppOperation] download started: \(downloadURL)")
+        let hudName = self.appName
+        await MainActor.run { DownloadProgressHUD.shared.begin(appName: hudName) }
 
         // Mirrors first, origin last: the origin is what stalls for minutes on the networks this app
         // is used on, and a dead mirror only costs the time it takes to fail.
@@ -236,6 +238,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
                     debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?").")
                 }
                 self.setProgress(75)
+                await MainActor.run { DownloadProgressHUD.shared.end() }
                 return fileURL
             } catch {
                 lastError = error
@@ -243,6 +246,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             }
         }
 
+        await MainActor.run { DownloadProgressHUD.shared.end() }
         throw lastError ?? URLError(.badURL)
     }
 
@@ -364,6 +368,8 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
             if percent != self.lastLoggedPercent && (now - self.lastLogTime >= 0.3 || percent == 100) {
                 self.lastLoggedPercent = percent
                 self.lastLogTime = now
+                let reported = fraction
+                Task { @MainActor in DownloadProgressHUD.shared.update(fraction: reported, appName: nil) }
                 debugLog("[DownloadAppOperation] Download transfer: \(percent)% (\(ByteCountFormatter.string(fromByteCount: totalBytesWritten, countStyle: .file)) / \(ByteCountFormatter.string(fromByteCount: totalBytesExpectedToWrite, countStyle: .file)))")
             }
         } else {
@@ -375,6 +381,8 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
             if percent != self.lastLoggedPercent && (now - self.lastLogTime >= 0.3 || percent == 100) {
                 self.lastLoggedPercent = percent
                 self.lastLogTime = now
+                let reported = estimatedFraction
+                Task { @MainActor in DownloadProgressHUD.shared.update(fraction: reported, appName: nil) }
                 debugLog("[DownloadAppOperation] Download transfer: \(percent)% (\(ByteCountFormatter.string(fromByteCount: totalBytesWritten, countStyle: .file)) / \(ByteCountFormatter.string(fromByteCount: totalBytesExpectedToWrite, countStyle: .file)))")
             }
         }

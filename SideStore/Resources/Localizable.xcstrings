@@ -4968,7 +4968,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "needs-review",
-            "value": "下载 %@ …"
+            "value": "正在下载 %@…"
           }
         }
       }
