@@ -123,6 +123,10 @@ final class AppViewController: UIViewController
             self?.view.setNeedsLayout()
             self?.view.layoutIfNeeded()
         }
+
+        self.contentViewController.didSelectVersion = { [weak self] version in
+            self?.install(version)
+        }
         
         self.update()
         
@@ -479,6 +483,8 @@ private extension AppViewController
             }
             self.navigationBarDownloadButton.alpha = self.navigationBarAnimator?.fractionComplete ?? 1.0
         }
+
+        self.contentViewController.refreshVersionList()
     }
     
     func showNavigationBar()
@@ -675,6 +681,43 @@ extension AppViewController
         }
     }
     
+    func install(_ version: AppVersion)
+    {
+        if let installedApp = self.app.installedApp
+        {
+            guard !installedApp.matches(version) else { return }
+            self.updateApp(installedApp, to: version)
+            return
+        }
+
+        let group = AppManager.shared.install(.app(version), presentingViewController: self) { [weak self] (result) in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                switch result
+                {
+                case .success:
+                    debugLog("Installed \(version.localizedVersion) from AppViewController: \(self.app.bundleIdentifier)")
+                case .failure(let error) where error is CancellationError:
+                    break
+                case .failure(let error):
+                    let toastView = ToastView(error: error)
+                    toastView.opensErrorLog = true
+                    toastView.show(in: self)
+                }
+
+                self.bannerView.button.progress = nil
+                self.navigationBarDownloadButton.progress = nil
+                self.update()
+            }
+        }
+
+        if !group.progress.isCancelled
+        {
+            self.bannerView.button.progress = group.progress
+            self.navigationBarDownloadButton.progress = group.progress
+        }
+    }
+
     func open(_ installedApp: InstalledApp)
     {
         UIApplication.shared.open(installedApp.openAppURL)

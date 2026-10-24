@@ -7,6 +7,7 @@
 //
 
 @preconcurrency import UIKit
+import SwiftUI
 
 import Nuke
 
@@ -25,7 +26,13 @@ extension AppContentViewController
 final class AppContentViewController: UITableViewController
 {
     var app: StoreApp!
-    
+
+    /// Called when the user picks a build from another channel. `AppViewController` owns the
+    /// install/update progress UI, so it performs the actual work.
+    var didSelectVersion: ((AppVersion) -> Void)?
+
+    private var versionsHostingController: UIHostingController<AppVersionsCard>?
+
 //     private lazy var screenshotsDataSource = self.makeScreenshotsDataSource()
     private lazy var dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
@@ -80,6 +87,8 @@ final class AppContentViewController: UITableViewController
         
         self.descriptionTextView.toggleButton.addTarget(self, action: #selector(AppContentViewController.toggleCollapsingSection(_:)), for: .primaryActionTriggered)
         self.versionDescriptionTextView.toggleButton.addTarget(self, action: #selector(AppContentViewController.toggleCollapsingSection(_:)), for: .primaryActionTriggered)
+
+        self.refreshVersionList()
     }
     
     override func viewDidLayoutSubviews()
@@ -109,6 +118,118 @@ final class AppContentViewController: UITableViewController
                 self.tableView.beginUpdates()
                 self.tableView.endUpdates()
             }
+        }
+
+        self.layoutVersionsFooter()
+    }
+
+    func refreshVersionList()
+    {
+        let entries = self.makeVersionEntries()
+        guard !entries.isEmpty else
+        {
+            self.versionsHostingController?.willMove(toParent: nil)
+            self.versionsHostingController?.view.removeFromSuperview()
+            self.versionsHostingController?.removeFromParent()
+            self.versionsHostingController = nil
+            self.tableView.tableFooterView = nil
+            return
+        }
+
+        let card = AppVersionsCard(
+            entries: entries,
+            tintColor: Color(uiColor: self.app.tintColor ?? .altPrimary),
+            onSelect: { [weak self] version in self?.didSelectVersion?(version) }
+        )
+
+        if let hostingController = self.versionsHostingController
+        {
+            hostingController.rootView = card
+        }
+        else
+        {
+            let hostingController = UIHostingController(rootView: card)
+            hostingController.view.backgroundColor = .clear
+            self.addChild(hostingController)
+            hostingController.didMove(toParent: self)
+            self.versionsHostingController = hostingController
+            self.tableView.tableFooterView = hostingController.view
+        }
+
+        self.layoutVersionsFooter()
+    }
+
+    private func makeVersionEntries() -> [AppVersionsCard.Entry]
+    {
+        let installedApp = self.app.installedApp
+        let currentVersionID = self.app.latestAvailableVersion?.versionID
+
+        var seenVersionIDs = Set<String>()
+        var entries: [(channel: ReleaseTrackType, version: AppVersion)] = []
+
+        for track in self.app.releaseTracks ?? []
+        {
+            // Source refreshes delete and re-create these objects while the page is open, and this
+            // runs from a managed-object-changed notification.
+            guard !track.isDeleted, track.managedObjectContext?.deletedObjects.contains(track) == false else { continue }
+
+            for version in track.releases ?? []
+            {
+                guard !version.isDeleted, version.managedObjectContext?.deletedObjects.contains(version) == false else { continue }
+                guard version.isSupported else { continue }
+
+                // The version at the top of the page is already one tap away.
+                guard version.versionID != currentVersionID else { continue }
+                guard seenVersionIDs.insert(version.versionID).inserted else { continue }
+                entries.append((track.type, version))
+            }
+        }
+
+        entries.sort { $0.version.date > $1.version.date }
+
+        return entries.prefix(20).map { entry in
+            AppVersionsCard.Entry(
+                version: entry.version,
+                channel: entry.channel,
+                isInstalled: installedApp?.matches(entry.version) ?? false
+            )
+        }
+    }
+
+    private func layoutVersionsFooter()
+    {
+        guard let hostingController = self.versionsHostingController,
+              let footerView = self.tableView.tableFooterView else { return }
+
+        let width = self.tableView.bounds.width > 0 ? self.tableView.bounds.width : self.view.bounds.width
+        guard width > 0 else { return }
+
+        let size = self.fittingSize(for: hostingController, width: width)
+        let height = ceil(size.height)
+        guard abs(footerView.frame.height - height) > 0.5 || abs(footerView.frame.width - width) > 0.5 else { return }
+
+        UIView.performWithoutAnimation {
+            footerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+            // Re-assigning the footer is what makes the table pick up the new height.
+            self.tableView.tableFooterView = footerView
+        }
+    }
+
+    private func fittingSize(for hostingController: UIHostingController<AppVersionsCard>, width: CGFloat) -> CGSize
+    {
+        let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+        if #available(iOS 16.0, *)
+        {
+            return hostingController.sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude))
+        }
+        else
+        {
+            hostingController.view.frame.size.width = width
+            return hostingController.view.systemLayoutSizeFitting(
+                targetSize,
+                withHorizontalFittingPriority: .required,
+                verticalFittingPriority: .fittingSizeLevel
+            )
         }
     }
 }
@@ -170,6 +291,117 @@ private extension AppContentViewController
         // Disable animations to prevent some potentially strange ones.
         UIView.performWithoutAnimation {
             self.tableView.reloadRows(at: [indexPath], with: .none)
+        }
+    }
+}
+
+private struct AppVersionsCard: View
+{
+    struct Entry: Identifiable
+    {
+        let version: AppVersion
+        let channel: ReleaseTrackType
+        let isInstalled: Bool
+
+        var id: String {
+            "\(self.channel.rawValue)|\(self.version.versionID)"
+        }
+    }
+
+    let entries: [Entry]
+    let tintColor: Color
+    let onSelect: (AppVersion) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Other Versions")
+                    .font(.system(size: 22, weight: .bold))
+                Text("Install a specific build from another channel.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            VStack(spacing: 0) {
+                ForEach(Array(self.entries.enumerated()), id: \.element.id) { index, entry in
+                    self.row(for: entry)
+                    if index < self.entries.count - 1
+                    {
+                        Divider()
+                            .padding(.leading, 52)
+                    }
+                }
+            }
+            .background(.regularMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 28)
+        .padding(.bottom, 12)
+    }
+
+    private func row(for entry: Entry) -> some View {
+        SwiftUI.Button(action: { self.onSelect(entry.version) }) {
+            HStack(spacing: 12) {
+                Image(systemName: self.symbolName(for: entry.channel))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(self.tintColor)
+                    .frame(width: 24)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: entry.version.localizedVersion)
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(.primary)
+
+                    Text(verbatim: "\(self.channelName(for: entry.channel)) · \(Date().relativeDateString(since: entry.version.date))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer(minLength: 8)
+
+                if entry.isInstalled
+                {
+                    Text("Installed")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.secondary)
+                }
+                else
+                {
+                    Text("Install")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(self.tintColor)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(entry.isInstalled)
+    }
+
+    private func channelName(for channel: ReleaseTrackType) -> String {
+        switch channel
+        {
+        case .stable: return NSLocalizedString("Stable", comment: "")
+        case .nightly: return NSLocalizedString("Beta", comment: "")
+        case .develop: return NSLocalizedString("Develop", comment: "")
+        case .alpha: return NSLocalizedString("Alpha", comment: "")
+        case .local: return NSLocalizedString("Local", comment: "")
+        case .unknown: return NSLocalizedString("Other", comment: "")
+        }
+    }
+
+    private func symbolName(for channel: ReleaseTrackType) -> String {
+        switch channel
+        {
+        case .stable: return "checkmark.seal.fill"
+        case .nightly: return "moon.stars.fill"
+        case .develop: return "hammer.fill"
+        case .alpha: return "flask.fill"
+        case .local: return "desktopcomputer"
+        case .unknown: return "shippingbox.fill"
         }
     }
 }

@@ -1244,6 +1244,17 @@
         }
       }
     },
+    "Alpha": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alpha 版"
+          }
+        }
+      }
+    },
     "An account configuration file was found. Enter password to import.": {
       "extractionState": "manual",
       "localizations": {
@@ -2131,6 +2142,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "成为支持者！"
+          }
+        }
+      }
+    },
+    "Beta": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试版"
           }
         }
       }
@@ -4430,6 +4452,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "描述"
+          }
+        }
+      }
+    },
+    "Develop": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发版"
           }
         }
       }
@@ -7525,6 +7558,17 @@
         }
       }
     },
+    "Install a specific build from another channel.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从其他通道安装指定版本的构建。"
+          }
+        }
+      }
+    },
     "Install and refresh apps using an on-device local loopback VPN tunnel.": {
       "extractionState": "manual",
       "localizations": {
@@ -9435,6 +9479,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "其他选项…"
+          }
+        }
+      }
+    },
+    "Other Versions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他版本"
           }
         }
       }
@@ -12658,6 +12713,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "源决定 AirStore 里有哪些应用可以安装。添加的源越多，可用的应用就越多。\n\n不知道从哪开始？试试添加我们推荐的源！"
+          }
+        }
+      }
+    },
+    "Stable": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稳定版"
           }
         }
       }

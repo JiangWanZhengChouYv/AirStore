@@ -95,11 +95,11 @@ extension StoreApp {
     //MARK: - relationships
     @NSManaged @objc(releaseTracks) public private(set) var _releaseTracks: NSOrderedSet?
     
-    private var releaseTracks: [ReleaseTrack]?{
+    public var releaseTracks: [ReleaseTrack]?{
         return _releaseTracks?.array as? [ReleaseTrack]
     }
     
-    private func releaseTrackFor(track: String) -> ReleaseTrack? {
+    public func releaseTrackFor(track: String) -> ReleaseTrack? {
         return releaseTracks?.first(where: { $0.type.rawValue == track })
     }
     
