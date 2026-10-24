@@ -256,6 +256,13 @@ public class DatabaseManager: @unchecked Sendable
             {
                 installedApp = app
             }
+            else if let existing = InstalledApp.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), localAppBundle.bundleIdentifier), in: context)
+            {
+                // Something installed us without going through our own pipeline -- iLoader, a manual
+                // ipa, an older build -- so the row exists but is not attached to the built-in store
+                // app. Adopt it instead of creating a second one.
+                installedApp = existing
+            }
             else
             {
                 //TODO: Support build versions.
@@ -302,13 +309,17 @@ public class DatabaseManager: @unchecked Sendable
                     
                 } while(false)
                 
-                installedApp.storeApp = storeApp
                 // Persist the release track for newly created self-app entries
                 if installedApp.releaseTrack == nil,
                    let trackEntity = storeApp.latestSupportedVersion?.releaseTrack {
                     installedApp.releaseTrack = trackEntity
                 }
             }
+            
+            // Set on every path, not just on creation: an app installed outside our own pipeline has
+            // a row that was never attached, and `hasUpdate` bails out as soon as storeApp is nil --
+            // which is exactly what shows as 侧载 in My Apps.
+            installedApp.storeApp = storeApp
             
             /* App Extensions */
             var installedExtensions = Set<InstalledExtension>()

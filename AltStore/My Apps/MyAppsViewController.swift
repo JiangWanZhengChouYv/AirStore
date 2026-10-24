@@ -90,6 +90,10 @@ class MyAppsViewController: UICollectionViewController
     {
         super.viewDidLoad()
         
+        // The footer under the app list ("View App IDs") comes straight from the storyboard and is
+        // not a cell, so nothing else looks its text up.
+        self.view.localizingStoryboardText()
+        
         // Allows us to intercept delegate callbacks.
         self.updatesDataSource.fetchedResultsController.delegate = self
         self.activeAppsDataSource.fetchedResultsController.delegate = self

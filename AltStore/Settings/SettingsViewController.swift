@@ -86,7 +86,6 @@ extension SettingsViewController
         case certificateManagement  // row 9 - Certificate Management
         case backupAndRestore       // row 10 - Backup & Restore
         case userCustomizations     // row 11 - User Customizations
-        case checkForUpdates        // row 12 - Check for Updates (built in code, not in the storyboard)
 
         static var allCases: [AdvancedSettingsRow] {
             var rows: [AdvancedSettingsRow] = [.sendFeedback, .refreshAttempts, .refreshSideJITServer, .pairingFileManagement]
@@ -100,8 +99,7 @@ extension SettingsViewController
                 .profileManagement,
                 .certificateManagement,
                 .backupAndRestore,
-                .userCustomizations,
-                .checkForUpdates
+                .userCustomizations
             ])
             return rows
         }
@@ -110,6 +108,7 @@ extension SettingsViewController
     private enum BetaTestingRow: Int, CaseIterable {
         case betaUpdates
         case betaTrack
+        case checkForUpdates    // built in code, sits under the track picker
     }
 
     private enum DiagnosticsRow: Int, CaseIterable
@@ -231,6 +230,10 @@ final class SettingsViewController: UITableViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        
+        // Cells and section headers look their text up again as they are configured; the table's own
+        // footer view ("Follow AirStore for updates") is none of those, so it has to be walked here.
+        self.view.localizingStoryboardText()
         
         #if !os(tvOS)
         // --- iOS 26 fix ---
@@ -966,18 +969,17 @@ extension SettingsViewController
         if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
             return AccountVerificationRow.preferredHeight
         }
-        let effectiveIndexPath: IndexPath
-        if Section.allCases[indexPath.section] == .advancedSettings
+        if Section.allCases[indexPath.section] == .betaTesting,
+           indexPath.row == BetaTestingRow.checkForUpdates.rawValue
         {
+            // This row is built in code, so there is no storyboard cell to measure. Borrow the
+            // height of the one above it, which is what it has to match to look like a pair.
+            return super.tableView(tableView, heightForRowAt: IndexPath(row: BetaTestingRow.betaTrack.rawValue, section: indexPath.section))
+        }
+
+        let effectiveIndexPath: IndexPath
+        if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
-
-            if row == .checkForUpdates
-            {
-                // This row is built in code, so there is no storyboard cell to measure. Borrow the
-                // height of the one above it, which is what it has to match to look like a pair.
-                return super.tableView(tableView, heightForRowAt: IndexPath(row: AdvancedSettingsRow.userCustomizations.rawValue, section: indexPath.section))
-            }
-
             effectiveIndexPath = IndexPath(row: row.rawValue, section: indexPath.section)
         } else {
             effectiveIndexPath = indexPath
@@ -997,12 +999,12 @@ extension SettingsViewController
                 actionCell.backgroundConfiguration = .clear()
             }
         }
-        else if Section.allCases[indexPath.section] == .advancedSettings,
-                indexPath.row == AdvancedSettingsRow.allCases.count - 2,
+        else if Section.allCases[indexPath.section] == .betaTesting,
+                indexPath.row == BetaTestingRow.betaTrack.rawValue,
                 let insetCell = cell as? InsetGroupTableViewCell
         {
-            // The storyboard draws this row as the end of the group; once Check for Updates is
-            // appended below it, the group actually ends there, so the corners move.
+            // The storyboard draws the track picker as the end of the group; once Check for Updates
+            // is appended below it, the group actually ends there, so the corners move.
             insetCell.style = .middle
         }
     }
@@ -1012,15 +1014,15 @@ extension SettingsViewController
         if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
             return 0
         }
+        if Section.allCases[indexPath.section] == .betaTesting,
+           indexPath.row == BetaTestingRow.checkForUpdates.rawValue
+        {
+            return super.tableView(tableView, indentationLevelForRowAt: IndexPath(row: BetaTestingRow.betaTrack.rawValue, section: indexPath.section))
+        }
+
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
-
-            if row == .checkForUpdates
-            {
-                return super.tableView(tableView, indentationLevelForRowAt: IndexPath(row: AdvancedSettingsRow.userCustomizations.rawValue, section: indexPath.section))
-            }
-
             effectiveIndexPath = IndexPath(row: row.rawValue, section: indexPath.section)
         } else {
             effectiveIndexPath = indexPath
@@ -1038,6 +1040,7 @@ extension SettingsViewController
         case .account: return (self.activeTeam == nil) ? 0 : (self.accountStatus == .completed ? 3 : 4)
         case .appRefresh: return AppRefreshRow.allCases.count
         case .advancedSettings: return AdvancedSettingsRow.allCases.count
+        case .betaTesting: return BetaTestingRow.allCases.count
         default: return super.tableView(tableView, numberOfRowsInSection: section.rawValue)
         }
     }
@@ -1053,19 +1056,21 @@ extension SettingsViewController
             return cell
         }
         
-        if Section.allCases[indexPath.section] == .advancedSettings,
-           AdvancedSettingsRow.allCases[indexPath.row] == .checkForUpdates
+        if Section.allCases[indexPath.section] == .betaTesting,
+           indexPath.row == BetaTestingRow.checkForUpdates.rawValue
         {
-            // The storyboard has twelve cells in this section; this one is ours, so it is built here
-            // instead of adding a thirteenth cell to a file nobody can review as text.
+            // The storyboard has two cells in this section; this one is ours, so it is built here
+            // instead of adding a third cell to a file nobody can review as text.
             let cell = InsetGroupTableViewCell(style: .default, reuseIdentifier: "checkForUpdates")
             cell.style = .bottom
             cell.isSelectable = true
+            cell.backgroundColor = UIColor(white: 1, alpha: 0.15)
             cell.textLabel?.text = self.isCheckingForUpdates
                 ? NSLocalizedString("Checking for Updates…", comment: "")
                 : NSLocalizedString("Check for Updates", comment: "")
+            cell.textLabel?.textColor = .white
             cell.imageView?.image = UIImage(systemName: "arrow.triangle.2.circlepath")
-            cell.imageView?.tintColor = .altPrimary
+            cell.imageView?.tintColor = .white
             return cell
         }
 
@@ -1407,10 +1412,15 @@ extension SettingsViewController
                 vc.title = NSLocalizedString("User Customizations", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
                 
-            case .checkForUpdates:
-                self.checkForUpdates()
-
             case .refreshAttempts: break
+            }
+        
+        case .betaTesting:
+            // The two storyboard rows own their own controls (a switch and a popup button), so the
+            // only selectable row here is ours.
+            if indexPath.row == BetaTestingRow.checkForUpdates.rawValue
+            {
+                self.checkForUpdates()
             }
         
         case .diagnostics:
