@@ -96,7 +96,8 @@ final class FetchSourceOperation: BaseStandaloneOperation<StandaloneOperationCon
     /// to the origin, so a miss costs one extra round trip and never a failed fetch.
     private func fetchSourceData(mirroring url: URL) async throws -> (Data, URLResponse)
     {
-        guard let mirror = Self.jsdelivrMirror(for: url) else {
+        let mirror = url.mirroredThroughCDN
+        guard mirror != url else {
             return try await self.fetchSourceData(with: self.request(for: url))
         }
 
@@ -130,33 +131,6 @@ final class FetchSourceOperation: BaseStandaloneOperation<StandaloneOperationCon
         request.cachePolicy = .reloadIgnoringLocalCacheData     // don't use local caching
         request.timeoutInterval = AppConstants.Sources.fetchTimeout
         return request
-    }
-
-    /// `raw.githubusercontent.com/OWNER/REPO/REF/PATH` becomes `cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH`.
-    ///
-    /// Only that host and only files: jsDelivr will not proxy release assets or anything above its
-    /// 20 MB limit, and third-party hosts are none of its business.
-    static func jsdelivrMirror(for url: URL) -> URL?
-    {
-        guard url.host?.lowercased() == "raw.githubusercontent.com" else { return nil }
-
-        let components = url.pathComponents.filter { $0 != "/" }
-        guard components.count >= 4 else { return nil }
-
-        let owner = components[0]
-        let repository = components[1]
-        let reference = components[2]
-        let path = components[3...].joined(separator: "/")
-
-        // A branch name can itself contain slashes, and there is no way to tell where the ref ends
-        // and the path begins, so leave those to the origin rather than guess a URL that 404s.
-        guard !reference.contains("/") else { return nil }
-
-        var mirror = URLComponents()
-        mirror.scheme = "https"
-        mirror.host = "cdn.jsdelivr.net"
-        mirror.path = "/gh/\(owner)/\(repository)@\(reference)/\(path)"
-        return mirror.url
     }
 
     private func fetchSourceData(with request: URLRequest) async throws -> (Data, URLResponse) {

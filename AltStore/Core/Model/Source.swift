@@ -182,8 +182,8 @@ public class Source: BaseEntity, Decodable
             self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
             self.websiteURL = try container.decodeIfPresent(URL.self, forKey: .websiteURL)
             self.localizedDescription = try container.decodeIfPresent(String.self, forKey: .localizedDescription)
-            self.iconURL = try container.decodeIfPresent(URL.self, forKey: .iconURL)
-            self.headerImageURL = try container.decodeIfPresent(URL.self, forKey: .headerImageURL)
+            self.iconURL = try container.decodeIfPresent(URL.self, forKey: .iconURL)?.mirroredThroughCDN
+            self.headerImageURL = try container.decodeIfPresent(URL.self, forKey: .headerImageURL)?.mirroredThroughCDN
             self.patreonURL = try container.decodeIfPresent(URL.self, forKey: .patreonURL)
             
             if let tintColorHex = try container.decodeIfPresent(String.self, forKey: .tintColor)

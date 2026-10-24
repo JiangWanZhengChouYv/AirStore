@@ -225,7 +225,29 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
     
     func downloadFile(from downloadURL: URL) async throws -> URL {
         debugLog("[DownloadAppOperation] download started: \(downloadURL)")
-        let fileURL: URL = try await withCheckedThrowingContinuation { continuation in
+
+        // Mirrors first, origin last: the origin is what stalls for minutes on the networks this app
+        // is used on, and a dead mirror only costs the time it takes to fail.
+        var lastError: Error?
+        for candidate in downloadURL.releaseDownloadCandidates {
+            do {
+                let fileURL = try await self.download(candidate)
+                if candidate != downloadURL {
+                    debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?").")
+                }
+                self.setProgress(75)
+                return fileURL
+            } catch {
+                lastError = error
+                debugLog("[DownloadAppOperation] Download failed via \(candidate.host ?? "?"): \(error.localizedDescription)")
+            }
+        }
+
+        throw lastError ?? URLError(.badURL)
+    }
+
+    private func download(_ downloadURL: URL) async throws -> URL {
+        try await withCheckedThrowingContinuation { continuation in
             let delegate = DownloadProgressDelegate(progress: self.progress) { result in
                 continuation.resume(with: result)
             }
@@ -235,8 +257,6 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             self.activeDownloadTask = task
             task.resume()
         }
-        self.setProgress(75)
-        return fileURL
     }
     
     

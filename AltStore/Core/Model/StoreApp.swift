@@ -299,7 +299,7 @@ public class StoreApp: BaseEntity, Decodable
             self.developerName = try container.decode(String.self, forKey: .developerName)
             self.localizedDescription = try container.decode(String.self, forKey: .localizedDescription)
             do {
-                self.iconURL = try container.decode(URL.self, forKey: .iconURL)
+                self.iconURL = try container.decode(URL.self, forKey: .iconURL).mirroredThroughCDN
             } catch {
                 if let rawURLString = try? container.decode(String.self, forKey: .iconURL),
                    let placeholderURL = URL(string: "about:blank") {
@@ -341,7 +341,7 @@ public class StoreApp: BaseEntity, Decodable
                 let legacyAspectRatio = CGSize(width: 750, height: 1334)
                 
                 appScreenshots = screenshotURLs.map { imageURL in
-                    let screenshot = AppScreenshot(imageURL: imageURL, size: legacyAspectRatio, deviceType: .iphone, context: context)
+                    let screenshot = AppScreenshot(imageURL: imageURL.mirroredThroughCDN, size: legacyAspectRatio, deviceType: .iphone, context: context)
                     return screenshot
                 }
 
