@@ -206,7 +206,10 @@ draw_finished() {
   case "$conclusion" in
     success) colour="$C_GRN"; state="通过" ;;
     failure) colour="$C_RED"; state="失败" ;;
-    *)       colour="$C_DIM"; state="结束" ;;
+    "")        colour="$C_YEL"; state="收尾" ;;   # completed, conclusion not published yet
+    cancelled) colour="$C_DIM"; state="取消" ;;   # superseded by a newer push on the same branch
+    skipped)   colour="$C_DIM"; state="跳过" ;;
+    *)         colour="$C_DIM"; state="结束" ;;
   esac
 
   local elapsed=$(( $(to_epoch "$updated") - $(to_epoch "$started") ))
@@ -256,6 +259,9 @@ build_frame() {
     [ -z "$fields" ] && continue
     status=${fields%%$'\037'*}
     [ "$status" != "completed" ] && continue
+    case "$fields" in
+      *$'\037'$'\037'*) ANY_RUNNING=1 ;;   # conclusion still empty: poll again rather than call it 结束
+    esac
     FRAME="${FRAME}$(draw_finished "$id" "$fields")"$'\n'
     shown=$(( shown + 1 ))
   done
