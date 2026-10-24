@@ -41,6 +41,11 @@ final class DownloadProgressHUD
             self.currentName = appName
             self.titleLabel?.text = String(format: NSLocalizedString("Downloading %@…", comment: ""), appName)
         }
+
+        // Retried here as well as at the start: the first update can arrive before a window exists,
+        // and the install flow presents its own full-screen progress layer afterwards, so the card
+        // has to be pulled back to the front on every tick or it ends up underneath it.
+        self.installIfNeeded()
         guard self.container != nil else { return }
         self.setFraction(fraction)
     }
@@ -64,7 +69,11 @@ final class DownloadProgressHUD
 
     private func installIfNeeded()
     {
-        guard self.container == nil else { return }
+        if let container = self.container, let superview = container.superview
+        {
+            superview.bringSubviewToFront(container)
+            return
+        }
 
         let window = UIApplication.shared.connectedScenes
             .compactMap { ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) }
