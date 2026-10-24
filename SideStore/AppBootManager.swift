@@ -107,7 +107,11 @@ public final class AppBootManager {
     public nonisolated func performBootSequence() async {
         debugLog("[AppBootManager] performBootSequence() entered")
         defer { debugLog("[AppBootManager] performBootSequence() exited") }
-        
+
+        // Before minimuxer reads the pairing file, pick up anything dropped into the shared folder
+        // and publish anything that only exists here.
+        PairingFileManager.shared.syncWithSharedDirectory()
+
         async let jitCheck: Void = {
             debugLog("[AppBootManager] performBootSequence(): JIT check starting")
             defer { debugLog("[AppBootManager] performBootSequence(): JIT check completed") }

@@ -23,6 +23,7 @@ struct PairingFileManagementView: View {
             VStack(alignment: .leading, spacing: 24) {
                 activeProtocolSection
                 pairingFilesSection
+                sharedFolderSection
                 pairingMethodsSection
                 managementSection
             }
@@ -86,6 +87,12 @@ struct PairingFileManagementView: View {
                 return Alert(
                     title: Text("Import Error"),
                     message: Text(LocalizedStringKey(msg)),
+                    dismissButton: .default(Text("OK"))
+                )
+            case .syncResult(let msg):
+                return Alert(
+                    title: Text("Shared Folder"),
+                    message: Text(msg),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -466,6 +473,53 @@ struct PairingFileManagementView: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 40)
+    }
+
+    private var sharedFolderSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("SHARED FOLDER")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Color.white.opacity(0.6))
+                .padding(.horizontal, 4)
+
+            VStack(spacing: 0) {
+                sharedFolderRow(
+                    icon: "square.and.arrow.up",
+                    title: "Export to Shared Folder",
+                    action: viewModel.exportToSharedFolder
+                )
+                divider
+                sharedFolderRow(
+                    icon: "square.and.arrow.down",
+                    title: "Import from Shared Folder",
+                    action: viewModel.importFromSharedFolder
+                )
+            }
+            .background(Color.settingsRowBackground)
+            .cornerRadius(14)
+
+            Text("AirStore syncs these files with its shared App Group folder at launch. Importing places a copy there immediately.")
+                .font(.system(size: 12))
+                .foregroundColor(Color.white.opacity(0.5))
+                .padding(.horizontal, 4)
+                .padding(.top, 4)
+        }
+    }
+
+    private func sharedFolderRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        SwiftUI.Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                Text(title)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .frame(height: 50)
+        }
     }
 
     private var pairingMethodsSection: some View {

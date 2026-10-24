@@ -254,6 +254,28 @@
         }
       }
     },
+    "%lld pairing file(s) synced with the shared folder.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已与共享文件夹同步 %lld 个配对文件。"
+          }
+        }
+      }
+    },
+    "%lld pairing file(s) synced, %lld failed: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已同步 %lld 个配对文件，%lld 个失败：%@"
+          }
+        }
+      }
+    },
     "**Settings -> apps -> AirStore -> LocalNetworkAccess = toggle on**": {
       "extractionState": "manual",
       "localizations": {
@@ -1075,6 +1097,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "侧店设置已完成。您可以现在安装并刷新应用。"
+          }
+        }
+      }
+    },
+    "AirStore syncs these files with its shared App Group folder at launch. Importing places a copy there immediately.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 启动时会与共享 App Group 文件夹双向同步这些文件；导入时会立即放置一份到该文件夹。"
           }
         }
       }
@@ -5875,6 +5908,17 @@
         }
       }
     },
+    "Export to Shared Folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出到共享文件夹"
+          }
+        }
+      }
+    },
     "Export/Share": {
       "extractionState": "manual",
       "localizations": {
@@ -7378,6 +7422,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "导入文件"
+          }
+        }
+      }
+    },
+    "Import from Shared Folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从共享文件夹导入"
           }
         }
       }
@@ -11397,6 +11452,17 @@
         }
       }
     },
+    "SHARED FOLDER": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共享文件夹"
+          }
+        }
+      }
+    },
     "SIDESIGN": {
       "extractionState": "manual",
       "localizations": {
@@ -12108,6 +12174,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "分享 profile"
+          }
+        }
+      }
+    },
+    "Shared Folder": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共享文件夹"
           }
         }
       }

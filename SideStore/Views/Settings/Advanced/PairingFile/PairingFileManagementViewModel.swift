@@ -20,6 +20,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
         case resetConfirmation
         case resetCompleted
         case importError(String)
+        case syncResult(String)
 
         public var id: String {
             switch self {
@@ -27,6 +28,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
             case .resetConfirmation: return "reset"
             case .resetCompleted: return "resetCompleted"
             case .importError(let msg): return "importError_\(msg)"
+            case .syncResult(let msg): return "syncResult_\(msg)"
             }
         }
     }
@@ -214,5 +216,32 @@ public final class PairingFileManagementViewModel: ObservableObject {
         PairingFileManager.shared.resetAllPairingFiles()
         refresh()
         activeAlert = .resetCompleted
+    }
+
+    public func exportToSharedFolder() {
+        presentSyncResult(PairingFileManager.shared.exportAllPairingFilesToSharedDirectory())
+    }
+
+    public func importFromSharedFolder() {
+        presentSyncResult(PairingFileManager.shared.importAllPairingFilesFromSharedDirectory())
+    }
+
+    private func presentSyncResult(_ summary: PairingSyncSummary) {
+        refresh()
+        let message: String
+        if summary.failed.isEmpty {
+            message = String(
+                format: NSLocalizedString("%lld pairing file(s) synced with the shared folder.", comment: ""),
+                summary.movedCount
+            )
+        } else {
+            message = String(
+                format: NSLocalizedString("%lld pairing file(s) synced, %lld failed: %@", comment: ""),
+                summary.movedCount,
+                summary.failed.count,
+                summary.failed.joined(separator: ", ")
+            )
+        }
+        activeAlert = .syncResult(message)
     }
 }
