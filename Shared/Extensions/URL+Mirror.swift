@@ -31,20 +31,25 @@ public extension URL
         return mirror.url ?? self
     }
 
-    /// Public mirrors of github.com, in the order worth trying.
+    /// Public mirrors of github.com, best first.
     ///
-    /// jsDelivr refuses release assets, and release assets are what the app update actually
-    /// downloads -- 28 MB from objects.githubusercontent.com, which on many networks never finishes.
-    /// Measured from such a network: ghproxy.net answers in seconds, gh-proxy.com is slow but alive,
-    /// ghfast.top was unreachable, and the origin itself did not connect at all.
+    /// jsDelivr refuses release assets (its GitHub file limit is 20 MB; this asset is 28 MB), so
+    /// these are the routes the update actually has. Measured 2026-10-24 against the whole develop
+    /// asset: gh-proxy.com 5.2 MB/s, ghfast.top 1.5 MB/s, ghproxy.net 0.09 MB/s (still 20 MB short
+    /// after 90 s). The origin answered an 8 MB range at 4-5 MB/s but dropped a full attempt, and
+    /// did not connect at all without a proxy on that line.
     private static let releaseMirrors = [
-        "https://ghproxy.net/",
-        "https://gh-proxy.com/",
-        "https://ghfast.top/"
+        "https://gh-proxy.com/"
     ]
 
-    /// The same release asset through each mirror, best first, ending with the original URL so a
-    /// network that reaches GitHub directly still works.
+    /// Tried only after the origin: alive, but measured slower than going straight to GitHub.
+    private static let lastResortReleaseMirrors = [
+        "https://ghfast.top/",
+        "https://ghproxy.net/"
+    ]
+
+    /// The same release asset through each route, best first. The origin sits second because it
+    /// was faster than the fallbacks whenever it answered; the last-resort mirrors end the list.
     var releaseDownloadCandidates: [URL]
     {
         guard self.host?.lowercased() == "github.com", self.path.contains("/releases/download/") else {
@@ -52,6 +57,7 @@ public extension URL
         }
 
         let mirrored = URL.releaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
-        return mirrored + [self]
+        let lastResort = URL.lastResortReleaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
+        return mirrored + [self] + lastResort
     }
 }

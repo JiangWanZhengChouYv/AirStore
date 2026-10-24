@@ -230,8 +230,8 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         let hudName = self.appName
         await MainActor.run { DownloadProgressHUD.shared.begin(id: taskID, appName: hudName, url: downloadURL) }
 
-        // Mirrors first, origin last: the origin is what stalls for minutes on the networks this app
-        // is used on, and a dead mirror only costs the time it takes to fail.
+        // Best measured route first, origin second, slow mirrors last. A dead candidate only costs
+        // the time it takes to fail, and the 20 s idle timeout keeps a blocked origin from stalling.
         var lastError: Error?
         for candidate in downloadURL.releaseDownloadCandidates {
             var resumeData: Data?
@@ -268,7 +268,11 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             let delegate = DownloadProgressDelegate(progress: self.progress, taskID: taskID) { result in
                 continuation.resume(with: result)
             }
-            let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+            let configuration = URLSessionConfiguration.default
+            // Idle timeout, not total: slow-but-alive mirrors keep sending, while a blocked host
+            // gives up in time for the next candidate.
+            configuration.timeoutIntervalForRequest = 20
+            let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
             let task: URLSessionDownloadTask
             if let resumeData {
                 task = session.downloadTask(withResumeData: resumeData)
