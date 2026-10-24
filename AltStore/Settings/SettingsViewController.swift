@@ -1059,18 +1059,27 @@ extension SettingsViewController
         if Section.allCases[indexPath.section] == .betaTesting,
            indexPath.row == BetaTestingRow.checkForUpdates.rawValue
         {
-            // The storyboard has two cells in this section; this one is ours, so it is built here
-            // instead of adding a third cell to a file nobody can review as text.
+            // Built here rather than as a third storyboard cell, but laid out like the two above it:
+            // bold 17pt white label, 30pt margin, no icon. The card background comes from
+            // InsetGroupTableViewCell itself, so it matches without any extra work.
             let cell = InsetGroupTableViewCell(style: .default, reuseIdentifier: "checkForUpdates")
             cell.style = .bottom
             cell.isSelectable = true
             cell.backgroundColor = UIColor(white: 1, alpha: 0.15)
-            cell.textLabel?.text = self.isCheckingForUpdates
+            cell.layoutMargins = UIEdgeInsets(top: 8, left: 30, bottom: 8, right: 30)
+
+            let label = UILabel()
+            label.translatesAutoresizingMaskIntoConstraints = false
+            label.font = .boldSystemFont(ofSize: 17)
+            label.textColor = .white
+            label.text = self.isCheckingForUpdates
                 ? NSLocalizedString("Checking for Updates…", comment: "")
                 : NSLocalizedString("Check for Updates", comment: "")
-            cell.textLabel?.textColor = .white
-            cell.imageView?.image = UIImage(systemName: "arrow.triangle.2.circlepath")
-            cell.imageView?.tintColor = .white
+            cell.contentView.addSubview(label)
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(equalTo: cell.contentView.layoutMarginsGuide.leadingAnchor),
+                label.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+            ])
             return cell
         }
 

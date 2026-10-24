@@ -215,12 +215,19 @@ public class DatabaseManager: @unchecked Sendable
             
             let altStoreSource: Source
             
-            // The feed this slot used to point at lists upstream SideStore as an update for our
-            // bundle id, and installing that replaces AirStore and loses the sign-in fix. Anyone who
-            // has it gets it deleted rather than migrated -- there is nothing in it worth keeping.
-            if let retired = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.retiredIdentifier), in: context)
+            // Two kinds of leftovers get dropped rather than migrated: the upstream feed this slot
+            // used to point at (it lists SideStore as an update for our bundle id, and installing
+            // that replaces AirStore), and any other branch of our own feed left behind by the
+            // subscription helper this replaced -- those rows have the right name, no apps, and a
+            // date from whenever they last worked.
+            for source in Source.all(satisfying: nil, in: context)
             {
-                context.delete(retired)
+                let isRetiredUpstream = source.identifier == Source.retiredIdentifier
+                let isStaleOwnFeed = source.identifier != Source.altStoreIdentifier && source.isAirStoreOfficial
+                if isRetiredUpstream || isStaleOwnFeed
+                {
+                    context.delete(source)
+                }
             }
             
             if let source = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.altStoreIdentifier), in: context)

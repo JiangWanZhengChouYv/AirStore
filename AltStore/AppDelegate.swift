@@ -178,6 +178,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 try await DatabaseManager.shared.start()
                 debugLog("Started DatabaseManager.")
                 
+                // The built-in feed is created with nothing behind it, and nothing else fetches it at
+                // launch (the only automatic fetch is iOS background refresh). Left alone it shows up
+                // in the Sources list with no apps and no icon, which reads as broken rather than new.
+                let sourceContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+                let builtInSourceIsEmpty = sourceContext.performAndWait { () -> Bool in
+                    let predicate = NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.altStoreIdentifier)
+                    guard let source = Source.first(satisfying: predicate, in: sourceContext) else { return false }
+                    return source.apps.isEmpty
+                }
+                if builtInSourceIsEmpty
+                {
+                    _ = try? await AppManager.shared.fetchSource(sourceURL: Source.altStoreSourceURL, managedObjectContext: sourceContext)
+                }
+                
                 debugLog("Reconciling any staged drafts started...")
                 await Self.reconcileSelfReinstallationIfNeeded()
                 debugLog("Reconcile any staged drafts completed.")

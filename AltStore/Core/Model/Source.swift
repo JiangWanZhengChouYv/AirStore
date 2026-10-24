@@ -31,8 +31,16 @@ public extension Source
      /// The built-in feed is first-party, so it is presented from the bundle rather than from
      /// whatever the JSON happens to call itself -- the name in the database stays English for
      /// anyone reading it programmatically, and the icon never has to come over the network.
+     ///
+     /// Rows created before this became the built-in slot point at other branches of the same file,
+     /// so the path is what decides: they are ours too, just stale, and saying so is what lets the
+     /// cleanup in DatabaseManager recognise them.
      var isAirStoreOfficial: Bool {
-         return self.identifier == Source.altStoreIdentifier
+         if self.identifier == Source.altStoreIdentifier { return true }
+         if self.sourceURL.path.hasSuffix("/source/airstore-source.json") { return true }
+         // Rows written before either of those existed still carry a name only this code has ever
+         // used, and nothing else on a device is called that.
+         return ["AirStore Official", "AirStore Offical", "SideStore Offical"].contains(self.name)
      }
 
      var displayName: String {
