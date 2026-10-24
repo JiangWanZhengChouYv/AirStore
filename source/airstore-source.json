@@ -9,23 +9,23 @@
       "bundleIdentifier": "com.SideStore.SideStore",
       "developerName": "JiangWanZhengChouYv",
       "subtitle": "Sideload and refresh apps with your own Apple ID",
-      "iconURL": "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
+      "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
       "screenshotURLs": [],
-      "version": "0.8.1-develop-20261024.0335.7-79b306ed",
-      "date": "2026-10-24T03:43:04Z",
+      "version": "0.8.1-develop-20261024.0357.10-68107eb4",
+      "date": "2026-10-24T04:04:44Z",
       "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-      "size": 28210975,
-      "sha256": "7ae68aded556caf373e0f65a620cafd42773388d1712cfcc0435018aa67dffba",
-      "localizedDescription": "Development build 0.8.1-develop-20261024.0335.7-79b306ed from commit 79b306ed.",
+      "size": 28220433,
+      "sha256": "f0427152c0c817307da183991fe9c7728680505006515346415313cfc324e22b",
+      "localizedDescription": "Development build 0.8.1-develop-20261024.0357.10-68107eb4 from commit 68107eb4.",
       "versions": [
         {
-          "version": "0.8.1-develop-20261024.0335.7-79b306ed",
-          "date": "2026-10-24T03:43:04Z",
+          "version": "0.8.1-develop-20261024.0357.10-68107eb4",
+          "date": "2026-10-24T04:04:44Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-          "size": 28210975,
-          "sha256": "7ae68aded556caf373e0f65a620cafd42773388d1712cfcc0435018aa67dffba",
-          "localizedDescription": "Development build 0.8.1-develop-20261024.0335.7-79b306ed from commit 79b306ed."
+          "size": 28220433,
+          "sha256": "f0427152c0c817307da183991fe9c7728680505006515346415313cfc324e22b",
+          "localizedDescription": "Development build 0.8.1-develop-20261024.0357.10-68107eb4 from commit 68107eb4."
         },
         {
           "version": "0.8.0",
@@ -41,12 +41,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.1-develop-20261024.0335.7-79b306ed",
-              "date": "2026-10-24T03:43:04Z",
+              "version": "0.8.1-develop-20261024.0357.10-68107eb4",
+              "date": "2026-10-24T04:04:44Z",
               "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-              "size": 28210975,
-              "sha256": "7ae68aded556caf373e0f65a620cafd42773388d1712cfcc0435018aa67dffba",
-              "localizedDescription": "Development build 0.8.1-develop-20261024.0335.7-79b306ed from commit 79b306ed."
+              "size": 28220433,
+              "sha256": "f0427152c0c817307da183991fe9c7728680505006515346415313cfc324e22b",
+              "localizedDescription": "Development build 0.8.1-develop-20261024.0357.10-68107eb4 from commit 68107eb4."
             }
           ]
         },
