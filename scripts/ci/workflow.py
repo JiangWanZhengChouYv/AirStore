@@ -141,11 +141,21 @@ def clean_spm_cache():
 
 def build():
     run("mkdir -p build/logs")
-    run(
-        "set -o pipefail && "
-        "NSUnbufferedIO=YES make -B build "
-        "2>&1 | tee -a build/logs/build.log | xcbeautify --renderer github-actions"
-    )
+    try:
+        run(
+            "set -o pipefail && "
+            "NSUnbufferedIO=YES make -B build "
+            "2>&1 | tee -a build/logs/build.log | xcbeautify --renderer github-actions"
+        )
+    except subprocess.CalledProcessError:
+        # xcbeautify's rendered output drops file paths; print the raw errors so a compiler
+        # timeout can be located without downloading the encrypted build log.
+        subprocess.run(
+            "grep -nE 'error:' build/logs/build.log | tail -30",
+            shell=True,
+            cwd=ROOT,
+        )
+        raise
     run("make fakesign | tee -a build/logs/build.log")
     run("make ipa | tee -a build/logs/build.log")
     run("zip -r -9 ./SideStore.dSYMs.zip ./SideStore.xcarchive/dSYMs")
