@@ -350,10 +350,8 @@ private extension SettingsViewController
 {
     
     private var versionDetailText: String {
-        let info = Bundle.main.infoDictionary
-        let version = (info?["CFBundleShortVersionString"] as? String) ?? "?.?.?"
-        let build = (info?["CFBundleVersion"] as? String) ?? ""
-        return build.isEmpty ? version : "\(version) (\(build))"
+        let build = Bundle.Info.activeBundleBuildVersion ?? ""
+        return build.isEmpty ? Bundle.Info.activeBundleShortVersion : "\(Bundle.Info.activeBundleShortVersion) (\(build))"
     }
 
     private func getVersionAttributedString() -> NSAttributedString {

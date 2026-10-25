@@ -25,11 +25,17 @@ public extension Bundle
     {
         public static let activeBundle: Bundle = Bundle.activeBundle
         public static let activeBundleURL: URL = activeBundle.bundleURL
+        public static let activeBundleShortVersion: String = {
+            (activeBundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "?.?.?"
+        }()
+
+        public static let activeBundleBuildVersion: String? = {
+            activeBundle.infoDictionary?["CFBundleVersion"] as? String
+        }()
+
         public static let activeBundleVersion: String = {
-            let info = activeBundle.infoDictionary
-            let version = (info?["CFBundleShortVersionString"] as? String) ?? "?.?.?"
-            let build = (info?["CFBundleVersion"] as? String).map { " (\($0))" } ?? "(????)"
-            return NSLocalizedString(String(format: "Version %@%@", version, build), comment: "SideStore Version")
+            let build = activeBundleBuildVersion.map { " (\($0))" } ?? "(????)"
+            return NSLocalizedString(String(format: "Version %@%@", activeBundleShortVersion, build), comment: "SideStore Version")
         }()
         public static let activeBundleIdentifier: String = activeBundle.bundleIdentifier!
         public static let storeAppBundleIdentifier = Bundle.storeAppBundleIdentifier

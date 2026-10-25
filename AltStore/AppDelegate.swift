@@ -195,6 +195,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 debugLog("Reconciling any staged drafts started...")
                 await Self.reconcileSelfReinstallationIfNeeded()
                 debugLog("Reconcile any staged drafts completed.")
+
+                await Self.reconcileSelfVersionIfNeeded()
                 
                 await WidgetDataManager.publishCurrentInstalledAppsIfNeeded(in: DatabaseManager.shared.viewContext)
                 
@@ -725,6 +727,36 @@ private extension AppDelegate {
             }
         } else {
             debugLog("[AppDelegate] reconcileSelfReinstallation: BundlePath matched pre-installation path. Reinstallation was not completed or failed.")
+        }
+    }
+
+    /// The bundle on disk is what is actually running. An update installed outside AirStore
+    /// (iLoader, or a manual reinstall) never passes through InstallAppOperation, so the
+    /// InstalledApp row keeps reporting the old version and the update card offers the same build
+    /// again. Reconcile the self row from the running bundle on launch.
+    nonisolated static func reconcileSelfVersionIfNeeded() async
+    {
+        let version = Bundle.Info.activeBundleShortVersion
+        let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+
+        await context.perform {
+            let request = InstalledApp.fetchRequest()
+            request.predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), StoreApp.altstoreAppID)
+            guard let installedApp = try? context.fetch(request).first,
+                  installedApp.version != version else { return }
+
+            debugLog("[AppDelegate] reconcileSelfVersion: installed \(installedApp.version) -> running \(version)")
+            installedApp.version = version
+
+            do
+            {
+                try context.save()
+            }
+            catch
+            {
+                debugLog("[AppDelegate] reconcileSelfVersion: save failed: \(error)")
+            }
         }
     }
 }
