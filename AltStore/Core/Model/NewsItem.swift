@@ -72,7 +72,7 @@ public class NewsItem: BaseEntity, Decodable
             self.tintColor = tintColor
         }
         
-        self.imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)
+        self.imageURL = try container.decodeIfPresent(URL.self, forKey: .imageURL)?.mirroredThroughCDN
         self.externalURL = try container.decodeIfPresent(URL.self, forKey: .externalURL)
         
         // TODO: app specific news should be moved to appEntity (via refactoring)

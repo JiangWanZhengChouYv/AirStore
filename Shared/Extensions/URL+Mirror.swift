@@ -7,28 +7,44 @@ import Foundation
 
 public extension URL
 {
-    /// The same file served through jsDelivr instead of raw.githubusercontent.
+    /// The same file served through jsDelivr instead of GitHub.
     ///
-    /// That host is blocked or crawling on a lot of the networks this app is used on, and it is what
-    /// every source's icons, screenshots and screenshots' thumbnails point at. jsDelivr serves the
-    /// identical file from edge nodes, which is the difference between an icon appearing and a blank
-    /// square. Only that one host is rewritten: release assets and third-party hosts are not
-    /// something jsDelivr proxies, and anything it cannot serve is left exactly as it was.
+    /// raw.githubusercontent is blocked or crawling on a lot of the networks this app is used on,
+    /// and sources point every icon, screenshot and header at it. jsDelivr serves the identical
+    /// file from edge nodes. `github.com/.../raw/...` is the same file behind another host, so it
+    /// is rewritten too. Release assets and other hosts are left alone: jsDelivr does not proxy
+    /// release assets, and its GitHub file limit is 20 MB.
     var mirroredThroughCDN: URL
     {
-        guard self.host?.lowercased() == "raw.githubusercontent.com" else { return self }
+        let host = self.host?.lowercased()
 
-        // /OWNER/REPO/REF/PATH...  ->  cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH...
-        // A branch name containing a slash cannot be told apart from the path, so those resolve to
-        // a URL that 404s and the caller keeps whatever it had.
-        let components = self.pathComponents.filter { $0 != "/" }
-        guard components.count >= 4 else { return self }
+        if host == "raw.githubusercontent.com"
+        {
+            // /OWNER/REPO/REF/PATH...  ->  cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH...
+            // A branch name containing a slash cannot be told apart from the path, so those
+            // resolve to a URL that 404s and the caller keeps whatever it had.
+            let components = self.pathComponents.filter { $0 != "/" }
+            guard components.count >= 4 else { return self }
+            return Self.jsDelivrURL(owner: components[0], repo: components[1], ref: components[2], path: components[3...]) ?? self
+        }
 
-        var mirror = URLComponents()
-        mirror.scheme = "https"
-        mirror.host = "cdn.jsdelivr.net"
-        mirror.path = "/gh/\(components[0])/\(components[1])@\(components[2])/" + components[3...].joined(separator: "/")
-        return mirror.url ?? self
+        if host == "github.com"
+        {
+            // /OWNER/REPO/raw/REF/PATH...  ->  cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH...
+            let components = self.pathComponents.filter { $0 != "/" }
+            guard components.count >= 5, components[2].lowercased() == "raw" else { return self }
+            return Self.jsDelivrURL(owner: components[0], repo: components[1], ref: components[3], path: components[4...]) ?? self
+        }
+
+        return self
+    }
+
+    /// gh-proxy.com's wrapper for any GitHub file.
+    var githubProxyURL: URL?
+    {
+        guard let host = self.host?.lowercased(),
+              ["github.com", "raw.githubusercontent.com", "codeload.github.com"].contains(host) else { return nil }
+        return URL(string: "https://gh-proxy.com/" + self.absoluteString)
     }
 
     /// Public mirrors of github.com, best first.
@@ -48,16 +64,53 @@ public extension URL
         "https://ghproxy.net/"
     ]
 
-    /// The same release asset through each route, best first. The origin sits second because it
-    /// was faster than the fallbacks whenever it answered; the last-resort mirrors end the list.
-    var releaseDownloadCandidates: [URL]
+    /// Every route worth trying for a downloadable GitHub file, best first.
+    ///
+    /// Release assets keep the measured order above. Raw files use jsDelivr first because it is
+    /// the fast route for the small files sources normally point at; IPAs skip it because it
+    /// refuses anything over 20 MB. Archives and other github.com downloads go straight through
+    /// gh-proxy, then the origin.
+    var downloadCandidates: [URL]
     {
-        guard self.host?.lowercased() == "github.com", self.path.contains("/releases/download/") else {
-            return [self]
+        guard let host = self.host?.lowercased() else { return [self] }
+
+        if host == "github.com", self.path.contains("/releases/download/")
+        {
+            let primary = URL.releaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
+            let lastResort = URL.lastResortReleaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
+            return Self.distinct(primary + [self] + lastResort)
         }
 
-        let mirrored = URL.releaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
-        let lastResort = URL.lastResortReleaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
-        return mirrored + [self] + lastResort
+        if host == "raw.githubusercontent.com" || (host == "github.com" && self.path.contains("/raw/"))
+        {
+            let cdn = self.mirroredThroughCDN
+            let proxy = self.githubProxyURL
+            if self.pathExtension.lowercased() == "ipa" {
+                return Self.distinct([proxy, cdn, self])
+            }
+            return Self.distinct([cdn, proxy, self])
+        }
+
+        if host == "codeload.github.com" || (host == "github.com" && self.path.contains("/archive/"))
+        {
+            return Self.distinct([self.githubProxyURL, self])
+        }
+
+        return [self]
+    }
+
+    private static func jsDelivrURL(owner: String, repo: String, ref: String, path: ArraySlice<String>) -> URL?
+    {
+        var mirror = URLComponents()
+        mirror.scheme = "https"
+        mirror.host = "cdn.jsdelivr.net"
+        mirror.path = "/gh/\(owner)/\(repo)@\(ref)/" + path.joined(separator: "/")
+        return mirror.url
+    }
+
+    private static func distinct(_ urls: [URL?]) -> [URL]
+    {
+        var seen = Set<String>()
+        return urls.compactMap { $0 }.filter { seen.insert($0.absoluteString).inserted }
     }
 }

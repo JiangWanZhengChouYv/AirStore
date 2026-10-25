@@ -88,41 +88,47 @@ final class FetchSourceOperation: BaseStandaloneOperation<StandaloneOperationCon
         return fetchedSource
     }
     
-    /// Fetch the source, preferring a jsDelivr mirror when the URL is a raw.githubusercontent.com one.
+    /// Fetch the source through the best route for the URL: jsDelivr for raw GitHub files, gh-proxy
+    /// when the CDN cannot serve it, the origin as the last resort.
     ///
     /// The URL kept in CoreData stays exactly what the user subscribed to, because `Source.identifier`
     /// is derived from it -- rewriting it here instead of there is what stops everyone from ending up
-    /// with a second "AirStore Official" after this ships. Anything the mirror cannot serve falls back
-    /// to the origin, so a miss costs one extra round trip and never a failed fetch.
+    /// with a second "AirStore Official" after this ships. A miss only costs one extra round trip and
+    /// never a failed fetch.
     private func fetchSourceData(mirroring url: URL) async throws -> (Data, URLResponse)
     {
-        let mirror = url.mirroredThroughCDN
-        guard mirror != url else {
-            return try await self.fetchSourceData(with: self.request(for: url))
-        }
+        var lastError: Error?
 
-        do
+        for candidate in url.downloadCandidates
         {
-            let (data, response) = try await self.fetchSourceData(with: self.request(for: mirror))
-            guard let status = (response as? HTTPURLResponse)?.statusCode, (200...299).contains(status) else {
-                // A 404 from the mirror still comes back as a response with a body, so without this
-                // check the fallback would never run and the decode would fail on error text.
-                let code = (response as? HTTPURLResponse)?.statusCode ?? -1
-                throw OperationError.invalidResponse(reason: "jsDelivr answered HTTP \(code)")
+            do
+            {
+                let (data, response) = try await self.fetchSourceData(with: self.request(for: candidate))
+                guard let status = (response as? HTTPURLResponse)?.statusCode, (200...299).contains(status) else {
+                    // A 404 from a mirror still comes back as a response with a body, so without this
+                    // check the fallback would never run and the decode would fail on error text.
+                    let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+                    throw OperationError.invalidResponse(reason: "\(candidate.host ?? "server") answered HTTP \(code)")
+                }
+
+                if candidate != url
+                {
+                    self.debugLog("[FetchSourceOperation] Fetched \(url.absoluteString) via \(candidate.host ?? candidate.absoluteString).")
+                }
+                return (data, response)
             }
+            catch let error as URLError where error.code == .cancelled
+            {
+                throw error
+            }
+            catch
+            {
+                lastError = error
+                self.debugLog("[FetchSourceOperation] \(candidate.host ?? candidate.absoluteString) could not serve \(url.absoluteString): \(error.localizedDescription)")
+            }
+        }
 
-            self.debugLog("[FetchSourceOperation] Fetched \(url.absoluteString) from the jsDelivr mirror.")
-            return (data, response)
-        }
-        catch let error as URLError where error.code == .cancelled
-        {
-            throw error
-        }
-        catch
-        {
-            self.debugLog("[FetchSourceOperation] Mirror could not serve \(url.absoluteString) (\(error.localizedDescription)); falling back to the origin.")
-            return try await self.fetchSourceData(with: self.request(for: url))
-        }
+        throw lastError ?? OperationError.invalidResponse(reason: "No route could fetch \(url.absoluteString)")
     }
 
     private func request(for url: URL) -> URLRequest

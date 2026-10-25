@@ -230,10 +230,11 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         let hudName = self.appName
         await MainActor.run { DownloadProgressHUD.shared.begin(id: taskID, appName: hudName, url: downloadURL) }
 
-        // Best measured route first, origin second, slow mirrors last. A dead candidate only costs
-        // the time it takes to fail, and the 20 s idle timeout keeps a blocked origin from stalling.
+        // Best measured route first, origin second, slow mirrors last; raw and archive URLs get
+        // their own order. A dead candidate only costs the time it takes to fail, and the 20 s idle
+        // timeout keeps a blocked origin from stalling.
         var lastError: Error?
-        for candidate in downloadURL.releaseDownloadCandidates {
+        for candidate in downloadURL.downloadCandidates {
             var resumeData: Data?
 
             for _ in 0..<2 {

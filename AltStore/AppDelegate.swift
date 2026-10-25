@@ -321,6 +321,8 @@ private extension AppDelegate
         DataLoader.sharedUrlCache.diskCapacity = 0
         
         let pipeline = ImagePipeline { configuration in
+            configuration.dataLoader = GitHubImageFallbackLoader()
+
             do
             {
                 let dataCache = try DataCache(name: "io.sidestore.Nuke")
@@ -730,5 +732,61 @@ private extension AppDelegate {
 extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .sound])
+    }
+}
+
+/// Nuke's data loader with one extra hop: when an image on GitHub or its jsDelivr mirror fails,
+/// retry the same file through gh-proxy before giving up.
+private final class GitHubImageFallbackLoader: DataLoading, @unchecked Sendable
+{
+    private let loader = DataLoader()
+
+    func loadData(
+        with request: URLRequest,
+        didReceiveData: @escaping @Sendable (Data, URLResponse) -> Void,
+        completion: @escaping @Sendable (Error?) -> Void
+    ) -> any Cancellable
+    {
+        let loader = self.loader
+        return loader.loadData(with: request, didReceiveData: didReceiveData) { error in
+            if let error = error as? URLError, error.code == .cancelled
+            {
+                completion(error)
+                return
+            }
+
+            guard error != nil, let fallbackURL = request.url?.githubImageFallbackURL else
+            {
+                completion(error)
+                return
+            }
+
+            var fallbackRequest = request
+            fallbackRequest.url = fallbackURL
+            _ = loader.loadData(with: fallbackRequest, didReceiveData: didReceiveData, completion: completion)
+        }
+    }
+}
+
+private extension URL
+{
+    /// Where to retry an image that GitHub's CDN could not serve.
+    var githubImageFallbackURL: URL?
+    {
+        if let proxy = self.githubProxyURL { return proxy }
+
+        // Reverse the jsDelivr rewrite: cdn.jsdelivr.net/gh/OWNER/REPO@REF/PATH...
+        guard self.host?.lowercased() == "cdn.jsdelivr.net" else { return nil }
+        let components = self.pathComponents.filter { $0 != "/" }
+        guard components.count >= 4, components[0].lowercased() == "gh" else { return nil }
+
+        let repoAndRef = components[2].split(separator: "@", maxSplits: 1)
+        guard repoAndRef.count == 2 else { return nil }
+
+        var raw = URLComponents()
+        raw.scheme = "https"
+        raw.host = "raw.githubusercontent.com"
+        raw.path = "/\(components[1])/\(repoAndRef[0])/\(repoAndRef[1])/" + components[3...].joined(separator: "/")
+        return raw.url?.githubProxyURL
     }
 }
