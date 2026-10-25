@@ -11,7 +11,6 @@
       "subtitle": "Sideload and refresh apps with your own Apple ID",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
-      "screenshotURLs": [],
       "version": "0.8.1",
       "date": "2026-10-25T00:45:14Z",
       "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
@@ -79,7 +78,21 @@
             }
           ]
         }
-      ]
+      ],
+      "screenshots": {
+        "iphone": [
+          {
+            "imageURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg",
+            "width": 1008,
+            "height": 2048
+          },
+          {
+            "imageURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-browse.jpeg",
+            "width": 1020,
+            "height": 2048
+          }
+        ]
+      }
     }
   ],
   "news": []
