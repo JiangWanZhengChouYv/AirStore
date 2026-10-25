@@ -31,6 +31,7 @@ final class DownloadProgressHUD
         let chevron = UIImageView(image: UIImage(systemName: "chevron.down"))
 
         var isExpanded = false
+        var isOperation = false
         var lastBytes: Int64 = 0
         var lastTime: CFTimeInterval = 0
         var mirror: String?
@@ -64,6 +65,42 @@ final class DownloadProgressHUD
         self.stack?.addArrangedSubview(card.container)
         card.container.alpha = 0
         UIView.animate(withDuration: 0.2) { card.container.alpha = 1 }
+    }
+
+    func beginOperation(id: String, title: String, subtitle: String)
+    {
+        if let existing = self.cards[id]
+        {
+            existing.title.text = title
+            existing.subtitle.text = subtitle
+            existing.bar.setProgress(0, animated: false)
+            existing.percent.text = "0%"
+            return
+        }
+
+        let card = Card()
+        card.isOperation = true
+        card.title.text = title
+        card.percent.text = "0%"
+        card.subtitle.text = subtitle
+        self.configure(card)
+        card.chevron.isHidden = true
+        card.details.isHidden = true
+        self.cards[id] = card
+
+        self.installIfNeeded()
+        self.stack?.addArrangedSubview(card.container)
+        card.container.alpha = 0
+        UIView.animate(withDuration: 0.2) { card.container.alpha = 1 }
+    }
+
+    func updateOperation(id: String, fraction: Double, subtitle: String? = nil)
+    {
+        guard let card = self.cards[id], card.isOperation else { return }
+        let clamped = min(max(fraction, 0), 1)
+        card.bar.setProgress(Float(clamped), animated: true)
+        card.percent.text = "\(Int(clamped * 100))%"
+        if let subtitle { card.subtitle.text = subtitle }
     }
 
     /// Which mirror is serving this attempt, so the details can name it instead of guessing.

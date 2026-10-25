@@ -652,14 +652,16 @@ final class AppManager: ObservableObject, @unchecked Sendable
         self.removeApp(installedApp, completionHandler: completionHandler)
     }
     
-    func enableJIT(for installedApp: InstalledApp, completionHandler: @escaping (Result<Void, Error>) -> Void)
+    func enableJIT(for installedApp: InstalledApp,
+                   progressHandler: (@Sendable (Int64, String) -> Void)? = nil,
+                   completionHandler: @escaping (Result<Void, Error>) -> Void)
     {
         Task.detached {
             debugLog("[AppManager] enableJIT() called for app: \(installedApp.bundleIdentifier)")
             let dbBackgroundContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
             let context = StandaloneOperationContext(steps: .enableJIT, dbBackgroundContext: dbBackgroundContext)
             do {
-                let enableJITOperation = try EnableJITOperation(installedApp: installedApp, context: context)
+                let enableJITOperation = try EnableJITOperation(installedApp: installedApp, context: context, progressHandler: progressHandler)
                 do {
                     _ = try await enableJITOperation.execute()
                     completionHandler(.success(()))

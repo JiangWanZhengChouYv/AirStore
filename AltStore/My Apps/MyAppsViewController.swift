@@ -1760,8 +1760,20 @@ private extension MyAppsViewController
     }
     
     func enableJIT(for installedApp: InstalledApp) {
-        AppManager.shared.enableJIT(for: installedApp) { result in
+        let appName = installedApp.name
+        let hudID = "enable-jit-\(installedApp.bundleIdentifier)"
+        DownloadProgressHUD.shared.beginOperation(
+            id: hudID,
+            title: String(format: NSLocalizedString("Enabling JIT for %@…", comment: ""), appName),
+            subtitle: NSLocalizedString("Finding the running app…", comment: "")
+        )
+        AppManager.shared.enableJIT(for: installedApp, progressHandler: { value, stage in
+            Task { @MainActor in
+                DownloadProgressHUD.shared.updateOperation(id: hudID, fraction: Double(value) / 100.0, subtitle: stage)
+            }
+        }) { result in
             DispatchQueue.main.async {
+                DownloadProgressHUD.shared.end(id: hudID)
                 switch result {
                 case .success:
                     break
