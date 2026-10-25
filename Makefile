@@ -251,6 +251,7 @@ clean-build:
 
 fakesign-apps:
 	ldid -SAltStore/Resources/ReleaseEntitlements.plist SideStore.xcarchive/Products/Applications/SideStore.app/SideStore
+	ldid -S SideStore.xcarchive/Products/Applications/SideStore.app/Frameworks/StikJIT.framework/StikJIT
 	ldid -SAltWidget/Resources/ReleaseEntitlements.plist SideStore.xcarchive/Products/Applications/SideStore.app/PlugIns/AltWidgetExtension.appex/AltWidgetExtension
 
 fakesign-sidebackup:	

@@ -76,6 +76,38 @@ struct UserCustomizationsView: View {
         let onSave: (String) -> Void
     }
 
+    private struct EditDialogModifier: ViewModifier {
+        let dialog: EditDialogState?
+        @Binding var text: String
+        let dismiss: () -> Void
+
+        func body(content: Content) -> some View {
+            content.alert(
+                dialog?.title ?? "",
+                isPresented: Binding(
+                    get: { dialog != nil },
+                    set: { if !$0 { dismiss() } }
+                )
+            ) {
+                TextField(dialog?.placeholder ?? "", text: $text)
+                    #if !os(tvOS)
+                    .keyboardType(dialog?.keyboardType ?? .default)
+                    #endif
+                SwiftUI.Button("OK") {
+                    if let dialog {
+                        dialog.onSave(text)
+                    }
+                    dismiss()
+                }
+                SwiftUI.Button("Cancel", role: .cancel) {
+                    dismiss()
+                }
+            } message: {
+                Text(dialog?.message ?? "")
+            }
+        }
+    }
+
     @State private var editDialog: EditDialogState? = nil
     @State private var editingValueText: String = ""
 
@@ -553,29 +585,7 @@ struct UserCustomizationsView: View {
                 ActivityViewController(activityItems: [url])
             }
         }
-        .alert(
-            editDialog?.title ?? "",
-            isPresented: Binding<Bool>(
-                get: { editDialog != nil },
-                set: { if !$0 { editDialog = nil } }
-            )
-        ) {
-            TextField(editDialog?.placeholder ?? "", text: $editingValueText)
-                #if !os(tvOS)
-                .keyboardType(editDialog?.keyboardType ?? .default)
-                #endif
-            SwiftUI.Button("OK") {
-                if let dialog = editDialog {
-                    dialog.onSave(editingValueText)
-                }
-                editDialog = nil
-            }
-            SwiftUI.Button("Cancel", role: .cancel) {
-                editDialog = nil
-            }
-        } message: {
-            Text(editDialog?.message ?? "")
-        }
+        .modifier(EditDialogModifier(dialog: editDialog, text: $editingValueText, dismiss: { editDialog = nil }))
         .task {
             isFreeAccount = (try? await AuthManager.shared.getAuthenticatedTeam())?.type == .free
         }
