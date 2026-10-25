@@ -10,7 +10,6 @@
 import Combine
 import UniformTypeIdentifiers
 import CoreData
-import Darwin
 import StikJIT
 
 enum SideJITServerErrorType: Error {
@@ -49,7 +48,7 @@ final class EnableJITOperation: BaseStandaloneOperation<StandaloneOperationConte
         let userdefaults = UserDefaults.standard
         let dbContext = self.context.dbBackgroundContext
 
-        let (targetBundleId, appName, bundlePath) = await dbContext.perform {
+        let (targetBundleId, appName, _) = await dbContext.perform {
             (installedApp.resignedBundleIdentifier, installedApp.name, installedApp.fileURL.path)
         }
 
@@ -87,48 +86,29 @@ final class EnableJITOperation: BaseStandaloneOperation<StandaloneOperationConte
             }
         } else {
             try await enableJITOnDevice(bundleIdentifier: targetBundleId, appName: appName,
-                                       bundlePath: bundlePath,
                                        progress: { self.setProgress($0) })
         }
     }
 }
 
-/// Turns JIT on without leaving the phone: this attaches debugserver to the already-running app
-/// through the local pairing, which is the step StikDebug and SideJITServer otherwise do for us.
-/// Takes a bare bundle id rather than an InstalledApp because the callers are the store's own
-/// context menu and the `sidestore://enable-jit` deep link, and a guest inside the container has a
-/// bundle id but no row in our database. Needs proper testing on a device with the DDI mounted.
+/// Turns JIT on without leaving the phone. StikJIT needs the target process id: the plain
+/// debugger attach cannot prepare executable regions on TXM devices, and the debug proxy's
+/// process list is the only way to learn the id from another process.
 func enableJITOnDevice(bundleIdentifier: String, appName: String, pid: UInt32? = nil,
-                       bundlePath: String? = nil,
                        progress: (@Sendable (Int64) -> Void)? = nil) async throws
 {
-    // StikJIT needs the target process id; it replaces the debugger attach that cannot prepare
-    // executable regions on TXM devices. Fall back to the old path when the process is unknown.
-    if let targetPID = pid ?? runningPID(forBundlePath: bundlePath) {
-        try await enableJITWithStikJIT(targetPID: Int32(targetPID), appName: appName, progress: progress)
-        return
-    }
-
-    var lastError: Error?
-    let maxRetries = 3
-    for retry in 0..<maxRetries {
-        progress?(30 + Int64(Double(retry) / Double(maxRetries) * 60.0))
+    let targetPID: UInt32
+    if let pid {
+        targetPID = pid
+    } else {
         do {
-            await CellularRefreshManager.shared.turnOffDataIfNeeded()
-            if let pid {
-                try await safeAttachDebugger(pid)
-            } else {
-                try await safeDebugApp(bundleIdentifier)
-            }
-            await CellularRefreshManager.shared.turnOnDataIfNeeded()
-            await notifyJITSuccess(appName: appName)
-            return
+            targetPID = try await safeRunningProcessID(bundleIdentifier)
         } catch {
-            await CellularRefreshManager.shared.turnOnDataIfNeeded()
-            lastError = error
+            throw OperationError.invalidParameters("Could not find \(appName) running. Open it, leave it in the background, then enable JIT again. (\(error.localizedDescription))")
         }
     }
-    if let error = lastError { throw error }
+
+    try await enableJITWithStikJIT(targetPID: Int32(targetPID), appName: appName, progress: progress)
 }
 
 func notifyJITSuccess(appName: String) async {
@@ -283,45 +263,4 @@ private func enableJITWithStikJIT(targetPID: Int32, appName: String, progress: (
 
     progress?(100)
     await notifyJITSuccess(appName: appName)
-}
-
-// libproc is present on iOS but not exported through the Swift Darwin overlay.
-@_silgen_name("proc_listpids")
-private func alt_proc_listpids(_ type: UInt32, _ typeinfo: UInt32, _ buffer: UnsafeMutableRawPointer?, _ buffersize: Int32) -> Int32
-
-@_silgen_name("proc_pidpath")
-private func alt_proc_pidpath(_ pid: Int32, _ buffer: UnsafeMutableRawPointer?, _ buffersize: UInt32) -> Int32
-
-private let procAllPIDs: UInt32 = 1
-private let procPIDPathInfoMaxSize: UInt32 = 4096
-
-/// Finds the running process whose executable lives inside the installed bundle. Best effort: the
-/// sandbox may hide other processes, in which case the caller falls back to the debugger path.
-private func runningPID(forBundlePath bundlePath: String?) -> UInt32?
-{
-    guard let bundlePath, !bundlePath.isEmpty else { return nil }
-    let target = URL(fileURLWithPath: bundlePath).standardizedFileURL.path
-
-    let byteCount = alt_proc_listpids(procAllPIDs, 0, nil, 0)
-    guard byteCount > 0 else { return nil }
-
-    var pids = [pid_t](repeating: 0, count: Int(byteCount) / MemoryLayout<pid_t>.size + 16)
-    let filled = pids.withUnsafeMutableBytes { buffer in
-        alt_proc_listpids(procAllPIDs, 0, buffer.baseAddress, Int32(buffer.count))
-    }
-    guard filled > 0 else { return nil }
-
-    for pid in pids.prefix(Int(filled) / MemoryLayout<pid_t>.size) where pid > 0
-    {
-        var path = [CChar](repeating: 0, count: Int(procPIDPathInfoMaxSize))
-        let length = alt_proc_pidpath(pid, &path, procPIDPathInfoMaxSize)
-        guard length > 0 else { continue }
-
-        let executablePath = String(cString: path)
-        if executablePath == target || executablePath.hasPrefix(target + "/")
-        {
-            return UInt32(pid)
-        }
-    }
-    return nil
 }

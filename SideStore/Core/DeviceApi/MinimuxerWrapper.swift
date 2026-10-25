@@ -404,6 +404,22 @@ func safeDebugApp(_ appId: String) async throws {
     try await debugApp(appId)
 }
 
+func runningProcessID(_ appId: String) async throws -> UInt32 {
+    #if targetEnvironment(simulator)
+    throw OperationError.invalidParameters("JIT is not available in the Simulator.")
+    #else
+    debugLog("[SideStore] fetchRunningProcessID(appId) invoked")
+    return try await withRemotePairingRetry {
+        try await minimuxer.core.fetchRunningProcessID(appId: appId)
+    }
+    #endif
+}
+
+func safeRunningProcessID(_ appId: String) async throws -> UInt32 {
+    try await ensureMinimuxerReady()
+    return try await runningProcessID(appId)
+}
+
 func attachDebugger(_ pid: UInt32) async throws {
     defer { debugLog("[SideStore] attachDebugger(pid) completed") }
     #if targetEnvironment(simulator)
