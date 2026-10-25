@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. Everything except JIT works on iOS 26; see the 0.8.1 release notes.",
       "versions": [
         {
-          "version": "0.8.2-develop-202610250415.27-288f16bf",
-          "date": "2026-10-25T04:23:51Z",
+          "version": "0.8.2-develop-202610250451.28-b4483931",
+          "date": "2026-10-25T04:59:51Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-          "size": 28270359,
-          "sha256": "59ab58cf7e33c35e7cddda40bcb12cad4a970684d1d05e4d30bfc8ca8bfb0fb1",
-          "localizedDescription": "Development build 0.8.2-develop-202610250415.27-288f16bf from commit 288f16bf."
+          "size": 28269879,
+          "sha256": "b6e54e0ca45579c9ecba93f55fd168b2cab1a4e8e7691b1bb19c147d3582b769",
+          "localizedDescription": "Development build 0.8.2-develop-202610250451.28-b4483931 from commit b4483931."
         },
         {
           "version": "0.8.1",
@@ -48,12 +48,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.2-develop-202610250415.27-288f16bf",
-              "date": "2026-10-25T04:23:51Z",
+              "version": "0.8.2-develop-202610250451.28-b4483931",
+              "date": "2026-10-25T04:59:51Z",
               "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-              "size": 28270359,
-              "sha256": "59ab58cf7e33c35e7cddda40bcb12cad4a970684d1d05e4d30bfc8ca8bfb0fb1",
-              "localizedDescription": "Development build 0.8.2-develop-202610250415.27-288f16bf from commit 288f16bf."
+              "size": 28269879,
+              "sha256": "b6e54e0ca45579c9ecba93f55fd168b2cab1a4e8e7691b1bb19c147d3582b769",
+              "localizedDescription": "Development build 0.8.2-develop-202610250451.28-b4483931 from commit b4483931."
             }
           ]
         },
