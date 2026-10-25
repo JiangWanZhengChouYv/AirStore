@@ -286,7 +286,9 @@ trap 'leave_screen' EXIT INT TERM
 
 render() {
   if [ "$SCREEN_ACTIVE" = 1 ]; then
-    printf '\033[H%s\033[J' "$FRAME"
+    # Clear first, then draw. Erasing only after the final cursor (the old version) left the tails
+    # of long or wrapped rows inside earlier lines when the new frame was shorter.
+    printf '\033[H\033[J%s\033[J' "$FRAME"
   else
     printf '%s\n' "$FRAME"
   fi
