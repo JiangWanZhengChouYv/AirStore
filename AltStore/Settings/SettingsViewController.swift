@@ -349,6 +349,13 @@ final class SettingsViewController: UITableViewController
 private extension SettingsViewController
 {
     
+    private var versionDetailText: String {
+        let info = Bundle.main.infoDictionary
+        let version = (info?["CFBundleShortVersionString"] as? String) ?? "?.?.?"
+        let build = (info?["CFBundleVersion"] as? String) ?? ""
+        return build.isEmpty ? version : "\(version) (\(build))"
+    }
+
     private func getVersionAttributedString() -> NSAttributedString {
         let appVersion = Bundle.Info.activeBundleVersion
         let iosVersion = "iOS \(UIDevice.current.systemVersion) (\(ProcessInfo.processInfo.operatingSystemBuild))"
@@ -487,7 +494,12 @@ private extension SettingsViewController
         guard self.isViewLoaded else { return }
         let typeIndexPath = IndexPath(row: 2, section: Section.account.rawValue)
         if let typeCell = self.tableView.cellForRow(at: typeIndexPath) as? InsetGroupTableViewCell {
-            typeCell.style = (self.accountStatus == .completed) ? .bottom : .middle
+            typeCell.style = .middle
+        }
+
+        let versionIndexPath = IndexPath(row: 3, section: Section.account.rawValue)
+        if let versionCell = self.tableView.cellForRow(at: versionIndexPath) as? InsetGroupTableViewCell {
+            versionCell.style = (self.accountStatus == .completed) ? .bottom : .middle
         }
     }
     
@@ -961,8 +973,13 @@ extension SettingsViewController
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat
     {
-        if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
-            return AccountVerificationRow.preferredHeight
+        if Section.allCases[indexPath.section] == .account {
+            if indexPath.row == 3 {
+                return 66
+            }
+            if indexPath.row == 4 {
+                return AccountVerificationRow.preferredHeight
+            }
         }
         let effectiveIndexPath: IndexPath
         if Section.allCases[indexPath.section] == .advancedSettings {
@@ -978,8 +995,10 @@ extension SettingsViewController
     {
         if Section.allCases[indexPath.section] == .account {
             if indexPath.row == 2, let insetCell = cell as? InsetGroupTableViewCell {
+                insetCell.style = .middle
+            } else if indexPath.row == 3, let insetCell = cell as? InsetGroupTableViewCell {
                 insetCell.style = (self.accountStatus == .completed) ? .bottom : .middle
-            } else if indexPath.row == 3, let actionCell = cell as? AccountVerificationRow {
+            } else if indexPath.row == 4, let actionCell = cell as? AccountVerificationRow {
                 actionCell.style = .bottom
                 actionCell.backgroundColor = .clear
                 actionCell.contentView.backgroundColor = .clear
@@ -990,7 +1009,7 @@ extension SettingsViewController
 
     override func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int
     {
-        if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
+        if Section.allCases[indexPath.section] == .account && indexPath.row == 4 {
             return 0
         }
         let effectiveIndexPath: IndexPath
@@ -1010,7 +1029,7 @@ extension SettingsViewController
         {
         case _ where isSectionHidden(section): return 0
         case .signIn: return (self.activeTeam == nil) ? 1 : 0
-        case .account: return (self.activeTeam == nil) ? 0 : (self.accountStatus == .completed ? 3 : 4)
+        case .account: return (self.activeTeam == nil) ? 0 : (self.accountStatus == .completed ? 4 : 5)
         case .appRefresh: return AppRefreshRow.allCases.count
         case .advancedSettings: return AdvancedSettingsRow.allCases.count
         default: return super.tableView(tableView, numberOfRowsInSection: section.rawValue)
@@ -1019,7 +1038,7 @@ extension SettingsViewController
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        if Section.allCases[indexPath.section] == .account && indexPath.row == 3 {
+        if Section.allCases[indexPath.section] == .account && indexPath.row == 4 {
             let cell = tableView.dequeueReusableCell(withIdentifier: AccountVerificationRow.reuseIdentifier) as? AccountVerificationRow
                 ?? AccountVerificationRow()
             cell.configure(with: self.accountStatus)
@@ -1038,10 +1057,14 @@ extension SettingsViewController
         let cell = super.tableView(tableView, cellForRowAt: effectiveIndexPath)
         
         if Section.allCases[indexPath.section] == .account {
-            if indexPath.row == 2 {
-                if let insetCell = cell as? InsetGroupTableViewCell {
-                    insetCell.style = (self.accountStatus == .completed) ? .bottom : .middle
-                }
+            if indexPath.row == 2, let insetCell = cell as? InsetGroupTableViewCell {
+                insetCell.style = .middle
+            } else if indexPath.row == 3, let insetCell = cell as? InsetGroupTableViewCell {
+                insetCell.style = (self.accountStatus == .completed) ? .bottom : .middle
+                insetCell.detailTextLabel?.text = self.versionDetailText
+                insetCell.detailTextLabel?.font = .monospacedDigitSystemFont(ofSize: 14, weight: .semibold)
+                insetCell.detailTextLabel?.numberOfLines = 2
+                insetCell.detailTextLabel?.lineBreakMode = .byCharWrapping
             }
         }
         
@@ -1146,7 +1169,7 @@ extension SettingsViewController
         {
         case .signIn: self.signIn()
         case .account:
-            if indexPath.row == 3 {
+            if indexPath.row == 4 {
                 tableView.deselectRow(at: indexPath, animated: true)
                 self.resolvePendingAccountActions()
             }
