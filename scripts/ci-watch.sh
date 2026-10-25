@@ -52,18 +52,23 @@ else
 fi
 
 COLS=${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}
+LINES=${LINES:-$(tput lines 2>/dev/null || echo 40)}
+[ "$LINES" -gt 0 ] 2>/dev/null || LINES=40
 
 # Everything before the bar is a fixed 57 cells: state(4) name(12) branch(10) sha(8) percent(4)
 # steps(7) elapsed(5) plus the separators. Whatever is left gets split between the bar and the
 # step name, so a row always ends on one line -- a wrapped row breaks the redraw accounting.
 FIXED_CELLS=57
-rest=$(( COLS - FIXED_CELLS - 3 ))
-[ "$rest" -lt 16 ] && rest=16
-BAR_WIDTH=$(( rest * 6 / 10 ))
-[ "$BAR_WIDTH" -lt 6 ] && BAR_WIDTH=6
-[ "$BAR_WIDTH" -gt 40 ] && BAR_WIDTH=40
-STEP_WIDTH=$(( rest - BAR_WIDTH ))
-[ "$STEP_WIDTH" -lt 8 ] && STEP_WIDTH=8
+recalc_layout() {
+  rest=$(( COLS - FIXED_CELLS - 3 ))
+  [ "$rest" -lt 16 ] && rest=16
+  BAR_WIDTH=$(( rest * 6 / 10 ))
+  [ "$BAR_WIDTH" -lt 6 ] && BAR_WIDTH=6
+  [ "$BAR_WIDTH" -gt 40 ] && BAR_WIDTH=40
+  STEP_WIDTH=$(( rest - BAR_WIDTH ))
+  [ "$STEP_WIDTH" -lt 8 ] && STEP_WIDTH=8
+}
+recalc_layout
 
 now_epoch() { date +%s; }
 
@@ -224,31 +229,78 @@ draw_finished() {
     "$mm" "$ss" "$C_DIM" "${artifacts:0:$(( COLS - 60 ))}" "$C_OFF"
 }
 
+EXPANDED_IDS="|"
+DETAIL_CACHE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/ciw-details.XXXXXX")
+
+is_expanded() {
+  case "$EXPANDED_IDS" in *"|$1|"*) return 0 ;; esac
+  return 1
+}
+
+# Job/step lines for one run. Completed runs are cached; running ones are fetched again on each
+# poll so their steps stay current.
+details_for() {
+  local id="$1" status="$2"
+  local cache="$DETAIL_CACHE_DIR/$id" tmp="$DETAIL_CACHE_DIR/$id.$$"
+  if [ "$status" = "completed" ] && [ -f "$cache" ]; then
+    cat "$cache"
+    return
+  fi
+
+  gh api "repos/$REPO/actions/runs/$id/jobs?per_page=10" --jq '
+    .jobs[] |
+    ("▸ " + .name + "  [" + (.conclusion // .status) + "]") as $job |
+    $job,
+    (.steps[]? | "   " + (if .conclusion == "failure" then "✗ " elif .conclusion == "success" then "✓ " elif .conclusion == "skipped" then "· " else "… " end) + .name)
+  ' 2>/dev/null | head -n 14 > "$tmp"
+
+  if [ "$status" = "completed" ]; then
+    mv "$tmp" "$cache"
+    cat "$cache"
+  else
+    cat "$tmp"
+    rm -f "$tmp"
+  fi
+}
+
+append_frame_line() {
+  # $1 run id (empty for headers), $2 text. One terminal line at most; stops at the window height.
+  [ "${#LINE_IDS[@]}" -ge "$((LINES - 1))" ] && return 1
+  FRAME="${FRAME}${2}"$'\n'
+  LINE_IDS[${#LINE_IDS[@]}]="$1"
+  return 0
+}
+
 # Rebuilds FRAME from whatever is running and the tail of the history. Sets ANY_RUNNING.
 build_frame() {
-  FRAME="${C_CYN}AirStore CI${C_OFF}  $(date '+%H:%M:%S')  "
+  FRAME=""
+  LINE_IDS=()
   ANY_RUNNING=0
 
-  local running recent body=""
+  append_frame_line "" "${C_CYN}AirStore CI${C_OFF}  $(date '+%H:%M:%S')  "
+
+  local running recent id fields status
   running=$(running_ids)
   recent=$(recent_ids)
 
-  local id fields status
-  for id in $running; do
-    fields=$(run_fields "$id") || continue
-    [ -z "$fields" ] && continue
-    body="${body}$(draw_run "$id" "$fields")"$'\n'
+  if [ -n "$running" ]; then
     ANY_RUNNING=1
-  done
-
-  if [ "$ANY_RUNNING" = 0 ]; then
-    FRAME="${FRAME}${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出${C_OFF}"$'\n'
-    FRAME="${FRAME}${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"$'\n'
+    append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 立即刷新 · q 退出 · 点击行展开${C_OFF}"
+    for id in $running; do
+      fields=$(run_fields "$id") || continue
+      [ -z "$fields" ] && continue
+      status=${fields%%$'\037'*}
+      append_frame_line "$id" "$(draw_run "$id" "$fields")" || break
+      if is_expanded "$id"; then
+        while IFS= read -r line; do
+          append_frame_line "$id" "  ${C_DIM}${line:0:$((COLS - 4))}${C_OFF}" || break
+        done < <(details_for "$id" "$status")
+      fi
+    done
   else
-    FRAME="${FRAME}${C_DIM}每 ${INTERVAL}s 刷新 · r 立即刷新 · q 退出${C_OFF}"$'\n'
+    append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · 点击行展开${C_OFF}"
+    append_frame_line "" "${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"
   fi
-
-  FRAME="${FRAME}${body}"
 
   # History, minus anything already drawn as running.
   local shown=0
@@ -262,11 +314,54 @@ build_frame() {
     case "$fields" in
       *$'\037'$'\037'*) ANY_RUNNING=1 ;;   # conclusion still empty: poll again rather than call it 结束
     esac
-    FRAME="${FRAME}$(draw_finished "$id" "$fields")"$'\n'
+    append_frame_line "$id" "$(draw_finished "$id" "$fields")" || break
     shown=$(( shown + 1 ))
+    if is_expanded "$id"; then
+      while IFS= read -r line; do
+        append_frame_line "$id" "  ${C_DIM}${line:0:$((COLS - 4))}${C_OFF}" || break
+      done < <(details_for "$id" "completed")
+    fi
   done
 
   FRAME="${FRAME%$'\n'}"$'\n'
+}
+
+handle_click() {
+  local y="$1"
+  [ "$y" -ge 1 ] && [ "$y" -le "${#LINE_IDS[@]}" ] || return
+  local id="${LINE_IDS[$(( y - 1 ))]}"
+  [ -z "$id" ] && return
+
+  if is_expanded "$id"; then
+    EXPANDED_IDS=${EXPANDED_IDS//|$id|/|}
+  else
+    EXPANDED_IDS="${EXPANDED_IDS}${id}|"
+  fi
+  build_frame
+  render
+  next_poll=$(( $(now_epoch) + INTERVAL ))
+}
+
+# SGR (ESC [ < b ; x ; y M/m) and classic X10 (ESC [ M + 3 bytes) mouse reports.
+handle_mouse() {
+  local seq="$1" esc=$'\e' b x y press
+  local re="^${esc}\\[<([0-9]+);([0-9]+);([0-9]+)([Mm])$"
+  if [[ "$seq" =~ $re ]]; then
+    b=${BASH_REMATCH[1]}; x=${BASH_REMATCH[2]}; y=${BASH_REMATCH[3]}; press=${BASH_REMATCH[4]}
+    [ "$press" = "M" ] || return
+    [ $(( b & 3 )) -eq 0 ] || return
+    handle_click "$y"
+    return
+  fi
+
+  if [ "${seq:0:3}" = "${esc}[M" ] && [ "${#seq}" -ge 6 ]; then
+    local cb=${seq:3:1} cx=${seq:4:1} cy=${seq:5:1}
+    b=$(( $(printf '%d' "'$cb") - 32 ))
+    x=$(( $(printf '%d' "'$cx") - 32 ))
+    y=$(( $(printf '%d' "'$cy") - 32 ))
+    [ $(( b & 3 )) -eq 0 ] || return
+    handle_click "$y"
+  fi
 }
 
 # Alternate screen, so the dashboard owns the window and leaving restores whatever was there.
@@ -274,15 +369,15 @@ SCREEN_ACTIVE=0
 enter_screen() {
   [ "$ONCE" = 1 ] && return
   [ -t 1 ] || return
-  printf '\033[?1049h\033[?25l'
+  printf '\033[?1049h\033[?25l\033[?1000h\033[?1006h'
   SCREEN_ACTIVE=1
 }
 leave_screen() {
   [ "$SCREEN_ACTIVE" = 1 ] || return
-  printf '\033[?25h\033[?1049l'
+  printf '\033[?1006l\033[?1000l\033[?25h\033[?1049l'
   SCREEN_ACTIVE=0
 }
-trap 'leave_screen' EXIT INT TERM
+trap 'rm -rf "$DETAIL_CACHE_DIR"; leave_screen' EXIT INT TERM
 
 render() {
   if [ "$SCREEN_ACTIVE" = 1 ]; then
@@ -299,6 +394,19 @@ next_poll=0
 failed_any=0
 
 while :; do
+  # Re-flow once a second so a ⌘+ font change (or a window resize) takes effect within 1s.
+  if [ "$SCREEN_ACTIVE" = 1 ]; then
+    new_cols=$(tput cols 2>/dev/null || echo "$COLS")
+    new_lines=$(tput lines 2>/dev/null || echo "$LINES")
+    if [ "$new_cols" != "$COLS" ] || [ "$new_lines" != "$LINES" ]; then
+      COLS=$new_cols
+      LINES=$new_lines
+      [ "$LINES" -gt 0 ] 2>/dev/null || LINES=40
+      recalc_layout
+      next_poll=0
+    fi
+  fi
+
   now=$(now_epoch)
 
   if [ "$now" -ge "$next_poll" ]; then
@@ -321,6 +429,11 @@ while :; do
       case "$key" in
         r|R) next_poll=0 ;;
         q|Q) break ;;
+        $'\e')
+          rest=""
+          IFS= read -rsn 24 -t 1 rest || true
+          handle_mouse "$key$rest"
+          ;;
       esac
     fi
   else
