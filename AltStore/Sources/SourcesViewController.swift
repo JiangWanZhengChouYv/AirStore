@@ -220,7 +220,11 @@ private extension SourcesViewController
             cell.bannerView.iconImageView.image = nil
             cell.bannerView.iconImageView.isIndicatingActivity = true
             
-            let numberOfApps = source.apps.filter { StoreApp.visibleAppsPredicate.evaluate(with: $0) }.count
+            // visibleAppsPredicate deliberately hides AirStore itself from store lists, but the
+            // source card should still count the one app this source actually ships.
+            let numberOfApps = source.apps.filter {
+                $0.bundleIdentifier == StoreApp.altstoreAppID || StoreApp.visibleAppsPredicate.evaluate(with: $0)
+            }.count
             
             UIView.performWithoutAnimation {
                 cell.bannerView.button.style = .custom
