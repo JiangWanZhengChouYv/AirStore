@@ -285,7 +285,7 @@ build_frame() {
 
   if [ -n "$running" ]; then
     ANY_RUNNING=1
-    append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 立即刷新 · q 退出 · 点击行展开${C_OFF}"
+    append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 刷新 · q 退出 · 1–9 展开 · m 鼠标 · ⌘+ 放大${C_OFF}"
     for id in $running; do
       fields=$(run_fields "$id") || continue
       [ -z "$fields" ] && continue
@@ -298,7 +298,7 @@ build_frame() {
       fi
     done
   else
-    append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · 点击行展开${C_OFF}"
+    append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · 1–9 展开 · m 鼠标 · ⌘+ 放大${C_OFF}"
     append_frame_line "" "${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"
   fi
 
@@ -326,12 +326,9 @@ build_frame() {
   FRAME="${FRAME%$'\n'}"$'\n'
 }
 
-handle_click() {
-  local y="$1"
-  [ "$y" -ge 1 ] && [ "$y" -le "${#LINE_IDS[@]}" ] || return
-  local id="${LINE_IDS[$(( y - 1 ))]}"
+toggle_run() {
+  local id="$1"
   [ -z "$id" ] && return
-
   if is_expanded "$id"; then
     EXPANDED_IDS=${EXPANDED_IDS//|$id|/|}
   else
@@ -340,6 +337,25 @@ handle_click() {
   build_frame
   render
   next_poll=$(( $(now_epoch) + INTERVAL ))
+}
+
+handle_click() {
+  local y="$1"
+  [ "$y" -ge 1 ] && [ "$y" -le "${#LINE_IDS[@]}" ] || return
+  toggle_run "${LINE_IDS[$(( y - 1 ))]}"
+}
+
+# Keyboard fallback: 1-9 toggles the nth expandable row in frame order.
+handle_digit() {
+  local n="$1" count=0 id
+  for id in "${LINE_IDS[@]}"; do
+    [ -z "$id" ] && continue
+    count=$(( count + 1 ))
+    if [ "$count" -eq "$n" ]; then
+      toggle_run "$id"
+      return
+    fi
+  done
 }
 
 # SGR (ESC [ < b ; x ; y M/m) and classic X10 (ESC [ M + 3 bytes) mouse reports.
@@ -366,15 +382,23 @@ handle_mouse() {
 
 # Alternate screen, so the dashboard owns the window and leaving restores whatever was there.
 SCREEN_ACTIVE=0
+MOUSE_ENABLED=0
+STTY_STATE=""
 enter_screen() {
   [ "$ONCE" = 1 ] && return
   [ -t 1 ] || return
-  printf '\033[?1049h\033[?25l\033[?1000h\033[?1006h'
+  STTY_STATE=$(stty -g 2>/dev/null || true)
+  # Without this the terminal echoes incoming mouse reports as if they were typed text.
+  [ -n "$STTY_STATE" ] && stty -echo -icanon min 1 time 0 2>/dev/null
+  printf '\033[?1049h\033[?25l'
+  [ "$MOUSE_ENABLED" = 1 ] && printf '\033[?1000h\033[?1006h'
   SCREEN_ACTIVE=1
 }
 leave_screen() {
   [ "$SCREEN_ACTIVE" = 1 ] || return
-  printf '\033[?1006l\033[?1000l\033[?25h\033[?1049l'
+  [ "$MOUSE_ENABLED" = 1 ] && printf '\033[?1006l\033[?1000l'
+  printf '\033[?25h\033[?1049l'
+  [ -n "$STTY_STATE" ] && stty "$STTY_STATE" 2>/dev/null
   SCREEN_ACTIVE=0
 }
 trap 'rm -rf "$DETAIL_CACHE_DIR"; leave_screen' EXIT INT TERM
@@ -429,6 +453,16 @@ while :; do
       case "$key" in
         r|R) next_poll=0 ;;
         q|Q) break ;;
+        m|M)
+          if [ "$MOUSE_ENABLED" = 1 ]; then
+            MOUSE_ENABLED=0
+            printf '\033[?1006l\033[?1000l'
+          else
+            MOUSE_ENABLED=1
+            printf '\033[?1000h\033[?1006h'
+          fi
+          ;;
+        [1-9]) handle_digit "$key" ;;
         $'\e')
           rest=""
           IFS= read -rsn 24 -t 1 rest || true
