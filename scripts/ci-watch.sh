@@ -8,9 +8,9 @@
 #   ciw -b develop -i 5      # one branch, refresh every 5s while runs are active
 #   ESTIMATE=600 ciw         # override the seconds a build is expected to take
 #
-# Keys: r = refresh now, q = quit, 1-9 = expand the Nth row, m = toggle mouse clicks (on by
-# default). When nothing is running it keeps the finished runs on screen and checks again every
-# three minutes, so a push made from another window shows up on its own.
+# Keys: r = refresh now, q = quit, 1-9 = expand the Nth row. When nothing is running it keeps the
+# finished runs on screen and checks again every three minutes, so a push made from another window
+# shows up on its own.
 #
 # The bar is time based on purpose: one xcodebuild step is most of the run, so counting steps sits
 # at 60% for nine minutes and then jumps. The estimate comes from this workflow's own recent
@@ -274,6 +274,7 @@ append_frame_line() {
   # $1 run id (empty for headers), $2 text. One terminal line at most; stops at the window height.
   [ "${#LINE_IDS[@]}" -ge "$((LINES - 1))" ] && return 1
   FRAME="${FRAME}${2}"$'\n'
+  FRAME_LINES[${#FRAME_LINES[@]}]="$2"
   LINE_IDS[${#LINE_IDS[@]}]="$1"
   return 0
 }
@@ -281,6 +282,7 @@ append_frame_line() {
 # Rebuilds FRAME from whatever is running and the tail of the history. Sets ANY_RUNNING.
 build_frame() {
   FRAME=""
+  FRAME_LINES=()
   LINE_IDS=()
   ANY_RUNNING=0
 
@@ -293,11 +295,12 @@ build_frame() {
   if [ -n "$running" ]; then
     ANY_RUNNING=1
     append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
-    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认开）${C_OFF}"
+    append_frame_line "" "${C_DIM}1–9 展开/收起从上往下第 N 行${C_OFF}"
     for id in $running; do
       fields=$(run_fields "$id") || continue
       [ -z "$fields" ] && continue
       status=${fields%%$'\037'*}
+      printf '%s' "$status" > "$DETAIL_CACHE_DIR/status.$id"
       append_frame_line "$id" "$(draw_run "$id" "$fields")" || break
       if is_expanded "$id"; then
         while IFS= read -r line; do
@@ -307,7 +310,7 @@ build_frame() {
     done
   else
     append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
-    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认开）${C_OFF}"
+    append_frame_line "" "${C_DIM}1–9 展开/收起从上往下第 N 行${C_OFF}"
     append_frame_line "" "${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"
   fi
 
@@ -320,6 +323,7 @@ build_frame() {
     [ -z "$fields" ] && continue
     status=${fields%%$'\037'*}
     [ "$status" != "completed" ] && continue
+    printf '%s' "completed" > "$DETAIL_CACHE_DIR/status.$id"
     case "$fields" in
       *$'\037'$'\037'*) ANY_RUNNING=1 ;;   # conclusion still empty: poll again rather than call it 结束
     esac
@@ -335,35 +339,105 @@ build_frame() {
   FRAME="${FRAME%$'\n'}"$'\n'
 }
 
+frame_from_lines() {
+  FRAME=""
+  local i=0
+  while [ "$i" -lt "${#FRAME_LINES[@]}" ]; do
+    FRAME="${FRAME}${FRAME_LINES[$i]}"$'\n'
+    i=$((i + 1))
+  done
+}
+
+# Drops one run's detail lines but keeps its summary line. No API call: collapsing must be instant.
+collapse_run() {
+  local id="$1" i=0 seen=0 out_l=() out_i=()
+  while [ "$i" -lt "${#LINE_IDS[@]}" ]; do
+    if [ "${LINE_IDS[$i]}" = "$id" ]; then
+      if [ "$seen" = 0 ]; then
+        seen=1
+        out_l[${#out_l[@]}]="${FRAME_LINES[$i]}"
+        out_i[${#out_i[@]}]="$id"
+      fi
+    else
+      out_l[${#out_l[@]}]="${FRAME_LINES[$i]}"
+      out_i[${#out_i[@]}]="${LINE_IDS[$i]}"
+    fi
+    i=$((i + 1))
+  done
+  FRAME_LINES=("${out_l[@]}")
+  LINE_IDS=("${out_i[@]}")
+  frame_from_lines
+}
+
+# Inserts one run's details under its summary line, fetching them only if this session has not
+# already cached them. Later polls refresh the whole frame anyway.
+expand_run() {
+  local id="$1" i=0 insert_after=-1
+  while [ "$i" -lt "${#LINE_IDS[@]}" ]; do
+    [ "${LINE_IDS[$i]}" = "$id" ] && insert_after=$i
+    i=$((i + 1))
+  done
+  [ "$insert_after" -lt 0 ] && return 1
+  if [ "${#LINE_IDS[@]}" -ge "$((LINES - 1))" ]; then
+    show_status "窗口太矮，展开会把内容挤出屏幕；放大窗口或按 r 后再试"
+    return 1
+  fi
+
+  local status=""
+  [ -f "$DETAIL_CACHE_DIR/status.$id" ] && status=$(cat "$DETAIL_CACHE_DIR/status.$id")
+
+  local details
+  if [ "$status" = "completed" ] && [ -f "$DETAIL_CACHE_DIR/$id" ]; then
+    details=$(cat "$DETAIL_CACHE_DIR/$id")
+  else
+    show_status "加载中… 正在拉取 #$id 的 job 和步骤"
+    details=$(details_for "$id" "$status")
+  fi
+
+  local out_l=() out_i=() line
+  i=0
+  while [ "$i" -lt "${#LINE_IDS[@]}" ]; do
+    [ "${#out_i[@]}" -ge "$((LINES - 1))" ] && break
+    out_l[${#out_l[@]}]="${FRAME_LINES[$i]}"
+    out_i[${#out_i[@]}]="${LINE_IDS[$i]}"
+    if [ "$i" -eq "$insert_after" ]; then
+      while IFS= read -r line; do
+        [ "${#out_i[@]}" -ge "$((LINES - 1))" ] && break
+        out_l[${#out_l[@]}]="  ${C_DIM}${line:0:$((COLS - 4))}${C_OFF}"
+        out_i[${#out_i[@]}]="$id"
+      done <<< "$details"
+    fi
+    i=$((i + 1))
+  done
+  FRAME_LINES=("${out_l[@]}")
+  LINE_IDS=("${out_i[@]}")
+  frame_from_lines
+}
+
 toggle_run() {
-  local id="$1" expanding=0
+  local id="$1"
   [ -z "$id" ] && return
   if is_expanded "$id"; then
     EXPANDED_IDS=${EXPANDED_IDS//|$id|/|}
+    collapse_run "$id"
   else
     EXPANDED_IDS="${EXPANDED_IDS}${id}|"
-    expanding=1
+    if ! expand_run "$id"; then
+      EXPANDED_IDS=${EXPANDED_IDS//|$id|/|}
+      return
+    fi
   fi
-  if [ "$expanding" = 1 ]; then
-    # The frame rebuild calls the API once per row, so say what is happening before it starts.
-    show_status "加载中… 正在拉取 #$id 的 job 和步骤"
-  fi
-  build_frame
   render
-  next_poll=$(( $(now_epoch) + INTERVAL ))
 }
 
-handle_click() {
-  local y="$1"
-  [ "$y" -ge 1 ] && [ "$y" -le "${#LINE_IDS[@]}" ] || return
-  toggle_run "${LINE_IDS[$(( y - 1 ))]}"
-}
-
-# Keyboard fallback: 1-9 toggles the nth expandable row in frame order.
+# Keyboard: 1-9 toggles the nth run row from the top. Detail lines repeat their run's id, so count
+# each id once or the numbering would drift as rows open.
 handle_digit() {
-  local n="$1" count=0 id
+  local n="$1" count=0 last="" id
   for id in "${LINE_IDS[@]}"; do
     [ -z "$id" ] && continue
+    [ "$id" = "$last" ] && continue
+    last="$id"
     count=$(( count + 1 ))
     if [ "$count" -eq "$n" ]; then
       toggle_run "$id"
@@ -372,49 +446,23 @@ handle_digit() {
   done
 }
 
-# SGR (ESC [ < b ; x ; y M/m) and classic X10 (ESC [ M + 3 bytes) mouse reports.
-handle_mouse() {
-  local seq="$1" esc=$'\e' b x y press
-  local re="^${esc}\\[<([0-9]+);([0-9]+);([0-9]+)([Mm])$"
-  if [[ "$seq" =~ $re ]]; then
-    b=${BASH_REMATCH[1]}; x=${BASH_REMATCH[2]}; y=${BASH_REMATCH[3]}; press=${BASH_REMATCH[4]}
-    [ "$press" = "M" ] || return
-    [ $(( b & 3 )) -eq 0 ] || return
-    handle_click "$y"
-    return
-  fi
-
-  if [ "${seq:0:3}" = "${esc}[M" ] && [ "${#seq}" -ge 6 ]; then
-    local cb=${seq:3:1} cx=${seq:4:1} cy=${seq:5:1}
-    b=$(( $(printf '%d' "'$cb") - 32 ))
-    x=$(( $(printf '%d' "'$cx") - 32 ))
-    y=$(( $(printf '%d' "'$cy") - 32 ))
-    [ $(( b & 3 )) -eq 0 ] || return
-    handle_click "$y"
-  fi
-}
-
 # Alternate screen, so the dashboard owns the window and leaving restores whatever was there.
 SCREEN_ACTIVE=0
-MOUSE_ENABLED=1
 RAW_MODE=0
 STTY_STATE=""
 enter_screen() {
   [ "$ONCE" = 1 ] && return
   [ -t 1 ] || return
   STTY_STATE=$(stty -g 2>/dev/null || true)
-  # Without this the terminal echoes incoming mouse reports as if they were typed text, which is
-  # what turned a click into a screenful of escape sequences.
+  # Single keys without Enter, and nothing echoed back into the frame.
   if [ -n "$STTY_STATE" ] && stty -echo -icanon min 1 time 0 2>/dev/null; then
     RAW_MODE=1
   fi
   printf '\033[?1049h\033[?25l'
-  [ "$MOUSE_ENABLED" = 1 ] && [ "$RAW_MODE" = 1 ] && printf '\033[?1000h\033[?1006h'
   SCREEN_ACTIVE=1
 }
 leave_screen() {
   [ "$SCREEN_ACTIVE" = 1 ] || return
-  [ "$MOUSE_ENABLED" = 1 ] && printf '\033[?1006l\033[?1000l'
   printf '\033[?25h\033[?1049l'
   [ -n "$STTY_STATE" ] && stty "$STTY_STATE" 2>/dev/null
   SCREEN_ACTIVE=0
@@ -477,29 +525,13 @@ while :; do
   fi
 
   # One key, no echo. A pipe or a redirect means nobody is listening, so do not spin on EOF.
-  if [ -t 0 ]; then
+  if [ -t 0 ] && [ "$RAW_MODE" = 1 ]; then
     key=""
     if read -rsn1 -t 1 key; then
       case "$key" in
         r|R) show_status "刷新中…"; next_poll=0 ;;
         q|Q) break ;;
-        m|M)
-          if [ "$MOUSE_ENABLED" = 1 ]; then
-            MOUSE_ENABLED=0
-            printf '\033[?1006l\033[?1000l'
-            show_status "鼠标点击已关闭（键盘 1–9 仍可展开行）"
-          else
-            MOUSE_ENABLED=1
-            printf '\033[?1000h\033[?1006h'
-            show_status "鼠标点击已开启：点某一行展开/收起（再按 m 关闭）"
-          fi
-          ;;
         [1-9]) handle_digit "$key" ;;
-        $'\e')
-          rest=""
-          IFS= read -rsn 24 -t 1 rest || true
-          handle_mouse "$key$rest"
-          ;;
       esac
     fi
   else
