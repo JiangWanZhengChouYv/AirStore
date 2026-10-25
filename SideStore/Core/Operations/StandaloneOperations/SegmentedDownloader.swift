@@ -20,8 +20,6 @@ final class SegmentedDownloader: @unchecked Sendable
         var minimumSegmentSize: Int64 = 1_048_576
         var requestTimeout: TimeInterval = 20
         var resourceTimeout: TimeInterval = 180
-        /// Set when the download should go through the loopback GitHub520 proxy.
-        var proxyPort: UInt16?
     }
 
     enum Failure: Error
@@ -90,15 +88,7 @@ final class SegmentedDownloader: @unchecked Sendable
         request.httpMethod = "HEAD"
         request.timeoutInterval = self.configuration.requestTimeout
 
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = self.configuration.requestTimeout
-        if let proxyPort = self.configuration.proxyPort {
-            configuration.applyGitHub520Proxy(port: proxyPort)
-        }
-        let session = URLSession(configuration: configuration)
-        defer { session.invalidateAndCancel() }
-
-        let (_, response) = try await session.data(for: request)
+        let (_, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw Failure.rangeNotSupported
         }
@@ -185,9 +175,6 @@ private final class Coordinator: NSObject, URLSessionDataDelegate, @unchecked Se
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         // URLSession defaults to six connections per host; the whole point here is to exceed that.
         configuration.httpMaximumConnectionsPerHost = self.connectionCount
-        if let proxyPort = self.configuration.proxyPort {
-            configuration.applyGitHub520Proxy(port: proxyPort)
-        }
 
         let session = URLSession(configuration: configuration, delegate: self, delegateQueue: self.queue)
         self.session = session
@@ -323,22 +310,5 @@ private final class Coordinator: NSObject, URLSessionDataDelegate, @unchecked Se
         let completion = self.completion
         self.completion = nil
         completion?(result)
-    }
-}
-
-extension URLSessionConfiguration
-{
-    /// The HTTPS-specific keys are not exported on iOS, so the dictionary uses their literal names;
-    /// the HTTP keys alone are enough where the HTTPS ones are not understood.
-    func applyGitHub520Proxy(port: UInt16)
-    {
-        self.connectionProxyDictionary = [
-            "HTTPEnable": NSNumber(value: 1),
-            "HTTPProxy": "127.0.0.1",
-            "HTTPPort": NSNumber(value: port),
-            "HTTPSEnable": NSNumber(value: 1),
-            "HTTPSProxy": "127.0.0.1",
-            "HTTPSPort": NSNumber(value: port)
-        ]
     }
 }

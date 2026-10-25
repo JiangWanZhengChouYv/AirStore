@@ -235,17 +235,8 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         // Best measured route first, origin second, slow mirrors last; raw and archive URLs get
         // their own order. A dead candidate only costs the time it takes to fail, and the 20 s idle
         // timeout keeps a blocked origin from stalling.
-        // With GitHub520 reachable, the origin is the fastest route; otherwise keep the mirror order.
-        var candidates = downloadURL.downloadCandidates
-        if LocalGitHubProxy.shared.proxyPort(for: downloadURL.host) != nil,
-           let originIndex = candidates.firstIndex(of: downloadURL)
-        {
-            candidates.remove(at: originIndex)
-            candidates.insert(downloadURL, at: 0)
-        }
-
         var lastError: Error?
-        for candidate in candidates {
+        for candidate in downloadURL.downloadCandidates {
             await MainActor.run { DownloadProgressHUD.shared.setMirror(candidate.host ?? "", for: taskID) }
 
             do {
@@ -302,9 +293,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
     private func downloadSegmented(_ downloadURL: URL, taskID: String) async throws -> URL {
         let destinationURL = self.temporaryDirectory.appendingPathComponent("segmented-\(UUID().uuidString).ipa")
-        var configuration = SegmentedDownloader.Configuration()
-        configuration.proxyPort = LocalGitHubProxy.shared.proxyPort(for: downloadURL.host)
-        let downloader = SegmentedDownloader(url: downloadURL, destinationURL: destinationURL, configuration: configuration) { [weak self] received, total in
+        let downloader = SegmentedDownloader(url: downloadURL, destinationURL: destinationURL) { [weak self] received, total in
             guard let self else { return }
             if total > 0 {
                 let fraction = Double(received) / Double(total)
@@ -334,9 +323,6 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             // Idle timeout, not total: slow-but-alive mirrors keep sending, while a blocked host
             // gives up in time for the next candidate.
             configuration.timeoutIntervalForRequest = 20
-            if let proxyPort = LocalGitHubProxy.shared.proxyPort(for: downloadURL.host) {
-                configuration.applyGitHub520Proxy(port: proxyPort)
-            }
             let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
             let task: URLSessionDownloadTask
             if let resumeData {

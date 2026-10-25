@@ -217,9 +217,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         self.setTintColor()
         self.prepareImageCache()
 
-        LocalGitHubProxy.shared.log = { debugLog($0) }
-        GitHub520Hosts.shared.prepare()
-
         SecureValueTransformer.register()        
         
         #if DEBUG && targetEnvironment(simulator)
