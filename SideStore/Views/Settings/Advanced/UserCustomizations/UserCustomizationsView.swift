@@ -76,6 +76,22 @@ struct UserCustomizationsView: View {
         let onSave: (String) -> Void
     }
 
+    private struct WireGuardExportModifier: ViewModifier {
+        let url: URL?
+        let dismiss: () -> Void
+
+        func body(content: Content) -> some View {
+            content.sheet(isPresented: Binding(
+                get: { url != nil },
+                set: { if !$0 { dismiss() } }
+            )) {
+                if let url {
+                    ActivityViewController(activityItems: [url])
+                }
+            }
+        }
+    }
+
     private struct EditDialogModifier: ViewModifier {
         let dialog: EditDialogState?
         @Binding var text: String
@@ -577,14 +593,7 @@ struct UserCustomizationsView: View {
                 Text("Switching to App Bundle prioritizes storage efficiency by transferring the app bundle directly without packaging a temporary IPA, but transfer speeds will be noticeably slower.")
             }
         }
-        .sheet(isPresented: Binding<Bool>(
-            get: { wireGuardExportURL != nil },
-            set: { if !$0 { wireGuardExportURL = nil } }
-        )) {
-            if let url = wireGuardExportURL {
-                ActivityViewController(activityItems: [url])
-            }
-        }
+        .modifier(WireGuardExportModifier(url: wireGuardExportURL, dismiss: { wireGuardExportURL = nil }))
         .modifier(EditDialogModifier(dialog: editDialog, text: $editingValueText, dismiss: { editDialog = nil }))
         .task {
             isFreeAccount = (try? await AuthManager.shared.getAuthenticatedTeam())?.type == .free
