@@ -12,13 +12,21 @@
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
       "screenshotURLs": [],
-      "version": "0.8.0",
-      "date": "2026-10-19T10:01:45Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.0/SideStore-0.8.0.ipa",
-      "size": 31158352,
-      "sha256": "33aece754b8784435fa885b178c4c233162ab3c173781b7e90d5b0cb7df6d0ea",
-      "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in no longer ends in -80045 on iOS 26.4 and above: the client identity sent to Apple now matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is one backed by a real Windows ADI.\n\nVerified on one iPhone on iOS 27.2 with a free personal Apple ID. Installing and refreshing third-party apps after sign-in has not been re-tested. Sign-in depends on the third-party server win.ani.sidestore.io staying online.",
+      "version": "0.8.1",
+      "date": "2026-10-25T00:45:14Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
+      "size": 27786255,
+      "sha256": "d51030a6f504f56d5e333eb80a713f971f91102e933a4b1a61a384250e30d00b",
+      "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. Everything except JIT works on iOS 26; see the 0.8.1 release notes.",
       "versions": [
+        {
+          "version": "0.8.1",
+          "date": "2026-10-25T00:45:14Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
+          "size": 27786255,
+          "sha256": "d51030a6f504f56d5e333eb80a713f971f91102e933a4b1a61a384250e30d00b",
+          "localizedDescription": "0.8.1: download cards now show speed and size and resume dropped transfers; every GitHub download goes through gh-proxy; pairing files sync with the shared folder; the app page lists other channels' builds; Settings shows the exact installed version. JIT still does not work on iOS 26 (TXM); use StikDebug for now."
+        },
         {
           "version": "0.8.0",
           "date": "2026-10-19T10:01:45Z",
@@ -32,6 +40,14 @@
         {
           "track": "stable",
           "releases": [
+            {
+              "version": "0.8.1",
+              "date": "2026-10-25T00:45:14Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
+              "size": 27786255,
+              "sha256": "d51030a6f504f56d5e333eb80a713f971f91102e933a4b1a61a384250e30d00b",
+              "localizedDescription": "0.8.1: download cards now show speed and size and resume dropped transfers; every GitHub download goes through gh-proxy; pairing files sync with the shared folder; the app page lists other channels' builds; Settings shows the exact installed version. JIT still does not work on iOS 26 (TXM); use StikDebug for now."
+            },
             {
               "version": "0.8.0",
               "date": "2026-10-19T10:01:45Z",
