@@ -127,7 +127,11 @@ final class AppViewController: UIViewController
         self.contentViewController.didSelectVersion = { [weak self] version in
             self?.install(version)
         }
-        
+
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(AppViewController.refreshSources(_:)), for: .valueChanged)
+        self.scrollView.refreshControl = refreshControl
+
         self.update()
         
         NotificationCenter.default.addObserver(self, selector: #selector(AppViewController.didChangeApp(_:)), name: .NSManagedObjectContextObjectsDidChange, object: DatabaseManager.shared.viewContext)
@@ -484,6 +488,7 @@ private extension AppViewController
             self.navigationBarDownloadButton.alpha = self.navigationBarAnimator?.fractionComplete ?? 1.0
         }
 
+        self.contentViewController.refreshVersionDetails()
         self.contentViewController.refreshVersionList()
     }
     
@@ -758,6 +763,24 @@ extension AppViewController
 
 private extension AppViewController
 {
+    @objc private func refreshSources(_ sender: UIRefreshControl)
+    {
+        AppManager.shared.updateAllSources { [weak self] result in
+            DispatchQueue.main.async {
+                sender.endRefreshing()
+                guard let self else { return }
+                self.update()
+
+                if case .failure(let error) = result
+                {
+                    let toastView = ToastView(error: error)
+                    toastView.opensErrorLog = true
+                    toastView.show(in: self)
+                }
+            }
+        }
+    }
+
     @objc func didChangeApp(_ notification: Notification)
     {
         // Async so that AppManager.installationProgress(for:) is nil when we update.

@@ -32,6 +32,7 @@ final class AppContentViewController: UITableViewController
     var didSelectVersion: ((AppVersion) -> Void)?
 
     private var versionsHostingController: UIHostingController<AppVersionsCard>?
+    private var versionDetailsSignature: String?
 
 //     private lazy var screenshotsDataSource = self.makeScreenshotsDataSource()
     private lazy var dateFormatter: DateFormatter = {
@@ -66,10 +67,28 @@ final class AppContentViewController: UITableViewController
         
         self.tableView.contentInset.bottom = 20
         
-        self.subtitleLabel.text = self.app.subtitle
-        let desc = self.app.localizedDescription
-        self.descriptionTextView.text = desc
+        self.refreshVersionDetails()
         
+        self.descriptionTextView.maximumNumberOfLines = 5
+        self.versionDescriptionTextView.maximumNumberOfLines = 5
+        
+        self.descriptionTextView.toggleButton.addTarget(self, action: #selector(AppContentViewController.toggleCollapsingSection(_:)), for: .primaryActionTriggered)
+        self.versionDescriptionTextView.toggleButton.addTarget(self, action: #selector(AppContentViewController.toggleCollapsingSection(_:)), for: .primaryActionTriggered)
+
+        self.refreshVersionList()
+    }
+
+    func refreshVersionDetails()
+    {
+        // This runs from managed-object-changed notifications too; do not reset the collapsible
+        // text views while the same release is on screen.
+        let signature = [self.app.latestAvailableVersion?.versionID ?? "nil", self.app.subtitle ?? "", self.app.localizedDescription].joined(separator: "|")
+        guard signature != self.versionDetailsSignature else { return }
+        self.versionDetailsSignature = signature
+
+        self.subtitleLabel.text = self.app.subtitle
+        self.descriptionTextView.text = self.app.localizedDescription
+
         if let version = self.app.latestAvailableVersion {
             self.versionDescriptionTextView.text = version.localizedDescription ?? "nil"
             self.versionLabel.text = String(format: NSLocalizedString("Version %@", comment: ""), version.localizedVersion)
@@ -81,14 +100,6 @@ final class AppContentViewController: UITableViewController
             self.versionDateLabel.text = nil
             self.sizeLabel.text = ByteCountFormatter.string(fromByteCount: 0, countStyle: .file)
         }
-        
-        self.descriptionTextView.maximumNumberOfLines = 5
-        self.versionDescriptionTextView.maximumNumberOfLines = 5
-        
-        self.descriptionTextView.toggleButton.addTarget(self, action: #selector(AppContentViewController.toggleCollapsingSection(_:)), for: .primaryActionTriggered)
-        self.versionDescriptionTextView.toggleButton.addTarget(self, action: #selector(AppContentViewController.toggleCollapsingSection(_:)), for: .primaryActionTriggered)
-
-        self.refreshVersionList()
     }
     
     override func viewDidLayoutSubviews()
