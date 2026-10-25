@@ -8,7 +8,7 @@
 #   ciw -b develop -i 5      # one branch, refresh every 5s while runs are active
 #   ESTIMATE=600 ciw         # override the seconds a build is expected to take
 #
-# Keys: r = refresh now, q = quit, 1-9 = expand the Nth row, m = toggle mouse clicks (off by
+# Keys: r = refresh now, q = quit, 1-9 = expand the Nth row, m = toggle mouse clicks (on by
 # default). When nothing is running it keeps the finished runs on screen and checks again every
 # three minutes, so a push made from another window shows up on its own.
 #
@@ -293,7 +293,7 @@ build_frame() {
   if [ -n "$running" ]; then
     ANY_RUNNING=1
     append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
-    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认关）${C_OFF}"
+    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认开）${C_OFF}"
     for id in $running; do
       fields=$(run_fields "$id") || continue
       [ -z "$fields" ] && continue
@@ -307,7 +307,7 @@ build_frame() {
     done
   else
     append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
-    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认关）${C_OFF}"
+    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认开）${C_OFF}"
     append_frame_line "" "${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"
   fi
 
@@ -396,16 +396,20 @@ handle_mouse() {
 
 # Alternate screen, so the dashboard owns the window and leaving restores whatever was there.
 SCREEN_ACTIVE=0
-MOUSE_ENABLED=0
+MOUSE_ENABLED=1
+RAW_MODE=0
 STTY_STATE=""
 enter_screen() {
   [ "$ONCE" = 1 ] && return
   [ -t 1 ] || return
   STTY_STATE=$(stty -g 2>/dev/null || true)
-  # Without this the terminal echoes incoming mouse reports as if they were typed text.
-  [ -n "$STTY_STATE" ] && stty -echo -icanon min 1 time 0 2>/dev/null
+  # Without this the terminal echoes incoming mouse reports as if they were typed text, which is
+  # what turned a click into a screenful of escape sequences.
+  if [ -n "$STTY_STATE" ] && stty -echo -icanon min 1 time 0 2>/dev/null; then
+    RAW_MODE=1
+  fi
   printf '\033[?1049h\033[?25l'
-  [ "$MOUSE_ENABLED" = 1 ] && printf '\033[?1000h\033[?1006h'
+  [ "$MOUSE_ENABLED" = 1 ] && [ "$RAW_MODE" = 1 ] && printf '\033[?1000h\033[?1006h'
   SCREEN_ACTIVE=1
 }
 leave_screen() {
@@ -415,7 +419,8 @@ leave_screen() {
   [ -n "$STTY_STATE" ] && stty "$STTY_STATE" 2>/dev/null
   SCREEN_ACTIVE=0
 }
-trap 'rm -rf "$DETAIL_CACHE_DIR"; leave_screen' EXIT INT TERM
+trap 'rm -rf "$DETAIL_CACHE_DIR"; leave_screen' EXIT
+trap 'leave_screen; exit 130' INT TERM
 
 render() {
   if [ "$SCREEN_ACTIVE" = 1 ]; then
@@ -435,6 +440,10 @@ show_status() {
 }
 
 enter_screen
+# The first frame is several API calls deep; without this the alternate screen sits blank.
+if [ "$SCREEN_ACTIVE" = 1 ]; then
+  show_status "加载中… 正在读取正在跑的和最近的 CI"
+fi
 next_poll=0
 failed_any=0
 
