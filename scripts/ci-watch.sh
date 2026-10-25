@@ -8,8 +8,9 @@
 #   ciw -b develop -i 5      # one branch, refresh every 5s while runs are active
 #   ESTIMATE=600 ciw         # override the seconds a build is expected to take
 #
-# Keys: r = refresh now, q = quit. When nothing is running it keeps the finished runs on screen
-# and checks again every three minutes, so a push made from another window shows up on its own.
+# Keys: r = refresh now, q = quit, 1-9 = expand the Nth row, m = toggle mouse clicks (off by
+# default). When nothing is running it keeps the finished runs on screen and checks again every
+# three minutes, so a push made from another window shows up on its own.
 #
 # The bar is time based on purpose: one xcodebuild step is most of the run, so counting steps sits
 # at 60% for nine minutes and then jumps. The estimate comes from this workflow's own recent
@@ -254,6 +255,12 @@ details_for() {
     (.steps[]? | "   " + (if .conclusion == "failure" then "✗ " elif .conclusion == "success" then "✓ " elif .conclusion == "skipped" then "· " else "… " end) + .name)
   ' 2>/dev/null | head -n 14 > "$tmp"
 
+  if [ ! -s "$tmp" ]; then
+    rm -f "$tmp"
+    printf '%s\n' "（没有拉到详情，按 r 重试）"
+    return
+  fi
+
   if [ "$status" = "completed" ]; then
     mv "$tmp" "$cache"
     cat "$cache"
@@ -285,7 +292,8 @@ build_frame() {
 
   if [ -n "$running" ]; then
     ANY_RUNNING=1
-    append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 刷新 · q 退出 · 1–9 展开 · m 鼠标 · ⌘+ 放大${C_OFF}"
+    append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
+    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认关）${C_OFF}"
     for id in $running; do
       fields=$(run_fields "$id") || continue
       [ -z "$fields" ] && continue
@@ -298,7 +306,8 @@ build_frame() {
       fi
     done
   else
-    append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · 1–9 展开 · m 鼠标 · ⌘+ 放大${C_OFF}"
+    append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
+    append_frame_line "" "${C_DIM}1–9 展开从上往下第 N 行 · m 开启/关闭鼠标点击（默认关）${C_OFF}"
     append_frame_line "" "${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"
   fi
 
@@ -327,12 +336,17 @@ build_frame() {
 }
 
 toggle_run() {
-  local id="$1"
+  local id="$1" expanding=0
   [ -z "$id" ] && return
   if is_expanded "$id"; then
     EXPANDED_IDS=${EXPANDED_IDS//|$id|/|}
   else
     EXPANDED_IDS="${EXPANDED_IDS}${id}|"
+    expanding=1
+  fi
+  if [ "$expanding" = 1 ]; then
+    # The frame rebuild calls the API once per row, so say what is happening before it starts.
+    show_status "加载中… 正在拉取 #$id 的 job 和步骤"
   fi
   build_frame
   render
@@ -413,6 +427,13 @@ render() {
   fi
 }
 
+# Bottom-row message while a slow rebuild runs, so a click never looks ignored. The next full
+# render clears it along with the rest of the screen.
+show_status() {
+  [ "$SCREEN_ACTIVE" = 1 ] || return
+  printf '\033[%d;1H\033[K%s%s%s' "$LINES" "$C_YEL" "$1" "$C_OFF"
+}
+
 enter_screen
 next_poll=0
 failed_any=0
@@ -451,15 +472,17 @@ while :; do
     key=""
     if read -rsn1 -t 1 key; then
       case "$key" in
-        r|R) next_poll=0 ;;
+        r|R) show_status "刷新中…"; next_poll=0 ;;
         q|Q) break ;;
         m|M)
           if [ "$MOUSE_ENABLED" = 1 ]; then
             MOUSE_ENABLED=0
             printf '\033[?1006l\033[?1000l'
+            show_status "鼠标点击已关闭（键盘 1–9 仍可展开行）"
           else
             MOUSE_ENABLED=1
             printf '\033[?1000h\033[?1006h'
+            show_status "鼠标点击已开启：点某一行展开/收起（再按 m 关闭）"
           fi
           ;;
         [1-9]) handle_digit "$key" ;;
