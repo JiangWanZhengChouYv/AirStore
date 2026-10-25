@@ -21,9 +21,11 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
     private let session = URLSession(configuration: .default)
     private let temporaryDirectory = FileManager.default.uniqueTemporaryURL()
     private var activeDownloadTask: URLSessionDownloadTask?
+    private var activeSegmentedDownloader: SegmentedDownloader?
 
     override func cancel() {
         super.cancel()
+        self.activeSegmentedDownloader?.cancel()
         self.activeDownloadTask?.cancel()
     }
 
@@ -235,11 +237,36 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         // timeout keeps a blocked origin from stalling.
         var lastError: Error?
         for candidate in downloadURL.downloadCandidates {
+            await MainActor.run { DownloadProgressHUD.shared.setMirror(candidate.host ?? "", for: taskID) }
+
+            do {
+                let fileURL = try await self.downloadSegmented(candidate, taskID: taskID)
+                if candidate != downloadURL {
+                    debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?") over multiple connections.")
+                }
+                self.setProgress(75)
+                await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
+                return fileURL
+            }
+            catch is CancellationError {
+                await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
+                throw CancellationError()
+            }
+            catch SegmentedDownloader.Failure.cancelled {
+                await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
+                throw OperationError.cancelled
+            }
+            catch {
+                // Ranges unavailable, or a mirror that dislikes 32 connections. One connection
+                // still gets a chance before moving to the next candidate.
+                lastError = error
+                debugLog("[DownloadAppOperation] Segmented download failed via \(candidate.host ?? "?") (\(error.localizedDescription)); falling back to one connection.")
+            }
+
             var resumeData: Data?
 
             for _ in 0..<2 {
                 do {
-                    await MainActor.run { DownloadProgressHUD.shared.setMirror(candidate.host ?? "", for: taskID) }
                     let fileURL = try await self.download(candidate, taskID: taskID, resumeData: resumeData)
                     if candidate != downloadURL {
                         debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?").")
@@ -262,6 +289,29 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
         await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
         throw lastError ?? URLError(.badURL)
+    }
+
+    private func downloadSegmented(_ downloadURL: URL, taskID: String) async throws -> URL {
+        let destinationURL = self.temporaryDirectory.appendingPathComponent("segmented-\(UUID().uuidString).ipa")
+        let downloader = SegmentedDownloader(url: downloadURL, destinationURL: destinationURL) { [weak self] received, total in
+            guard let self else { return }
+            if total > 0 {
+                let fraction = Double(received) / Double(total)
+                self.progress.completedUnitCount = Int64(fraction * 75.0)
+            }
+            Task { @MainActor in
+                DownloadProgressHUD.shared.update(id: taskID, bytes: received, total: total)
+            }
+        }
+
+        self.activeSegmentedDownloader = downloader
+        defer {
+            if self.activeSegmentedDownloader === downloader {
+                self.activeSegmentedDownloader = nil
+            }
+        }
+        try await downloader.download()
+        return destinationURL
     }
 
     private func download(_ downloadURL: URL, taskID: String, resumeData: Data?) async throws -> URL {
