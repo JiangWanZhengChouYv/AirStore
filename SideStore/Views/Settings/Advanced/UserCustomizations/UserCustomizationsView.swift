@@ -76,6 +76,33 @@ struct UserCustomizationsView: View {
         let onSave: (String) -> Void
     }
 
+    private struct PreferIPAToggleAlertModifier: ViewModifier {
+        let pendingPreferIPAOngoing: Bool
+        @Binding var isPresented: Bool
+        let onSwitch: (Bool) -> Void
+        let onCancel: () -> Void
+
+        func body(content: Content) -> some View {
+            content.alert(
+                pendingPreferIPAOngoing ? "Prefer Resigned IPA" : "Prefer App Bundle",
+                isPresented: $isPresented
+            ) {
+                SwiftUI.Button("Switch") {
+                    onSwitch(pendingPreferIPAOngoing)
+                }
+                SwiftUI.Button("Cancel", role: .cancel) {
+                    onCancel()
+                }
+            } message: {
+                if pendingPreferIPAOngoing {
+                    Text("Switching to Resigned IPA prioritizes install speed (~40% faster) by packaging an uncompressed IPA for fast transfer, but temporarily uses additional disk space during packaging.")
+                } else {
+                    Text("Switching to App Bundle prioritizes storage efficiency by transferring the app bundle directly without packaging a temporary IPA, but transfer speeds will be noticeably slower.")
+                }
+            }
+        }
+    }
+
     private struct WireGuardExportModifier: ViewModifier {
         let url: URL?
         let dismiss: () -> Void
@@ -578,21 +605,17 @@ struct UserCustomizationsView: View {
         } message: {
             Text("The new language is saved and takes effect the next time the app starts.")
         }
-        .alert(pendingPreferIPAOngoing ? "Prefer Resigned IPA" : "Prefer App Bundle", isPresented: $showPreferIPAToggleAlert) {
-            SwiftUI.Button("Switch") {
-                preferResignedIPA = pendingPreferIPAOngoing
-                UserDefaults.standard.preferResignedIPA = pendingPreferIPAOngoing
-            }
-            SwiftUI.Button("Cancel", role: .cancel) {
+        .modifier(PreferIPAToggleAlertModifier(
+            pendingPreferIPAOngoing: pendingPreferIPAOngoing,
+            isPresented: $showPreferIPAToggleAlert,
+            onSwitch: { newValue in
+                preferResignedIPA = newValue
+                UserDefaults.standard.preferResignedIPA = newValue
+            },
+            onCancel: {
                 pendingPreferIPAOngoing = preferResignedIPA
             }
-        } message: {
-            if pendingPreferIPAOngoing {
-                Text("Switching to Resigned IPA prioritizes install speed (~40% faster) by packaging an uncompressed IPA for fast transfer, but temporarily uses additional disk space during packaging.")
-            } else {
-                Text("Switching to App Bundle prioritizes storage efficiency by transferring the app bundle directly without packaging a temporary IPA, but transfer speeds will be noticeably slower.")
-            }
-        }
+        ))
         .modifier(WireGuardExportModifier(url: wireGuardExportURL, dismiss: { wireGuardExportURL = nil }))
         .modifier(EditDialogModifier(dialog: editDialog, text: $editingValueText, dismiss: { editDialog = nil }))
         .task {
