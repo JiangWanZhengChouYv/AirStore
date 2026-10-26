@@ -262,6 +262,9 @@ private func enableJITWithStikJIT(targetPID: UInt32?, bundleIdentifier: String, 
 
     // With the DDI mounted the debug proxy can answer, so this is the first point where the
     // process list is reliable. A pid from a deep link is used as-is.
+    // Attaching to a process that iOS has already suspended in the background cannot work: the
+    // script resumes it, it stops again before reaching a breakpoint, and the registers come back
+    // empty. Launching it suspended puts the debugger in place before the app's own startup check.
     let resolvedPID: Int32
     if let targetPID
     {
@@ -270,18 +273,27 @@ private func enableJITWithStikJIT(targetPID: UInt32?, bundleIdentifier: String, 
     }
     else
     {
-        progress?(79, String(format: NSLocalizedString("Finding %@…", comment: ""), appName))
+        progress?(79, String(format: NSLocalizedString("Restarting %@ suspended…", comment: ""), appName))
         let pid: UInt32
         do
         {
-            pid = try await safeRunningProcessID(bundleIdentifier)
+            pid = try await safeLaunchAppSuspended(bundleIdentifier)
+            progress?(80, String(format: NSLocalizedString("Restarted %@ suspended (PID %lld)", comment: ""), appName, Int64(pid)))
         }
-        catch
+        catch let launchError
         {
-            throw OperationError.invalidParameters("Could not read the running process list for \(appName). Keep it open in the background and try again. (\(error.localizedDescription))")
+            progress?(79, String(format: NSLocalizedString("Finding %@…", comment: ""), appName))
+            do
+            {
+                pid = try await safeRunningProcessID(bundleIdentifier)
+                progress?(80, String(format: NSLocalizedString("Found %@ (PID %lld)", comment: ""), appName, Int64(pid)))
+            }
+            catch
+            {
+                throw OperationError.invalidParameters("Could not restart \(appName) suspended or find it running. (\(launchError.localizedDescription) / \(error.localizedDescription))")
+            }
         }
         resolvedPID = Int32(pid)
-        progress?(80, String(format: NSLocalizedString("Found %@ (PID %lld)", comment: ""), appName, Int64(pid)))
     }
 
     progress?(83, NSLocalizedString("Turning off cellular data…", comment: ""))

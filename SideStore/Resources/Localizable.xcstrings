@@ -2751,6 +2751,28 @@
         }
       }
     },
+    "Checking the developer disk image…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查开发者磁盘映像…"
+          }
+        }
+      }
+    },
+    "Checking the device…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查设备…"
+          }
+        }
+      }
+    },
     "Checksum (SHA-256) Check": {
       "extractionState": "manual",
       "localizations": {
@@ -3264,6 +3286,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在连接开发者门户…"
+          }
+        }
+      }
+    },
+    "Connecting to SideJITServer…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在连接 SideJITServer…"
           }
         }
       }
@@ -4555,6 +4588,17 @@
         }
       }
     },
+    "Developer disk image ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发者磁盘映像已就绪"
+          }
+        }
+      }
+    },
     "Developers": {
       "extractionState": "manual",
       "localizations": {
@@ -5039,6 +5083,17 @@
         }
       }
     },
+    "Downloading DDI %@… (%d%%)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在下载 DDI %@…（%d%%）"
+          }
+        }
+      }
+    },
     "Drag to reorder server priority. Swipe left on a server to hide or unhide it.": {
       "extractionState": "manual",
       "localizations": {
@@ -5343,6 +5398,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "启用"
+          }
+        }
+      }
+    },
+    "Enabling JIT for %@…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在为 %@ 开启 JIT…"
+          }
+        }
+      }
+    },
+    "Enabling JIT…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在开启 JIT…"
           }
         }
       }
@@ -6568,6 +6645,17 @@
         }
       }
     },
+    "Finding the running app…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在查找运行中的 App…"
+          }
+        }
+      }
+    },
     "Finish Refresh": {
       "extractionState": "manual",
       "localizations": {
@@ -6575,6 +6663,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "完成刷新"
+          }
+        }
+      }
+    },
+    "Finishing…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在收尾…"
           }
         }
       }
@@ -6641,6 +6740,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "为了您的安全，请卸载并删除源文件"
+          }
+        }
+      }
+    },
+    "Found %@ (PID %lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已找到 %@（PID %lld）"
           }
         }
       }
@@ -8493,6 +8603,17 @@
         }
       }
     },
+    "Mounting the developer disk image…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在挂载开发者磁盘映像…"
+          }
+        }
+      }
+    },
     "My App": {
       "extractionState": "manual",
       "localizations": {
@@ -10099,6 +10220,17 @@
         }
       }
     },
+    "Preparing the developer disk image…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在准备开发者磁盘映像…"
+          }
+        }
+      }
+    },
     "Pride": {
       "extractionState": "manual",
       "localizations": {
@@ -11283,6 +11415,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "需要重启才能生效"
+          }
+        }
+      }
+    },
+    "Restarted %@ suspended (PID %lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已挂起重启 %@（PID %lld）"
+          }
+        }
+      }
+    },
+    "Restarting %@ suspended…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在以挂起状态重启 %@…"
           }
         }
       }
@@ -13817,6 +13971,17 @@
         }
       }
     },
+    "Turning off cellular data…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在关闭蜂窝数据…"
+          }
+        }
+      }
+    },
     "Type": {
       "extractionState": "manual",
       "localizations": {
@@ -14290,6 +14455,17 @@
         }
       }
     },
+    "Using the PID from the link": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用链接中的 PID"
+          }
+        }
+      }
+    },
     "Utilities": {
       "extractionState": "manual",
       "localizations": {
@@ -14451,6 +14627,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "验证账户状态..."
+          }
+        }
+      }
+    },
+    "Verifying the developer disk image…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在校验开发者磁盘映像…"
           }
         }
       }

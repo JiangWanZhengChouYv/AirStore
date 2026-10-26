@@ -420,6 +420,24 @@ func safeRunningProcessID(_ appId: String) async throws -> UInt32 {
     return try await runningProcessID(appId)
 }
 
+/// Restarts the app suspended so a debugger can be in place before its own startup checks run.
+/// The existing instance is replaced, which is what enabling JIT on a running emulator means.
+func launchAppSuspended(_ appId: String) async throws -> UInt32 {
+    #if targetEnvironment(simulator)
+    throw OperationError.invalidParameters("JIT is not available in the Simulator.")
+    #else
+    debugLog("[SideStore] launchAppSuspended(appId) invoked")
+    return try await withRemotePairingRetry {
+        try await minimuxer.core.launchAppSuspended(appId: appId)
+    }
+    #endif
+}
+
+func safeLaunchAppSuspended(_ appId: String) async throws -> UInt32 {
+    try await ensureMinimuxerReady()
+    return try await launchAppSuspended(appId)
+}
+
 func attachDebugger(_ pid: UInt32) async throws {
     defer { debugLog("[SideStore] attachDebugger(pid) completed") }
     #if targetEnvironment(simulator)
