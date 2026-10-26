@@ -511,7 +511,7 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
                 return
             }
             if let mime = resp.mimeType?.lowercased(), mime.contains("html") {
-                finish(with: .failure(URLError(.cannotParseResponseData, userInfo: [NSURLErrorKey: url])))
+                finish(with: .failure(URLError(.cannotDecodeContentData, userInfo: [NSURLErrorKey: url])))
                 return
             }
         }
