@@ -438,6 +438,19 @@ func safeLaunchAppSuspended(_ appId: String) async throws -> UInt32 {
     return try await launchAppSuspended(appId)
 }
 
+/// Used to clean up an app that was launched suspended and then could not be debugged; left alone
+/// it would sit there with no debugger attached.
+func killProcess(_ pid: UInt32) async throws {
+    #if targetEnvironment(simulator)
+    return
+    #else
+    debugLog("[SideStore] killProcess(pid: \(pid)) invoked")
+    try await withRemotePairingRetry {
+        try await minimuxer.core.killProcess(pid: pid)
+    }
+    #endif
+}
+
 func attachDebugger(_ pid: UInt32) async throws {
     defer { debugLog("[SideStore] attachDebugger(pid) completed") }
     #if targetEnvironment(simulator)

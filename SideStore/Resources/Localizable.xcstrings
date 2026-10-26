@@ -6645,6 +6645,17 @@
         }
       }
     },
+    "Finding %@…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在查找 %@…"
+          }
+        }
+      }
+    },
     "Finding the running app…": {
       "extractionState": "manual",
       "localizations": {

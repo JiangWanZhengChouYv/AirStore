@@ -266,6 +266,7 @@ private func enableJITWithStikJIT(targetPID: UInt32?, bundleIdentifier: String, 
     // script resumes it, it stops again before reaching a breakpoint, and the registers come back
     // empty. Launching it suspended puts the debugger in place before the app's own startup check.
     let resolvedPID: Int32
+    var launchedSuspended = false
     if let targetPID
     {
         resolvedPID = Int32(targetPID)
@@ -278,6 +279,7 @@ private func enableJITWithStikJIT(targetPID: UInt32?, bundleIdentifier: String, 
         do
         {
             pid = try await safeLaunchAppSuspended(bundleIdentifier)
+            launchedSuspended = true
             progress?(80, String(format: NSLocalizedString("Restarted %@ suspended (PID %lld)", comment: ""), appName, Int64(pid)))
         }
         catch let launchError
@@ -319,6 +321,12 @@ private func enableJITWithStikJIT(targetPID: UInt32?, bundleIdentifier: String, 
     catch
     {
         await CellularRefreshManager.shared.turnOnDataIfNeeded()
+        if launchedSuspended
+        {
+            // The app is sitting suspended with nothing attached to it; killing it lets the user
+            // open it again instead of finding a frozen icon.
+            try? await killProcess(UInt32(resolvedPID))
+        }
         throw OperationError.invalidParameters("StikJIT could not enable JIT: \(error.localizedDescription)")
     }
 
