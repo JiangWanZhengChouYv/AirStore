@@ -30,7 +30,12 @@ internal final class ProxyPredicate: NSCompoundPredicate {
     }
 }
 
-open class FetchedResultsDataSource<ContentType: NSManagedObject, CellType: UIView & CellContentCell, ViewType: UIScrollView, DataSourceType>: CellContentDataSource<ContentType, CellType, ViewType, DataSourceType>, NSFetchedResultsControllerDelegate {
+open class FetchedResultsDataSource<
+    ContentType: NSManagedObject,
+    CellType: UIView & CellContentCell,
+    ViewType: UIScrollView,
+    DataSourceType
+>: CellContentDataSource<ContentType, CellType, ViewType, DataSourceType>, NSFetchedResultsControllerDelegate {
     open var liveFetchLimit: Int = 0 {
         didSet {
             guard liveFetchLimit != oldValue else { return }
@@ -332,7 +337,11 @@ open class FetchedResultsDataSource<ContentType: NSManagedObject, CellType: UIVi
 
 open class FetchedResultsCollectionViewDataSource<ContentType: NSManagedObject>: FetchedResultsDataSource<ContentType, UICollectionViewCell, UICollectionView, UICollectionViewDataSource> {}
 open class FetchedResultsTableViewDataSource<ContentType: NSManagedObject>: FetchedResultsDataSource<ContentType, UITableViewCell, UITableView, UITableViewDataSource> {}
-open class FetchedResultsCollectionViewPrefetchingDataSource<ContentType: NSManagedObject, PrefetchContentType>: FetchedResultsCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource, UICollectionViewDataSourcePrefetching {
+open class FetchedResultsCollectionViewPrefetchingDataSource<
+    ContentType: NSManagedObject,
+    PrefetchContentType
+>: FetchedResultsCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource,
+    UICollectionViewDataSourcePrefetching {
     public var prefetchItemCache = NSCache<AnyObject, AnyObject>()
     public var prefetchHandler: ((ContentType, IndexPath) async throws -> PrefetchContentType?)?
     public var prefetchCompletionHandler: ((UICollectionViewCell, PrefetchContentType?, IndexPath, Error?) -> Void)?

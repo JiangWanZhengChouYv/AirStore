@@ -96,7 +96,10 @@ extension ProcessInfo {
     
     public var sparseRestorePatched: Bool {
         // only true if we are 18.7.2<=26 || >=26.0.2
-        if (OperatingSystemVersion(majorVersion: 18, minorVersion: 7, patchVersion: 2) <= operatingSystemVersion && operatingSystemVersion.majorVersion == 18) || operatingSystemVersion >= OperatingSystemVersion(majorVersion: 26, minorVersion: 0, patchVersion: 2) { true }
+        if (OperatingSystemVersion(majorVersion: 18, minorVersion: 7, patchVersion: 2) <= operatingSystemVersion &&
+                operatingSystemVersion.majorVersion == 18) ||
+            (operatingSystemVersion >=
+                OperatingSystemVersion(majorVersion: 26, minorVersion: 0, patchVersion: 2)) { true }
         // we are 26.0<26.0.2
         else if operatingSystemVersion < OperatingSystemVersion(majorVersion: 26, minorVersion: 0, patchVersion: 2) { false }
         // we are <18.7.2

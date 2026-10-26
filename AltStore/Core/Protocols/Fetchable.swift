@@ -44,7 +44,12 @@ public extension Fetchable
         }
     }
     
-    private static func all(satisfying predicate: NSPredicate? = nil, sortedBy sortDescriptors: [NSSortDescriptor]? = nil, in context: NSManagedObjectContext, requestProperties: [PartialKeyPath<FetchRequest>: Any?], returnFirstResult: Bool) -> [Self]
+    private static func all(
+        satisfying predicate: NSPredicate? = nil,
+        sortedBy sortDescriptors: [NSSortDescriptor]? = nil,
+        in context: NSManagedObjectContext,
+        requestProperties: [PartialKeyPath<FetchRequest>: Any?],
+        returnFirstResult: Bool) -> [Self]
     {
         var result: [Self] = []
         context.performAndWait {

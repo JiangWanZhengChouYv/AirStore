@@ -381,7 +381,7 @@ private func updateAttributedString(
                     if divEscaped {
                         dividerMissing = true
                     } else {
-                        searchRange.length = searchRange.length - (NSMaxRange(divRange) - searchRange.location)
+                        searchRange.length -= (NSMaxRange(divRange) - searchRange.location)
                         searchRange.location = NSMaxRange(divRange)
                     }
                 }

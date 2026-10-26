@@ -879,7 +879,10 @@ private extension MyAppsViewController
             }
             
             self.isRefreshingAllApps = true
-            if let activeAppsHeader = self.collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: Section.activeApps.rawValue)) as? InstalledAppsCollectionHeaderView {
+            if let activeAppsHeader = self.collectionView.supplementaryView(
+                forElementKind: UICollectionView.elementKindSectionHeader,
+                at: IndexPath(item: 0, section: Section.activeApps.rawValue)
+            ) as? InstalledAppsCollectionHeaderView {
                 activeAppsHeader.button.isIndicatingActivity = true
                 activeAppsHeader.button.accessibilityLabel = NSLocalizedString("Refreshing", comment: "")
             }

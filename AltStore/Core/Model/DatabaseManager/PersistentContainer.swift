@@ -226,7 +226,12 @@ open class PersistentContainer: NSPersistentContainer, @unchecked Sendable {
         }
         
         var mappingModel: NSMappingModel?
-        guard let migrationManager = self.progressiveMigrationManager(forSourceModel: sourceModel, destinationModel: model, configuration: configuration, mappingModel: &mappingModel), let finalMappingModel = mappingModel else {
+        guard let migrationManager = self.progressiveMigrationManager(
+                forSourceModel: sourceModel,
+                destinationModel: model,
+                configuration: configuration,
+                mappingModel: &mappingModel
+        ), let finalMappingModel = mappingModel else {
             throw DatabaseError.migrationFailed(
                 reason: NSLocalizedString("Unable to find a valid migration path for the database.", comment: "")
             )
@@ -235,9 +240,21 @@ open class PersistentContainer: NSPersistentContainer, @unchecked Sendable {
         let temporaryFilename = UUID().uuidString + "." + url.pathExtension
         let temporaryDestinationURL = FileManager.default.temporaryDirectory.appendingPathComponent(temporaryFilename)
         
-        try migrationManager.migrateStore(from: url, sourceType: description.type, options: description.options, with: finalMappingModel, toDestinationURL: temporaryDestinationURL, destinationType: description.type, destinationOptions: description.options)
+        try migrationManager.migrateStore(
+            from: url,
+            sourceType: description.type,
+            options: description.options,
+            with: finalMappingModel,
+            toDestinationURL: temporaryDestinationURL,
+            destinationType: description.type,
+            destinationOptions: description.options)
         
-        try self.persistentStoreCoordinator.replacePersistentStore(at: url, destinationOptions: description.options, withPersistentStoreFrom: temporaryDestinationURL, sourceOptions: description.options, ofType: description.type)
+        try self.persistentStoreCoordinator.replacePersistentStore(
+            at: url,
+            destinationOptions: description.options,
+            withPersistentStoreFrom: temporaryDestinationURL,
+            sourceOptions: description.options,
+            ofType: description.type)
         
         do {
             try self.persistentStoreCoordinator.destroyPersistentStore(at: temporaryDestinationURL, ofType: description.type, options: description.options)

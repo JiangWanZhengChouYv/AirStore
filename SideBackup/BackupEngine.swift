@@ -192,7 +192,13 @@ final class BackupEngine: NSObject, Sendable {
                 }
                 
                 do {
-                    try self.performBackupCoordinated(temporaryAppBackupDirectory: temporaryAppBackupDirectory, appBackupDirectory: appBackupDirectory, altstoreAppGroup: altstoreAppGroup, skipNonCopyable: skipNonCopyable, progressHandler: progressHandler, logger: logger)
+                    try self.performBackupCoordinated(
+                        temporaryAppBackupDirectory: temporaryAppBackupDirectory,
+                        appBackupDirectory: appBackupDirectory,
+                        altstoreAppGroup: altstoreAppGroup,
+                        skipNonCopyable: skipNonCopyable,
+                        progressHandler: progressHandler,
+                        logger: logger)
                     continuation.resume(returning: ())
                 } catch {
                     continuation.resume(throwing: error)
@@ -237,7 +243,13 @@ final class BackupEngine: NSObject, Sendable {
         }
     }
     
-    private func performBackupCoordinated(temporaryAppBackupDirectory: URL, appBackupDirectory: URL, altstoreAppGroup: String, skipNonCopyable: Bool, progressHandler: (@Sendable (Int64, Int64) -> Void)?, logger: ConsoleLog) throws {
+    private func performBackupCoordinated(
+        temporaryAppBackupDirectory: URL,
+        appBackupDirectory: URL,
+        altstoreAppGroup: String,
+        skipNonCopyable: Bool,
+        progressHandler: (@Sendable (Int64, Int64) -> Void)?,
+        logger: ConsoleLog) throws {
         do {
             let mainGroupBackupDirectory = temporaryAppBackupDirectory.appendingPathComponent("App")
             try FileManager.default.createDirectory(at: mainGroupBackupDirectory, withIntermediateDirectories: true, attributes: nil)
