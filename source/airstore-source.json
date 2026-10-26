@@ -7,7 +7,7 @@
     {
       "name": "AirStore",
       "bundleIdentifier": "com.SideStore.SideStore",
-      "developerName": "JiangWanZhengChouYv",
+      "developerName": "AirStore团队",
       "subtitle": "Sideload and refresh apps with your own Apple ID",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
