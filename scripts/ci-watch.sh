@@ -151,6 +151,9 @@ draw_run() {
   done_steps=$(printf '%s\n' "$steps" | grep -cE '^completed')
   current=$(printf '%s\n' "$steps" | awk -F'\t' '$1=="in_progress"{print $3; exit}')
   [ -z "$current" ] && current=$(printf '%s\n' "$steps" | awk -F'\t' '$1!="completed"{print $3; exit}')
+  # Whether a runner has actually started work. Queued runs cost the same API calls as building
+  # ones, so the poll interval is chosen from this; the caller reads it back out of the file.
+  printf '%s' "$total" > "$DETAIL_CACHE_DIR/steps.$id" 2>/dev/null
 
   local elapsed
   if [ "$status" = "completed" ]; then
@@ -285,6 +288,8 @@ build_frame() {
   FRAME_LINES=()
   LINE_IDS=()
   ANY_RUNNING=0
+  POLL_FAST=0
+  HELP_INDEX=-1
 
   append_frame_line "" "${C_CYN}AirStore CI${C_OFF}  $(date '+%H:%M:%S')  "
 
@@ -294,6 +299,7 @@ build_frame() {
 
   if [ -n "$running" ]; then
     ANY_RUNNING=1
+    HELP_INDEX=${#FRAME_LINES[@]}
     append_frame_line "" "${C_DIM}每 ${INTERVAL}s 刷新 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
     append_frame_line "" "${C_DIM}1–9 展开/收起从上往下第 N 行${C_OFF}"
     for id in $running; do
@@ -302,6 +308,11 @@ build_frame() {
       status=${fields%%$'\037'*}
       printf '%s' "$status" > "$DETAIL_CACHE_DIR/status.$id"
       append_frame_line "$id" "$(draw_run "$id" "$fields")" || break
+      # A run that has not been given a runner yet has nothing to watch; asking every 15 s about
+      # it is just traffic.
+      if [ "$(cat "$DETAIL_CACHE_DIR/steps.$id" 2>/dev/null)" -gt 0 ] 2>/dev/null; then
+        POLL_FAST=1
+      fi
       if is_expanded "$id"; then
         while IFS= read -r line; do
           append_frame_line "$id" "  ${C_DIM}${line:0:$((COLS - 4))}${C_OFF}" || break
@@ -309,6 +320,7 @@ build_frame() {
       fi
     done
   else
+    HELP_INDEX=${#FRAME_LINES[@]}
     append_frame_line "" "${C_DIM}空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检 · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
     append_frame_line "" "${C_DIM}1–9 展开/收起从上往下第 N 行${C_OFF}"
     append_frame_line "" "${C_DIM}没有正在运行的 CI，下面是最近 $HISTORY 条：${C_OFF}"
@@ -325,7 +337,7 @@ build_frame() {
     [ "$status" != "completed" ] && continue
     printf '%s' "completed" > "$DETAIL_CACHE_DIR/status.$id"
     case "$fields" in
-      *$'\037'$'\037'*) ANY_RUNNING=1 ;;   # conclusion still empty: poll again rather than call it 结束
+      *$'\037'$'\037'*) ANY_RUNNING=1; POLL_FAST=1 ;;   # conclusion still empty: poll again rather than call it 结束
     esac
     append_frame_line "$id" "$(draw_finished "$id" "$fields")" || break
     shown=$(( shown + 1 ))
@@ -336,7 +348,20 @@ build_frame() {
     fi
   done
 
-  FRAME="${FRAME%$'\n'}"$'\n'
+  # The interval line is drawn before the rows, so it could not know whether anything actually
+  # started. Fix it up now that the answer is known.
+  if [ "$HELP_INDEX" -ge 0 ]; then
+    local label
+    if [ "$ANY_RUNNING" = 1 ] && [ "$POLL_FAST" = 0 ]; then
+      label="等 runner · 每 $(( IDLE_INTERVAL / 60 )) 分钟刷新"
+    elif [ "$ANY_RUNNING" = 1 ]; then
+      label="每 ${INTERVAL}s 刷新"
+    else
+      label="空闲 · 每 $(( IDLE_INTERVAL / 60 )) 分钟自检"
+    fi
+    FRAME_LINES[$HELP_INDEX]="${C_DIM}${label} · r 刷新 · q 退出 · ⌘+ 放大${C_OFF}"
+  fi
+  frame_from_lines
 }
 
 frame_from_lines() {
@@ -513,7 +538,7 @@ while :; do
 
   if [ "$now" -ge "$next_poll" ]; then
     build_frame
-    if [ "$ANY_RUNNING" = 1 ]; then
+    if [ "$ANY_RUNNING" = 1 ] && [ "$POLL_FAST" = 1 ]; then
       next_poll=$(( now + INTERVAL ))
     else
       next_poll=$(( now + IDLE_INTERVAL ))
