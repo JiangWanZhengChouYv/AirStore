@@ -93,5 +93,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: SideStore-${{ env.MARKETING_VERSION }}-dSYMs.zip
-          path: SideStore.dSYMs.zip
+          name: AirStore-${{ env.MARKETING_VERSION }}-dSYMs.zip
+          path: AirStore.dSYMs.zip

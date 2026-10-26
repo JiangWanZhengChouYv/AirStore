@@ -158,7 +158,7 @@ def build():
         raise
     run("make fakesign | tee -a build/logs/build.log")
     run("make ipa | tee -a build/logs/build.log")
-    run("zip -r -9 ./SideStore.dSYMs.zip ./SideStore.xcarchive/dSYMs")
+    run("zip -r -9 ./AirStore.dSYMs.zip ./SideStore.xcarchive/dSYMs")
 
 # ----------------------------------------------------------
 # TESTS BUILD
@@ -453,7 +453,7 @@ def upload_release(release_name, release_tag, commit_sha, repo, upstream_tag_rec
 
     run(
         f'gh release upload "{release_tag}" '
-        f'AirStore.ipa SideStore.dSYMs.zip build-logs.zip '
+        f'AirStore.ipa AirStore.dSYMs.zip build-logs.zip '
         f'--clobber'
     )
 

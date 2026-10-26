@@ -206,8 +206,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: steps.build_gate.outputs.should_skip != 'true'
         with:
-          name: SideStore-${{ env.MARKETING_VERSION }}-dSYMs.zip
-          path: SideStore.dSYMs.zip
+          name: AirStore-${{ env.MARKETING_VERSION }}-dSYMs.zip
+          path: AirStore.dSYMs.zip
 
       - uses: actions/checkout@v4
         if: steps.build_gate.outputs.should_skip != 'true' && env.DEPLOY_KEY != ''
