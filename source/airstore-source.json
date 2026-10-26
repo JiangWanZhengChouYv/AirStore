@@ -7,7 +7,7 @@
     {
       "name": "AirStore",
       "bundleIdentifier": "com.SideStore.SideStore",
-      "developerName": "JiangWanZhengChouYv",
+      "developerName": "AirStore团队",
       "subtitle": "Sideload and refresh apps with your own Apple ID",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. Everything except JIT works on iOS 26; see the 0.8.1 release notes.",
       "versions": [
         {
-          "version": "0.8.2-develop-202610251138.33-25642ef0",
-          "date": "2026-10-25T11:44:20Z",
+          "version": "0.8.2-develop-202610261051.35-0de9b7bb",
+          "date": "2026-10-26T11:01:46Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-          "size": 30051008,
-          "sha256": "073943e6d768bccbc11705598f971aba8fbadb5b6f788b624e99e636649eb6ac",
-          "localizedDescription": "Development build 0.8.2-develop-202610251138.33-25642ef0 from commit 25642ef0."
+          "size": 30102816,
+          "sha256": "c75a4e8d8e3c4027642efe669b436ea6222bbc4eca88f5326baeaf748ac203a9",
+          "localizedDescription": "Development build 0.8.2-develop-202610261051.35-0de9b7bb from commit 0de9b7bb."
         },
         {
           "version": "0.8.1",
@@ -48,12 +48,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.2-develop-202610251138.33-25642ef0",
-              "date": "2026-10-25T11:44:20Z",
+              "version": "0.8.2-develop-202610261051.35-0de9b7bb",
+              "date": "2026-10-26T11:01:46Z",
               "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-              "size": 30051008,
-              "sha256": "073943e6d768bccbc11705598f971aba8fbadb5b6f788b624e99e636649eb6ac",
-              "localizedDescription": "Development build 0.8.2-develop-202610251138.33-25642ef0 from commit 25642ef0."
+              "size": 30102816,
+              "sha256": "c75a4e8d8e3c4027642efe669b436ea6222bbc4eca88f5326baeaf748ac203a9",
+              "localizedDescription": "Development build 0.8.2-develop-202610261051.35-0de9b7bb from commit 0de9b7bb."
             }
           ]
         },
