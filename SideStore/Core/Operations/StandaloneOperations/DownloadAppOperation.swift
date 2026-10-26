@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CryptoKit
 import UniformTypeIdentifiers
 import SideSign
 
@@ -139,8 +140,13 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             // so context.appVersion != nil means downloading from source.
             self.context.appVersion = appVersion
         }
-        
-        let appBundle = try await downloadIPA(from: sourceURL)
+
+        // A mirror that has not picked up this build yet serves the previous one, which is a valid
+        // file with the wrong bytes. Checking the hash per candidate sends those to the next route
+        // instead of failing the install later.
+        let expectedSHA256: String? = $app.perform { object in (object as? AppVersion)?.sha256 }
+
+        let appBundle = try await downloadIPA(from: sourceURL, expectedSHA256: expectedSHA256)
         
         if self.context.bundleIdentifier == StoreApp.dolphinAppID, self.context.bundleIdentifier != appBundle.bundleIdentifier {
             // Manually update the app's bundle identifier to match the one specified in the source.
@@ -164,7 +170,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         return movedAppBundle
     }
     
-    func downloadIPA(from sourceURL: URL) async throws -> ALTApplication {
+    func downloadIPA(from sourceURL: URL, expectedSHA256: String? = nil) async throws -> ALTApplication {
         let fileURL: URL
         
         if sourceURL.isFileURL {
@@ -172,7 +178,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             self.setProgress(75)
         } else {
             // Regular app
-            fileURL = try await downloadFile(from: sourceURL)
+            fileURL = try await downloadFile(from: sourceURL, expectedSHA256: expectedSHA256)
         }
         
         defer {
@@ -225,7 +231,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         return appBundle
     }
     
-    func downloadFile(from downloadURL: URL) async throws -> URL {
+    func downloadFile(from downloadURL: URL, expectedSHA256: String? = nil) async throws -> URL {
         debugLog("[DownloadAppOperation] download started: \(downloadURL)")
 
         let taskID = "\(self.bundleIdentifier)|\(downloadURL.absoluteString)"
@@ -241,12 +247,17 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
             do {
                 let fileURL = try await self.downloadSegmented(candidate, taskID: taskID)
-                if candidate != downloadURL {
-                    debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?") over multiple connections.")
+                if self.hashMatches(fileURL, expected: expectedSHA256)
+                {
+                    if candidate != downloadURL {
+                        debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?") over multiple connections.")
+                    }
+                    self.setProgress(75)
+                    await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
+                    return fileURL
                 }
-                self.setProgress(75)
-                await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
-                return fileURL
+                try? FileManager.default.removeItem(at: fileURL)
+                lastError = OperationError.missingAppBundle(reason: "stale copy on \(candidate.host ?? "?")")
             }
             catch is CancellationError {
                 await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
@@ -265,18 +276,25 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
             var resumeData: Data?
 
-            for _ in 0..<2 {
+            for attempt in 0..<2 {
                 do {
                     let fileURL = try await self.download(candidate, taskID: taskID, resumeData: resumeData)
-                    if candidate != downloadURL {
-                        debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?").")
+                    if self.hashMatches(fileURL, expected: expectedSHA256)
+                    {
+                        if candidate != downloadURL {
+                            debugLog("[DownloadAppOperation] Downloaded through mirror \(candidate.host ?? "?").")
+                        }
+                        self.setProgress(75)
+                        await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
+                        return fileURL
                     }
-                    self.setProgress(75)
-                    await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
-                    return fileURL
+                    try? FileManager.default.removeItem(at: fileURL)
+                    lastError = OperationError.missingAppBundle(reason: "stale copy on \(candidate.host ?? "?")")
+                    break   // A wrong file is not a dropped connection; there is nothing to resume.
                 }
                 catch {
                     lastError = error
+                    if attempt == 1 { break }
                     // A dropped connection hands back the bytes it already has; resuming the same
                     // mirror once is the difference between retrying 28 MB and the last few.
                     resumeData = (error as NSError).userInfo[NSURLSessionDownloadTaskResumeData] as? Data
@@ -289,6 +307,20 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
         await MainActor.run { DownloadProgressHUD.shared.end(id: taskID) }
         throw lastError ?? URLError(.badURL)
+    }
+
+    /// True when the bytes are the ones the source promised, or when the source promised nothing.
+    private func hashMatches(_ fileURL: URL, expected: String?) -> Bool
+    {
+        guard let expected, !expected.isEmpty else { return true }
+        guard let data = try? Data(contentsOf: fileURL, options: .alwaysMapped) else { return false }
+
+        let hash = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        guard hash.caseInsensitiveCompare(expected) == .orderedSame else {
+            debugLog("[DownloadAppOperation] Downloaded \(hash.prefix(12))… but the source says \(expected.prefix(12))…; moving to the next route.")
+            return false
+        }
+        return true
     }
 
     private func downloadSegmented(_ downloadURL: URL, taskID: String) async throws -> URL {
@@ -468,15 +500,18 @@ private final class DownloadProgressDelegate: NSObject, URLSessionDownloadDelega
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         defer { session.finishTasksAndInvalidate() }
+        let url = downloadTask.originalRequest?.url ?? location
         if let resp = downloadTask.response as? HTTPURLResponse {
             debugLog("[DownloadAppOperation] downloadFile: completed with status \(resp.statusCode) at \(location.path)")
-            if resp.statusCode == 403 {
-                finish(with: .failure(URLError(.noPermissionsToReadFile)))
+            // A mirror that has not picked up a brand new release asset answers with an error page,
+            // often as 200 + text/html. Anything but a 2xx binary has to count as a dead route so
+            // the loop moves on and the origin gets its turn.
+            guard (200..<300).contains(resp.statusCode) else {
+                finish(with: .failure(URLError(.badServerResponse, userInfo: [NSURLErrorKey: url])))
                 return
             }
-            if resp.statusCode == 404 {
-                let error = CocoaError(.fileNoSuchFile, userInfo: [NSURLErrorKey: downloadTask.originalRequest?.url ?? location])
-                finish(with: .failure(error))
+            if let mime = resp.mimeType?.lowercased(), mime.contains("html") {
+                finish(with: .failure(URLError(.cannotParseResponseData, userInfo: [NSURLErrorKey: url])))
                 return
             }
         }
