@@ -112,6 +112,25 @@ jobs:
             exit 1
           fi
 
+      # Grab the package that is live right now, before the upload below replaces it. This is the
+      # delta's base, and it has to be the *unsigned* bundle: what lands on a phone gets re-signed
+      # (embedding.mobileprovision, LC_CODE_SIGNATURE, _CodeSignature), so the device caches its
+      # ASBU at unzip time, before signing, and only bytes produced the same way here will match it.
+      - name: Fetch the previous package for the delta
+        run: |
+          mkdir -p build/previous
+          if gh release download develop-latest --pattern AirStore.ipa --dir build/previous --clobber; then
+            python3 scripts/ci/make_patch.py pack \
+              --app SideStore.xcarchive/Products/Applications/SideStore.app --out build/target.asbu
+            unzip -qo build/previous/AirStore.ipa -d build/previous/unzipped
+            python3 scripts/ci/make_patch.py pack \
+              --app build/previous/unzipped/Payload/SideStore.app --out build/base.asbu
+            python3 scripts/ci/make_patch.py create \
+              --base build/base.asbu --target build/target.asbu --out AirStore.patch
+          else
+            echo "No previous package on develop-latest yet; shipping without a delta."
+          fi
+
       - name: Publish onto the rolling prerelease
         run: |
           gh release view develop-latest >/dev/null 2>&1 || \
@@ -121,6 +140,12 @@ jobs:
           AirStore offers these as updates when the develop track is selected in Settings. \
           Not for distribution -- sign with your own Apple ID and expect breakage."
           gh release upload develop-latest AirStore.ipa --clobber
+          # The delta rides the same rolling release, deliberately: no second tag, no second
+          # release to keep its asset list straight. The device finds it by convention (the ipa
+          # URL's release tag plus AirStore.patch), so nothing about the feed schema changes.
+          if [ -f AirStore.patch ]; then
+            gh release upload develop-latest AirStore.patch --clobber
+          fi
 
       - name: Generate the source feed
         run: |
