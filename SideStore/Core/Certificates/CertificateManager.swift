@@ -150,9 +150,9 @@ public final class CertificateManager: @unchecked Sendable {
         var metadataDict: [String: String] = getCertificateMetadata(for: cert.serialNumber) ?? [:]
         metadataDict["name"] = cert.name
         metadataDict["serialNumber"] = cert.serialNumber
-        if let v = cert.machineIdentifier { metadataDict["machineIdentifier"] = v }
-        if let v = cert.machineName { metadataDict["machineName"] = v }
-        if let v = cert.requesterEmail { metadataDict["requesterEmail"] = v }
+        if let value = cert.machineIdentifier { metadataDict["machineIdentifier"] = value }
+        if let value = cert.machineName { metadataDict["machineName"] = value }
+        if let value = cert.requesterEmail { metadataDict["requesterEmail"] = value }
         setCertificateMetadata(metadataDict, for: cert.serialNumber)
     }
 
@@ -176,9 +176,9 @@ public final class CertificateManager: @unchecked Sendable {
         var metadataDict: [String: String] = getCertificateMetadata(for: x509.serialNumber) ?? [:]
         metadataDict["name"] = x509.name
         metadataDict["serialNumber"] = x509.serialNumber
-        if let v = x509.machineIdentifier { metadataDict["machineIdentifier"] = v }
-        if let v = x509.machineName { metadataDict["machineName"] = v }
-        if let v = x509.requesterEmail { metadataDict["requesterEmail"] = v }
+        if let value = x509.machineIdentifier { metadataDict["machineIdentifier"] = value }
+        if let value = x509.machineName { metadataDict["machineName"] = value }
+        if let value = x509.requesterEmail { metadataDict["requesterEmail"] = value }
         setCertificateMetadata(metadataDict, for: x509.serialNumber)
     }
     

@@ -486,8 +486,8 @@ struct InfoPlistRawView: View {
             return ISO8601DateFormatter().string(from: date)
         } else if let dict = value as? [String: Any] {
             var sanitized: [String: Any] = [:]
-            for (k, v) in dict {
-                sanitized[k] = jsonSanitize(v)
+            for (key, v) in dict {
+                sanitized[key] = jsonSanitize(v)
             }
             return sanitized
         } else if let array = value as? [Any] {

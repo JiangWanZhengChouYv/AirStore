@@ -111,7 +111,7 @@ public class TreeMap<Key: Comparable, Value>: Sequence {
     /// Returns all keys in sorted order.
     public var keys: [Key] {
         var result = [Key]()
-        for (k, _) in self { result.append(k) }
+        for (key, _) in self { result.append(key) }
         return result
     }
     

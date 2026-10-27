@@ -18,8 +18,8 @@ extension ActiveAppsTimelineProvider {
         // this dummy data is for simulator (uncomment when testing ActiveAppsWidget pagination)
         if (apps.count > 0){
             let app = apps[0]
-            for i in 1...10 {
-                let name = "\(app.name) - \(i)"
+            for index in 1...10 {
+                let name = "\(app.name) - \(index)"
                 let snapshot = AppSnapshot(name: name,
                                     bundleIdentifier: app.bundleIdentifier,
                                     expirationDate: app.expirationDate,

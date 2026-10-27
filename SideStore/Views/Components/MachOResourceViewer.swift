@@ -193,33 +193,33 @@ struct MachOResourceViewer: View {
     }
 
     private func loadMachO() {
-        guard let p = try? MachOParser(url: url) else { return }
-        self.parser = p
-        self.dumpText = generateDumpText(p)
+        guard let parser = try? MachOParser(url: url) else { return }
+        self.parser = parser
+        self.dumpText = generateDumpText(parser)
     }
 
-    private func generateDumpText(_ p: MachOParser) -> String {
+    private func generateDumpText(_ parser: MachOParser) -> String {
         var info = "--- Mach-O Binary Info: \(url.lastPathComponent) ---\n"
         info += "Path: \(url.path)\n"
         info += "Size: \(formatSize(url))\n"
-        info += "Architectures: \(p.architectures().joined(separator: ", "))\n"
-        if let platform = p.platformType() {
+        info += "Architectures: \(parser.architectures().joined(separator: ", "))\n"
+        if let platform = parser.platformType() {
             info += "Platform: \(platform)\n"
         }
-        if let minOS = p.minimumOSVersion() {
+        if let minOS = parser.minimumOSVersion() {
             info += "Min OS Version: \(minOS)\n"
         }
-        info += "Encrypted (DRM): \(p.isEncrypted() ? "Yes" : "No")\n"
-        if let bundleID = p.bundleIdentifier() {
+        info += "Encrypted (DRM): \(parser.isEncrypted() ? "Yes" : "No")\n"
+        if let bundleID = parser.bundleIdentifier() {
             info += "Bundle ID: \(bundleID)\n"
         }
-        if let teamID = p.teamID() {
+        if let teamID = parser.teamID() {
             info += "Team ID: \(teamID)\n"
         }
-        if let entry = p.entryPoint() {
+        if let entry = parser.entryPoint() {
             info += "Entry Point: \(String(format: "0x%llX", entry))\n"
         }
-        let cdHashes = p.getCDHashes()
+        let cdHashes = parser.getCDHashes()
         if !cdHashes.isEmpty {
             info += "CDHashes:\n"
             for hash in cdHashes {
@@ -227,7 +227,7 @@ struct MachOResourceViewer: View {
             }
         }
 
-        let certs = p.certificates()
+        let certs = parser.certificates()
         if !certs.isEmpty {
             info += "Certificates (\(certs.count)):\n"
             for (index, cert) in certs.enumerated() {
@@ -236,7 +236,7 @@ struct MachOResourceViewer: View {
             }
         }
 
-        let libs = p.linkedLibraries()
+        let libs = parser.linkedLibraries()
         if !libs.isEmpty {
             info += "Linked Libraries (\(libs.count)):\n"
             for lib in libs {
@@ -244,7 +244,7 @@ struct MachOResourceViewer: View {
             }
         }
 
-        let segs = p.segments()
+        let segs = parser.segments()
         if !segs.isEmpty {
             info += "Segments (\(segs.count)):\n"
             for seg in segs {
@@ -252,7 +252,7 @@ struct MachOResourceViewer: View {
             }
         }
 
-        if let ent = try? p.entitlements(), !ent.isEmpty {
+        if let ent = try? parser.entitlements(), !ent.isEmpty {
             info += "\n--- Embedded Entitlements ---\n"
             info += ent
             info += "\n"

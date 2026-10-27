@@ -47,8 +47,8 @@ final class RefreshAppOperation: BasePipelineOperation<InstallAppOperationContex
         
         do {
             await CellularRefreshManager.shared.turnOffDataIfNeeded()
-            for p in profiles {
-                try await installProvisioningProfiles(p.value.data)
+            for profile in profiles {
+                try await installProvisioningProfiles(profile.value.data)
             }
             await CellularRefreshManager.shared.turnOnDataIfNeeded()
         } catch {

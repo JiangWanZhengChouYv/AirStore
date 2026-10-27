@@ -12,12 +12,12 @@ import Foundation
 final class UITests: XCTestCase {
     
     // Handle to the homescreen UI
-    private static let springboard_app = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-    private static let spotlight_app = XCUIApplication(bundleIdentifier: "com.apple.Spotlight")
+    private static let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+    private static let spotlightApp = XCUIApplication(bundleIdentifier: "com.apple.Spotlight")
     
-    private static let searchBar = spotlight_app.textFields["SpotlightSearchField"]
+    private static let searchBar = spotlightApp.textFields["SpotlightSearchField"]
 
-    private static let APP_NAME = "SideStore"
+    private static let appName = "SideStore"
     
     func printAllMethods(of className: String) {
         guard let cls: AnyClass = objc_getClass(className) as? AnyClass else {
@@ -27,8 +27,8 @@ final class UITests: XCTestCase {
 
         var methodCount: UInt32 = 0
         if let methodList = class_copyMethodList(cls, &methodCount) {
-            for i in 0..<Int(methodCount) {
-                let method = methodList[i]
+            for index in 0..<Int(methodCount) {
+                let method = methodList[index]
                 let sel = method_getName(method)
                 print(String(describing: sel))
             }
@@ -77,7 +77,7 @@ final class UITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        let systemAlert = Self.springboard_app.alerts["“\(Self.APP_NAME)” Would Like to Send You Notifications"]
+        let systemAlert = Self.springboardApp.alerts["“\(Self.appName)” Would Like to Send You Notifications"]
 
         // if it exists keep going immediately else wait for upto 5 sec with polling every 1 sec for existence
         XCTAssertTrue(systemAlert.exists || systemAlert.waitForExistence(timeout: 5), "Notifications alert did not appear")
@@ -95,7 +95,7 @@ final class UITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        let systemAlert = Self.springboard_app.alerts["“\(Self.APP_NAME)” Would Like to Send You Notifications"]
+        let systemAlert = Self.springboardApp.alerts["“\(Self.appName)” Would Like to Send You Notifications"]
 
         // if it exists keep going immediately else wait for upto 5 sec with polling every 1 sec for existence
         XCTAssertTrue(systemAlert.exists || systemAlert.waitForExistence(timeout: 5), "Notifications alert did not appear")
@@ -112,7 +112,7 @@ final class UITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        let systemAlert = Self.springboard_app.alerts["“\(Self.APP_NAME)” Would Like to Send You Notifications"]
+        let systemAlert = Self.springboardApp.alerts["“\(Self.appName)” Would Like to Send You Notifications"]
 
         // if it exists keep going immediately else wait for upto 5 sec with polling every 1 sec for existence
         XCTAssertTrue(systemAlert.exists || systemAlert.waitForExistence(timeout: 5), "Notifications alert did not appear")
@@ -129,7 +129,7 @@ final class UITests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        let systemAlert = Self.springboard_app.alerts["“\(Self.APP_NAME)” Would Like to Send You Notifications"]
+        let systemAlert = Self.springboardApp.alerts["“\(Self.appName)” Would Like to Send You Notifications"]
 
         // if it exists keep going immediately else wait for upto 5 sec with polling every 1 sec for existence
         XCTAssertTrue(systemAlert.exists || systemAlert.waitForExistence(timeout: 5), "Notifications alert did not appear")
@@ -164,7 +164,7 @@ private extension UITests {
                 clearButton.tap()
             }
         }
-        springboard_app.tap()
+        springboardApp.tap()
     }
     
     class func deleteMyApp() {
@@ -172,23 +172,23 @@ private extension UITests {
         dismissSpringboardAlerts()
         
 //        XCUIDevice.shared.press(.home)
-        springboard_app.swipeDown()
+        springboardApp.swipeDown()
         
         let searchBar = Self.searchBar
         _ = searchBar.exists || searchBar.waitForExistence(timeout: 5)
-        searchBar.typeText(APP_NAME)
+        searchBar.typeText(appName)
 
         // Rest of the deletion flow...
-        let appIcon = spotlight_app.icons[APP_NAME]
+        let appIcon = spotlightApp.icons[appName]
         // if it exists keep going immediately else wait for upto 5 sec with polling every 1 sec for existence
         if appIcon.exists || appIcon.waitForExistence(timeout: 5) {
             appIcon.press(forDuration: 1)
             
-            let deleteAppButton = spotlight_app.buttons["Delete App"]
+            let deleteAppButton = spotlightApp.buttons["Delete App"]
             _ = deleteAppButton.exists || deleteAppButton.waitForExistence(timeout: 5)
             deleteAppButton.tap()
             
-            let confirmDeleteButton = springboard_app.alerts["Delete “\(APP_NAME)”?"]
+            let confirmDeleteButton = springboardApp.alerts["Delete “\(appName)”?"]
             _ = confirmDeleteButton.exists || confirmDeleteButton.waitForExistence(timeout: 5)
             confirmDeleteButton.scrollViews.otherElements.buttons["Delete"].tap()
         }
@@ -197,7 +197,7 @@ private extension UITests {
         _ = clearButton.exists || clearButton.waitForExistence(timeout: 5)
         clearButton.tap()
         
-        springboard_app.tap()
+        springboardApp.tap()
     }
     
     @objc func replace() {
@@ -212,28 +212,28 @@ private extension UITests {
         dismissSpringboardAlerts()
         
         // Rest of the deletion flow...
-        let appIcon = springboard_app.icons[APP_NAME]
+        let appIcon = springboardApp.icons[appName]
         // if it exists keep going immediately else wait for upto 5 sec with polling every 1 sec for existence
         if appIcon.exists || appIcon.waitForExistence(timeout: 5) {
             appIcon.press(forDuration: 1)
             
             do {
-                let button = springboard_app.buttons["Remove App"]
+                let button = springboardApp.buttons["Remove App"]
                 _ = button.exists || button.waitForExistence(timeout: 5)
                 button.tap()
-                _ = springboard_app.waitForExistence(timeout: 0.5)
+                _ = springboardApp.waitForExistence(timeout: 0.5)
             }
             do {
-                let button = springboard_app.buttons["Delete App"]
+                let button = springboardApp.buttons["Delete App"]
                 _ = button.waitForExistence(timeout: 0.5)
                 button.tap()
-                _ = springboard_app.waitForExistence(timeout: 0.5)
+                _ = springboardApp.waitForExistence(timeout: 0.5)
             }
             do {
-                let button = springboard_app.buttons["Delete"]
+                let button = springboardApp.buttons["Delete"]
                 _ = button.waitForExistence(timeout: 0.5)
                 button.tap()
-                _ = springboard_app.waitForExistence(timeout: 0.5)
+                _ = springboardApp.waitForExistence(timeout: 0.5)
             }
 
 //            // Press home once to make the icons stop wiggling
@@ -244,7 +244,7 @@ private extension UITests {
     
     
     class func dismissSpringboardAlerts() {
-        for alert in springboard_app.alerts.allElementsBoundByIndex {
+        for alert in springboardApp.alerts.allElementsBoundByIndex {
             if alert.exists {
                 // If there's a "Cancel" button, tap it; otherwise, tap the first button.
                 if alert.buttons["Cancel"].exists {

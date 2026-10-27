@@ -329,10 +329,10 @@ struct ConnectionDetailsCard: View {
                         RoundedCorner(
                             radius: 20,
                             corners: {
-                                var c: UIRectCorner = []
-                                if isFirst { c.formUnion([.topLeft, .topRight]) }
-                                if isLast { c.formUnion([.bottomLeft, .bottomRight]) }
-                                return c
+                                var cornerMask: UIRectCorner = []
+                                if isFirst { cornerMask.formUnion([.topLeft, .topRight]) }
+                                if isLast { cornerMask.formUnion([.bottomLeft, .bottomRight]) }
+                                return cornerMask
                             }()
                         )
                     )

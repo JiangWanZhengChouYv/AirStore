@@ -168,8 +168,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             
-            for t in types {
-                let typeWithoutDot = t.hasSuffix(".") ? String(t.dropLast()) : t
+            for serviceType in types {
+                let typeWithoutDot = serviceType.hasSuffix(".") ? String(serviceType.dropLast()) : serviceType
                 let parameters = typeWithoutDot.contains("_tcp") ? NWParameters.tcp : NWParameters.udp
                 parameters.includePeerToPeer = true
                 
@@ -180,12 +180,12 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
                     guard let self = self else { return }
                     if !results.isEmpty {
                         Task { @MainActor in
-                            if self.discoveredTypes.insert(t).inserted {
+                            if self.discoveredTypes.insert(serviceType).inserted {
                                 let info = ServiceTypeInfo(
-                                    rawType: t,
-                                    friendlyName: Self.friendlyName(for: t)
+                                    rawType: serviceType,
+                                    friendlyName: Self.friendlyName(for: serviceType)
                                 )
-                                if !self.serviceTypes.contains(where: { $0.rawType == t }) {
+                                if !self.serviceTypes.contains(where: { $0.rawType == serviceType }) {
                                     self.serviceTypes.append(info)
                                     self.serviceTypes.sort { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
                                 }

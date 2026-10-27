@@ -107,8 +107,8 @@ open class CellContentDataSource<
     private func updatePlaceholderVisibility() {
         guard let contentView else { return }
         var shouldShowPlaceholderView = true
-        for i in 0..<numberOfSections(in: contentView) {
-            if self.contentView(contentView, numberOfItemsInSection: i) > 0 {
+        for index in 0..<numberOfSections(in: contentView) {
+            if self.contentView(contentView, numberOfItemsInSection: index) > 0 {
                 shouldShowPlaceholderView = false
                 break
             }

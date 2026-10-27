@@ -72,61 +72,61 @@ public extension UIColor {
         var rgbValue: UInt64 = 0
         guard Scanner(string: hexSanitized).scanHexInt64(&rgbValue) else { return nil }
 
-        let r, g, b, a: CGFloat
+        let red, green, blue, alpha: CGFloat
         if hexSanitized.count == 6 {
-            r = CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0
-            g = CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0
-            b = CGFloat(rgbValue & 0x0000FF) / 255.0
-            a = 1.0
+            red = CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0
+            green = CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0
+            blue = CGFloat(rgbValue & 0x0000FF) / 255.0
+            alpha = 1.0
         } else if hexSanitized.count == 8 {
-            r = CGFloat((rgbValue & 0xFF000000) >> 24) / 255.0
-            g = CGFloat((rgbValue & 0x00FF0000) >> 16) / 255.0
-            b = CGFloat((rgbValue & 0x0000FF00) >> 8) / 255.0
-            a = CGFloat(rgbValue & 0x000000FF) / 255.0
+            red = CGFloat((rgbValue & 0xFF000000) >> 24) / 255.0
+            green = CGFloat((rgbValue & 0x00FF0000) >> 16) / 255.0
+            blue = CGFloat((rgbValue & 0x0000FF00) >> 8) / 255.0
+            alpha = CGFloat(rgbValue & 0x000000FF) / 255.0
         } else {
             return nil
         }
 
-        self.init(red: r, green: g, blue: b, alpha: a)
+        self.init(red: red, green: green, blue: blue, alpha: alpha)
     }
 
     var rgbComponents: (r: Int, g: Int, b: Int) {
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        getRed(&r, green: &g, blue: &b, alpha: &a)
-        return (Int(r * 255), Int(g * 255), Int(b * 255))
+        var redChannel: CGFloat = 0
+        var greenChannel: CGFloat = 0
+        var blueChannel: CGFloat = 0
+        var alphaChannel: CGFloat = 0
+        getRed(&redChannel, green: &greenChannel, blue: &blueChannel, alpha: &alphaChannel)
+        return (Int(redChannel * 255), Int(greenChannel * 255), Int(blueChannel * 255))
     }
 
-    var hslComponents: (h: Int, s: Int, l: Int) {
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        getRed(&r, green: &g, blue: &b, alpha: &a)
+    var hslComponents: (hue: Int, saturation: Int, lightness: Int) {
+        var redChannel: CGFloat = 0
+        var greenChannel: CGFloat = 0
+        var blueChannel: CGFloat = 0
+        var alphaChannel: CGFloat = 0
+        getRed(&redChannel, green: &greenChannel, blue: &blueChannel, alpha: &alphaChannel)
 
-        let maxVal = max(r, max(g, b))
-        let minVal = min(r, min(g, b))
+        let maxVal = max(redChannel, max(greenChannel, blueChannel))
+        let minVal = min(redChannel, min(greenChannel, blueChannel))
         let delta = maxVal - minVal
 
-        var h: CGFloat = 0
-        var s: CGFloat = 0
-        let l: CGFloat = (maxVal + minVal) / 2.0
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        let lightness: CGFloat = (maxVal + minVal) / 2.0
 
         if delta != 0 {
-            s = l > 0.5 ? delta / (2.0 - maxVal - minVal) : delta / (maxVal + minVal)
+            saturation = lightness > 0.5 ? delta / (2.0 - maxVal - minVal) : delta / (maxVal + minVal)
 
-            if maxVal == r {
-                h = (g - b) / delta + (g < b ? 6 : 0)
-            } else if maxVal == g {
-                h = (b - r) / delta + 2
+            if maxVal == redChannel {
+                hue = (greenChannel - blueChannel) / delta + (greenChannel < blueChannel ? 6 : 0)
+            } else if maxVal == greenChannel {
+                hue = (blueChannel - redChannel) / delta + 2
             } else {
-                h = (r - g) / delta + 4
+                hue = (redChannel - greenChannel) / delta + 4
             }
-            h /= 6.0
+            hue /= 6.0
         }
 
-        return (Int(h * 360), Int(s * 100), Int(l * 100))
+        return (Int(hue * 360), Int(saturation * 100), Int(lightness * 100))
     }
 }

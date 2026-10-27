@@ -147,14 +147,14 @@ public final class ProfileManager: @unchecked Sendable {
     }
 
     private func cleanSerial(_ serial: String) -> String {
-        var s = serial.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        if s.hasPrefix("0X") {
-            s.removeFirst(2)
+        var normalizedSerial = serial.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if normalizedSerial.hasPrefix("0X") {
+            normalizedSerial.removeFirst(2)
         }
-        while s.hasPrefix("0") && s.count > 1 {
-            s.removeFirst()
+        while normalizedSerial.hasPrefix("0") && normalizedSerial.count > 1 {
+            normalizedSerial.removeFirst()
         }
-        return s
+        return normalizedSerial
     }
 
     public func hasPrivateKey(for serialNumber: String, certData: Data? = nil) -> Bool {

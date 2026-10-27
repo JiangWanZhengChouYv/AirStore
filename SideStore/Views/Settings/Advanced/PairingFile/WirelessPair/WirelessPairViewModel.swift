@@ -432,8 +432,8 @@ final class WirelessPairViewModel: ObservableObject {
             
             let instancesSnapshot = self.bonjour.instances
             debugLog("[WirelessPairViewModel] one-shot: gathered \(instancesSnapshot.count) Bonjour instances from BonjourDiscoveryManager:")
-            for s in instancesSnapshot {
-                debugLog("[WirelessPairViewModel]  -> instance: name='\(s.name)', type='\(s.type)', domain='\(s.domain)', id='\(s.id)'")
+            for string in instancesSnapshot {
+                debugLog("[WirelessPairViewModel]  -> instance: name='\(string.name)', type='\(string.type)', domain='\(string.domain)', id='\(string.id)'")
             }
             
             self.bonjour.stopInstanceSearch()
@@ -460,8 +460,8 @@ final class WirelessPairViewModel: ObservableObject {
             self.discoveredTargets = finalTargets
             self.isScanning = false
             debugLog("[WirelessPairViewModel] one-shot pass complete: \(self.discoveredTargets.count) targets ready:")
-            for t in self.discoveredTargets {
-                debugLog("[WirelessPairViewModel]  -> Target: '\(t.name)' [\(t.rawType)] - IPv4: \(t.ipv4 ?? "none"), IPv6: \(t.ipv6 ?? "none"), Port: \(t.port)")
+            for type in self.discoveredTargets {
+                debugLog("[WirelessPairViewModel]  -> Target: '\(type.name)' [\(type.rawType)] - IPv4: \(type.ipv4 ?? "none"), IPv6: \(type.ipv6 ?? "none"), Port: \(type.port)")
             }
         }
     }

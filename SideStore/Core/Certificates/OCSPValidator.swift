@@ -233,14 +233,14 @@ public struct OCSPValidator {
     }
     
     private static func derInteger(_ data: Data) -> Data {
-        var d = data
-        while d.count > 1 && d[0] == 0 && (d[1] & 0x80) == 0 {
-            d.removeFirst()
+        var mutableData = data
+        while mutableData.count > 1 && mutableData[0] == 0 && (mutableData[1] & 0x80) == 0 {
+            mutableData.removeFirst()
         }
-        if d.count > 0 && (d[0] & 0x80) != 0 {
-            d.insert(0x00, at: 0)
+        if mutableData.count > 0 && (mutableData[0] & 0x80) != 0 {
+            mutableData.insert(0x00, at: 0)
         }
-        return derEncode(tag: 0x02, content: d)
+        return derEncode(tag: 0x02, content: mutableData)
     }
     
     private static func extractSubjectNameDER(from certDER: Data) -> Data? {
