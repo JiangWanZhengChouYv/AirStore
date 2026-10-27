@@ -109,11 +109,11 @@ struct BundleDelta
         guard packageURL.host?.hasSuffix("github.com") == true,
               packageURL.pathExtension.lowercased() == "ipa",
               let range = packageURL.path.range(of: marker),
-              let tag = packageURL.path[..<range.upperBound].split(separator: "/").last,
+              let tag = packageURL.path[range.upperBound...].split(separator: "/").first,
               tag.isEmpty == false else { return nil }
         
         guard var components = URLComponents(url: packageURL, resolvingAgainstBaseURL: false) else { return nil }
-        components.path = String(packageURL.path[..<range.upperBound]) + "/AirStore.patch"
+        components.path = String(packageURL.path[..<range.upperBound]) + tag + "/AirStore.patch"
         return components.url
     }
     

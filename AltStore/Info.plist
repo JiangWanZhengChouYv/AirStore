@@ -6,6 +6,8 @@
 	<string>https://ani3.stikstore.app</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>AirStore</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -42,8 +44,6 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
-	<key>CFBundleDisplayName</key>
-	<string>AirStore</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -168,6 +168,10 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>AirStore can use local network access to discover Bonjour (mDNS) services on your network. This is not required for core functionality.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>AirStore uses location updates to keep background operations active.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AirStore uses location updates to keep background operations active.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>RefreshAllIntent</string>
@@ -238,10 +242,6 @@
 		<string>remote-notification</string>
 		<string>processing</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>AirStore uses location updates to keep background operations active.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>AirStore uses location updates to keep background operations active.</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
