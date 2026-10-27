@@ -9,8 +9,9 @@ name: Develop AirStore build
 #     develop-source branch, which is what the app fetches, so a machine never rewrites what a
 #     human wrote on develop.
 #   - It does not publish to a normal release. All builds land on one rolling prerelease tagged
-#     develop-latest, whose asset name never changes, so the download URL in that JSON stays
-#     valid across builds and no one has to prune old releases.
+#     develop-latest, whose assets are named after the build's version, so the package you are
+#     already on stays downloadable after the next push replaces the feed. The feed carries the
+#     exact URL, so nothing downstream has to guess the name.
 
 on:
   push:
@@ -116,13 +117,17 @@ jobs:
       # delta's base, and it has to be the *unsigned* bundle: what lands on a phone gets re-signed
       # (embedding.mobileprovision, LC_CODE_SIGNATURE, _CodeSignature), so the device caches its
       # ASBU at unzip time, before signing, and only bytes produced the same way here will match it.
+      # Newest by asset id rather than by name, because the names now carry the version.
       - name: Fetch the previous package for the delta
         run: |
           mkdir -p build/previous
-          if gh release download develop-latest --pattern AirStore.ipa --dir build/previous --clobber; then
+          previous=$(gh release view develop-latest --json assets --jq \
+            '[.assets[] | select(.name | endswith(".ipa"))] | max_by(.id) | .name' 2>/dev/null || true)
+          echo "base package: ${previous:-none}"
+          if [ -n "$previous" ] && gh release download develop-latest --pattern "$previous" --dir build/previous --clobber; then
             python3 scripts/ci/make_patch.py pack \
               --app SideStore.xcarchive/Products/Applications/SideStore.app --out build/target.asbu
-            unzip -qo build/previous/AirStore.ipa -d build/previous/unzipped
+            unzip -qo "build/previous/$previous" -d build/previous/unzipped
             python3 scripts/ci/make_patch.py pack \
               --app build/previous/unzipped/Payload/SideStore.app --out build/base.asbu
             python3 scripts/ci/make_patch.py create \
@@ -139,22 +144,36 @@ jobs:
               --notes "Every build here is a snapshot of develop, replaced by the next push. \
           AirStore offers these as updates when the develop track is selected in Settings. \
           Not for distribution -- sign with your own Apple ID and expect breakage."
-          gh release upload develop-latest AirStore.ipa --clobber
-          # The delta rides the same rolling release, deliberately: no second tag, no second
-          # release to keep its asset list straight. The device finds it by convention (the ipa
-          # URL's release tag plus AirStore.patch), so nothing about the feed schema changes.
+          # The package and the patch take the build's version as their name, so one pair can never
+          # be served with another build's counterpart, and BundleDelta finds the patch by swapping
+          # the extension on the URL the feed already gives it.
+          cp AirStore.ipa "$VERSION.ipa"
+          gh release upload develop-latest "$VERSION.ipa" --clobber
           if [ -f AirStore.patch ]; then
-            gh release upload develop-latest AirStore.patch --clobber
+            cp AirStore.patch "$VERSION.patch"
+            gh release upload develop-latest "$VERSION.patch" --clobber
           fi
+
+      - name: Keep only the last few builds on the rolling release
+        run: |
+          # Version names would otherwise pile up 30 MB per push, so the five newest pairs go and
+          # everything older is pruned. Five is the horizon: a build you are still on has to stay
+          # downloadable long enough to be the base of the patch that updates it.
+          gh release view develop-latest --json assets --jq \
+            '[.assets[] | select((.name | endswith(".ipa")) or (.name | endswith(".patch")))]
+             | sort_by(.id) | .[0:-10] | .[].name' 2>/dev/null | while read -r stale; do
+            echo "pruning $stale"
+            gh release delete-asset develop-latest "$stale" --yes || true
+          done
 
       - name: Generate the source feed
         run: |
           python3 scripts/ci/develop_source.py \
             --source source/airstore-source.json \
-            --ipa AirStore.ipa \
+            --ipa "$VERSION.ipa" \
             --bundle-id "$(python3 scripts/ci/workflow.py get-bundle-id)" \
             --version "$VERSION" \
-            --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirStore.ipa" \
+            --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/$VERSION.ipa" \
             --track develop \
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
             --out build/airstore-source.json
