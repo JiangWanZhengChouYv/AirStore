@@ -115,7 +115,7 @@
 				Resources/ReleaseEntitlements.plist,
 			);
 			platformFiltersByRelativePath = {
-				Authentication/Base.lproj/Authentication.storyboard = (
+				Authentication/Authentication.storyboard = (
 					ios,
 				);
 				Authentication/tvOS/Authentication.storyboard = (
