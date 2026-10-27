@@ -118,7 +118,7 @@ class AppCardCollectionViewCell: UICollectionViewCell
         self.screenshotsCollectionView.panGestureRecognizer.require(toFail: self.topAreaPanGestureRecognizer)
         self.screenshotsCollectionView.addGestureRecognizer(self.topAreaPanGestureRecognizer)
         
-        self.screenshotsCollectionView.register(AppScreenshotCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.screenshotsCollectionView.register(AppScreenshotCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
         self.stackView.isLayoutMarginsRelativeArrangement = true
         self.stackView.layoutMargins.bottom = inset

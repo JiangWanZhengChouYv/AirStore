@@ -52,7 +52,7 @@ class PreviewAppScreenshotsViewController: UICollectionViewController
         self.collectionView.insetsLayoutMarginsFromSafeArea = true
         
         self.collectionView.alwaysBounceVertical = false
-        self.collectionView.register(AppScreenshotCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(AppScreenshotCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
         self.collectionView.dataSource = self.dataSource
         self.collectionView.prefetchDataSource = self.dataSource

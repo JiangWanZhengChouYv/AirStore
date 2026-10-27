@@ -10,7 +10,7 @@
 
 extension UITableView: CellContentUpdateableView, CellContentTransactionUpdateable {
     public func addChange(_ change: CellContentChange) {
-        if change.sectionIndex != UnknownSectionIndex {
+        if change.sectionIndex != unknownSectionIndex {
             let indexSet = IndexSet(integer: change.sectionIndex)
             switch change.type {
             case .insert:

@@ -106,7 +106,7 @@ class AppDetailCollectionViewController: UICollectionViewController
         self.collectionView.collectionViewLayout = collectionViewLayout
         
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "PrivacyCell")
-        self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
         self.headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
             elementKind: UICollectionView.elementKindSectionHeader

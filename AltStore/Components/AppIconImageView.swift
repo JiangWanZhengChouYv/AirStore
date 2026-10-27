@@ -170,9 +170,9 @@ extension UIImage
         var totalLuminance: CGFloat = 0.0
         var totalOpaquePixels: CGFloat = 0.0
         
-        for y in 0..<height {
-            for x in 0..<width {
-                let offset = (y * width + x) * bytesPerPixel
+        for row in 0..<height {
+            for column in 0..<width {
+                let offset = (row * width + column) * bytesPerPixel
                 let red = CGFloat(rawData[offset])
                 let green = CGFloat(rawData[offset + 1])
                 let blue = CGFloat(rawData[offset + 2])

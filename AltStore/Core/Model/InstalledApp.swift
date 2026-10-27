@@ -324,7 +324,7 @@ public extension InstalledApp
     func loadIcon() async throws -> UIImage?
     {
         if self.bundleIdentifier == StoreApp.altstoreAppID,
-           let iconName = UIApplication.alt_shared?.value(forKey: "alternateIconName") as? String
+           let iconName = UIApplication.altShared?.value(forKey: "alternateIconName") as? String
         {
             // Use alternate app icon for AltStore, if one was chosen.
             let imageName = iconName.replacingOccurrences(of: "Icon", with: "")

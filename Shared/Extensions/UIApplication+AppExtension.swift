@@ -11,11 +11,11 @@
 public extension UIApplication
 {
     // Cannot normally use UIApplication.shared from extensions, so we get around this by calling value(forKey:).
-    class var alt_shared: UIApplication? {
+    class var altShared: UIApplication? {
         return UIApplication.value(forKey: "sharedApplication") as? UIApplication
     }
     
-    var alt_keyWindow: UIWindow? {
+    var altKeyWindow: UIWindow? {
         return connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
@@ -26,7 +26,7 @@ public extension UIApplication
     }
     
     func topViewController(base: UIViewController? = nil) -> UIViewController? {
-        let root = base ?? alt_keyWindow?.rootViewController
+        let root = base ?? altKeyWindow?.rootViewController
         if let nav = root as? UINavigationController {
             return topViewController(base: nav.visibleViewController ?? nav.topViewController)
         }

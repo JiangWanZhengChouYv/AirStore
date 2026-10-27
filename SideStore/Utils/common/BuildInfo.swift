@@ -32,12 +32,12 @@ public class BuildInfo{
         self.bundle = bundle
     }
 
-    public lazy var project_version: String? = {
+    public lazy var projectVersion: String? = {
         let version  = bundle.object(forInfoDictionaryKey: Self.currentProjectVersionTag) as? String
         return version
     }()
 
-    public lazy var marketing_version: String? = {
+    public lazy var marketingVersion: String? = {
         let version  = bundle.object(forInfoDictionaryKey: Self.marketingVersionTag) as? String
         return version
     }()
@@ -47,7 +47,7 @@ public class BuildInfo{
         return xcode
     }()
 
-    public lazy var xcode_revision: String? = {
+    public lazy var xcodeRevision: String? = {
         let revision  = bundle.object(forInfoDictionaryKey: Self.xcodeRevisionTag) as? String
         return revision
     }()

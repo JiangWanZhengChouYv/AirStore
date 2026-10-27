@@ -52,8 +52,8 @@ fileprivate struct BuildVersion: Comparable {
         }
         // Compare suffixes
         switch (lhs.suffix, rhs.suffix) {
-        case let (l?, r?):
-            return l < r
+        case let (left?, right?):
+            return left < right
         case (nil, _?):
             return true // nil is considered less than any character
         case (_?, nil):

@@ -44,7 +44,7 @@ class AppScreenshotsViewController: UICollectionViewController
         let collectionViewLayout = self.makeLayout()
         self.collectionView.collectionViewLayout = collectionViewLayout
         
-        self.collectionView.register(AppScreenshotCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(AppScreenshotCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
         self.collectionView.dataSource = self.dataSource
         self.collectionView.prefetchDataSource = self.dataSource

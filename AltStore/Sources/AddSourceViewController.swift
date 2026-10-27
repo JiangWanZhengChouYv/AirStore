@@ -83,7 +83,7 @@ class AddSourceViewController: UICollectionViewController
         let layout = self.makeLayout()
         self.collectionView.collectionViewLayout = layout
         
-        self.collectionView.register(AppBannerCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(AppBannerCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         self.collectionView.register(AddSourceTextFieldCell.self, forCellWithReuseIdentifier: ReuseID.textFieldCell.rawValue)
         
         self.collectionView.register(UICollectionViewListCell.self,

@@ -53,7 +53,7 @@ extension UICollectionView: CellContentUpdateableView, CellContentTransactionUpd
         
         var updateIndexPaths = [IndexPath]()
         for change in currentOperations {
-            if change.sectionIndex == UnknownSectionIndex && change.type == .update, let indexPath = change.currentIndexPath {
+            if change.sectionIndex == unknownSectionIndex && change.type == .update, let indexPath = change.currentIndexPath {
                 updateIndexPaths.append(indexPath)
             }
         }
@@ -80,7 +80,7 @@ extension UICollectionView: CellContentUpdateableView, CellContentTransactionUpd
         
         self.performBatchUpdates({
             for change in currentOperations {
-                if change.sectionIndex != UnknownSectionIndex {
+                if change.sectionIndex != unknownSectionIndex {
                     let indexSet = IndexSet(integer: change.sectionIndex)
                     switch change.type {
                     case .insert: self.insertSections(indexSet)
@@ -119,7 +119,7 @@ extension UICollectionView: CellContentUpdateableView, CellContentTransactionUpd
             operations?.append(change)
         } else {
             self.performBatchUpdates({
-                if change.sectionIndex != UnknownSectionIndex {
+                if change.sectionIndex != unknownSectionIndex {
                     let indexSet = IndexSet(integer: change.sectionIndex)
                     switch change.type {
                     case .insert: self.insertSections(indexSet)

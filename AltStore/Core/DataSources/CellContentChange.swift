@@ -9,7 +9,7 @@
 @preconcurrency import UIKit
 import CoreData
 
-public let UnknownSectionIndex: Int = -1
+public let unknownSectionIndex: Int = -1
 
 public final class CellContentChange: NSObject {
     public enum ChangeType: Int {
@@ -29,7 +29,7 @@ public final class CellContentChange: NSObject {
         self.type = type
         self.currentIndexPath = currentIndexPath
         self.destinationIndexPath = destinationIndexPath
-        self.sectionIndex = UnknownSectionIndex
+        self.sectionIndex = unknownSectionIndex
         super.init()
     }
 

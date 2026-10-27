@@ -99,7 +99,7 @@ class AltAppIconsViewController: UICollectionViewController
         self.collectionView.dataSource = self.dataSource
         self.dataSource.contentView = self.collectionView
         
-        self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         self.collectionView.register(UICollectionViewListCell.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: UICollectionView.elementKindSectionHeader)

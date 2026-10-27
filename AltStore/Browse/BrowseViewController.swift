@@ -89,7 +89,7 @@ class BrowseViewController: UICollectionViewController
         
         self.prototypeCell.contentView.translatesAutoresizingMaskIntoConstraints = false
         
-        self.collectionView.register(AppCardCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(AppCardCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
         self.collectionView.dataSource = self.dataSource
         self.collectionView.prefetchDataSource = self.dataSource

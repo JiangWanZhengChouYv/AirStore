@@ -9,7 +9,7 @@
 @preconcurrency import UIKit
 import CoreData
 
-public let CellContentGenericCellIdentifier = "Cell"
+public let cellContentGenericCellIdentifier = "Cell"
 
 public protocol CellContentIndexPathTranslating: AnyObject {
     func dataSource(_ dataSource: AnyObject, globalIndexPathForLocalIndexPath localIndexPath: IndexPath) -> IndexPath?
@@ -37,7 +37,7 @@ open class CellContentDataSource<
     UISearchResultsUpdating {
     open weak var contentView: ViewType?
     open weak var proxy: AnyObject?
-    open var cellIdentifierHandler: ((IndexPath) -> String) = { _ in CellContentGenericCellIdentifier }
+    open var cellIdentifierHandler: ((IndexPath) -> String) = { _ in cellContentGenericCellIdentifier }
     open var cellConfigurationHandler: ((CellType, ContentType, IndexPath) -> Void) = { _, _, _ in }
     private var _predicate: NSPredicate?
     open var predicate: NSPredicate? {
@@ -157,7 +157,7 @@ open class CellContentDataSource<
     open func addChange(_ change: CellContentChange) {
         let transformedChange: CellContentChange
         
-        if change.sectionIndex != UnknownSectionIndex {
+        if change.sectionIndex != unknownSectionIndex {
             let sectionIndexPath = IndexPath(item: 0, section: change.sectionIndex)
             let globalIndexPath = indexPathTranslator?.dataSource(self, globalIndexPathForLocalIndexPath: sectionIndexPath) ?? sectionIndexPath
             transformedChange = CellContentChange(type: change.type, sectionIndex: globalIndexPath.section)
@@ -168,7 +168,7 @@ open class CellContentDataSource<
         }
         transformedChange.rowAnimation = change.rowAnimation
         
-        if change.sectionIndex == UnknownSectionIndex {
+        if change.sectionIndex == unknownSectionIndex {
             var indexPathForRemovingFromCache: IndexPath? = nil
             switch change.type {
             case .update:

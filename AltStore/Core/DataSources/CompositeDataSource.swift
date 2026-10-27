@@ -35,7 +35,7 @@ open class CompositeDataSource<
         }
         self.cellIdentifierHandler = { [weak self] indexPath in
             guard let self, let resolved = self.resolve(indexPath) else {
-                return CellContentGenericCellIdentifier
+                return cellContentGenericCellIdentifier
             }
             return resolved.dataSource.anyCellIdentifier(at: resolved.indexPath)
         }

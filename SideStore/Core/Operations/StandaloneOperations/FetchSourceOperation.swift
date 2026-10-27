@@ -280,7 +280,7 @@ final class FetchSourceOperation: BaseStandaloneOperation<StandaloneOperationCon
         let incomingSourceID = source.identifier
         if let previousSourceID = self.$source.identifier,
            incomingSourceID != previousSourceID {
-//            if let version = BuildInfo().marketing_version,
+//            if let version = BuildInfo().marketingVersion,
 //               SemanticVersion(version)! <= SemanticVersion("0.6.1")!
 //            {
 //                // delete the source, so that incoming will be saved.

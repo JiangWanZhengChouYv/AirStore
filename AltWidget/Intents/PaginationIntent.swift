@@ -39,7 +39,7 @@ class PaginationIntent: AppIntent, @unchecked Sendable {
         // if id was not passed in, then we assume the widget isn't customized yet
         // hence we use the common ID, if this is not present in registry of PageInfoManager
         // then it will return nil, triggering to show first page in the provider
-        self.widgetID = widgetID ?? WidgetUpdateIntent.COMMON_WIDGET_ID
+        self.widgetID = widgetID ?? WidgetUpdateIntent.commonWidgetID
         self.direction = direction.rawValue
         self.widgetKind = widgetKind
         debugLog("[PaginationIntent] Initialized with widgetID: \(self.widgetID), direction: \(self.direction), widgetKind: \(self.widgetKind)")

@@ -98,7 +98,7 @@ class NewsViewController: UICollectionViewController
         self.collectionView.prefetchDataSource = self.dataSource
         self.dataSource.contentView = self.collectionView
         
-        self.collectionView.register(NewsCollectionViewCell.nib, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(NewsCollectionViewCell.nib, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         self.collectionView.register(AppBannerFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "AppBanner")
         
         #if !os(tvOS)

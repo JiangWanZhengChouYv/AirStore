@@ -58,7 +58,7 @@ final class SourcesViewController: UICollectionViewController
         
         self.navigationController?.view.tintColor = .altPrimary
         
-        self.collectionView.register(AppBannerCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(AppBannerCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
         self.collectionView.dataSource = self.dataSource
         self.collectionView.prefetchDataSource = self.dataSource

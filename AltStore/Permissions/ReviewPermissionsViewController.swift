@@ -99,7 +99,7 @@ class ReviewPermissionsViewController: UICollectionViewController
         self.dataSource.proxy = self
         self.collectionView.dataSource = self.dataSource
         
-        self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
+        self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         self.collectionView.register(UICollectionViewListCell.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: UICollectionView.elementKindSectionHeader)

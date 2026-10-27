@@ -118,7 +118,7 @@ public class TreeMap<Key: Comparable, Value>: Sequence {
     /// Returns all values in order of their keys.
     public var values: [Value] {
         var result = [Value]()
-        for (_, v) in self { result.append(v) }
+        for (_, value) in self { result.append(value) }
         return result
     }
     
@@ -156,47 +156,47 @@ public class TreeMap<Key: Comparable, Value>: Sequence {
     
     // MARK: - Rotation Methods
     
-    private func rotateLeft(_ x: Node) {
-        guard let y = x.right else { return }
-        x.right = y.left
-        if let leftChild = y.left {
-            leftChild.parent = x
+    private func rotateLeft(_ node: Node) {
+        guard let child = node.right else { return }
+        node.right = child.left
+        if let leftChild = child.left {
+            leftChild.parent = node
         }
-        y.parent = x.parent
-        if x.parent == nil {
-            root = y
-        } else if x === x.parent?.left {
-            x.parent?.left = y
+        child.parent = node.parent
+        if node.parent == nil {
+            root = child
+        } else if node === node.parent?.left {
+            node.parent?.left = child
         } else {
-            x.parent?.right = y
+            node.parent?.right = child
         }
-        y.left = x
-        x.parent = y
+        child.left = node
+        node.parent = child
     }
     
-    private func rotateRight(_ x: Node) {
-        guard let y = x.left else { return }
-        x.left = y.right
-        if let rightChild = y.right {
-            rightChild.parent = x
+    private func rotateRight(_ node: Node) {
+        guard let child = node.left else { return }
+        node.left = child.right
+        if let rightChild = child.right {
+            rightChild.parent = node
         }
-        y.parent = x.parent
-        if x.parent == nil {
-            root = y
-        } else if x === x.parent?.right {
-            x.parent?.right = y
+        child.parent = node.parent
+        if node.parent == nil {
+            root = child
+        } else if node === node.parent?.right {
+            node.parent?.right = child
         } else {
-            x.parent?.left = y
+            node.parent?.left = child
         }
-        y.right = x
-        x.parent = y
+        child.right = node
+        node.parent = child
     }
     
     // MARK: - Insertion Fix-Up
     
     /// Restores red–black properties after insertion.
-    private func fixAfterInsertion(_ x: Node) {
-        var node = x
+    private func fixAfterInsertion(_ inserted: Node) {
+        var node = inserted
         node.color = .red
         while node !== root, let parent = node.parent, parent.color == .red {
             if parent === parent.parent?.left {
@@ -245,123 +245,123 @@ public class TreeMap<Key: Comparable, Value>: Sequence {
     // MARK: - Deletion Helpers
     
     /// Replaces subtree rooted at u with subtree rooted at v.
-    private func transplant(_ u: Node, _ v: Node?) {
-        if u.parent == nil {
-            root = v
-        } else if u === u.parent?.left {
-            u.parent?.left = v
+    private func transplant(_ outgoing: Node, _ incoming: Node?) {
+        if outgoing.parent == nil {
+            root = incoming
+        } else if outgoing === outgoing.parent?.left {
+            outgoing.parent?.left = incoming
         } else {
-            u.parent?.right = v
+            outgoing.parent?.right = incoming
         }
-        if let vNode = v {
-            vNode.parent = u.parent
+        if let incomingNode = incoming {
+            incomingNode.parent = outgoing.parent
         }
     }
     
     /// Deletes node z and fixes red–black properties.
-    private func deleteNode(_ z: Node) {
-        var y = z
-        let originalColor = y.color
-        var x: Node?
+    private func deleteNode(_ target: Node) {
+        var replacement = target
+        let originalColor = replacement.color
+        var movedChild: Node?
         
-        if z.left == nil {
-            x = z.right
-            transplant(z, z.right)
-        } else if z.right == nil {
-            x = z.left
-            transplant(z, z.left)
+        if target.left == nil {
+            movedChild = target.right
+            transplant(target, target.right)
+        } else if target.right == nil {
+            movedChild = target.left
+            transplant(target, target.left)
         } else {
-            y = minimum(z.right!)
-            let yOriginalColor = y.color
-            x = y.right
-            if y.parent === z {
-                if x != nil { x!.parent = y }
+            replacement = minimum(target.right!)
+            let replacementOriginalColor = replacement.color
+            movedChild = replacement.right
+            if replacement.parent === target {
+                if movedChild != nil { movedChild!.parent = replacement }
             } else {
-                transplant(y, y.right)
-                y.right = z.right
-                y.right?.parent = y
+                transplant(replacement, replacement.right)
+                replacement.right = target.right
+                replacement.right?.parent = replacement
             }
-            transplant(z, y)
-            y.left = z.left
-            y.left?.parent = y
-            y.color = z.color
-            if yOriginalColor == .black {
-                fixAfterDeletion(x, parent: y.parent)
+            transplant(target, replacement)
+            replacement.left = target.left
+            replacement.left?.parent = replacement
+            replacement.color = target.color
+            if replacementOriginalColor == .black {
+                fixAfterDeletion(movedChild, parent: replacement.parent)
             }
             return
         }
         if originalColor == .black {
-            fixAfterDeletion(x, parent: z.parent)
+            fixAfterDeletion(movedChild, parent: target.parent)
         }
     }
     
     /// Restores red–black properties after deletion.
-    private func fixAfterDeletion(_ x: Node?, parent: Node?) {
-        var x = x
+    private func fixAfterDeletion(_ node: Node?, parent: Node?) {
+        var node = node
         var parent = parent
-        while (x == nil || x!.color == .black) && (x !== root) {
-            if x === parent?.left {
-                var w = parent?.right
-                if w?.color == .red {
-                    w?.color = .black
+        while (node == nil || node!.color == .black) && (node !== root) {
+            if node === parent?.left {
+                var sibling = parent?.right
+                if sibling?.color == .red {
+                    sibling?.color = .black
                     parent?.color = .red
                     rotateLeft(parent!)
-                    w = parent?.right
+                    sibling = parent?.right
                 }
-                if (w?.left == nil || w?.left?.color == .black) &&
-                   (w?.right == nil || w?.right?.color == .black) {
-                    w?.color = .red
-                    x = parent
-                    parent = x?.parent
+                if (sibling?.left == nil || sibling?.left?.color == .black) &&
+                   (sibling?.right == nil || sibling?.right?.color == .black) {
+                    sibling?.color = .red
+                    node = parent
+                    parent = node?.parent
                 } else {
-                    if w?.right == nil || w?.right?.color == .black {
-                        w?.left?.color = .black
-                        w?.color = .red
-                        if let wUnwrapped = w { rotateRight(wUnwrapped) }
-                        w = parent?.right
+                    if sibling?.right == nil || sibling?.right?.color == .black {
+                        sibling?.left?.color = .black
+                        sibling?.color = .red
+                        if let wUnwrapped = sibling { rotateRight(wUnwrapped) }
+                        sibling = parent?.right
                     }
-                    w?.color = parent?.color ?? .black
+                    sibling?.color = parent?.color ?? .black
                     parent?.color = .black
-                    w?.right?.color = .black
+                    sibling?.right?.color = .black
                     rotateLeft(parent!)
-                    x = root
+                    node = root
                     parent = nil
                 }
             } else {
-                var w = parent?.left
-                if w?.color == .red {
-                    w?.color = .black
+                var sibling = parent?.left
+                if sibling?.color == .red {
+                    sibling?.color = .black
                     parent?.color = .red
                     rotateRight(parent!)
-                    w = parent?.left
+                    sibling = parent?.left
                 }
-                if (w?.left == nil || w?.left?.color == .black) &&
-                   (w?.right == nil || w?.right?.color == .black) {
-                    w?.color = .red
-                    x = parent
-                    parent = x?.parent
+                if (sibling?.left == nil || sibling?.left?.color == .black) &&
+                   (sibling?.right == nil || sibling?.right?.color == .black) {
+                    sibling?.color = .red
+                    node = parent
+                    parent = node?.parent
                 } else {
-                    if w?.left == nil || w?.left?.color == .black {
-                        w?.right?.color = .black
-                        w?.color = .red
-                        if let wUnwrapped = w { rotateLeft(wUnwrapped) }
-                        w = parent?.left
+                    if sibling?.left == nil || sibling?.left?.color == .black {
+                        sibling?.right?.color = .black
+                        sibling?.color = .red
+                        if let wUnwrapped = sibling { rotateLeft(wUnwrapped) }
+                        sibling = parent?.left
                     }
-                    w?.color = parent?.color ?? .black
+                    sibling?.color = parent?.color ?? .black
                     parent?.color = .black
-                    w?.left?.color = .black
+                    sibling?.left?.color = .black
                     rotateRight(parent!)
-                    x = root
+                    node = root
                     parent = nil
                 }
             }
         }
-        x?.color = .black
+        node?.color = .black
     }
     
     // Convenience overload if parent is not separately tracked.
-    private func fixAfterDeletion(_ x: Node?) {
-        fixAfterDeletion(x, parent: x?.parent)
+    private func fixAfterDeletion(_ node: Node?) {
+        fixAfterDeletion(node, parent: node?.parent)
     }
     
     // MARK: - Sequence Conformance (In-Order Traversal)
