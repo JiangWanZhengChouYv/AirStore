@@ -1,0 +1,68 @@
+name: SwiftLint
+
+# Lint runs on ubuntu in the SwiftLint image, not on macos-26 with the builds. The build workflows
+# already compete for macOS runners -- a develop build sat queued and got cancelled four times --
+# and a style check has no business waiting behind them for an hour to print the same number.
+#
+# It is expected to be red. Default rules with no .swiftlint.yml put the error-severity count in
+# the hundreds, and they are coming down a batch at a time; the badge tracks the slope, not a
+# gate on any single pull request. Warnings are reported but never fail the job, because there are
+# fourteen thousand of them and that argument is not happening in a diff.
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swiftlint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: SwiftLint (error-severity violations must reach zero)
+    runs-on: ubuntu-latest
+    container:
+      # Pinned to the same version the cleanup is run with locally.
+      image: ghcr.io/realm/swiftlint:0.65.1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the SwiftLint version
+        run: swiftlint version
+
+      # Only first-party targets. Dependencies/ is vendored submodule code and is not ours to format.
+      - name: Lint
+        run: |
+          swiftlint lint --quiet AltStore SideStore Shared SideBackup AltWidget > swiftlint.log || true
+          # || true because grep exits 1 on a zero count, which is exactly the case this job is
+          # working toward -- it must not turn into a red step of its own.
+          errors=$(grep -c ': error:' swiftlint.log || true)
+          warnings=$(grep -c ': warning:' swiftlint.log || true)
+          echo "errors=$errors warnings=$warnings"
+          {
+            echo '### SwiftLint'
+            echo
+            echo "- error-severity violations: **$errors**"
+            echo "- warning-severity violations: **$warnings**"
+            echo
+            echo '```'
+            grep -o '([a-z_0-9]*)$' swiftlint.log | tr -d '()' | sort | uniq -c | sort -rn | head -12 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report the remaining errors
+        run: |
+          errors=$(grep -c ': error:' swiftlint.log || true)
+          if [ "$errors" -gt 0 ]; then
+            grep ': error:' swiftlint.log | head -20 || true
+            echo "::error::$errors error-severity SwiftLint violations remain. They are removed in batches."
+            exit 1
+          fi
+          echo "No error-severity violations left."
