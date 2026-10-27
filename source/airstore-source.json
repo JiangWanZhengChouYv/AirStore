@@ -11,20 +11,28 @@
       "subtitle": "Sideload and refresh apps with your own Apple ID",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
-      "version": "0.8.1",
-      "date": "2026-10-25T00:45:14Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
-      "size": 27786255,
-      "sha256": "d51030a6f504f56d5e333eb80a713f971f91102e933a4b1a61a384250e30d00b",
-      "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. Everything except JIT works on iOS 26; see the 0.8.1 release notes.",
+      "version": "0.8.2",
+      "date": "2026-10-26T13:02:56Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.2/AirStore.ipa",
+      "size": 30103068,
+      "sha256": "fd141a95563fa372cd269c95e912bdf2912cf6719b10b4fa0f8d02708379332b",
+      "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.8.2-develop-202610261146.37-bc4d6b0a",
-          "date": "2026-10-26T11:55:52Z",
+          "version": "0.8.3-develop-202610270917.38-b18a3788",
+          "date": "2026-10-27T09:26:56Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-          "size": 30103675,
-          "sha256": "36d9eaa08a3193c6e13734070b277838c9fc6ce9bd54fb0c0a574cf8babe6f92",
-          "localizedDescription": "Development build 0.8.2-develop-202610261146.37-bc4d6b0a from commit bc4d6b0a."
+          "size": 30103700,
+          "sha256": "be3d9d6c3433edb5e1d63c08ad5c319a778dcc3fe123b0720aa99561c7cab0c2",
+          "localizedDescription": "Development build 0.8.3-develop-202610270917.38-b18a3788 from commit b18a3788."
+        },
+        {
+          "version": "0.8.2",
+          "date": "2026-10-26T13:02:56Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.2/AirStore.ipa",
+          "size": 30103068,
+          "sha256": "fd141a95563fa372cd269c95e912bdf2912cf6719b10b4fa0f8d02708379332b",
+          "localizedDescription": "0.8.2: JIT is built in. StikJIT ships inside AirStore, so enabling JIT fetches the developer disk image through the same mirrors as app downloads, mounts it over Remote Pairing, and restarts the target app suspended so the debugger is attached before the app checks for JIT itself - the step that makes MeloNX accept it. A progress card shows each stage. Downloads now treat a mirror that has not picked up a fresh asset as a dead route and fall back to the origin. Breaking: iOS 17.4 is now the minimum; 0.8.1 is the last build for iOS 15 and 16."
         },
         {
           "version": "0.8.1",
@@ -48,18 +56,26 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.2-develop-202610261146.37-bc4d6b0a",
-              "date": "2026-10-26T11:55:52Z",
+              "version": "0.8.3-develop-202610270917.38-b18a3788",
+              "date": "2026-10-27T09:26:56Z",
               "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-              "size": 30103675,
-              "sha256": "36d9eaa08a3193c6e13734070b277838c9fc6ce9bd54fb0c0a574cf8babe6f92",
-              "localizedDescription": "Development build 0.8.2-develop-202610261146.37-bc4d6b0a from commit bc4d6b0a."
+              "size": 30103700,
+              "sha256": "be3d9d6c3433edb5e1d63c08ad5c319a778dcc3fe123b0720aa99561c7cab0c2",
+              "localizedDescription": "Development build 0.8.3-develop-202610270917.38-b18a3788 from commit b18a3788."
             }
           ]
         },
         {
           "track": "stable",
           "releases": [
+            {
+              "version": "0.8.2",
+              "date": "2026-10-26T13:02:56Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.2/AirStore.ipa",
+              "size": 30103068,
+              "sha256": "fd141a95563fa372cd269c95e912bdf2912cf6719b10b4fa0f8d02708379332b",
+              "localizedDescription": "0.8.2: JIT is built in. StikJIT ships inside AirStore, so enabling JIT fetches the developer disk image through the same mirrors as app downloads, mounts it over Remote Pairing, and restarts the target app suspended so the debugger is attached before the app checks for JIT itself - the step that makes MeloNX accept it. A progress card shows each stage. Downloads now treat a mirror that has not picked up a fresh asset as a dead route and fall back to the origin. Breaking: iOS 17.4 is now the minimum; 0.8.1 is the last build for iOS 15 and 16."
+            },
             {
               "version": "0.8.1",
               "date": "2026-10-25T00:45:14Z",
