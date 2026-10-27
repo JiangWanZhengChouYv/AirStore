@@ -5347,12 +5347,12 @@
         }
       }
     },
-    "Enable LocalDevVPN and use Sidestore on the go.": {
+    "Enable LocalDevVPN and use AirStore on the go.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
+            "state": "translated",
             "value": "打开 LocalDevVPN，随时随地使用 AirStore。"
           }
         }
@@ -8163,12 +8163,12 @@
         }
       }
     },
-    "Leave AirStore running in the background on your idevice.": {
+    "Leave AirStore running in the background on your device.": {
       "extractionState": "manual",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
-            "state": "needs-review",
+            "state": "translated",
             "value": "让 AirStore 在设备后台保持运行。"
           }
         }
