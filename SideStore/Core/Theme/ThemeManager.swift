@@ -99,7 +99,7 @@ public extension UIColor {
         return (Int(redChannel * 255), Int(greenChannel * 255), Int(blueChannel * 255))
     }
 
-    var hslComponents: (hue: Int, saturation: Int, lightness: Int) {
+    var hslComponents: (h: Int, s: Int, l: Int) {
         var redChannel: CGFloat = 0
         var greenChannel: CGFloat = 0
         var blueChannel: CGFloat = 0
