@@ -19,6 +19,7 @@
 		A8F5E9AF30422E3600DBD7E1 /* SideSign in Frameworks */ = {isa = PBXBuildFile; productRef = A8F5E9AE30422E3600DBD7E1 /* SideSign */; };
 		A8F5E9B230422E3600DBD7E4 /* StikJIT in Frameworks */ = {isa = PBXBuildFile; productRef = A8F5E9B130422E3600DBD7E3 /* StikJIT */; };
 		BF989177250AABF4002ACF50 /* AltWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BF989167250AABF3002ACF50 /* AltWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A8F010000000000000000003 /* Authentication.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A8F010000000000000000001 /* Authentication.storyboard */; platformFilter = ios; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,8 @@
 		BF58047B246A28F7008AE704 /* SideBackup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SideBackup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF989167250AABF3002ACF50 /* AltWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AltWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFD2476A2284B9A500981D42 /* SideStore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SideStore.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8F0100000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Authentication.storyboard; sourceTree = "<group>"; };
+		A8F0100000000000000000B2 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Authentication.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -113,11 +116,10 @@
 			membershipExceptions = (
 				Info.plist,
 				Resources/ReleaseEntitlements.plist,
+				"Authentication/Base.lproj/Authentication.storyboard",
+				"Authentication/zh-Hans.lproj/Authentication.strings",
 			);
 			platformFiltersByRelativePath = {
-				Authentication/Authentication.storyboard = (
-					ios,
-				);
 				Authentication/tvOS/Authentication.storyboard = (
 					tvos,
 				);
@@ -264,6 +266,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A8F010000000000000000001 /* Authentication.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A8F0100000000000000000B1 /* Base */,
+				A8F0100000000000000000B2 /* zh-Hans */,
+			);
+			name = Authentication.storyboard;
+			sourceTree = "<group>";
+		};
+		A8F010000000000000000002 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				A8F010000000000000000001 /* Authentication.storyboard */,
+			);
+			name = Authentication;
+			path = AltStore/Authentication;
+			sourceTree = "<group>";
+		};
 		A8E8DEA73059BC9800F69B47 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -275,6 +295,7 @@
 			isa = PBXGroup;
 			children = (
 				A8EEC8412F4B146A00F2436D /* AltStore */,
+				A8F010000000000000000002 /* Authentication */,
 				A8EEC3B92F4B0EFC00F2436D /* AltWidget */,
 				A8EEC3482F4B0D8600F2436D /* Shared */,
 				A8EECF2A2F4B195000F2436D /* SideStore */,
@@ -467,6 +488,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A8F010000000000000000003 /* Authentication.storyboard in Resources */,
 				A84596F62F7DC4C90000B8CD /* SideStore.conf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

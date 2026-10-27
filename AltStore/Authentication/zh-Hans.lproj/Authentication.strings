@@ -1,0 +1,36 @@
+/* Class = "UILabel"; text = "Welcome to AirStore."; ObjectID = "EI2-V3-zQZ"; */
+"EI2-V3-zQZ.text" = "欢迎使用 AirStore。";
+/* Class = "UILabel"; text = "Sign in with your Apple ID to get started."; ObjectID = "SNU-tv-8Au"; */
+"SNU-tv-8Au.text" = "登录你的 Apple ID 即可开始。";
+/* Class = "UILabel"; text = "APPLE ID"; ObjectID = "59N-O1-6bM"; */
+"59N-O1-6bM.text" = "Apple ID";
+/* Class = "UILabel"; text = "PASSWORD"; ObjectID = "Ava-XY-7vs"; */
+"Ava-XY-7vs.text" = "密码";
+/* Class = "UILabel"; text = "Why do we need this?"; ObjectID = "p9U-0q-Kn8"; */
+"p9U-0q-Kn8.text" = "为什么需要这个？";
+/* Class = "UILabel"; text = "Launch AirStore"; ObjectID = "XKD-XH-eB0"; */
+"XKD-XH-eB0.text" = "启动 AirStore";
+/* Class = "UILabel"; text = "Leave AirStore running in the background on your device."; ObjectID = "6HP-Xh-sAH"; */
+"6HP-Xh-sAH.text" = "让 AirStore 在设备后台保持运行。";
+/* Class = "UILabel"; text = "Connect to Wi-Fi and VPN"; ObjectID = "esj-pD-D4A"; */
+"esj-pD-D4A.text" = "连接 Wi-Fi 和 VPN";
+/* Class = "UILabel"; text = "Enable LocalDevVPN and use AirStore on the go."; ObjectID = "4rk-ge-FSj"; */
+"4rk-ge-FSj.text" = "打开 LocalDevVPN，随时随地使用 AirStore。";
+/* Class = "UILabel"; text = "Download Apps"; ObjectID = "JeJ-bk-UCA"; */
+"JeJ-bk-UCA.text" = "下载 App";
+/* Class = "UILabel"; text = "Browse and download apps directly from AirStore."; ObjectID = "M7T-9j-uyt"; */
+"M7T-9j-uyt.text" = "直接在 AirStore 里浏览并下载 App。";
+/* Class = "UILabel"; text = "Apps Refresh Automatically"; ObjectID = "nvb-Aq-sYa"; */
+"nvb-Aq-sYa.text" = "App 自动刷新";
+/* Class = "UILabel"; text = "Apps are refreshed in the background while you are on AirStore VPN!"; ObjectID = "HU5-Hv-E3d"; */
+"HU5-Hv-E3d.text" = "连着 AirStore 的 VPN 时，App 会在后台自动刷新！";
+/* Class = "UILabel"; text = "Description"; ObjectID = "knk-Wf-PKf"; */
+"knk-Wf-PKf.text" = "描述";
+/* Class = "UINavigationItem"; title = "How it works"; ObjectID = "bCq-Jq-gf1"; */
+"bCq-Jq-gf1.title" = "使用说明";
+/* Class = "UINavigationItem"; title = "Resign AirStore"; ObjectID = "5nk-NR-jtV"; */
+"5nk-NR-jtV.title" = "重新签名 AirStore";
+/* Class = "UINavigationItem"; title = "Select a Team"; ObjectID = "qxJ-Go-OPq"; */
+"qxJ-Go-OPq.title" = "选择团队";
+/* Class = "barButtonItem"; title = "Close"; ObjectID = "nDc-Zs-wnK"; */
+"nDc-Zs-wnK.title" = "关闭";
