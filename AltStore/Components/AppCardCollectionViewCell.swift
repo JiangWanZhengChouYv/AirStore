@@ -84,7 +84,9 @@ class AppCardCollectionViewCell: UICollectionViewCell
         let inset = self.bannerView.layoutMargins.left
         let multiplier = (AppScreenshot.defaultAspectRatio.width * 3) / AppScreenshot.defaultAspectRatio.height
         let spacing = (inset * 2) + (minimumItemSpacing * 2)
-        self.collectionViewAspectRatioConstraint = self.screenshotsCollectionView.widthAnchor.constraint(equalTo: self.screenshotsCollectionView.heightAnchor, multiplier: multiplier, constant: spacing)
+        self.collectionViewAspectRatioConstraint = self.screenshotsCollectionView.widthAnchor.constraint(equalTo: self.screenshotsCollectionView.heightAnchor,
+            multiplier: multiplier,
+            constant: spacing)
         
         // Allows us to ignore swipes in top portion of screenshotsCollectionView.
         self.topAreaPanGestureRecognizer = UIPanGestureRecognizer(target: nil, action: nil)

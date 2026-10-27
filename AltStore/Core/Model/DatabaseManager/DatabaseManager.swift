@@ -15,7 +15,11 @@ extension CFNotificationName
     fileprivate static let willMigrateDatabase = CFNotificationName("com.rileytestut.AltStore.WillMigrateDatabase" as CFString)
 }
 
-private let ReceivedWillMigrateDatabaseNotification: @convention(c) (CFNotificationCenter?, UnsafeMutableRawPointer?, CFNotificationName?, UnsafeRawPointer?, CFDictionary?) -> Void = { (center, observer, name, object, userInfo) in
+private let willMigrateDatabaseObserver: @convention(c) (CFNotificationCenter?,
+    UnsafeMutableRawPointer?,
+    CFNotificationName?,
+    UnsafeRawPointer?,
+    CFDictionary?) -> Void = { (center, observer, name, object, userInfo) in
     DatabaseManager.shared.receivedWillMigrateDatabaseNotification()
 }
 
@@ -44,7 +48,12 @@ public class DatabaseManager: @unchecked Sendable
         self.persistentContainer.preferredMergePolicy = MergePolicy()
         
         let observer = Unmanaged.passUnretained(self).toOpaque()
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), observer, ReceivedWillMigrateDatabaseNotification, CFNotificationName.willMigrateDatabase.rawValue, nil, .deliverImmediately)
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
+            observer,
+            willMigrateDatabaseObserver,
+            CFNotificationName.willMigrateDatabase.rawValue,
+            nil,
+            .deliverImmediately)
     }
     
     public class func deleteDatabase() -> Bool

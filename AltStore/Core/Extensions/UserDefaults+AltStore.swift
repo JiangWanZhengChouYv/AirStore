@@ -503,20 +503,20 @@ public extension UserDefaults
     
     class func registerDefaults()
     {
-        let ios13_5 = OperatingSystemVersion(majorVersion: 13, minorVersion: 5, patchVersion: 0)
-        let isLegacyDeactivationSupported = !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios13_5)
-        let activeAppLimitIncludesExtensions = !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios13_5)
+        let ios135 = OperatingSystemVersion(majorVersion: 13, minorVersion: 5, patchVersion: 0)
+        let isLegacyDeactivationSupported = !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios135)
+        let activeAppLimitIncludesExtensions = !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios135)
         
         let ios14 = OperatingSystemVersion(majorVersion: 14, minorVersion: 0, patchVersion: 0)
         
         let ios16 = OperatingSystemVersion(majorVersion: 16, minorVersion: 0, patchVersion: 0)
-        let ios16_2 = OperatingSystemVersion(majorVersion: 16, minorVersion: 2, patchVersion: 0)
-        let ios15_7_2 = OperatingSystemVersion(majorVersion: 15, minorVersion: 7, patchVersion: 2)
+        let ios162 = OperatingSystemVersion(majorVersion: 16, minorVersion: 2, patchVersion: 0)
+        let ios1572 = OperatingSystemVersion(majorVersion: 15, minorVersion: 7, patchVersion: 2)
         
         // MacDirtyCow supports iOS 14.0 - 15.7.1 OR 16.0 - 16.1.2
         let isMacDirtyCowSupported =
-        (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios14) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios15_7_2)) ||
-        (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16_2))
+        (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios14) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios1572)) ||
+        (ProcessInfo.processInfo.isOperatingSystemAtLeast(ios16) && !ProcessInfo.processInfo.isOperatingSystemAtLeast(ios162))
         
         let preferredAppSorting: AppSorting = .default
         

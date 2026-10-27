@@ -120,8 +120,8 @@ struct CodeResourcesViewer: View {
                                                 .cornerRadius(6)
                                         }
                                     }
-                                    if let w = rule.weight {
-                                        Text("Weight: \(String(format: "%.1f", w))")
+                                    if let ruleWeight = rule.weight {
+                                        Text("Weight: \(String(format: "%.1f", ruleWeight))")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }

@@ -674,7 +674,7 @@ struct ExtensionInfoView: View {
                 let shortVer = plist?["CFBundleShortVersionString"] as? String
                 let buildVer = plist?["CFBundleVersion"] as? String
                 let versionStr: String = {
-                    if let s = shortVer, let b = buildVer { return "\(s) (\(b))" }
+                    if let shortVersion = shortVer, let buildVersion = buildVer { return "\(shortVersion) (\(buildVersion))" }
                     return shortVer ?? buildVer ?? "N/A"
                 }()
 
@@ -913,7 +913,7 @@ struct BundleInspectorView: View {
     private var version: String {
         let short = infoPlist?["CFBundleShortVersionString"] as? String
         let build = infoPlist?["CFBundleVersion"] as? String
-        if let s = short, let b = build { return "\(s) (\(b))" }
+        if let shortVersion = short, let buildVersion = build { return "\(shortVersion) (\(buildVersion))" }
         return short ?? build ?? "N/A"
     }
 

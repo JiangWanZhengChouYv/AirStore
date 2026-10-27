@@ -217,7 +217,12 @@ private extension FeaturedViewController
         featuredHeaderDataSource.numberOfSectionsHandler = { 1 }
         featuredHeaderDataSource.numberOfItemsHandler = { _ in 0 }
         
-        let dataSource = CompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>(dataSources: [self.recentlyUpdatedDataSource, self.categoriesDataSource, featuredHeaderDataSource, self.featuredAppsDataSource])
+        let dataSource = CompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>(dataSources: [
+            self.recentlyUpdatedDataSource,
+            self.categoriesDataSource,
+            featuredHeaderDataSource,
+            self.featuredAppsDataSource
+        ])
         dataSource.predicate = StoreApp.visibleAppsPredicate // Ensure we never accidentally show hidden apps
         return dataSource
     }
@@ -289,7 +294,10 @@ private extension FeaturedViewController
                                                NSSortDescriptor(keyPath: \StoreApp.bundleIdentifier, ascending: true),
                                                NSSortDescriptor(keyPath: \StoreApp.sourceIdentifier, ascending: true)]
         
-        let knownController = NSFetchedResultsController(fetchRequest: knownFetchRequest, managedObjectContext: DatabaseManager.shared.viewContext, sectionNameKeyPath: #keyPath(StoreApp._category), cacheName: nil)
+        let knownController = NSFetchedResultsController(fetchRequest: knownFetchRequest,
+            managedObjectContext: DatabaseManager.shared.viewContext,
+            sectionNameKeyPath: #keyPath(StoreApp._category),
+            cacheName: nil)
         let knownDataSource = FetchedResultsCollectionViewDataSource<StoreApp>(fetchedResultsController: knownController)
         knownDataSource.liveFetchLimit = 1 // One app per category
         
@@ -357,14 +365,20 @@ private extension FeaturedViewController
         let primaryFetchRequest = fetchRequest.copy() as! NSFetchRequest<StoreApp>
         primaryFetchRequest.predicate = sourceHasRemainingAppsPredicate
         
-        let primaryController = NSFetchedResultsController(fetchRequest: primaryFetchRequest, managedObjectContext: DatabaseManager.shared.viewContext, sectionNameKeyPath: #keyPath(StoreApp._source.featuredSortID), cacheName: nil)
+        let primaryController = NSFetchedResultsController(fetchRequest: primaryFetchRequest,
+            managedObjectContext: DatabaseManager.shared.viewContext,
+            sectionNameKeyPath: #keyPath(StoreApp._source.featuredSortID),
+            cacheName: nil)
         let primaryDataSource = FetchedResultsCollectionViewDataSource<StoreApp>(fetchedResultsController: primaryController)
         primaryDataSource.liveFetchLimit = 5
         
         let secondaryFetchRequest = fetchRequest.copy() as! NSFetchRequest<StoreApp>
         secondaryFetchRequest.predicate = NSCompoundPredicate(notPredicateWithSubpredicate: sourceHasRemainingAppsPredicate)
         
-        let secondaryController = NSFetchedResultsController(fetchRequest: secondaryFetchRequest, managedObjectContext: DatabaseManager.shared.viewContext, sectionNameKeyPath: #keyPath(StoreApp._source.featuredSortID), cacheName: nil)
+        let secondaryController = NSFetchedResultsController(fetchRequest: secondaryFetchRequest,
+            managedObjectContext: DatabaseManager.shared.viewContext,
+            sectionNameKeyPath: #keyPath(StoreApp._source.featuredSortID),
+            cacheName: nil)
         let secondaryDataSource = FetchedResultsCollectionViewDataSource<StoreApp>(fetchedResultsController: secondaryController)
         secondaryDataSource.liveFetchLimit = 5
         

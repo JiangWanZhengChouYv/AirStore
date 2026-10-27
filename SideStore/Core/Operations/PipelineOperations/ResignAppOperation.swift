@@ -117,7 +117,11 @@ final class ResignAppOperation: BasePipelineOperation<InstallAppOperationContext
         return appBundleURL
     }
     
-    private func prepare(_ appBundle: ALTApplication, bundleID identifier: String?, additionalInfoDictionaryValues: [String: Any] = [:], profiles: [String: ALTProvisioningProfile], appexBundleIds: [String: String]) throws {
+    private func prepare(_ appBundle: ALTApplication,
+        bundleID identifier: String?,
+        additionalInfoDictionaryValues: [String: Any] = [:],
+        profiles: [String: ALTProvisioningProfile],
+        appexBundleIds: [String: String]) throws {
         guard let identifier else {
             throw OperationError.invalidParameters("Bundle is missing bundle identifier.")
         }

@@ -86,7 +86,9 @@ public final class CacheManager {
         
         // 3. Uninstalled app backup directories size
         if let backupsDirectory = fileManager.appBackupsDirectory,
-           let fileURLs = try? fileManager.contentsOfDirectory(at: backupsDirectory, includingPropertiesForKeys: [.isDirectoryKey, .nameKey], options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles]) {
+           let fileURLs = try? fileManager.contentsOfDirectory(at: backupsDirectory,
+               includingPropertiesForKeys: [.isDirectoryKey, .nameKey],
+               options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles]) {
             
             // Get installed app bundle IDs
             let context = DatabaseManager.shared.viewContext

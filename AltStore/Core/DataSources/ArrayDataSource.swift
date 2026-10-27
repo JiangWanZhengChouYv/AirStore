@@ -54,7 +54,11 @@ open class ArrayDataSource<ContentType, CellType: UIView & CellContentCell, View
 open class ArrayCollectionViewDataSource<ContentType>: ArrayDataSource<ContentType, UICollectionViewCell, UICollectionView, UICollectionViewDataSource> {}
 open class ArrayTableViewDataSource<ContentType>: ArrayDataSource<ContentType, UITableViewCell, UITableView, UITableViewDataSource> {}
 
-open class ArrayCollectionViewPrefetchingDataSource<ContentType, PrefetchContentType>: ArrayCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource, UICollectionViewDataSourcePrefetching {
+open class ArrayCollectionViewPrefetchingDataSource<
+    ContentType,
+    PrefetchContentType
+>: ArrayCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource,
+    UICollectionViewDataSourcePrefetching {
     public var prefetchItemCache = NSCache<AnyObject, AnyObject>()
     public var prefetchHandler: ((ContentType, IndexPath) async throws -> PrefetchContentType?)?
     public var prefetchCompletionHandler: ((UICollectionViewCell, PrefetchContentType?, IndexPath, Error?) -> Void)?

@@ -14,7 +14,13 @@ protocol AnyCompositeDataSource: AnyObject {
     func compositeTableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
 }
 
-open class CompositeDataSource<ContentType, CellType: UIView & CellContentCell, ViewType: UIScrollView, DataSourceType>: CellContentDataSource<ContentType, CellType, ViewType, DataSourceType>, CellContentIndexPathTranslating {
+open class CompositeDataSource<
+    ContentType,
+    CellType: UIView & CellContentCell,
+    ViewType: UIScrollView,
+    DataSourceType
+>: CellContentDataSource<ContentType, CellType, ViewType, DataSourceType>,
+    CellContentIndexPathTranslating {
     open var dataSources: [AnyObject]
     open var shouldFlattenSections = false {
         didSet { (contentView as? UICollectionView)?.reloadData(); (contentView as? UITableView)?.reloadData() }
@@ -227,7 +233,11 @@ extension CompositeDataSource: AnyCompositeDataSource {
 open class CompositeCollectionViewDataSource<ContentType>: CompositeDataSource<ContentType, UICollectionViewCell, UICollectionView, UICollectionViewDataSource> {}
 open class CompositeTableViewDataSource<ContentType>: CompositeDataSource<ContentType, UITableViewCell, UITableView, UITableViewDataSource> {}
 
-open class CompositeCollectionViewPrefetchingDataSource<ContentType, PrefetchContentType>: CompositeCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource, UICollectionViewDataSourcePrefetching {
+open class CompositeCollectionViewPrefetchingDataSource<
+    ContentType,
+    PrefetchContentType
+>: CompositeCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource,
+    UICollectionViewDataSourcePrefetching {
     public var prefetchItemCache = NSCache<AnyObject, AnyObject>()
     public var prefetchHandler: ((ContentType, IndexPath) async throws -> PrefetchContentType?)?
     public var prefetchCompletionHandler: ((UICollectionViewCell, PrefetchContentType?, IndexPath, Error?) -> Void)?

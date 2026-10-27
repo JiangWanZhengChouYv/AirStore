@@ -127,8 +127,8 @@ public func formatLogMessage(_ message: String) -> String {
     if let dom = domain, !dom.isEmpty {
         bullets.append("  • domain: '\(dom)'")
     }
-    if let c = code {
-        bullets.append("  • code: \(c)")
+    if let codeValue = code {
+        bullets.append("  • code: \(codeValue)")
     }
     if let stream = streamCode {
         bullets.append("  • streamErrorCode: \(stream)")

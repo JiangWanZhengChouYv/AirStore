@@ -234,7 +234,11 @@ final class BackupEngine: NSObject, Sendable {
                 }
                 
                 do {
-                    try self.restoreBackupCoordinated(appBackupDirectory: appBackupDirectory, altstoreAppGroup: altstoreAppGroup, skipNonCopyable: skipNonCopyable, progressHandler: progressHandler, logger: logger)
+                    try self.restoreBackupCoordinated(appBackupDirectory: appBackupDirectory,
+                        altstoreAppGroup: altstoreAppGroup,
+                        skipNonCopyable: skipNonCopyable,
+                        progressHandler: progressHandler,
+                        logger: logger)
                     continuation.resume(returning: ())
                 } catch {
                     continuation.resume(throwing: error)
@@ -271,7 +275,12 @@ final class BackupEngine: NSObject, Sendable {
                 try FileManager.default.removeItem(at: backupDocumentsDirectory)
             }
             if FileManager.default.fileExists(atPath: documentsDirectory.path) {
-                try FileManager.default.copyDirectoryContents(at: documentsDirectory, to: backupDocumentsDirectory, options: [.skipsHiddenFiles], skipNonCopyable: skipNonCopyable, tracker: tracker, logger: logger)
+                try FileManager.default.copyDirectoryContents(at: documentsDirectory,
+                    to: backupDocumentsDirectory,
+                    options: [.skipsHiddenFiles],
+                    skipNonCopyable: skipNonCopyable,
+                    tracker: tracker,
+                    logger: logger)
             }
             debugLog(logger, "[SideBackup] Copied Documents directory from \(documentsDirectory) to \(backupDocumentsDirectory)")
             
@@ -280,7 +289,12 @@ final class BackupEngine: NSObject, Sendable {
                 try FileManager.default.removeItem(at: backupLibraryDirectory)
             }
             if FileManager.default.fileExists(atPath: libraryDirectory.path) {
-                try FileManager.default.copyDirectoryContents(at: libraryDirectory, to: backupLibraryDirectory, options: [.skipsHiddenFiles], skipNonCopyable: skipNonCopyable, tracker: tracker, logger: logger)
+                try FileManager.default.copyDirectoryContents(at: libraryDirectory,
+                    to: backupLibraryDirectory,
+                    options: [.skipsHiddenFiles],
+                    skipNonCopyable: skipNonCopyable,
+                    tracker: tracker,
+                    logger: logger)
             }
             debugLog(logger, "[SideBackup] Copied Library directory from \(libraryDirectory) to \(backupLibraryDirectory)")
             

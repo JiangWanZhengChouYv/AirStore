@@ -340,7 +340,10 @@ extension AppIDsViewController: NSFetchedResultsControllerDelegate
         self.dataSource.controllerWillChangeContent(controller)
     }
     
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType)
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange sectionInfo: NSFetchedResultsSectionInfo,
+        atSectionIndex sectionIndex: Int,
+        for type: NSFetchedResultsChangeType)
     {
         self.dataSource.controller(controller, didChange: sectionInfo, atSectionIndex: sectionIndex, for: type)
     }

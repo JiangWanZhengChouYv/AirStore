@@ -495,7 +495,10 @@ extension SourcesViewController: NSFetchedResultsControllerDelegate
         self.dataSource.controller(controller, didChange: anObject, at: indexPath, for: type, newIndexPath: newIndexPath)
     }
     
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) 
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange sectionInfo: NSFetchedResultsSectionInfo,
+        atSectionIndex sectionIndex: Int,
+        for type: NSFetchedResultsChangeType)
     {
         self.dataSource.controller(controller, didChange: sectionInfo, atSectionIndex: sectionIndex, for: type)
     }

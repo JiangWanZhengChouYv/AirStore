@@ -216,7 +216,9 @@ public final class StorageExplorerViewModel: ObservableObject {
             
             do {
                 let fileManager = FileManager.default
-                let contents = try fileManager.contentsOfDirectory(at: targetURL, includingPropertiesForKeys: [.isDirectoryKey, .fileSizeKey, .contentModificationDateKey], options: [.skipsHiddenFiles])
+                let contents = try fileManager.contentsOfDirectory(at: targetURL,
+                    includingPropertiesForKeys: [.isDirectoryKey, .fileSizeKey, .contentModificationDateKey],
+                    options: [.skipsHiddenFiles])
                 
                 for itemURL in contents {
                     if Task.isCancelled {

@@ -426,7 +426,9 @@ final class InstallAppOperation: BasePipelineOperation<InstallAppOperationContex
             //         let content = UNMutableNotificationContent()
             //         content.title = "Refreshing..."
             //         content.body = "SideStore will automatically move to the homescreen to finish refreshing!"
-            //         let notification = UNNotificationRequest(identifier: Bundle.Info.appbundleIdentifier + ".FinishRefreshNotification", content: content, trigger: UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false))
+            //         let notification = UNNotificationRequest(identifier: Bundle.Info.appbundleIdentifier +
+            //  ".FinishRefreshNotification", content: content, trigger:
+            //  UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false))
             //         try? await UNUserNotificationCenter.current().add(notification)
             //         
             //         await self.suspendToHomeScreen()

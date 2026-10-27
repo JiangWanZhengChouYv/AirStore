@@ -116,7 +116,11 @@ struct ProfileManagementView: View {
                         }
                     } else {
                         ForEach(filteredProfiles, id: \.uuid) { profile in
-                            NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: ProfileManager.shared.profileURL(for: profile.uuid), certificatesViewModel: certificatesViewModel)) {
+                            NavigationLink(destination: ProvisioningProfileDetailView(
+                                profile: profile,
+                                profileURL: ProfileManager.shared.profileURL(for: profile.uuid),
+                                certificatesViewModel: certificatesViewModel
+                            )) {
                                 ProfileManagementRowView(profile: profile, isRemote: viewModel.isRemoteProfile(profile), formatDate: formatDate)
                             }
                             #if !os(tvOS)

@@ -242,7 +242,9 @@ extension PillButton {
         let expirationDate = installedApp.expirationDate
         let isExpired = currentDate > expirationDate
         
-        // verboseLog("[PillButton] configure for app '\(installedApp.name)': status=\(installedApp.certificateStatus), certSerial=\(installedApp.certificateSerialNumber ?? "nil"), isExpired=\(isExpired)")
+        // verboseLog("[PillButton] configure for app '\(installedApp.name)':
+        //  status=\(installedApp.certificateStatus), certSerial=\(installedApp.certificateSerialNumber ?? "nil"),
+        //  isExpired=\(isExpired)")
         
         if installedApp.certificateStatus == .revoked {
             self.setDisplayState(.revoked)

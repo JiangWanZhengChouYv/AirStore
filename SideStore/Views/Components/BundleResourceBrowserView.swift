@@ -460,7 +460,7 @@ struct FullAppBundleView: View {
                 let short = plist?["CFBundleShortVersionString"] as? String
                 let build = plist?["CFBundleVersion"] as? String
                 let versionStr: String = {
-                    if let s = short, let b = build { return "\(s) (\(b))" }
+                    if let shortVersion = short, let buildVersion = build { return "\(shortVersion) (\(buildVersion))" }
                     return short ?? build ?? "N/A"
                 }()
 

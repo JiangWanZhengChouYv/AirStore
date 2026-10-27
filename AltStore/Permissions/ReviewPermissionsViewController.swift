@@ -100,7 +100,9 @@ class ReviewPermissionsViewController: UICollectionViewController
         self.collectionView.dataSource = self.dataSource
         
         self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
-        self.collectionView.register(UICollectionViewListCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: UICollectionView.elementKindSectionHeader)
+        self.collectionView.register(UICollectionViewListCell.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: UICollectionView.elementKindSectionHeader)
         
         let cancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(ReviewPermissionsViewController.cancel))
         self.navigationItem.leftBarButtonItem = cancelButton

@@ -119,7 +119,10 @@ private extension ErrorLogViewController
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \LoggedError.date, ascending: false)]
         fetchRequest.returnsObjectsAsFaults = false
         
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: DatabaseManager.shared.viewContext, sectionNameKeyPath: #keyPath(LoggedError.localizedDateString), cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+            managedObjectContext: DatabaseManager.shared.viewContext,
+            sectionNameKeyPath: #keyPath(LoggedError.localizedDateString),
+            cacheName: nil)
         
         let dataSource = FetchedResultsTableViewPrefetchingDataSource<LoggedError, UIImage>(fetchedResultsController: fetchedResultsController)
         dataSource.proxy = self

@@ -9,11 +9,11 @@
 import Foundation
 
 public class BuildInfo{
-    private static let MARKETING_VERSION_TAG        = "CFBundleShortVersionString"
-    private static let CURRENT_PROJECT_VERSION_TAG  = kCFBundleVersionKey as String
+    private static let marketingVersionTag        = "CFBundleShortVersionString"
+    private static let currentProjectVersionTag  = kCFBundleVersionKey as String
     
-    private static let XCODE_VERSION_TAG  = "DTXcode"
-    private static let XCODE_REVISION_TAG = "DTXcodeBuild"
+    private static let xcodeVersionTag  = "DTXcode"
+    private static let xcodeRevisionTag = "DTXcodeBuild"
 
     let bundle: Bundle
     
@@ -33,22 +33,22 @@ public class BuildInfo{
     }
 
     public lazy var project_version: String? = {
-        let version  = bundle.object(forInfoDictionaryKey: Self.CURRENT_PROJECT_VERSION_TAG) as? String
+        let version  = bundle.object(forInfoDictionaryKey: Self.currentProjectVersionTag) as? String
         return version
     }()
 
     public lazy var marketing_version: String? = {
-        let version  = bundle.object(forInfoDictionaryKey: Self.MARKETING_VERSION_TAG) as? String
+        let version  = bundle.object(forInfoDictionaryKey: Self.marketingVersionTag) as? String
         return version
     }()
 
     public lazy var xcode: String? = {
-        let xcode  = bundle.object(forInfoDictionaryKey: Self.XCODE_VERSION_TAG) as? String
+        let xcode  = bundle.object(forInfoDictionaryKey: Self.xcodeVersionTag) as? String
         return xcode
     }()
 
     public lazy var xcode_revision: String? = {
-        let revision  = bundle.object(forInfoDictionaryKey: Self.XCODE_REVISION_TAG) as? String
+        let revision  = bundle.object(forInfoDictionaryKey: Self.xcodeRevisionTag) as? String
         return revision
     }()
 }

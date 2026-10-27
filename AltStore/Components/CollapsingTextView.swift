@@ -110,7 +110,9 @@ final class CollapsingTextView: UITextView
         
         if self.isCollapsed
         {
-            let boundingSize = self.attributedText.boundingRect(with: CGSize(width: self.textContainer.size.width, height: .infinity), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+            let boundingSize = self.attributedText.boundingRect(with: CGSize(width: self.textContainer.size.width, height: .infinity),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil)
             let maximumCollapsedHeight = font.lineHeight * Double(self.maximumNumberOfLines) + self.lineSpacing * Double(self.maximumNumberOfLines - 1)
             
             if boundingSize.height.rounded() > maximumCollapsedHeight.rounded()

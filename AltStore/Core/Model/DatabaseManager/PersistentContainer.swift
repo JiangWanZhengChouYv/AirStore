@@ -154,7 +154,10 @@ open class PersistentContainer: NSPersistentContainer, @unchecked Sendable {
         }
         
         var mappingModel: NSMappingModel?
-        guard self.progressiveMigrationManager(forSourceModel: sourceModel, destinationModel: self.managedObjectModel, configuration: configuration, mappingModel: &mappingModel) != nil, mappingModel != nil else {
+        guard self.progressiveMigrationManager(forSourceModel: sourceModel,
+            destinationModel: self.managedObjectModel,
+            configuration: configuration,
+            mappingModel: &mappingModel) != nil, mappingModel != nil else {
             throw DatabaseError.databaseDowngradeDetected(
                 reason: NSLocalizedString("No valid migration path exists to downgrade this database. Please update AirStore or reset your database.", comment: "")
             )
@@ -265,7 +268,10 @@ open class PersistentContainer: NSPersistentContainer, @unchecked Sendable {
         try self._progressivelyMigratePersistentStore(to: model, configuration: configuration)
     }
     
-    private func progressiveMigrationManager(forSourceModel sourceModel: NSManagedObjectModel, destinationModel: NSManagedObjectModel, configuration: String?, mappingModel: inout NSMappingModel?) -> NSMigrationManager? {
+    private func progressiveMigrationManager(forSourceModel sourceModel: NSManagedObjectModel,
+        destinationModel: NSManagedObjectModel,
+        configuration: String?,
+        mappingModel: inout NSMappingModel?) -> NSMigrationManager? {
         if let explicit = self.explicitMappingModel(forSourceModel: sourceModel, destinationModel: destinationModel, configuration: configuration) {
             mappingModel = explicit
             return NSMigrationManager(sourceModel: sourceModel, destinationModel: destinationModel)

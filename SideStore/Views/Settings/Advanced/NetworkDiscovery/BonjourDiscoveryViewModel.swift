@@ -236,8 +236,8 @@ final class BonjourDiscoveryViewModel: ObservableObject {
                 
                 // 2. Check TXT records
                 for record in item.txtRecords {
-                    let k = record.key.lowercased()
-                    if k.contains("addr") || k.contains("ip") {
+                    let key = record.key.lowercased()
+                    if key.contains("addr") || key.contains("ip") {
                         if record.value.contains(":") { return "IPv6" }
                         if record.value.contains(".") { return "IPv4" }
                     }
@@ -532,7 +532,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     }
     
     static func decodeDeviceModel(_ model: String) -> String? {
-        let m = model.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedModel = model.trimmingCharacters(in: .whitespacesAndNewlines)
         let models: [String: String] = [
             "iPhone14,2": "iPhone 13 Pro",
             "iPhone14,3": "iPhone 13 Pro Max",
@@ -568,7 +568,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
             "Mac15,6": "MacBook Pro (14-inch, Nov 2023)",
             "Mac15,8": "MacBook Pro (16-inch, Nov 2023)"
         ]
-        return models[m]
+        return models[trimmedModel]
     }
     
     func copyAsJSON(service: DiscoveredService, resolved: ResolvedServiceInfo) -> String? {

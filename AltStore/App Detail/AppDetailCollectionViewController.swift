@@ -108,7 +108,9 @@ class AppDetailCollectionViewController: UICollectionViewController
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "PrivacyCell")
         self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
         
-        self.headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (headerView, elementKind, indexPath) in
+        self.headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { [weak self] (headerView, elementKind, indexPath) in
             var configuration = UIListContentConfiguration.plainHeader()
             
             // Match parent table view section headers.
@@ -155,7 +157,9 @@ private extension AppDetailCollectionViewController
         let layoutConfig = UICollectionViewCompositionalLayoutConfiguration()
         layoutConfig.contentInsetsReference = .layoutMargins
         
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [privacyPermissions, knownEntitlementPermissions, unknownEntitlementPermissions] (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: {
+            [privacyPermissions, knownEntitlementPermissions, unknownEntitlementPermissions]
+            (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
             guard let section = Section(rawValue: sectionIndex) else { return nil }
             switch section
             {

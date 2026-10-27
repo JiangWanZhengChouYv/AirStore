@@ -28,7 +28,13 @@ protocol AnyCellContentDataSource: AnyObject {
     var anyIsDynamic: Bool { get }
 }
 
-open class CellContentDataSource<ContentType, CellType: UIView & CellContentCell, ViewType: UIScrollView, DataSourceType>: NSObject, UITableViewDataSource, UICollectionViewDataSource, UISearchResultsUpdating {
+open class CellContentDataSource<
+    ContentType,
+    CellType: UIView & CellContentCell,
+    ViewType: UIScrollView,
+    DataSourceType
+>: NSObject, UITableViewDataSource, UICollectionViewDataSource,
+    UISearchResultsUpdating {
     open weak var contentView: ViewType?
     open weak var proxy: AnyObject?
     open var cellIdentifierHandler: ((IndexPath) -> String) = { _ in CellContentGenericCellIdentifier }

@@ -173,17 +173,17 @@ extension UIImage
         for y in 0..<height {
             for x in 0..<width {
                 let offset = (y * width + x) * bytesPerPixel
-                let r = CGFloat(rawData[offset])
-                let g = CGFloat(rawData[offset + 1])
-                let b = CGFloat(rawData[offset + 2])
-                let a = CGFloat(rawData[offset + 3]) / 255.0
+                let red = CGFloat(rawData[offset])
+                let green = CGFloat(rawData[offset + 1])
+                let blue = CGFloat(rawData[offset + 2])
+                let alpha = CGFloat(rawData[offset + 3]) / 255.0
                 
                 // Only consider pixels that are not fully transparent (alpha > 0.1)
-                if a > 0.1 {
+                if alpha > 0.1 {
                     // Relative luminance formula
-                    let luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0
-                    totalLuminance += luminance * a
-                    totalOpaquePixels += a
+                    let luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255.0
+                    totalLuminance += luminance * alpha
+                    totalOpaquePixels += alpha
                 }
             }
         }

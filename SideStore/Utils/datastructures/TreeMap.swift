@@ -383,9 +383,9 @@ public class TreeMap<Key: Comparable, Value>: Sequence {
             let node = stack.removeLast()
             let result = (node.key, node.value)
             var current = node.right
-            while let n = current {
-                stack.append(n)
-                current = n.left
+            while let successor = current {
+                stack.append(successor)
+                current = successor.left
             }
             return result
         }

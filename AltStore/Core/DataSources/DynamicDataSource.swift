@@ -31,7 +31,11 @@ open class DynamicDataSource<ContentType, CellType: UIView & CellContentCell, Vi
 open class DynamicCollectionViewDataSource<ContentType>: DynamicDataSource<ContentType, UICollectionViewCell, UICollectionView, UICollectionViewDataSource> {}
 open class DynamicTableViewDataSource<ContentType>: DynamicDataSource<ContentType, UITableViewCell, UITableView, UITableViewDataSource> {}
 
-open class DynamicCollectionViewPrefetchingDataSource<ContentType, PrefetchContentType>: DynamicCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource, UICollectionViewDataSourcePrefetching {
+open class DynamicCollectionViewPrefetchingDataSource<
+    ContentType,
+    PrefetchContentType
+>: DynamicCollectionViewDataSource<ContentType>, CellContentPrefetchingDataSource,
+    UICollectionViewDataSourcePrefetching {
     public var prefetchItemCache = NSCache<AnyObject, AnyObject>()
     public var prefetchHandler: ((ContentType, IndexPath) async throws -> PrefetchContentType?)?
     public var prefetchCompletionHandler: ((UICollectionViewCell, PrefetchContentType?, IndexPath, Error?) -> Void)?

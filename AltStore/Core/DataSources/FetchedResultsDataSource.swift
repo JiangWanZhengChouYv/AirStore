@@ -188,7 +188,11 @@ open class FetchedResultsDataSource<
         }
     }
 
-    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange anObject: Any,
+        at indexPath: IndexPath?,
+        for type: NSFetchedResultsChangeType,
+        newIndexPath: IndexPath?) {
         guard contentView?.window != nil else { return }
         
         let changeType: CellContentChange.ChangeType
@@ -318,7 +322,10 @@ open class FetchedResultsDataSource<
         }
     }
 
-    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange sectionInfo: NSFetchedResultsSectionInfo,
+        atSectionIndex sectionIndex: Int,
+        for type: NSFetchedResultsChangeType) {
         guard contentView?.window != nil else { return }
         
         let changeType: CellContentChange.ChangeType

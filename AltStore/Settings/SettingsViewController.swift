@@ -46,14 +46,14 @@ extension SettingsViewController
         case disableAppLimit
         
         static var allCases: [AppRefreshRow] {
-            var c: [AppRefreshRow] = [.backgroundRefresh, .noIdleTimeout, .addToSiri]
+            var rows: [AppRefreshRow] = [.backgroundRefresh, .noIdleTimeout, .addToSiri]
 
             // conditional entries go at the last to preserve ordering
             if UserDefaults.standard.isCowExploitSupported || !ProcessInfo().sparseRestorePatched
             {
-                c.append(.disableAppLimit)
+                rows.append(.disableAppLimit)
             }
-            return c
+            return rows
         }
     }
     
@@ -616,7 +616,9 @@ private extension SettingsViewController
         //     }
         //     else
         //     {
-        //         settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("If you've removed the 3-sideloaded app limit via the MacDirtyCow exploit, disable this setting to sideload more than 3 apps at a time.", comment: "")
+        //         settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("If you've removed the
+        //  3-sideloaded app limit via the MacDirtyCow exploit, disable this setting to sideload more than 3 apps at
+        //  a time.", comment: "")
         //     }
             
         }

@@ -25,7 +25,11 @@ private extension CFNotificationName {
     }
 }
 
-private let ReceivedApplicationState: @convention(c) (CFNotificationCenter?, UnsafeMutableRawPointer?, CFNotificationName?, UnsafeRawPointer?, CFDictionary?) -> Void = { (center, observer, name, object, userInfo) in
+private let receivedApplicationState: @convention(c) (CFNotificationCenter?,
+    UnsafeMutableRawPointer?,
+    CFNotificationName?,
+    UnsafeRawPointer?,
+    CFDictionary?) -> Void = { (center, observer, name, object, userInfo) in
     guard let name = name, let observer = observer else { return }
     
     let operation = unsafeBitCast(observer, to: BackgroundRefreshAppsOperation.self)
@@ -133,7 +137,7 @@ final class BackgroundRefreshAppsOperation: BaseStandaloneOperation<OperationCon
         
         for installedApp in self.installedApps {
             let appIsRunningNotification = CFNotificationName.appIsRunning(for: installedApp.bundleIdentifier)
-            CFNotificationCenterAddObserver(notificationCenter, observer, ReceivedApplicationState, appIsRunningNotification.rawValue, nil, .deliverImmediately)
+            CFNotificationCenterAddObserver(notificationCenter, observer, receivedApplicationState, appIsRunningNotification.rawValue, nil, .deliverImmediately)
             
             let requestAppStateNotification = CFNotificationName.requestAppState(for: installedApp.bundleIdentifier)
             CFNotificationCenterPostNotification(notificationCenter, requestAppStateNotification, nil, nil, true)

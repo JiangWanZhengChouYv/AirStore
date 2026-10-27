@@ -19,7 +19,7 @@ class ActiveAppsTimelineProvider<T:  WidgetInfo>: AppsTimelineProviderBase<Widge
     }
 
     private let defaultDataHolder = PaginationDataHolder(
-        itemsPerPage: ActiveAppsWidget.Constants.MAX_ROWS_PER_PAGE
+        itemsPerPage: ActiveAppsWidget.Constants.maxRowsPerPage
     )
     
     let widgetKind: String

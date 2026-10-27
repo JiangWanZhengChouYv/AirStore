@@ -86,9 +86,15 @@ class AddSourceViewController: UICollectionViewController
         self.collectionView.register(AppBannerCollectionViewCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
         self.collectionView.register(AddSourceTextFieldCell.self, forCellWithReuseIdentifier: ReuseID.textFieldCell.rawValue)
         
-        self.collectionView.register(UICollectionViewListCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: UICollectionView.elementKindSectionHeader)
-        self.collectionView.register(UICollectionViewListCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: UICollectionView.elementKindSectionFooter)
-        self.collectionView.register(PlaceholderCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: ReuseID.placeholderFooter.rawValue)
+        self.collectionView.register(UICollectionViewListCell.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: UICollectionView.elementKindSectionHeader)
+        self.collectionView.register(UICollectionViewListCell.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: UICollectionView.elementKindSectionFooter)
+        self.collectionView.register(PlaceholderCollectionReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: ReuseID.placeholderFooter.rawValue)
         
         self.collectionView.backgroundColor = .altBackground
         self.collectionView.keyboardDismissMode = .onDrag
@@ -886,7 +892,9 @@ extension AddSourceViewController: UICollectionViewDelegateFlowLayout
             return headerView
             
         case (.preview, UICollectionView.elementKindSectionFooter):
-            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: ReuseID.placeholderFooter.rawValue, for: indexPath) as! PlaceholderCollectionReusableView
+            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                withReuseIdentifier: ReuseID.placeholderFooter.rawValue,
+                for: indexPath) as! PlaceholderCollectionReusableView
             
             self.configure(footerView, with: self.viewModel.sourcePreviewResults)
             
@@ -904,7 +912,9 @@ extension AddSourceViewController: UICollectionViewDelegateFlowLayout
             return headerView
             
         case (.recommended, UICollectionView.elementKindSectionFooter):
-            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: ReuseID.placeholderFooter.rawValue, for: indexPath) as! PlaceholderCollectionReusableView
+            let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                withReuseIdentifier: ReuseID.placeholderFooter.rawValue,
+                for: indexPath) as! PlaceholderCollectionReusableView
             
             footerView.placeholderView.stackView.spacing = 15
             footerView.placeholderView.stackView.directionalLayoutMargins.top = 20

@@ -78,9 +78,20 @@ class ImportExport {
         let applePasswordToInclude = includeApplePassword ? AuthManager.shared.password : nil
         let account: ImportedAccount
         if let certPass = activeCert.password {
-            account = ImportedAccount(version: ImportedAccount.currentVersion, email: email, password: applePasswordToInclude, certificateData: activeCert.p12Data, certificatePassword: certPass, anisetteIdentifier: identifier, anisetteAdiBlob: adiPB)
+            account = ImportedAccount(version: ImportedAccount.currentVersion,
+                email: email,
+                password: applePasswordToInclude,
+                certificateData: activeCert.p12Data,
+                certificatePassword: certPass,
+                anisetteIdentifier: identifier,
+                anisetteAdiBlob: adiPB)
         } else {
-            account = ImportedAccount(version: ImportedAccount.currentVersion, email: email, password: applePasswordToInclude, certificateData: activeCert.p12Data, anisetteIdentifier: identifier, anisetteAdiBlob: adiPB)
+            account = ImportedAccount(version: ImportedAccount.currentVersion,
+                email: email,
+                password: applePasswordToInclude,
+                certificateData: activeCert.p12Data,
+                anisetteIdentifier: identifier,
+                anisetteAdiBlob: adiPB)
         }
 
         let jsonData = try Foundation.JSONEncoder().encode(account)
@@ -270,9 +281,20 @@ extension ImportExport {
             return nil
         }
         if let certPass = activeCert.password {
-            return ImportedAccount(version: ImportedAccount.currentVersion, email: email, password: passwordStr, certificateData: activeCert.p12Data, certificatePassword: certPass, anisetteIdentifier: identifier, anisetteAdiBlob: adiPB)
+            return ImportedAccount(version: ImportedAccount.currentVersion,
+                email: email,
+                password: passwordStr,
+                certificateData: activeCert.p12Data,
+                certificatePassword: certPass,
+                anisetteIdentifier: identifier,
+                anisetteAdiBlob: adiPB)
         } else {
-            return ImportedAccount(version: ImportedAccount.currentVersion, email: email, password: passwordStr, certificateData: activeCert.p12Data, anisetteIdentifier: identifier, anisetteAdiBlob: adiPB)
+            return ImportedAccount(version: ImportedAccount.currentVersion,
+                email: email,
+                password: passwordStr,
+                certificateData: activeCert.p12Data,
+                anisetteIdentifier: identifier,
+                anisetteAdiBlob: adiPB)
         }
     }
 

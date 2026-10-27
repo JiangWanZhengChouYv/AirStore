@@ -27,7 +27,7 @@ struct WidgetTag: WidgetInfo{
 struct ActiveAppsWidget: Widget
 {
     struct Constants{
-        static let MAX_ROWS_PER_PAGE: UInt = 3
+        static let maxRowsPerPage: UInt = 3
     }
     
     private static var id: Int = 1
@@ -115,7 +115,7 @@ private struct ActiveAppsWidgetView: View
         GeometryReader { (geometry) in
             HStack(alignment: .center) {
                 
-                let itemsPerPage = ActiveAppsWidget.Constants.MAX_ROWS_PER_PAGE
+                let itemsPerPage = ActiveAppsWidget.Constants.maxRowsPerPage
                 
                 let preferredRowHeight = (geometry.size.height / Double(itemsPerPage)) - 8
                 let rowHeight = min(preferredRowHeight, geometry.size.height / 2)

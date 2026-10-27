@@ -332,7 +332,12 @@ private extension MyAppsViewController
 {
     func makeDataSource() -> CompositeCollectionViewPrefetchingDataSource<InstalledApp, UIImage>
     {
-        let dataSource = CompositeCollectionViewPrefetchingDataSource<InstalledApp, UIImage>(dataSources: [self.noUpdatesDataSource, self.updatesDataSource, self.activeAppsDataSource, self.inactiveAppsDataSource])
+        let dataSource = CompositeCollectionViewPrefetchingDataSource<InstalledApp, UIImage>(dataSources: [
+            self.noUpdatesDataSource,
+            self.updatesDataSource,
+            self.activeAppsDataSource,
+            self.inactiveAppsDataSource
+        ])
         dataSource.proxy = self
         return dataSource
     }
@@ -891,7 +896,8 @@ private extension MyAppsViewController
             self.refresh(installedApps) { (result) in
                 DispatchQueue.main.async {
                     self.isRefreshingAllApps = false
-                    if let activeAppsHeader = self.collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: Section.activeApps.rawValue)) as? InstalledAppsCollectionHeaderView {
+                    if let activeAppsHeader = self.collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader,
+                        at: IndexPath(item: 0, section: Section.activeApps.rawValue)) as? InstalledAppsCollectionHeaderView {
                         activeAppsHeader.button.isIndicatingActivity = false
                         activeAppsHeader.button.accessibilityLabel = nil
                     }
@@ -2576,8 +2582,10 @@ extension MyAppsViewController: UICollectionViewDropDelegate
         
         // Retrieve header attributes for location calculations.
         guard
-            let activeAppsHeaderAttributes = collectionView.layoutAttributesForSupplementaryElement(ofKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: Section.activeApps.rawValue)),
-            let inactiveAppsHeaderAttributes = collectionView.layoutAttributesForSupplementaryElement(ofKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: Section.inactiveApps.rawValue))
+            let activeAppsHeaderAttributes = collectionView.layoutAttributesForSupplementaryElement(ofKind: UICollectionView.elementKindSectionHeader,
+                at: IndexPath(item: 0, section: Section.activeApps.rawValue)),
+            let inactiveAppsHeaderAttributes = collectionView.layoutAttributesForSupplementaryElement(ofKind: UICollectionView.elementKindSectionHeader,
+                at: IndexPath(item: 0, section: Section.inactiveApps.rawValue))
         else { return UICollectionViewDropProposal(operation: .cancel) }
         
         var dropDestinationIndexPath: IndexPath? = nil
@@ -2737,7 +2745,10 @@ extension MyAppsViewController: NSFetchedResultsControllerDelegate
         dataSource.controllerWillChangeContent(controller)
     }
     
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType)
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+        didChange sectionInfo: NSFetchedResultsSectionInfo,
+        atSectionIndex sectionIndex: Int,
+        for type: NSFetchedResultsChangeType)
     {
         guard let dataSource = self.dataSource(for: controller) else { return }
         
@@ -2774,7 +2785,8 @@ extension MyAppsViewController: NSFetchedResultsControllerDelegate
                     if (inactiveAppsCount == 0) != (self.previousInactiveAppsCount == 0)
                     {
                         self.previousInactiveAppsCount = inactiveAppsCount
-                        if let headerView = self.collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: Section.inactiveApps.rawValue)) {
+                        if let headerView = self.collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader,
+                            at: IndexPath(item: 0, section: Section.inactiveApps.rawValue)) {
                             headerView.isHidden = (inactiveAppsCount == 0)
                         }
                         self.collectionView.collectionViewLayout.invalidateLayout()

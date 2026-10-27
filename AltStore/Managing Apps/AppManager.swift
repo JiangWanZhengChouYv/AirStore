@@ -620,7 +620,10 @@ final class AppManager: ObservableObject, @unchecked Sendable
         debugLog("[AppManager] resign() called for app: \(installedApp.bundleIdentifier)")
         let pipelineHandler = self.makePipelineHandler(presentingViewController: presentingViewController)
         let dbContext = self.getValidDbContext()
-        return self.pipelineRunner.performSingleOperation(.resign(installedApp, alternateIconMode: alternateIconMode), handler: pipelineHandler, dbContext: dbContext, completionHandler: completionHandler)
+        return self.pipelineRunner.performSingleOperation(.resign(installedApp, alternateIconMode: alternateIconMode),
+            handler: pipelineHandler,
+            dbContext: dbContext,
+            completionHandler: completionHandler)
     }
     
     func backup(_ installedApp: InstalledApp, presentingViewController: UIViewController?, completionHandler: @escaping (Result<InstalledApp, Error>) -> Void)

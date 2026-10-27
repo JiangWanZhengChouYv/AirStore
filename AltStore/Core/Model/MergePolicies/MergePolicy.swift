@@ -235,7 +235,9 @@ extension MergePolicy{
 
                 // Permissions
                 let contextPermissions = Set(contextApp._permissions.lazy.compactMap { $0 as? AppPermission }.map { AnyHashable($0.permission) })
-                for case let databasePermission as AppPermission in databaseObject._permissions /* where !contextPermissions.contains(AnyHashable(databasePermission.permission)) */ // Compiler error as of Xcode 15
+                for case let databasePermission as AppPermission in databaseObject._permissions
+                /* where !contextPermissions.contains(AnyHashable(databasePermission.permission)) */
+                // Compiler error as of Xcode 15
                 {
                     if !contextPermissions.contains(AnyHashable(databasePermission.permission))
                     {

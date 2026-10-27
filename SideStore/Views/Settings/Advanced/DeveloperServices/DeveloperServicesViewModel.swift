@@ -186,7 +186,12 @@ class DeveloperServicesViewModel: ObservableObject {
         }
     }
 
-    func createManualProfile(name: String, appID: ALTAppID, certificateIDs: [String], deviceIDs: [String], type: ALTProfileType = .iOS, presentingViewController: UIViewController? = nil) async -> Bool {
+    func createManualProfile(name: String,
+        appID: ALTAppID,
+        certificateIDs: [String],
+        deviceIDs: [String],
+        type: ALTProfileType = .iOS,
+        presentingViewController: UIViewController? = nil) async -> Bool {
         self.isActionLoading = true
         defer { self.isActionLoading = false }
         do {
@@ -201,7 +206,13 @@ class DeveloperServicesViewModel: ObservableObject {
         }
     }
 
-    func updateProfile(_ profile: ALTListedProvisioningProfile, name: String, appIDId: String, certificateIDs: [String], deviceIDs: [String], type: ALTProfileType? = nil, presentingViewController: UIViewController? = nil) async -> Bool {
+    func updateProfile(_ profile: ALTListedProvisioningProfile,
+        name: String,
+        appIDId: String,
+        certificateIDs: [String],
+        deviceIDs: [String],
+        type: ALTProfileType? = nil,
+        presentingViewController: UIViewController? = nil) async -> Bool {
         guard let profileID = profile.identifier else {
             self.errorMessage = "Profile identifier missing"
             return false

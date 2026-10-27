@@ -93,8 +93,14 @@ final class AuthenticationViewController: UIViewController
         self.appleIDTextField.delegate = self
         self.passwordTextField.delegate = self
 
-        NotificationCenter.default.addObserver(self, selector: #selector(AuthenticationViewController.textFieldDidChangeText(_:)), name: UITextField.textDidChangeNotification, object: self.appleIDTextField)
-        NotificationCenter.default.addObserver(self, selector: #selector(AuthenticationViewController.textFieldDidChangeText(_:)), name: UITextField.textDidChangeNotification, object: self.passwordTextField)
+        NotificationCenter.default.addObserver(self,
+            selector: #selector(AuthenticationViewController.textFieldDidChangeText(_:)),
+            name: UITextField.textDidChangeNotification,
+            object: self.appleIDTextField)
+        NotificationCenter.default.addObserver(self,
+            selector: #selector(AuthenticationViewController.textFieldDidChangeText(_:)),
+            name: UITextField.textDidChangeNotification,
+            object: self.passwordTextField)
         
         self.update()
     }

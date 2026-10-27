@@ -705,23 +705,30 @@ private func emitMarkdown(
         var textRange = NSRange(location: NSNotFound, length: 0)
         var suffixRange = NSRange(location: NSNotFound, length: 0)
         _ = adjustRangeForWhitespace(range: currentRange, string: normalizedString as NSString, prefixRange: &prefixRange, textRange: &textRange, suffixRange: &suffixRange)
-        updateMarkdownString(result: result, string: normalizedString, prefixString: nil, prefixRange: prefixRange, textRange: textRange, suffixString: nil, suffixRange: suffixRange, needsEscaping: false)
+        updateMarkdownString(result: result,
+            string: normalizedString,
+            prefixString: nil,
+            prefixRange: prefixRange,
+            textRange: textRange,
+            suffixString: nil,
+            suffixRange: suffixRange,
+            needsEscaping: false)
     } else {
         var currentRangeHasLink = false
         var currentRangeURL: URL? = nil
         
         if let linkVal = currentAttributes[.link] {
             var url: URL? = nil
-            if let u = linkVal as? URL {
-                url = u
-            } else if let s = linkVal as? String {
-                url = URL(string: s)
+            if let linkURL = linkVal as? URL {
+                url = linkURL
+            } else if let linkString = linkVal as? String {
+                url = URL(string: linkString)
             }
             
-            if let u = url {
+            if let resolvedURL = url {
                 currentRangeHasLink = true
-                if u.scheme != "mailto" && u.absoluteString != currentString {
-                    currentRangeURL = u
+                if resolvedURL.scheme != "mailto" && resolvedURL.absoluteString != currentString {
+                    currentRangeURL = resolvedURL
                 }
             }
         }
@@ -790,6 +797,13 @@ private func emitMarkdown(
         var textRange = NSRange(location: NSNotFound, length: 0)
         var suffixRange = NSRange(location: NSNotFound, length: 0)
         _ = adjustRangeForWhitespace(range: currentRange, string: normalizedString as NSString, prefixRange: &prefixRange, textRange: &textRange, suffixRange: &suffixRange)
-        updateMarkdownString(result: result, string: normalizedString, prefixString: prefixString, prefixRange: prefixRange, textRange: textRange, suffixString: suffixString, suffixRange: suffixRange, needsEscaping: needsEscaping)
+        updateMarkdownString(result: result,
+            string: normalizedString,
+            prefixString: prefixString,
+            prefixRange: prefixRange,
+            textRange: textRange,
+            suffixString: suffixString,
+            suffixRange: suffixRange,
+            needsEscaping: needsEscaping)
     }
 }

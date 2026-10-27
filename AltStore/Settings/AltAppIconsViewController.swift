@@ -100,7 +100,9 @@ class AltAppIconsViewController: UICollectionViewController
         self.dataSource.contentView = self.collectionView
         
         self.collectionView.register(UICollectionViewListCell.self, forCellWithReuseIdentifier: CellContentGenericCellIdentifier)
-        self.collectionView.register(UICollectionViewListCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: UICollectionView.elementKindSectionHeader)
+        self.collectionView.register(UICollectionViewListCell.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: UICollectionView.elementKindSectionHeader)
                 
         self.headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, elementKind, indexPath) in
             let section = Section.allCases[indexPath.section]

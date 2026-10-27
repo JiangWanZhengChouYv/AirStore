@@ -20,12 +20,12 @@ extension ActiveAppsTimelineProvider {
             let app = apps[0]
             for i in 1...10 {
                 let name = "\(app.name) - \(i)"
-                let x = AppSnapshot(name: name,
+                let snapshot = AppSnapshot(name: name,
                                     bundleIdentifier: app.bundleIdentifier,
                                     expirationDate: app.expirationDate,
                                     refreshedDate: app.refreshedDate
                         )
-                newSets.append(x)
+                newSets.append(snapshot)
             }
             apps = newSets
         }

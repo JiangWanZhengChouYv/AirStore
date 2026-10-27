@@ -30,11 +30,11 @@ public struct LogNameInfo {
 }
 
 class ConsoleLog {
-    private static let CONSOLE_LOGS_DIRECTORY = "ConsoleLogs"
-    private static let CONSOLE_LOG_NAME_PREFIX = "console"
-    private static let CONSOLE_LOG_EXTN = ".log"
+    private static let consoleLogsDirectory = "ConsoleLogs"
+    private static let consoleLogNamePrefix = "console"
+    private static let consoleLogExtension = ".log"
     
-    private var configuredBaseName: String = ConsoleLog.CONSOLE_LOG_NAME_PREFIX
+    private var configuredBaseName: String = ConsoleLog.consoleLogNamePrefix
     private var configuredSuffixFormat: SuffixFormat = .timestamp
     
     public private(set) var activeLogInfo: LogNameInfo?
@@ -60,7 +60,7 @@ class ConsoleLog {
     }()
     
     public func formatFileName(baseName: String, suffixFormat: SuffixFormat) -> LogNameInfo {
-        let (name, ext) = splitFileName(baseName, defaultExtn: ConsoleLog.CONSOLE_LOG_EXTN)
+        let (name, ext) = splitFileName(baseName, defaultExtn: ConsoleLog.consoleLogExtension)
         switch suffixFormat {
         case .none:
             return LogNameInfo(name: name, suffix: "", fileExtension: ext)
@@ -132,7 +132,7 @@ class ConsoleLog {
     private lazy var consoleLogsDir: URL = {
         // create a directory for console logs
         let docsDir = FileManager.default.documentsDirectory
-        let consoleLogsDir = docsDir.appendingPathComponent(ConsoleLog.CONSOLE_LOGS_DIRECTORY)
+        let consoleLogsDir = docsDir.appendingPathComponent(ConsoleLog.consoleLogsDirectory)
         if !FileManager.default.fileExists(atPath: consoleLogsDir.path) {
             try! FileManager.default.createDirectory(at: consoleLogsDir, withIntermediateDirectories: true, attributes: nil)
         }
