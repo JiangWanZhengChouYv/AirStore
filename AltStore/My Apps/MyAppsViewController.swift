@@ -1340,6 +1340,9 @@ private extension MyAppsViewController
                 title = NSLocalizedString("Cannot Activate More than 3 Apps and App Extensions", comment: "")
                 let extCount = installedApp.appExtensions.count
                 let extText = extCount == 1 ? NSLocalizedString("app extension", comment: "") : NSLocalizedString("app extensions", comment: "")
+                // Localized string literal: wrapping it would change the catalog key, so the
+                // line cannot be shortened without un-translating this text for users.
+                // swiftlint:disable:next line_length
                 message = String(format: NSLocalizedString("Non-developer Apple IDs are limited to 3 active apps and app extensions, and \"%@\" contains %@ %@. Please choose an app to deactivate.", comment: ""), installedApp.name, NSNumber(value: extCount), extText)
             }
         } else {

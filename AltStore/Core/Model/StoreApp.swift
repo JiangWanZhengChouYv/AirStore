@@ -93,6 +93,9 @@ public typealias PlatformURLs = [PlatformURL]
 extension StoreApp {
     
     //MARK: - relationships
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(releaseTracks) public private(set) var _releaseTracks: NSOrderedSet?
     
     public var releaseTracks: [ReleaseTrack]?{
@@ -156,14 +159,23 @@ public class StoreApp: BaseEntity, Decodable
     
     @NSManaged public private(set) var developerName: String
     @NSManaged public private(set) var localizedDescription: String
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(size) internal var _size: Int64
     
     @nonobjc public var category: StoreCategory? {
+        // Unwraps the CoreData backing store property above, so the shorthand binding takes
+        // that name; it is not a new identifier we get to rename.
+        // swiftlint:disable:next identifier_name
         guard let _category else { return nil }
         
         let category = StoreCategory(rawValue: _category)
         return category
     }
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(category) public private(set) var _category: String?
     
     @NSManaged public private(set) var iconURL: URL
@@ -228,10 +240,16 @@ public class StoreApp: BaseEntity, Decodable
     @NSManaged public var installedApp: InstalledApp?
     @NSManaged public var newsItems: Set<NewsItem>
     
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(source) public var _source: Source?
     @NSManaged public internal(set) var featuringSource: Source?
     
     @NSManaged @objc(latestVersion) public private(set) var latestSupportedVersion: AppVersion?
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(versions) public private(set) var _versions: NSOrderedSet
     
     @NSManaged public private(set) var loggedErrors: NSSet /* Set<LoggedError> */ // Use NSSet to avoid eagerly fetching values.
@@ -250,6 +268,9 @@ public class StoreApp: BaseEntity, Decodable
     @nonobjc public var permissions: Set<AppPermission> {
         return self._permissions as! Set<AppPermission>
     }
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(permissions) internal private(set) var _permissions: NSSet // Use NSSet to avoid eagerly fetching values.
     
     @nonobjc public var versions: [AppVersion] {
@@ -259,6 +280,9 @@ public class StoreApp: BaseEntity, Decodable
     @nonobjc public var allScreenshots: [AppScreenshot] {
         return self._screenshots.array as! [AppScreenshot]
     }
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(screenshots) private(set) var _screenshots: NSOrderedSet
 
     private override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?)

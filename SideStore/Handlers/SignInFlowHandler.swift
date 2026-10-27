@@ -464,6 +464,9 @@ class SignInFlowHandler: AnyObject, SignInHandler, AnisetteServerHandler {
                 if teamType == .free {
                     let warningAlert = UIAlertController(
                         title: NSLocalizedString("Warning", comment: ""),
+                        // Localized string literal: wrapping it would change the catalog key, so the
+                        // line cannot be shortened without un-translating this text for users.
+                        // swiftlint:disable:next line_length
                         message: NSLocalizedString("AirStore cannot manage the existing certificate without owning its private key. The apps signed with the existing certificate will expire soon unless they are resigned and renewed explicitly by AirStore.", comment: ""),
                         preferredStyle: .alert
                     )
@@ -758,6 +761,9 @@ class SignInFlowHandler: AnyObject, SignInHandler, AnisetteServerHandler {
         }
         
         return await withCheckedContinuation { continuation in
+            // Localized string literal: wrapping it would change the catalog key, so the
+            // line cannot be shortened without un-translating this text for users.
+            // swiftlint:disable:next line_length
             let alert = UIAlertController(title: "WARNING: Outdated anisette server", message: "We've detected you are using an older anisette server. Using this server has a higher likelihood of locking your account and causing other issues. Are you sure you want to continue?", preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.destructive, handler: { action in
                 continuation.resume(returning: true)

@@ -20,6 +20,9 @@ public class AppVersion: BaseEntity, Decodable
         get { _buildVersion.isEmpty ? nil : _buildVersion }
         set { _buildVersion = newValue ?? "" }
     }
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(buildVersion) public private(set) var _buildVersion: String
     
     @NSManaged public private(set) var date: Date
@@ -27,6 +30,9 @@ public class AppVersion: BaseEntity, Decodable
     @NSManaged public private(set) var downloadURL: URL
     @NSManaged public private(set) var size: Int64
     @NSManaged public private(set) var sha256: String?
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(channel) public private(set) var _channel: String?
 
     @nonobjc public var minOSVersion: OperatingSystemVersion? {
@@ -49,6 +55,9 @@ public class AppVersion: BaseEntity, Decodable
     @NSManaged public var sourceID: String?   
 
     /* Relationships */
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(app) public private(set) var _app: StoreApp?
     @NSManaged @objc(latestVersionApp) public internal(set) var latestSupportedVersionApp: StoreApp?
     @NSManaged public var releaseTrack: ReleaseTrack?    

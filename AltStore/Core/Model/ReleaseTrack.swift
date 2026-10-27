@@ -63,11 +63,23 @@ public enum ReleaseTrackType: String, CaseIterable, CustomStringConvertible
 public class ReleaseTrack: BaseEntity, Decodable
 {
     // attributes
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(track) public private(set) var _track: String?
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(appBundleID) public private(set) var _appBundleID: String?
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(sourceID) public private(set) var _sourceID: String?
 
     // RelationShips
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(releases) public private(set) var _releases: NSOrderedSet?
     @NSManaged public private(set) var storeApp: StoreApp?
     @NSManaged public private(set) var installedApp: InstalledApp?

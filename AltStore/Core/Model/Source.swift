@@ -100,9 +100,18 @@ public class Source: BaseEntity, Decodable
     public var userInfo: [ALTSourceUserInfoKey: String]?
     
     /* Relationships */
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @objc(apps) @NSManaged public private(set) var _apps: NSOrderedSet
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @objc(newsItems) @NSManaged public private(set) var _newsItems: NSOrderedSet
     
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @objc(featuredApps) @NSManaged public private(set) var _featuredApps: NSOrderedSet
     @objc(hasFeaturedApps) @NSManaged private var _hasFeaturedApps: Bool
     
@@ -199,7 +208,7 @@ public class Source: BaseEntity, Decodable
             self.userInfo = userInfo?.reduce(into: [:]) { $0[ALTSourceUserInfoKey($1.key)] = $1.value }
             
             let apps = try container.decodeIfPresent([StoreApp].self, forKey: .apps) ?? []
-            let appsByID = Dictionary(apps.map { ($0.bundleIdentifier, $0) }, uniquingKeysWith: { (a, b) in return a })
+            let appsByID = Dictionary(apps.map { ($0.bundleIdentifier, $0) }, uniquingKeysWith: { (existing, inserted) in return existing })
             
             for (index, app) in apps.enumerated()
             {

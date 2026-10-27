@@ -72,6 +72,9 @@ final class SourcesViewController: UICollectionViewController
         self.placeholderView = PlaceholderView(frame: .zero)
         self.placeholderView.translatesAutoresizingMaskIntoConstraints = false
         self.placeholderView.textLabel.text = NSLocalizedString("Add More Sources!", comment: "")
+        // Localized string literal: wrapping it would change the catalog key, so the
+        // line cannot be shortened without un-translating this text for users.
+        // swiftlint:disable:next line_length
         self.placeholderView.detailTextLabel.text = NSLocalizedString("Sources determine what apps are available in AirStore. The more sources you add, the better your AirStore experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!", comment: "")
         self.placeholderView.detailTextLabel.textAlignment = .natural
         backgroundView.addSubview(self.placeholderView)

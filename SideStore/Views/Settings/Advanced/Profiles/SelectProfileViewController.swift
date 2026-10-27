@@ -160,6 +160,9 @@ final class SelectProfileViewController: UITableViewController {
         guard !compatibleProfiles.isEmpty else {
             let alert = UIAlertController(
                 title: NSLocalizedString("No Compatible Profiles", comment: ""),
+                // Localized string literal: wrapping it would change the catalog key, so the
+                // line cannot be shortened without un-translating this text for users.
+                // swiftlint:disable:next line_length
                 message: String(format: NSLocalizedString("No unexpired provisioning profiles matching '%@' with an imported signing certificate (.p12) were found locally.\n\nPlease go to Settings -> Profiles Management to import and configure a profile with its matching certificate.", comment: ""), self.installedApp.bundleIdentifier),
                 preferredStyle: .alert
             )

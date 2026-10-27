@@ -555,6 +555,9 @@ private extension SettingsViewController
             }
             else
             {
+                // Localized string literal: wrapping it would change the catalog key, so the
+                // line cannot be shortened without un-translating this text for users.
+                // swiftlint:disable:next line_length
                 settingsHeaderFooterView.secondaryLabel.text = NSLocalizedString("Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow AirStore to keep your device awake during a refresh or install of any apps.", comment: "")
             }
             

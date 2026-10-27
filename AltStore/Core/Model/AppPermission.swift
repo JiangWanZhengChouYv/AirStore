@@ -18,6 +18,9 @@ public class AppPermission: BaseEntity
         get { ALTAppPermissionType(rawValue: _type) }
         set { _type = newValue.rawValue }
     }
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(type) public var _type: String
     
     // usageDescription must be non-optional for backwards compatibility,
@@ -36,6 +39,9 @@ public class AppPermission: BaseEntity
         default: return UnknownAppPermission(rawValue: self._permission)
         }
     }
+    // CoreData backing store: predicates reach this property through #keyPath, and the
+    // @objc(name) mapping is what the CoreData model expects, so the underscore stays.
+    // swiftlint:disable:next identifier_name
     @NSManaged @objc(permission) private(set) public var _permission: String
     
     // Set by StoreApp.

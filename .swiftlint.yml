@@ -1,0 +1,37 @@
+# No config existed before 2026-10-27, so SwiftLint's defaults were both the cleanup backlog and
+# the CI gate. The cleanup itself took the count from 530 to 370 by editing code. This file, plus 27
+# inline notes at the sites it cannot express, covers the remaining 112 -- measured 370 -> 258 --
+# and every one of those 112 is something that cannot be fixed by editing code without changing what
+# the app actually says or which key the translation lives under.
+#
+# Everything else keeps its default severity: force_cast (115), identifier_name (62), the
+# body-length and complexity rules (52), force_try (10), type_name (9), file_length (6) and
+# large_tuple (4) still have to be paid for in code for the job to go green.
+
+excluded:
+  - Dependencies               # vendored submodules: minimuxer and SideSign are not ours to format
+  - SideStore.xcarchive
+  - SourcePackages
+  - build
+
+line_length:
+  warning: 120
+  # Why the error threshold is 260 rather than the default 200: 87 of the long lines left were
+  # NSLocalizedString / String(format:) calls whose *literal* is 200-370 characters wide. Wrapping
+  # at an argument boundary leaves the literal on one line, so the violation survives; splitting the
+  # literal would change its catalog key and silently un-translate that text for Chinese users.
+  # 54 of them fell in 200-260. The 7 longer ones are marked at the site with
+  # swiftlint:disable:next line_length and a reason, so this threshold does not quietly swallow the
+  # whole class -- each surviving case is named.
+  error: 260
+  # Interpolated lines (debugLog with \(ByteCountFormatter...) etc.) are their values' fault, not
+  # the code's shape; 29 of the flagged lines were of that kind. Comment lines are not code.
+  ignores_comments: true
+  ignores_interpolated_strings: true
+
+# identifier_name would be the place to exempt the CoreData backing properties (_category, _apps,
+# _versions ...), whose leading underscore is load-bearing: fetch predicates address them through
+# #keyPath(StoreApp._category) and their @objc(name) mapping is what the model expects. Rule-level
+# `excluded` does not apply to identifier_name in SwiftLint 0.65.1 -- three path forms were tried
+# against a single file and all still reported the violations -- so those 20 sites carry inline
+# swiftlint:disable:next notes instead.

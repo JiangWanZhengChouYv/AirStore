@@ -40,6 +40,9 @@ final class ResignAltStoreViewController: UIViewController
             case .revoked:
                 reasonText = NSLocalizedString("The signing certificate used to install AirStore was revoked on the Apple Developer portal.", comment: "")
             case .freeAccountLimitRevoked:
+                // Localized string literal: wrapping it would change the catalog key, so the
+                // line cannot be shortened without un-translating this text for users.
+                // swiftlint:disable:next line_length
                 reasonText = NSLocalizedString("Free developer accounts are limited to 1 active signing certificate. Since the private key for the active certificate was not found on this device, AirStore will create a new certificate. This will automatically revoke the active certificate, which may disable installations on other devices or made by Xcode.", comment: "")
             case .differentAccount:
                 reasonText = NSLocalizedString("The logged-in Apple ID account has changed.", comment: "")
