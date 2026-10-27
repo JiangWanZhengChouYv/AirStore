@@ -523,8 +523,8 @@ private extension AddSourceViewController
         
         if currentItemCount == 0 && newItemCount > 0 {
             // Insert all items if we currently have none
-            for i in 0..<newItemCount {
-                let indexPath = IndexPath(row: i, section: 0)
+            for index in 0..<newItemCount {
+                let indexPath = IndexPath(row: index, section: 0)
                 let change = CellContentChange(type: .insert,
                                                 currentIndexPath: nil,
                                                 destinationIndexPath: indexPath)
@@ -532,8 +532,8 @@ private extension AddSourceViewController
             }
         } else if currentItemCount > 0 && newItemCount == 0 {
             // Delete all items if we're going to have none
-            for i in 0..<currentItemCount {
-                let indexPath = IndexPath(row: i, section: 0)
+            for index in 0..<currentItemCount {
+                let indexPath = IndexPath(row: index, section: 0)
                 let change = CellContentChange(type: .delete,
                                                 currentIndexPath: indexPath,
                                                 destinationIndexPath: nil)
@@ -545,8 +545,8 @@ private extension AddSourceViewController
             changes = [change]
         } else {
             // Update existing items in place
-            for i in 0..<newItemCount {
-                let indexPath = IndexPath(row: i, section: 0)
+            for index in 0..<newItemCount {
+                let indexPath = IndexPath(row: index, section: 0)
                 let change = CellContentChange(type: .update,
                                                 currentIndexPath: indexPath,
                                                 destinationIndexPath: indexPath)

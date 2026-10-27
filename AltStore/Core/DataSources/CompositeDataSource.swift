@@ -175,14 +175,14 @@ open class CompositeDataSource<
         let globalIndexPath: IndexPath
         if shouldFlattenSections {
             var itemOffset = 0
-            for i in 0..<dataSourceIndex {
-                itemOffset += childItemCount(for: typedDataSources[i])
+            for index in 0..<dataSourceIndex {
+                itemOffset += childItemCount(for: typedDataSources[index])
             }
             globalIndexPath = IndexPath(item: localIndexPath.item + itemOffset, section: 0)
         } else {
             var sectionOffset = 0
-            for i in 0..<dataSourceIndex {
-                sectionOffset += childSectionCount(for: typedDataSources[i])
+            for index in 0..<dataSourceIndex {
+                sectionOffset += childSectionCount(for: typedDataSources[index])
             }
             globalIndexPath = IndexPath(item: localIndexPath.item, section: localIndexPath.section + sectionOffset)
         }

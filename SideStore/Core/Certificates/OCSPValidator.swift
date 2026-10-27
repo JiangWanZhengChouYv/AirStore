@@ -310,9 +310,9 @@ public struct OCSPValidator {
         if lenByte < 128 { return 2 + Int(lenByte) }
         let numLenBytes = Int(lenByte & 0x7F)
         var contentLen = 0
-        for i in 0..<numLenBytes {
-            if start + 2 + i < bytes.count {
-                contentLen = (contentLen << 8) | Int(bytes[start + 2 + i])
+        for index in 0..<numLenBytes {
+            if start + 2 + index < bytes.count {
+                contentLen = (contentLen << 8) | Int(bytes[start + 2 + index])
             }
         }
         return 2 + numLenBytes + contentLen
@@ -343,14 +343,14 @@ public struct OCSPValidator {
             return .error("OCSP Response Status code: \(responseStatus)")
         }
         
-        for i in 0..<(bytes.count - 3) {
-            if bytes[i] == 0x80 && bytes[i+1] == 0x00 && bytes[i+2] == 0x18 {
+        for index in 0..<(bytes.count - 3) {
+            if bytes[index] == 0x80 && bytes[index+1] == 0x00 && bytes[index+2] == 0x18 {
                 return .valid
             }
         }
         
-        for i in 0..<(bytes.count - 20) {
-            if (bytes[i] == 0xA1 || bytes[i] == 0x81) && (bytes[i+2] == 0x18 || bytes[i+3] == 0x18 || bytes[i+4] == 0x18 || bytes[i+18] == 0x18 || bytes[i+19] == 0x18) {
+        for index in 0..<(bytes.count - 20) {
+            if (bytes[index] == 0xA1 || bytes[index] == 0x81) && (bytes[index+2] == 0x18 || bytes[index+3] == 0x18 || bytes[index+4] == 0x18 || bytes[index+18] == 0x18 || bytes[index+19] == 0x18) {
                 return .revoked
             }
         }

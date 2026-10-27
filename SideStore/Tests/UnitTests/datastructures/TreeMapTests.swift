@@ -102,8 +102,8 @@ class TreeMapTests: XCTestCase {
     
     func testRemoveAll() {
         let map = TreeMap<Int, String>()
-        for i in 0..<100 {
-            map[i] = "\(i)"
+        for index in 0..<100 {
+            map[index] = "\(index)"
         }
         XCTAssertEqual(map.count, 100)
         map.removeAll()
@@ -114,8 +114,8 @@ class TreeMapTests: XCTestCase {
     func testBalancing() {
         let map = TreeMap<Int, Int>()
         // Insert elements in ascending order to challenge the balancing.
-        for i in 1...1000 {
-            map[i] = i
+        for index in 1...1000 {
+            map[index] = index
         }
         // Verify in-order traversal produces sorted order.
         var expected = 1
@@ -127,8 +127,8 @@ class TreeMapTests: XCTestCase {
         XCTAssertEqual(expected - 1, 1000)
         
         // Remove odd keys to force rebalancing.
-        for i in stride(from: 1, through: 1000, by: 2) {
-            _ = map.remove(key: i)
+        for index in stride(from: 1, through: 1000, by: 2) {
+            _ = map.remove(key: index)
         }
         let expectedEvenKeys = (1...1000).filter { $0 % 2 == 0 }
         XCTAssertEqual(map.keys, expectedEvenKeys)

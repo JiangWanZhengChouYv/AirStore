@@ -208,8 +208,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
         typeBrowser = nil
         timeoutTask?.cancel()
         timeoutTask = nil
-        for b in fallbackTypeBrowsers {
-            b.cancel()
+        for browser in fallbackTypeBrowsers {
+            browser.cancel()
         }
         fallbackTypeBrowsers.removeAll()
         isSearching = false
@@ -303,8 +303,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
         debugLog("[BonjourDiscovery] Stopping instance discovery.")
         timeoutTask?.cancel()
         timeoutTask = nil
-        for b in instanceBrowsers {
-            b.cancel()
+        for browser in instanceBrowsers {
+            browser.cancel()
         }
         instanceBrowsers.removeAll()
         isSearching = false
