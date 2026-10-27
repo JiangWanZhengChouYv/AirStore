@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.8.3-develop-202610271237.51-c6c87257",
-          "date": "2026-10-27T12:48:28Z",
+          "version": "0.8.3-develop-202610271250.52-cccea723",
+          "date": "2026-10-27T12:59:46Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-          "size": 30132257,
-          "sha256": "ddee3ad57e7e2b0be0cb49487ceae41f5c1a70c094df1d229541c53d4da7ddfc",
-          "localizedDescription": "Development build 0.8.3-develop-202610271237.51-c6c87257 from commit c6c87257."
+          "size": 30132345,
+          "sha256": "53cb627f71ac40f92f0344d2b90580ceb98bf6861cb17f6c6cd15f1ae9bf5522",
+          "localizedDescription": "Development build 0.8.3-develop-202610271250.52-cccea723 from commit cccea723."
         },
         {
           "version": "0.8.2",
@@ -56,12 +56,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.3-develop-202610271237.51-c6c87257",
-              "date": "2026-10-27T12:48:28Z",
+              "version": "0.8.3-develop-202610271250.52-cccea723",
+              "date": "2026-10-27T12:59:46Z",
               "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirStore.ipa",
-              "size": 30132257,
-              "sha256": "ddee3ad57e7e2b0be0cb49487ceae41f5c1a70c094df1d229541c53d4da7ddfc",
-              "localizedDescription": "Development build 0.8.3-develop-202610271237.51-c6c87257 from commit c6c87257."
+              "size": 30132345,
+              "sha256": "53cb627f71ac40f92f0344d2b90580ceb98bf6861cb17f6c6cd15f1ae9bf5522",
+              "localizedDescription": "Development build 0.8.3-develop-202610271250.52-cccea723 from commit cccea723."
             }
           ]
         },
