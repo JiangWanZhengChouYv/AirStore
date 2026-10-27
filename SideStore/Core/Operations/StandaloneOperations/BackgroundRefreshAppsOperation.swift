@@ -25,7 +25,7 @@ private extension CFNotificationName {
     }
 }
 
-private let receivedApplicationState: @convention(c) (CFNotificationCenter?,
+private let appIsRunningCallback: @convention(c) (CFNotificationCenter?,
     UnsafeMutableRawPointer?,
     CFNotificationName?,
     UnsafeRawPointer?,
@@ -137,7 +137,7 @@ final class BackgroundRefreshAppsOperation: BaseStandaloneOperation<OperationCon
         
         for installedApp in self.installedApps {
             let appIsRunningNotification = CFNotificationName.appIsRunning(for: installedApp.bundleIdentifier)
-            CFNotificationCenterAddObserver(notificationCenter, observer, receivedApplicationState, appIsRunningNotification.rawValue, nil, .deliverImmediately)
+            CFNotificationCenterAddObserver(notificationCenter, observer, appIsRunningCallback, appIsRunningNotification.rawValue, nil, .deliverImmediately)
             
             let requestAppStateNotification = CFNotificationName.requestAppState(for: installedApp.bundleIdentifier)
             CFNotificationCenterPostNotification(notificationCenter, requestAppStateNotification, nil, nil, true)
