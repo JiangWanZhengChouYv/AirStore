@@ -284,13 +284,13 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     // Sorted & Parsed Addresses
     var sortedAddresses: [String] {
         guard let resolved = resolvedService else { return [] }
-        return resolved.addresses.sorted { a, b in
-            let aIsV6 = a.contains(":")
-            let bIsV6 = b.contains(":")
+        return resolved.addresses.sorted { left, right in
+            let aIsV6 = left.contains(":")
+            let bIsV6 = right.contains(":")
             if aIsV6 != bIsV6 {
                 return sortAddressesV4First ? !aIsV6 : aIsV6
             }
-            return a.localizedStandardCompare(b) == .orderedAscending
+            return left.localizedStandardCompare(right) == .orderedAscending
         }
     }
     

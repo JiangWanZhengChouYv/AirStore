@@ -349,8 +349,8 @@ final class WirelessPairViewModel: ObservableObject {
                     case .service(let sName, _, let sDomain, _):
                         let cleanDomain = sDomain.isEmpty ? "local" : (sDomain.hasSuffix(".") ? String(sDomain.dropLast()) : sDomain)
                         resolvedHost = "\(sName).\(cleanDomain)"
-                        if let localEndpoint = path.localEndpoint, case .hostPort(_, let p) = localEndpoint {
-                            portVal = p.rawValue
+                        if let localEndpoint = path.localEndpoint, case .hostPort(_, let endpointPort) = localEndpoint {
+                            portVal = endpointPort.rawValue
                         }
                     default:
                         resolvedHost = service.name
@@ -381,8 +381,8 @@ final class WirelessPairViewModel: ObservableObject {
                     case .service(let sName, _, let sDomain, _):
                         let cleanDomain = sDomain.isEmpty ? "local" : (sDomain.hasSuffix(".") ? String(sDomain.dropLast()) : sDomain)
                         resolvedHost = "\(sName).\(cleanDomain)"
-                        if let localEndpoint = conn.currentPath?.localEndpoint, case .hostPort(_, let p) = localEndpoint {
-                            portVal = p.rawValue
+                        if let localEndpoint = conn.currentPath?.localEndpoint, case .hostPort(_, let endpointPort) = localEndpoint {
+                            portVal = endpointPort.rawValue
                         }
                     default:
                         resolvedHost = service.name

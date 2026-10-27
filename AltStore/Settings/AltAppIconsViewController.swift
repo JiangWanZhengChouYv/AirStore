@@ -178,7 +178,7 @@ private extension AltAppIconsViewController
             }
             
             var backgroundConfiguration = UIBackgroundConfiguration.listPlainCell()
-            backgroundConfiguration.backgroundColorTransformer = UIConfigurationColorTransformer { [weak cell] c in
+            backgroundConfiguration.backgroundColorTransformer = UIConfigurationColorTransformer { [weak cell] color in
                 if let state = cell?.configurationState, state.isHighlighted 
                 {
                     // Highlighted, so use darker white for background.

@@ -146,16 +146,16 @@ public extension NSError
         userInfo[NSLocalizedFailureReasonErrorKey] = self.localizedFailureReason
         userInfo[NSLocalizedRecoverySuggestionErrorKey] = self.localizedRecoverySuggestion
 
-        let sortedUserInfo = userInfo.sorted { (left, b) in
+        let sortedUserInfo = userInfo.sorted { (left, right) in
             let indexA = preferredKeyOrder.firstIndex(of: left.key)
-            let indexB = preferredKeyOrder.firstIndex(of: b.key)
+            let indexB = preferredKeyOrder.firstIndex(of: right.key)
 
             switch (indexA, indexB)
             {
             case (let indexA?, let indexB?): return indexA < indexB
             case (_?, nil): return true // indexA exists, indexB is nil, so A should come first.
             case (nil, _?): return false  // indexA is nil, indexB exists, so B should come first.
-            case (nil, nil): return left.key < b.key // both indexes are nil, so sort alphabetically.
+            case (nil, nil): return left.key < right.key // both indexes are nil, so sort alphabetically.
             }
         }
 

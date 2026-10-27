@@ -137,7 +137,7 @@ public final class StorageExplorerViewModel: ObservableObject {
             case .confirmBulkDelete: return "bulkDelete"
             case .rename(let item): return "rename-\(item.url.path)"
             case .bulkRename: return "bulkRename"
-            case .pasteConflict(let c): return "conflict-\(c.sourceURL.path)"
+            case .pasteConflict(let clash): return "conflict-\(clash.sourceURL.path)"
             case .error(let msg): return "error-\(msg)"
             }
         }

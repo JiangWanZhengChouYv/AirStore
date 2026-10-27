@@ -233,8 +233,8 @@ final class PipelineHandler: PipelineExecutionHandler,
         guard let presenter = self.activePresenter else {
             debugLog("[PipelineHandler] resolveInfoPlistCustomization: activePresenter is nil!")
             var fallback: [String: [String: any Sendable]] = [:]
-            for t in targets {
-                fallback[t.id] = t.initialPlist
+            for target in targets {
+                fallback[target.id] = target.initialPlist
             }
             return (fallback, appendTeamID)
         }
@@ -298,8 +298,8 @@ final class PipelineHandler: PipelineExecutionHandler,
         guard let presenter = self.activePresenter else {
             debugLog("[PipelineHandler] resolveEntitlementsCustomization: activePresenter is nil!")
             var fallback: [String: [String: any Sendable]] = [:]
-            for t in targets {
-                fallback[t.id] = t.initialEntitlements
+            for target in targets {
+                fallback[target.id] = target.initialEntitlements
             }
             return fallback
         }

@@ -194,26 +194,26 @@ final class HealthCheckViewModel: ObservableObject {
     )
 
     nonisolated private func computeStatuses(
-        _ m: HealthCheckMetrics
+        _ metrics: HealthCheckMetrics
     ) -> CoreRequirementStatuses {
-        let netSat = m.wifi
-        let vpnSat = m.utun
-        let isRp = m.protocolStr == "Remote Pairing"
-        let ipsecSat = isRp ? nil : m.ipsec
+        let netSat = metrics.wifi
+        let vpnSat = metrics.utun
+        let isRp = metrics.protocolStr == "Remote Pairing"
+        let ipsecSat = isRp ? nil : metrics.ipsec
 
-        switch m.readyResult {
+        switch metrics.readyResult {
         case .success:
-            let pingSat = m.pingSuccess
+            let pingSat = metrics.pingSuccess
             let isPairingLoaded = minimuxer.core.isPairingFileLoaded
-            let pairingSat: Bool? = m.pairingVerified ? true : (isPairingLoaded ? nil : false)
-            let ddiSat = m.ddi
+            let pairingSat: Bool? = metrics.pairingVerified ? true : (isPairingLoaded ? nil : false)
+            let ddiSat = metrics.ddi
             return (netSat, vpnSat, ipsecSat, pingSat, pairingSat, ddiSat)
 
         case .failure(let error):
-            var pingSat: Bool? = m.pingSuccess
+            var pingSat: Bool? = metrics.pingSuccess
             let isPairingLoaded = minimuxer.core.isPairingFileLoaded
-            var pairingSat: Bool? = m.pairingVerified ? true : (isPairingLoaded ? nil : false)
-            var ddiSat: Bool? = m.ddi
+            var pairingSat: Bool? = metrics.pairingVerified ? true : (isPairingLoaded ? nil : false)
+            var ddiSat: Bool? = metrics.ddi
 
             switch error {
             case .noConnection:

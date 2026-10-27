@@ -271,8 +271,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
                     let epIface = iface?.name ?? "none"
                     var txtRecords: [(key: String, value: String)] = []
                     if case .bonjour(let txt) = result.metadata {
-                        for (k, v) in txt.dictionary {
-                            txtRecords.append((key: k, value: v))
+                        for (txtKey, txtValue) in txt.dictionary {
+                            txtRecords.append((key: txtKey, value: txtValue))
                         }
                         txtRecords.sort { $0.key.localizedCaseInsensitiveCompare($1.key) == .orderedAscending }
                     }
@@ -391,8 +391,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
                     case .service(let sName, _, let sDomain, _):
                         let cleanDomain = sDomain.isEmpty ? "local" : (sDomain.hasSuffix(".") ? String(sDomain.dropLast()) : sDomain)
                         resolvedHost = "\(sName).\(cleanDomain)"
-                        if let localEndpoint = path.localEndpoint, case .hostPort(_, let p) = localEndpoint {
-                            portVal = p.rawValue
+                        if let localEndpoint = path.localEndpoint, case .hostPort(_, let endpointPort) = localEndpoint {
+                            portVal = endpointPort.rawValue
                         }
                     default:
                         resolvedHost = service.name
@@ -588,9 +588,9 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
         var txtRecords: [(key: String, value: String)] = []
         if let txtData = sender.txtRecordData() {
             let dict = NetService.dictionary(fromTXTRecord: txtData)
-            for (k, v) in dict {
-                let valStr = String(data: v, encoding: .utf8) ?? ""
-                txtRecords.append((key: k, value: valStr))
+            for (dictKey, dictValue) in dict {
+                let valStr = String(data: dictValue, encoding: .utf8) ?? ""
+                txtRecords.append((key: dictKey, value: valStr))
             }
         }
         
@@ -826,8 +826,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
                         case .service(let sName, _, let sDomain, _):
                             let cleanDomain = sDomain.isEmpty ? "local" : (sDomain.hasSuffix(".") ? String(sDomain.dropLast()) : sDomain)
                             resolvedHost = "\(sName).\(cleanDomain)"
-                            if let localEndpoint = path.localEndpoint, case .hostPort(_, let p) = localEndpoint {
-                                portVal = p.rawValue
+                            if let localEndpoint = path.localEndpoint, case .hostPort(_, let endpointPort) = localEndpoint {
+                                portVal = endpointPort.rawValue
                             }
                         default:
                             resolvedHost = name
@@ -856,8 +856,8 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
                         case .service(let sName, _, let sDomain, _):
                             let cleanDomain = sDomain.isEmpty ? "local" : (sDomain.hasSuffix(".") ? String(sDomain.dropLast()) : sDomain)
                             resolvedHost = "\(sName).\(cleanDomain)"
-                            if let localEndpoint = conn.currentPath?.localEndpoint, case .hostPort(_, let p) = localEndpoint {
-                                portVal = p.rawValue
+                            if let localEndpoint = conn.currentPath?.localEndpoint, case .hostPort(_, let endpointPort) = localEndpoint {
+                                portVal = endpointPort.rawValue
                             }
                         default:
                             resolvedHost = name

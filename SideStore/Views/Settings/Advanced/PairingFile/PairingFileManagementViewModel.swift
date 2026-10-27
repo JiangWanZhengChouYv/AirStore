@@ -24,7 +24,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
 
         public var id: String {
             switch self {
-            case .deleteConfirmation(let p): return "delete_\(p.rawValue)"
+            case .deleteConfirmation(let pending): return "delete_\(pending.rawValue)"
             case .resetConfirmation: return "reset"
             case .resetCompleted: return "resetCompleted"
             case .importError(let msg): return "importError_\(msg)"
