@@ -39,7 +39,7 @@ OP_COPY, OP_INSERT = 0, 1
 
 ASBU_MAGIC = b"ASBU"
 ASBU_VERSION = 1
-ENTRY = struct.Struct("<BHHQ")
+ENTRY = struct.Struct("<BHBQ")   # flags pathLen execBit contentLen
 
 MIN_MATCH = 24        # shorter matches cost more in instructions than in literals
 FINGERPRINT = 16      # bytes of the base indexed for lookup
@@ -153,7 +153,12 @@ def pack_bundle(app_dir):
     metadata, fixed ordering: the only thing that may differ between two packs is content.
 
     magic(4) version(1) entryCount(u64), then per entry sorted by relative path bytes:
-    flags u8 (0 dir / 1 file / 2 symlink) pathLen u16 path mode u16 contentLen u64 [content]
+    flags u8 (0 dir / 1 file / 2 symlink) pathLen u16 execBit u8 contentLen u64 [content]
+
+    The executable bit is the only permission carried. CI packs the bundle out of the Xcode archive
+    while the device packs what its own unzip produced, and those trees can differ in mode bits that
+    nothing cares about -- carrying the full mode would then change baseSHA for an unchanged app and
+    every delta would silently fall back to the full download.
     """
     root = app_dir.rstrip("/")
     entries = []
@@ -162,16 +167,16 @@ def pack_bundle(app_dir):
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, root).encode()
             if os.path.islink(full):
-                entries.append((2, rel, os.stat(full, follow_symlinks=False).st_mode & 0o7777,
+                entries.append((2, rel, 1 if os.stat(full, follow_symlinks=False).st_mode & 0o111 else 0,
                                 os.readlink(full).encode()))
             elif os.path.isdir(full):
-                entries.append((0, rel, os.stat(full).st_mode & 0o7777, b""))
+                entries.append((0, rel, 1, b""))
             else:
-                entries.append((1, rel, os.stat(full).st_mode & 0o7777, open(full, "rb").read()))
+                entries.append((1, rel, 1 if os.stat(full).st_mode & 0o111 else 0, open(full, "rb").read()))
     entries.sort(key=lambda e: e[1])
     out = bytearray(struct.pack("<4sBQ", ASBU_MAGIC, ASBU_VERSION, len(entries)))
-    for flags, rel, mode, content in entries:
-        out += ENTRY.pack(flags, len(rel), mode, len(content))
+    for flags, rel, exec_bit, content in entries:
+        out += ENTRY.pack(flags, len(rel), exec_bit, len(content))
         out += rel + content
     return bytes(out)
 
@@ -183,7 +188,7 @@ def unpack_bundle(stream, out_dir):
     os.makedirs(out_dir, exist_ok=True)
     off = struct.calcsize("<4sBQ")
     for _ in range(count):
-        flags, path_len, mode, content_len = struct.unpack_from("<BHHQ", stream, off)
+        flags, path_len, exec_bit, content_len = struct.unpack_from(ENTRY.format, stream, off)
         off += ENTRY.size
         rel = stream[off:off + path_len].decode()
         off += path_len
@@ -199,7 +204,7 @@ def unpack_bundle(stream, out_dir):
             os.makedirs(os.path.dirname(full), exist_ok=True)
             with open(full, "wb") as fh:
                 fh.write(content)
-            os.chmod(full, mode)
+            os.chmod(full, 0o755 if exec_bit else 0o644)
     return count
 
 

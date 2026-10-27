@@ -15499,6 +15499,17 @@
           }
         }
       }
+    },
+    "Incremental Updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "增量更新"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

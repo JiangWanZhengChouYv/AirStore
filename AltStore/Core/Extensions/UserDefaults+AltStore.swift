@@ -138,6 +138,11 @@ public extension UserDefaults
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
     }
+    // Unset reads false, which is the point: the delta path is opt-in until it has been lived with.
+    @objc var isIncrementalUpdateEnabled: Bool {
+        get { self.bool(forKey: #function) }
+        set { self.set(newValue, forKey: #function) }
+    }
     @objc var isInstallConfirmationEnabled: Bool {
         get {
             guard self.object(forKey: #function) != nil else { return true }

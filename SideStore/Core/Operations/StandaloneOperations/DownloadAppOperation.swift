@@ -145,8 +145,38 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         // file with the wrong bytes. Checking the hash per candidate sends those to the next route
         // instead of failing the install later.
         let expectedSHA256: String? = $app.perform { object in (object as? AppVersion)?.sha256 }
+        let appVersion = app as? AppVersion
 
-        let appBundle = try await downloadIPA(from: sourceURL, expectedSHA256: expectedSHA256)
+        let appBundle: ALTApplication
+
+        if UserDefaults.standard.isIncrementalUpdateEnabled, let appVersion,
+           let patchURL = BundleDelta.patchURL(forPackageAt: sourceURL)
+        {
+            do
+            {
+                appBundle = try await self.downloadViaDelta(patchURL: patchURL, appVersion: appVersion)
+            }
+            catch
+            {
+                // Everything from a missing base to a stale patch is normal -- the app was installed
+                // from a computer, the rolling release skipped a build -- so a delta failure is not an
+                // error the user sees, it is the old behaviour.
+                debugLog("[DownloadAppOperation] Delta not usable for \(self.context.bundleIdentifier) (\(error)); downloading the full package")
+                appBundle = try await self.downloadIPA(from: sourceURL, expectedSHA256: expectedSHA256)
+            }
+        }
+        else
+        {
+            appBundle = try await self.downloadIPA(from: sourceURL, expectedSHA256: expectedSHA256)
+        }
+
+        if UserDefaults.standard.isIncrementalUpdateEnabled
+        {
+            // Cache the unsigned bundle for the next delta. This has to be now rather than after
+            // installing, because signing rewrites the executable, drops in the provisioning profile
+            // and regenerates the signatures, and CI builds its base from the unsigned archive.
+            try? BundleDelta.remember(bundleAt: appBundle.fileURL, forBundleID: self.context.bundleIdentifier)
+        }
         
         if self.context.bundleIdentifier == StoreApp.dolphinAppID, self.context.bundleIdentifier != appBundle.bundleIdentifier {
             // Manually update the app's bundle identifier to match the one specified in the source.
@@ -228,6 +258,27 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             }
         }
 
+        return appBundle
+    }
+    
+    /// Rebuild this package from the cached base plus the delta that sits beside it on the same
+    /// release. Any doubt at all throws, and the caller answers by downloading the full package.
+    private func downloadViaDelta(patchURL: URL, appVersion: AppVersion) async throws -> ALTApplication
+    {
+        let patchFile = try await self.downloadFile(from: patchURL, expectedSHA256: nil)
+        defer { try? FileManager.default.removeItem(at: patchFile) }
+
+        let directory = self.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        let bundleURL = try BundleDelta.restore(bundleID: self.context.bundleIdentifier, fromPatchAt: patchFile,
+                                                 into: directory, expectingVersion: appVersion.version)
+        guard let appBundle = ALTApplication(fileURL: bundleURL) else {
+            throw BundleDeltaError.identity("could not read \(bundleURL.lastPathComponent) as an app bundle")
+        }
+
+        let bytes = (try? FileManager.default.attributesOfItem(atPath: patchFile.path)[.size] as? Int64) ?? 0
+        debugLog("[DownloadAppOperation] Assembled \(appVersion.version) for \(self.context.bundleIdentifier) from a \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)) delta")
         return appBundle
     }
     
