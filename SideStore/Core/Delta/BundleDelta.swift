@@ -102,18 +102,25 @@ struct BundleDelta
     }
     
     /// The patch rides the same release as the package it applies to, found by convention so neither
-    /// the feed schema nor CoreData has to carry another field.
+    /// the feed schema nor CoreData has to carry another field: same release tag, same name, `.patch`
+    /// instead of `.ipa`. Naming it after the version means the pair for every build stays on the
+    /// release together, so a package can never be served with someone else's patch.
     static func patchURL(forPackageAt packageURL: URL) -> URL?
     {
         let marker = "/releases/download/"
         guard packageURL.host?.hasSuffix("github.com") == true,
               packageURL.pathExtension.lowercased() == "ipa",
-              let range = packageURL.path.range(of: marker),
-              let tag = packageURL.path[range.upperBound...].split(separator: "/").first,
-              tag.isEmpty == false else { return nil }
+              let range = packageURL.path.range(of: marker) else { return nil }
+        
+        // Past the marker a release URL has exactly two parts left: the tag it belongs to and the
+        // asset itself. Anything else is not a package on a release, and inventing a URL from it
+        // would only hide the fact that this build has no patch.
+        let tail = packageURL.path[range.upperBound...].split(separator: "/")
+        guard tail.count >= 2, let tag = tail.first, let fileName = tail.last else { return nil }
         
         guard var components = URLComponents(url: packageURL, resolvingAgainstBaseURL: false) else { return nil }
-        components.path = String(packageURL.path[..<range.upperBound]) + tag + "/AirStore.patch"
+        let stem = String(fileName.dropLast(packageURL.pathExtension.count + 1))
+        components.path = String(packageURL.path[..<range.upperBound]) + tag + "/" + stem + ".patch"
         return components.url
     }
     
@@ -174,7 +181,9 @@ struct BundleDelta
         try fm.moveItem(at: staging, to: destination)
         
         let size = (try? fm.attributesOfItem(atPath: destination.path)[.size] as? Int64) ?? 0
-        verboseLog("[BundleDelta] cached base for \(bundleID): \(entries.count) entries, \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))")
+        // Debug rather than verbose: whether a base exists is the one thing that decides if the next
+        // update can be a delta, and it should be readable in the log without turning on extra output.
+        debugLog("[BundleDelta] cached base for \(bundleID): \(entries.count) entries, \(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))")
     }
     
     private static func collectEntries(in bundleURL: URL) -> [Entry]

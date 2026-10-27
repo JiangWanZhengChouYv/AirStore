@@ -41,7 +41,7 @@ public enum OperationError: LocalizedError, CustomNSError, Sendable, Equatable {
     case openAppFailed(name: String)
     case pairingNotComplete(reason: String)
     case pledgeInactive(appName: String)
-    case SideJITIssue(error: String)
+    case sideJITIssue(error: String)
     case unknownUDID(reason: String)
 
     public static var cancelled: CancellationError { CancellationError() }
@@ -111,7 +111,7 @@ public enum OperationError: LocalizedError, CustomNSError, Sendable, Equatable {
             return "Pairing Required: \(reason)\n\nWithout a valid pairing file, SideStore operations cannot connect to your device. Please pair your device or import a valid pairing file."
         case .pledgeInactive(let appName):
             return "Your pledge is no longer active. Please renew it to continue using \(appName) normally."
-        case .SideJITIssue(let error):
+        case .sideJITIssue(let error):
             return "An error occurred while using SideJIT: \(error)"
         case .unknownUDID(let reason):
             return "SideStore could not determine this device's UDID: \(reason)\n\nPlease replace your pairing using iloader or idevice_pair."

@@ -84,10 +84,10 @@ final class EnableJITOperation: BaseStandaloneOperation<StandaloneOperationConte
                            let endRange = message.range(of: "</p>", range: startRange.upperBound..<message.endIndex) {
                             let pContent = message[startRange.upperBound..<endRange.lowerBound]
                             self.debugLog(message + " + " + String(pContent))
-                            throw OperationError.SideJITIssue(error: String(pContent))
+                            throw OperationError.sideJITIssue(error: String(pContent))
                         } else {
                             self.debugLog(message)
-                            throw OperationError.SideJITIssue(error: message)
+                            throw OperationError.sideJITIssue(error: message)
                         }
                     }
                 } else {
