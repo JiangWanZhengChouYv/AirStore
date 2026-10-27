@@ -193,18 +193,25 @@ struct BundleDelta
             
             var info = stat()
             guard lstat(url.path, &info) == 0 else { continue }
+            // st_mode is mode_t (UInt16) on Darwin, so compare through Int32 rather than matching
+            // S_IF* constants directly -- they are UInt16 and will not pattern-match an Int32.
             let fileType = Int32(info.st_mode & S_IFMT)
             
-            switch fileType
+            if fileType == Int32(S_IFDIR)
             {
-            case S_IFDIR:
                 entries.append(Entry(kind: .directory, path: relative, executable: true, size: 0, url: url))
-            case S_IFLNK:
+            }
+            else if fileType == Int32(S_IFLNK)
+            {
                 let target = (try? fm.destinationOfSymbolicLink(atPath: url.path)) ?? ""
                 entries.append(Entry(kind: .symlink, path: relative, executable: false, size: UInt64(target.utf8.count), url: url))
-            case S_IFREG:
+            }
+            else if fileType == Int32(S_IFREG)
+            {
                 entries.append(Entry(kind: .file, path: relative, executable: (info.st_mode & 0o111) != 0, size: UInt64(info.st_size), url: url))
-            default:
+            }
+            else
+            {
                 // Sockets, FIFOs and devices have no place in a bundle; skip rather than write
                 // something the reader would misinterpret.
                 verboseLog("[BundleDelta] skipping non-file entry \(relative)")
@@ -227,7 +234,7 @@ struct BundleDelta
         
         let patch = try Data(contentsOf: patchURL)
         guard patch.count > littleEndianThreshold else { throw BundleDeltaError.truncated }
-        guard Array(patch.prefix(4)) == Data(patchMagic), patch[4] == patchVersion else {
+        guard Array(patch.prefix(4)) == patchMagic, patch[4] == patchVersion else {
             throw BundleDeltaError.badMagic("not ASDP2")
         }
         
@@ -323,7 +330,7 @@ struct BundleDelta
         defer { try? handle.close() }
         
         let header = handle.readData(ofLength: asbuHeaderSize)
-        guard header.count == asbuHeaderSize, Array(header.prefix(4)) == Data(asbuMagic) else { throw BundleDeltaError.badMagic("not ASBU") }
+        guard header.count == asbuHeaderSize, Array(header.prefix(4)) == asbuMagic else { throw BundleDeltaError.badMagic("not ASBU") }
         guard header[4] == asbuVersion else { throw BundleDeltaError.badMagic("unsupported ASBU version \(header[4])") }
         let entryCount = Int(readU64(header, 5))
         
