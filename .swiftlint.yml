@@ -40,3 +40,22 @@ line_length:
 # file by file instead of excluded here, because rule-level `excluded` does not apply to type_name
 # either in SwiftLint 0.65.1 (tested: the eight kept reporting through the path), and a directory
 # level exclusion would also hide the force casts those files contain.
+
+type_body_length:
+  warning: 500
+  # Default is 350. This app's shape is inherited from upstream and is not accidental: one SwiftUI
+  # view per file whose `body` is a Form of a dozen settings rows, and one manager per class whose
+  # restore/fetch logic belongs together. 19 types sat above 350 and only four above 900 -- clearing
+  # the other fifteen would mean parking members in same-file extensions to move a number, which
+  # reads as a smaller type without making anyone easier to review. 900 is where a body stops being
+  # long and starts being unreviewable; those four stay red and get split when someone next has a
+  # reason to open the file.
+  error: 900
+
+file_length:
+  warning: 1200
+  # Default is 1000, which six files exceed -- five of them by only 50 to 170 lines, i.e. a threshold
+  # artifact rather than six problems. MyAppsViewController at 2949 lines is the one that genuinely
+  # cannot be reviewed as a whole, so the error line is 1500: it keeps naming that file and drops the
+  # five that are one screen over the line.
+  error: 1500
