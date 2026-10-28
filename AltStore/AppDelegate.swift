@@ -503,7 +503,12 @@ private extension AppDelegate
             {
                 let (sources, context) = try result.get()
                 
-                let previousUpdatesFetchRequest = InstalledApp.supportedUpdatesFetchRequest() as NSFetchRequest<NSFetchRequestResult>
+                // Left as a force cast on purpose, and it is counted in SwiftLint rather than suppressed:
+                // NSFetchRequest is not covariant, so reaching the untyped result type needs a cast where
+                // the plain `as` two lines below is a no-op (NewsItem.fetchRequest() already hands back
+                // the untyped one). Building the request by hand would mean copying everything
+                // supportedUpdatesFetchRequest() sets, and missing one is silent.
+                let previousUpdatesFetchRequest = InstalledApp.supportedUpdatesFetchRequest() as! NSFetchRequest<NSFetchRequestResult>
                 previousUpdatesFetchRequest.includesPendingChanges = false
                 previousUpdatesFetchRequest.resultType = .dictionaryResultType
                 previousUpdatesFetchRequest.propertiesToFetch = [#keyPath(InstalledApp.bundleIdentifier),
