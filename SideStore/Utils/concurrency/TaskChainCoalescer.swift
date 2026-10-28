@@ -21,7 +21,7 @@ actor TaskChainCoalescer {
     func coalesce<T: Sendable>(key: String, _ operation: @escaping @Sendable () async throws -> T) async throws -> T {
         if let existingTask = activeTasks[key] {
             let result = try await existingTask.value
-            return result as! T
+            return try coalescedResult(result, key: key)
         }
         
         let newTask = Task<Any, Error> {
@@ -36,7 +36,7 @@ actor TaskChainCoalescer {
         }
         
         let result = try await newTask.value
-        return result as! T
+        return try coalescedResult(result, key: key)
     }
     
     private func removeTask(key: String) {
@@ -74,7 +74,7 @@ actor TaskChainCoalescerWithProgress {
                 existing.progressHandlers.append(onProgress)
             }
             let result = try await existing.task.value
-            return result as! T
+            return try coalescedResult(result, key: key)
         }
         
         var initialHandlers = [@Sendable (Int64) -> Void]()
@@ -98,7 +98,7 @@ actor TaskChainCoalescerWithProgress {
         }
         
         let result = try await newTask.value
-        return result as! T
+        return try coalescedResult(result, key: key)
     }
     
     func broadcastProgress(key: String, progress: Int64) {
@@ -111,4 +111,27 @@ actor TaskChainCoalescerWithProgress {
     private func removeTask(key: String) {
         activeTasks.removeValue(forKey: key)
     }
+}
+
+enum CoalescedTaskError: Error, CustomStringConvertible
+{
+    case typeMismatch(key: String, actual: Any.Type)
+
+    var description: String
+    {
+        switch self
+        {
+        case .typeMismatch(key: let key, actual: let actual):
+            return "Two callers coalesced under key '\(key)' with different result types; the shared task produced \(actual)."
+        }
+    }
+}
+
+// Results are stored type-erased, so a caller waiting on someone else's task only finds out at
+// this line that the shapes disagree. Throwing lets that caller take its own fallback path; the
+// force cast it replaces took down every coalesced caller with it, including the one that ran.
+private func coalescedResult<T>(_ value: Any, key: String) throws -> T
+{
+    guard let typed = value as? T else { throw CoalescedTaskError.typeMismatch(key: key, actual: type(of: value)) }
+    return typed
 }

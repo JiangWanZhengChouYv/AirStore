@@ -274,7 +274,16 @@ public class BaseEntity: NSManagedObject, Fetchable
         var predicates = [NSPredicate]()
         for (key, val) in keys {
             let unwrapped = self.unwrapJsonValue(val)
-            predicates.append(NSPredicate(format: "%K == %@", key, unwrapped as! CVarArg))
+            // These keys arrive from a source's JSON, so a nested object can land here -- and a
+            // dictionary is not a predicate argument. Rather than crash inside every caller's restore,
+            // treat an unusable key as what it effectively is: a record we cannot match, which is the
+            // same answer the fetch gives for a genuinely new one.
+            guard let argument = unwrapped as? CVarArg else
+            {
+                debugLog("[BaseEntity] fetchExisting for \(entityName): key '\(key)' of type \(type(of: unwrapped)) cannot be used in a predicate, treating as not found")
+                return nil
+            }
+            predicates.append(NSPredicate(format: "%K == %@", key, argument))
         }
         guard !predicates.isEmpty else {
             verboseLog("[BaseEntity] fetchExisting for \(entityName): empty lookup keys, returning nil")

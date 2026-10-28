@@ -15,7 +15,14 @@ public final class AuthManager: @unchecked Sendable {
     public static let shared = AuthManager()
     
     private var portalProxy: DeveloperPortalProxyWithAuth {
-        DeveloperPortalProxy.shared as! DeveloperPortalProxyWithAuth
+        // The auth-aware subclass is installed over DeveloperPortalProxy.shared during boot, and every
+        // call here needs it. There is no fallback that means anything -- without a proxy no sign-in
+        // can proceed -- so this names what is actually in place instead of leaving a bare cast to
+        // fail later inside whichever auth call touched it first.
+        guard let proxy = DeveloperPortalProxy.shared as? DeveloperPortalProxyWithAuth else {
+            fatalError("AuthManager needs DeveloperPortalProxy.shared to be DeveloperPortalProxyWithAuth, but it is \(type(of: DeveloperPortalProxy.shared)). The auth wrapper was never installed.")
+        }
+        return proxy
     }
     
     private init() {}

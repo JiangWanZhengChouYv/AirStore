@@ -503,7 +503,7 @@ private extension AppDelegate
             {
                 let (sources, context) = try result.get()
                 
-                let previousUpdatesFetchRequest = InstalledApp.supportedUpdatesFetchRequest() as! NSFetchRequest<NSFetchRequestResult>
+                let previousUpdatesFetchRequest = InstalledApp.supportedUpdatesFetchRequest() as NSFetchRequest<NSFetchRequestResult>
                 previousUpdatesFetchRequest.includesPendingChanges = false
                 previousUpdatesFetchRequest.resultType = .dictionaryResultType
                 previousUpdatesFetchRequest.propertiesToFetch = [#keyPath(InstalledApp.bundleIdentifier),
