@@ -18,6 +18,8 @@ enum BundleDeltaError: Error, CustomStringConvertible
     case truncated
     case inflateFailed
     case baseTooShort(offset: UInt64, length: UInt64, size: UInt64)
+    case staleBase(cached: String, wants: String)
+    case shortReassembly(produced: UInt64, expected: UInt64)
     case shaMismatch(expected: String, actual: String)
     case identity(String)
     
@@ -31,6 +33,10 @@ enum BundleDeltaError: Error, CustomStringConvertible
         case .truncated: return "stream is truncated"
         case .inflateFailed: return "patch body did not decompress"
         case .baseTooShort(let offset, let length, let size): return "patch wants \(length) bytes at offset \(offset) but the base is only \(size)"
+        // Three separate failures used to share one sentence, and it cost a debugging round: the
+        // phone's byte-perfect reassembly was reported the same way a stale baseline is.
+        case .staleBase(cached: let cached, wants: let wants): return "phone is not on the build this patch was cut for: cached base is \(cached.prefix(12)), the patch wants \(wants.prefix(12))"
+        case .shortReassembly(produced: let produced, expected: let expected): return "reassembly stopped at \(produced) bytes of \(expected)"
         case .shaMismatch(expected: let expected, actual: let actual): return "reassembled SHA-256 is \(actual.prefix(12)), expected \(expected.prefix(12))"
         case .identity(let reason): return "rebuilt bundle failed its identity check: \(reason)"
         }
@@ -256,9 +262,10 @@ struct BundleDelta
         
         // A stale or plain wrong base is normal (the user updated through a computer, or the rolling
         // release skipped a build), so this check has to be cheap and it has to fail loudly enough
-        // that the caller falls back.
-        guard sha256(of: baseURL) == baseSHA else {
-            throw BundleDeltaError.shaMismatch(expected: hex(Data(baseSHA)), actual: hex(sha256(of: baseURL)))
+        // that the caller falls back. The base is ~52 MB, so hash it once and reuse it for the message.
+        let cachedBaseSHA = sha256(of: baseURL)
+        guard cachedBaseSHA == baseSHA else {
+            throw BundleDeltaError.staleBase(cached: hex(Data(cachedBaseSHA)), wants: hex(Data(baseSHA)))
         }
         
         let body = try inflate(Array(patch[patchHeaderSize..<patch.count]), toSize: rawBodyLength)
@@ -318,7 +325,7 @@ struct BundleDelta
             }
         }
         
-        guard produced == targetLength else { throw BundleDeltaError.shaMismatch(expected: hex(Data(targetSHA)), actual: "only \(produced) of \(targetLength) bytes") }
+        guard produced == targetLength else { throw BundleDeltaError.shortReassembly(produced: produced, expected: targetLength) }
         let actualSHA = hex(Data(digest.finalize()))
         guard actualSHA == hex(Data(targetSHA)) else { throw BundleDeltaError.shaMismatch(expected: hex(Data(targetSHA)), actual: actualSHA) }
         try? out.close()
