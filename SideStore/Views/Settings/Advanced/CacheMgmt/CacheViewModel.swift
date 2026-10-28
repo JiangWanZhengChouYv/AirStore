@@ -10,6 +10,16 @@ import SwiftUI
 import CoreData
 import SideSign
 
+// A dictionary value with five unlabeled members is only readable at the point where it is built.
+// Sendable because the scan below hands it to a detached task.
+private struct DBAppInfo: Sendable {
+    var name: String
+    var bundleID: String
+    var fileURL: URL
+    var alternateIconURL: URL
+    var hasAlternateIcon: Bool
+}
+
 struct CacheItem: Identifiable, Equatable {
     let id: String
     let name: String
@@ -60,13 +70,13 @@ class CacheViewModel: ObservableObject {
         
         // Fetch all database apps to map display names & icons
         let context = DatabaseManager.shared.viewContext
-        var dbAppsByFingerprint: [String: (name: String, bundleID: String, fileURL: URL, alternateIconURL: URL, hasAlternateIcon: Bool)] = [:]
+        var dbAppsByFingerprint: [String: DBAppInfo] = [:]
         
         context.performAndWait {
             let apps = InstalledApp.all(in: context)
             for app in apps {
                 guard let fingerprint = app.appBundleFingerprint else { continue }
-                dbAppsByFingerprint[fingerprint] = (
+                dbAppsByFingerprint[fingerprint] = DBAppInfo(
                     name: app.name,
                     bundleID: app.bundleIdentifier,
                     fileURL: app.fileURL,

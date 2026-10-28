@@ -184,14 +184,16 @@ final class HealthCheckViewModel: ObservableObject {
         }
     }
     
-    typealias CoreRequirementStatuses = (
-        netSat: Bool?,
-        vpnSat: Bool?,
-        ipsecSat: Bool?,
-        pingSat: Bool?,
-        pairingSat: Bool?,
-        ddiSat: Bool?
-    )
+    // Six `Bool?` in a row is a shape nobody can read positionally, and the consumer addresses every
+    // field by name anyway. Defaults on nil keep the "nothing checked yet" returns readable.
+    struct CoreRequirementStatuses: Sendable {
+        var netSat: Bool? = nil
+        var vpnSat: Bool? = nil
+        var ipsecSat: Bool? = nil
+        var pingSat: Bool? = nil
+        var pairingSat: Bool? = nil
+        var ddiSat: Bool? = nil
+    }
 
     nonisolated private func computeStatuses(
         _ metrics: HealthCheckMetrics
@@ -207,7 +209,7 @@ final class HealthCheckViewModel: ObservableObject {
             let isPairingLoaded = minimuxer.core.isPairingFileLoaded
             let pairingSat: Bool? = metrics.pairingVerified ? true : (isPairingLoaded ? nil : false)
             let ddiSat = metrics.ddi
-            return (netSat, vpnSat, ipsecSat, pingSat, pairingSat, ddiSat)
+            return CoreRequirementStatuses(netSat: netSat, vpnSat: vpnSat, ipsecSat: ipsecSat, pingSat: pingSat, pairingSat: pairingSat, ddiSat: ddiSat)
 
         case .failure(let error):
             var pingSat: Bool? = metrics.pingSuccess
@@ -217,11 +219,11 @@ final class HealthCheckViewModel: ObservableObject {
 
             switch error {
             case .noConnection:
-                return (false, nil, nil, nil, nil, nil)
+                return CoreRequirementStatuses(netSat: false)
             case .notStarted, .pairingNotLoaded:
-                return (nil, nil, nil, nil, nil, nil)
+                return CoreRequirementStatuses()
             case .noVPN, .invalidVPN:
-                return (netSat, false, nil, nil, nil, nil)
+                return CoreRequirementStatuses(netSat: netSat, vpnSat: false)
             case .noDevice, .notReachable:
                 pingSat = false
                 pairingSat = nil
@@ -237,7 +239,7 @@ final class HealthCheckViewModel: ObservableObject {
                 break
             }
 
-            return (netSat, vpnSat, ipsecSat, pingSat, pairingSat, ddiSat)
+            return CoreRequirementStatuses(netSat: netSat, vpnSat: vpnSat, ipsecSat: ipsecSat, pingSat: pingSat, pairingSat: pairingSat, ddiSat: ddiSat)
         }
     }
     

@@ -35,10 +35,20 @@ final class ScheduleExpirationWarningNotificationOperation: BaseStandaloneOperat
             expirationDate = installedApp.expirationDate
         }
 
-        let milestones: [(id: String, timeBeforeExp: TimeInterval, title: String, body: String)] = [
-            ("24h", 24 * 60 * 60, "SideStore Expiring Soon", "SideStore will expire in 24 hours. Open the app and refresh it to prevent it from expiring."),
-            ("6h",   6 * 60 * 60, "SideStore Expiring Extremely Soon", "SideStore will expire in 6 hours! Refresh now to prevent expiration."),
-            ("0h",   0,           "SideStore Expired", "SideStore has expired. Please refresh or reinstall the app.")
+        // Four unlabeled strings in a row read as noise; the loop below already calls them
+        // milestone.id / .title / .body.
+        struct Milestone
+        {
+            let id: String
+            let timeBeforeExp: TimeInterval
+            let title: String
+            let body: String
+        }
+
+        let milestones: [Milestone] = [
+            Milestone(id: "24h", timeBeforeExp: 24 * 60 * 60, title: "SideStore Expiring Soon", body: "SideStore will expire in 24 hours. Open the app and refresh it to prevent it from expiring."),
+            Milestone(id: "6h", timeBeforeExp: 6 * 60 * 60, title: "SideStore Expiring Extremely Soon", body: "SideStore will expire in 6 hours! Refresh now to prevent expiration."),
+            Milestone(id: "0h", timeBeforeExp: 0, title: "SideStore Expired", body: "SideStore has expired. Please refresh or reinstall the app.")
         ]
 
         let allIdentifiers = milestones.map { "\(AppManager.expirationWarningNotificationID).\($0.id)" }
