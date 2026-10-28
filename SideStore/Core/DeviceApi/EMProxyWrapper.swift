@@ -9,17 +9,17 @@
 import Foundation
 import Minimuxer
 
-func startEMProxy(bind_addr: String = AppConstants.Proxy.serverURL) async throws {
-    debugLog("[SideStore] startEMProxy(\(bind_addr)) invoked")
+func startEMProxy(bindAddress: String = AppConstants.Proxy.serverURL) async throws {
+    debugLog("[SideStore] startEMProxy(\(bindAddress)) invoked")
     defer { debugLog("[SideStore] startEMProxy() completed") }
 
     #if targetEnvironment(simulator)
     debugLog("[SideStore] startEMProxy() is no-op on simulator")
     #else
-    let components = bind_addr.split(separator: ":")
+    let components = bindAddress.split(separator: ":")
     guard components.count >= 1 && components.count <= 2 else {
-        debugLog("[SideStore] startEMProxy() invalid bind_addr format: \(bind_addr)")
-        throw EMProxyError.invalidSocketAddress(bind_addr)
+        debugLog("[SideStore] startEMProxy() invalid bindAddress format: \(bindAddress)")
+        throw EMProxyError.invalidSocketAddress(bindAddress)
     }
 
     await bindConnectionConfig()

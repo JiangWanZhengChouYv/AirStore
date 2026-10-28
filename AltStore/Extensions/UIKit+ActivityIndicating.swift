@@ -73,9 +73,9 @@ internal final class ActivityIndicatingHelper: NSObject, ActivityIndicating {
             
             DispatchQueue.main.async {
                 if newValue {
-                    (self.indicatingObject as? _ActivityIndicating)?.startIndicatingActivity()
+                    (self.indicatingObject as? ActivityIndicatingObject)?.startIndicatingActivity()
                 } else {
-                    (self.indicatingObject as? _ActivityIndicating)?.stopIndicatingActivity()
+                    (self.indicatingObject as? ActivityIndicatingObject)?.stopIndicatingActivity()
                 }
             }
         }
@@ -109,7 +109,7 @@ internal final class ActivityIndicatingHelper: NSObject, ActivityIndicating {
     }
 }
 
-internal protocol _ActivityIndicating: AnyObject {
+internal protocol ActivityIndicatingObject: AnyObject {
     func startIndicatingActivity()
     func stopIndicatingActivity()
 }
@@ -129,7 +129,7 @@ extension NSObject {
     }
 }
 
-extension UIButton: _ActivityIndicating, ActivityIndicating {
+extension UIButton: ActivityIndicatingObject, ActivityIndicating {
     @objc open var isIndicatingActivity: Bool {
         get { return activityIndicatingHelper.isIndicatingActivity }
         set { activityIndicatingHelper.isIndicatingActivity = newValue }
@@ -205,7 +205,7 @@ extension UIButton: _ActivityIndicating, ActivityIndicating {
     }
 }
 
-extension UIBarButtonItem: _ActivityIndicating, ActivityIndicating {
+extension UIBarButtonItem: ActivityIndicatingObject, ActivityIndicating {
     public var isIndicatingActivity: Bool {
         get { return activityIndicatingHelper.isIndicatingActivity }
         set { activityIndicatingHelper.isIndicatingActivity = newValue }
@@ -260,7 +260,7 @@ extension UIBarButtonItem: _ActivityIndicating, ActivityIndicating {
     }
 }
 
-extension UIImageView: _ActivityIndicating, ActivityIndicating {
+extension UIImageView: ActivityIndicatingObject, ActivityIndicating {
     public var isIndicatingActivity: Bool {
         get { return activityIndicatingHelper.isIndicatingActivity }
         set { activityIndicatingHelper.isIndicatingActivity = newValue }
@@ -297,7 +297,7 @@ extension UIImageView: _ActivityIndicating, ActivityIndicating {
     }
 }
 
-extension UITextField: _ActivityIndicating, ActivityIndicating {
+extension UITextField: ActivityIndicatingObject, ActivityIndicating {
     public var isIndicatingActivity: Bool {
         get { return activityIndicatingHelper.isIndicatingActivity }
         set { activityIndicatingHelper.isIndicatingActivity = newValue }
@@ -355,7 +355,7 @@ extension UITextField: _ActivityIndicating, ActivityIndicating {
     }
 }
 
-extension UIApplication: _ActivityIndicating, ActivityIndicating {
+extension UIApplication: ActivityIndicatingObject, ActivityIndicating {
     public var isIndicatingActivity: Bool {
         get { return activityIndicatingHelper.isIndicatingActivity }
         set { activityIndicatingHelper.isIndicatingActivity = newValue }

@@ -6,6 +6,9 @@
 //  Copyright © 2025 SideStore. All rights reserved.
 //
 
+// swiftlint:disable type_name -- Core Data addresses this policy by its literal name inside the
+// mapping model's xcmapping.xml, and the `_1` in that name is what the rule rejects. Renaming it
+// would not fail the build; it would make migrations from those versions silently skip the policy.
 import CoreData
 
 @objc(ReleaseTrack17To17_1MigrationPolicy)

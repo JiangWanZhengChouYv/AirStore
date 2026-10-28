@@ -35,3 +35,8 @@ line_length:
 # `excluded` does not apply to identifier_name in SwiftLint 0.65.1 -- three path forms were tried
 # against a single file and all still reported the violations -- so those 20 sites carry inline
 # swiftlint:disable:next notes instead.
+
+# type_name is left on everywhere else. The eight migration-policy classes it flags are annotated
+# file by file instead of excluded here, because rule-level `excluded` does not apply to type_name
+# either in SwiftLint 0.65.1 (tested: the eight kept reporting through the path), and a directory
+# level exclusion would also hide the force casts those files contain.
