@@ -102,6 +102,17 @@ class MyAppsViewController: UICollectionViewController
         self.collectionView.dataSource = self.dataSource
         self.collectionView.prefetchDataSource = self.dataSource
         self.dataSource.contentView = self.collectionView
+
+        // This page only knows about an update once a source has been fetched, which otherwise
+        // happens at launch, from the Sources tab, or by pulling this list down -- so on a tall
+        // screen there was no way to ask "is there a new version?" without a scroll.
+        let checkForUpdatesItem = UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise"),
+                                                  style: .plain,
+                                                  target: self,
+                                                  action: #selector(checkForUpdatesTapped))
+        checkForUpdatesItem.accessibilityLabel = NSLocalizedString("Check for Updates", comment: "")
+        self.navigationItem.rightBarButtonItem = checkForUpdatesItem
+
         #if !os(tvOS)
         self.collectionView.dragDelegate = self
         self.collectionView.dropDelegate = self
@@ -859,6 +870,19 @@ private extension MyAppsViewController
         self.refresh(installedApp)
     }
     
+    // Wraps the same fetch the pull-to-refresh uses (performCheckForUpdates: re-entry guard, source
+    // merge, error toasts, update() at the end). Named apart from checkForUpdates because that name
+    // already exists twice here -- once per platform -- and #selector would not resolve otherwise.
+    @objc private func checkForUpdatesTapped()
+    {
+        guard !self.isCheckingForUpdates else { return }
+
+        self.navigationItem.rightBarButtonItem?.isIndicatingActivity = true
+        self.performCheckForUpdates { [weak self] in
+            self?.navigationItem.rightBarButtonItem?.isIndicatingActivity = false
+        }
+    }
+
     @IBAction func refreshAllApps(_ sender: UIBarButtonItem)
     {
         Task { @MainActor in
