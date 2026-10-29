@@ -232,9 +232,27 @@ jobs:
       - name: Purge the CDN copy of the feed
         run: |
           # jsDelivr caches a branch URL until told otherwise, so without this the app can keep
-          # reading a feed several builds old -- which is exactly what made an update card offer a
-          # build from the day before. The purge endpoint takes the same path as the CDN URL.
-          curl -fsS "https://purge.jsdelivr.net/gh/$GITHUB_REPOSITORY@develop-source/source/airstore-source.json" || true
+          # reading a feed several builds old -- which is what made an update card offer a build from
+          # the day before. Measured 2026-10-29 though: the purge endpoint answers "finished" and then
+          # keeps serving a file two builds old for 15+ minutes, and it ignores cache-busting query
+          # strings, so "we asked" is not the same as "it worked". Ask, then poll for two minutes and
+          # say out loud whether it actually took.
+          curl -fsS "https://purge.jsdelivr.net/gh/$GITHUB_REPOSITORY@develop-source/source/airstore-source.json" >/dev/null \
+            || echo "::warning::the purge request itself failed"
+          for attempt in 1 2 3 4 5 6 7 8; do
+            sleep 15
+            served=$(curl -fsS --max-time 20 \
+              "https://cdn.jsdelivr.net/gh/$GITHUB_REPOSITORY@develop-source/source/airstore-source.json" \
+              | python3 -c 'import json,sys;d=json.load(sys.stdin);print(next((c["releases"][0]["version"] for c in d["apps"][0]["releaseChannels"] if c["track"]=="develop"), ""))' 2>/dev/null || true)
+            if [ "$served" = "$VERSION" ]; then
+              echo "jsDelivr is serving $VERSION after ${attempt} checks"
+              exit 0
+            fi
+            echo "attempt $attempt: jsDelivr still on ${served:-unreadable}"
+          done
+          # Not a failure: since 3422e96d the app reads source JSON through live pass-through proxies
+          # first, so a stale CDN copy no longer decides what the phone gets to see.
+          echo "::warning::jsDelivr still not serving $VERSION after two minutes -- the app prefers the live proxies, so this is no longer fatal"
 
       - name: Upload the feed for debugging
         uses: actions/upload-artifact@v4
