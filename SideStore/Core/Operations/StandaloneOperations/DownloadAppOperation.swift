@@ -184,11 +184,15 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
             appBundle = try await self.downloadIPA(from: sourceURL, expectedSHA256: expectedSHA256)
         }
 
-        if UserDefaults.standard.isIncrementalUpdateEnabled
+        if UserDefaults.standard.isIncrementalUpdateEnabled || BundleDelta.hasBaseline(forBundleID: self.context.bundleIdentifier)
         {
             // Cache the bundle as it was extracted, before this app re-signs it with the user's own
             // certificate -- signing rewrites the executable, drops in the provisioning profile and
             // regenerates _CodeSignature, and CI cuts its base from the published package's bytes.
+            //
+            // A cache that already exists is kept fresh even with the toggle off: the next patch is
+            // cut against the build actually installed, so leaving the previous build's base behind
+            // would cost one full download to the stale-base fallback.
             do {
                 try BundleDelta.remember(bundleAt: appBundle.fileURL, forBundleID: self.context.bundleIdentifier)
             } catch {

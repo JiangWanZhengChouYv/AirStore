@@ -123,6 +123,12 @@ struct BundleDelta
         return "\(formatter.string(from: when)) · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
     }
     
+    /// Whether a base is already sitting on disk for this bundle id.
+    static func hasBaseline(forBundleID bundleID: String) -> Bool
+    {
+        FileManager.default.fileExists(atPath: cacheURL(forBundleID: bundleID).path)
+    }
+
     /// The patch rides the same release as the package it applies to, found by convention so neither
     /// the feed schema nor CoreData has to carry another field: same release tag, same name, `.patch`
     /// instead of `.ipa`. Naming it after the version means the pair for every build stays on the
