@@ -117,11 +117,14 @@ jobs:
       # delta's base, and it has to be the *unsigned* bundle: what lands on a phone gets re-signed
       # (embedding.mobileprovision, LC_CODE_SIGNATURE, _CodeSignature), so the device caches its
       # ASBU at unzip time, before signing, and only bytes produced the same way here will match it.
-      # Newest by asset id rather than by name, because the names now carry the version.
+      # Newest by upload order, read off the REST asset id. Do not use `gh release view --json assets`
+      # here: its id is a GraphQL node string (RA_kwDOVM69jc4pC5Wr and friends), so max_by compares
+      # characters instead of time and picked a build two behind the live one on 2026-10-29 -- which
+      # shipped a patch cut against a base no phone had. REST returns an increasing number.
       - name: Fetch the previous package for the delta
         run: |
           mkdir -p build/previous
-          previous=$(gh release view develop-latest --json assets --jq \
+          previous=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" --jq \
             '[.assets[] | select(.name | endswith(".ipa"))] | max_by(.id) | .name' 2>/dev/null || true)
           echo "base package: ${previous:-none}"
           if [ -n "$previous" ] && gh release download develop-latest --pattern "$previous" --dir build/previous --clobber; then
@@ -156,10 +159,13 @@ jobs:
 
       - name: Keep only the last few builds on the rolling release
         run: |
-          # Version names would otherwise pile up 30 MB per push, so the five newest pairs go and
+          # Version names would otherwise pile up 30 MB per push, so the five newest pairs stay and
           # everything older is pruned. Five is the horizon: a build you are still on has to stay
           # downloadable long enough to be the base of the patch that updates it.
-          gh release view develop-latest --json assets --jq \
+          # REST again, for the same reason as the delta step: sorting the GraphQL node strings can
+          # put the package uploaded seconds ago at the front of that list, and deleting it would
+          # leave the feed pointing at an asset that is no longer there.
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" --jq \
             '[.assets[] | select((.name | endswith(".ipa")) or (.name | endswith(".patch")))]
              | sort_by(.id) | .[0:-10] | .[].name' 2>/dev/null | while read -r stale; do
             echo "pruning $stale"
