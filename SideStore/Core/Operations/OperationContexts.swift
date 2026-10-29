@@ -306,6 +306,11 @@ class InstallAppOperationContext: PipelineOperationContext
     }()
 
     var ipaURL: URL?
+
+    // True when DownloadAppOperation rebuilt the bundle from a delta instead of unpacking a
+    // package. Nothing downstream can compare against a package that was never on disk.
+    var assembledFromDelta = false
+
     var resignedAppBundle: ALTApplication?
     var installedApp: InstalledApp?
     var appBundleFingerprint: String?

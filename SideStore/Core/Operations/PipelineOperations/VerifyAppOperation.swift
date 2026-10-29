@@ -78,24 +78,32 @@ final class VerifyAppOperation: BasePipelineOperation<InstallAppOperationContext
             return false
         }
         
-        guard let ipaURL = context.ipaURL else {
-            throw OperationError.invalidParameters("Missing IPA URL for '\(appBundle.name)' in operation context")
-        }
-        self.setProgress(30)
-                            
-        // 3. Checksum (SHA-256) Verification
-        if UserDefaults.standard.isChecksumVerificationEnabled {
-            try await self.verifyHash(of: appBundle, at: ipaURL, matches: appVersion)
+        // 3 and 4 are checks against the downloaded package. A delta install never had one:
+        // BundleDelta.restore already matched the reassembled bytes against the patch header's
+        // SHA-256 and length, and its version against the feed, so both are covered -- and
+        // re-zipping the bundle could not reproduce the published archive's bytes or size anyway.
+        if context.assembledFromDelta {
+            debugLog("[VerifyAppOperation] \(appBundle.name) was assembled from a delta, so there is no package to check hash or size against.")
         } else {
-            debugLog("[VerifyAppOperation] Checksum verification disabled for \(appBundle.bundleIdentifier), skipping hash check.")
-        }
-        self.setProgress(50)
-        
-        // 4. File Size Verification
-        if UserDefaults.standard.isFileSizeVerificationEnabled {
-            try await self.verifyFileSize(of: appBundle, at: ipaURL, matches: appVersion)
-        } else {
-            debugLog("[VerifyAppOperation] File size verification disabled for \(appBundle.bundleIdentifier), skipping size check.")
+            guard let ipaURL = context.ipaURL else {
+                throw OperationError.invalidParameters("Missing IPA URL for '\(appBundle.name)' in operation context")
+            }
+            self.setProgress(30)
+                                
+            // 3. Checksum (SHA-256) Verification
+            if UserDefaults.standard.isChecksumVerificationEnabled {
+                try await self.verifyHash(of: appBundle, at: ipaURL, matches: appVersion)
+            } else {
+                debugLog("[VerifyAppOperation] Checksum verification disabled for \(appBundle.bundleIdentifier), skipping hash check.")
+            }
+            self.setProgress(50)
+            
+            // 4. File Size Verification
+            if UserDefaults.standard.isFileSizeVerificationEnabled {
+                try await self.verifyFileSize(of: appBundle, at: ipaURL, matches: appVersion)
+            } else {
+                debugLog("[VerifyAppOperation] File size verification disabled for \(appBundle.bundleIdentifier), skipping size check.")
+            }
         }
         self.setProgress(70)
         

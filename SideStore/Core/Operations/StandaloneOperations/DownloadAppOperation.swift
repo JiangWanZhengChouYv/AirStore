@@ -299,6 +299,7 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
         let bytes = (try? FileManager.default.attributesOfItem(atPath: patchFile.path)[.size] as? Int64) ?? 0
         debugLog("[DownloadAppOperation] Assembled \(appVersion.version) for \(self.context.bundleIdentifier) from a \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)) delta")
+        self.context.assembledFromDelta = true
         return appBundle
     }
     
