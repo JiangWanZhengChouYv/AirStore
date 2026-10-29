@@ -114,6 +114,17 @@ public extension URL
         {
             let cdn = self.mirroredThroughCDN
             let proxy = self.githubProxyURL
+            let ghfast = URL(string: "https://ghfast.top/" + self.absoluteString)
+            if self.pathExtension.lowercased() == "json" {
+                // A source's JSON is the control plane, so it has to be correct before it is fast.
+                // Measured 2026-10-29: jsDelivr still served a feed two builds old more than fifteen
+                // minutes after a purge that answered "finished", and it ignores cache-busting query
+                // strings, while both live pass-through proxies returned the current file. So for
+                // JSON the proxies go first and jsDelivr drops to the fallback it is still good at --
+                // a line that cannot reach them. Icons and screenshots keep jsDelivr first: a stale
+                // picture costs nothing, a stale feed makes the app swear there is no update.
+                return Self.distinct([proxy, ghfast, cdn, self])
+            }
             if self.pathExtension.lowercased() == "ipa" {
                 return Self.distinct([proxy, cdn, self])
             }
