@@ -132,7 +132,21 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
     
     private func download(@Managed _ app: AppProtocol) async throws -> ALTApplication {
         guard let sourceURL = self.sourceURL else {
-            throw OperationError.invalidParameters("Missing download URL for '\(self.appName)'.")
+            // A card update reaches this when PipelineRunner swaps InstalledApp -> StoreApp because
+            // the recorded bundle path is gone (which is what a self-update always does to it), and a
+            // StoreApp reads its URL off the first entry of _versions. Two sources can both carry
+            // com.SideStore.SideStore, so "which row did we get" is the whole question -- say it in
+            // the error instead of making someone reproduce it under a debugger.
+            let detail: String
+            if let storeApp = app as? StoreApp
+            {
+                detail = "type=StoreApp source=\(storeApp.source?.identifier ?? "nil") versions=\(storeApp._versions.count) deleted=\(storeApp.isDeleted)"
+            }
+            else
+            {
+                detail = "type=\(type(of: app))"
+            }
+            throw OperationError.invalidParameters("Missing download URL for '\(self.appName)' (\(detail)).")
         }
         if let appVersion = app as? AppVersion {
             // All downloads go through this path, and `app` is
