@@ -47,6 +47,31 @@ public extension URL
         return URL(string: "https://gh-proxy.com/" + self.absoluteString)
     }
 
+    /// The same release asset published to this repository's GitHub Pages site.
+    ///
+    /// CI mirrors every develop package and patch onto the `pages` branch, flat by file name, so the
+    /// version carried in the name is what keeps two builds apart. This is the only route that is
+    /// neither GitHub's own origin nor a third-party proxy someone else has to keep alive.
+    /// `github.com/OWNER/REPO/releases/download/TAG/FILE` -> `OWNER.github.io/REPO/FILE`.
+    var pagesURL: URL?
+    {
+        guard self.host?.lowercased() == "github.com",
+              let range = self.path.range(of: "/releases/download/") else { return nil }
+
+        let head = self.path[..<range.lowerBound].split(separator: "/").filter { $0.isEmpty == false }
+        let tail = self.path[range.upperBound...].split(separator: "/").filter { $0.isEmpty == false }
+        guard head.count == 2, let name = tail.last, name.isEmpty == false, name.contains(".") else { return nil }
+
+        var pages = URLComponents()
+        pages.scheme = "https"
+        // Hosts are case-insensitive but the owner is written with capitals in the remote URL, and a
+        // mixed-case host in a URL nobody can read off a log is its own little bug. The repository
+        // part stays as written: paths are case-sensitive.
+        pages.host = "\(head[0].lowercased()).github.io"
+        pages.path = "/\(head[1])/\(name)"
+        return pages.url
+    }
+
     /// Public mirrors of github.com, best first.
     ///
     /// jsDelivr refuses release assets (its GitHub file limit is 20 MB; this asset is 28 MB), so
@@ -66,10 +91,10 @@ public extension URL
 
     /// Every route worth trying for a downloadable GitHub file, best first.
     ///
-    /// Release assets keep the measured order above. Raw files use jsDelivr first because it is
-    /// the fast route for the small files sources normally point at; IPAs skip it because it
-    /// refuses anything over 20 MB. Archives and other github.com downloads go straight through
-    /// gh-proxy, then the origin.
+    /// Release assets go to this repository's Pages site first, then the measured proxies, then the
+    /// origin. Raw files use jsDelivr first because it is the fast route for the small files sources
+    /// normally point at; IPAs skip it because it refuses anything over 20 MB. Archives and other
+    /// github.com downloads go straight through gh-proxy, then the origin.
     var downloadCandidates: [URL]
     {
         guard let host = self.host?.lowercased() else { return [self] }
@@ -78,7 +103,7 @@ public extension URL
         {
             let primary = URL.releaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
             let lastResort = URL.lastResortReleaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
-            return Self.distinct(primary + [self] + lastResort)
+            return Self.distinct([self.pagesURL] + primary + [self] + lastResort)
         }
 
         if host == "raw.githubusercontent.com" || (host == "github.com" && self.path.contains("/raw/"))

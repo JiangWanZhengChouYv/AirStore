@@ -178,6 +178,40 @@ jobs:
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
             --out build/airstore-source.json
 
+      # The app asks this repository's Pages site for a release asset before it tries any
+      # third-party proxy, so the package and its patch have to exist there. Flat by file name -- the
+      # version in the name is what keeps two builds apart -- and only the five newest pairs are
+      # kept, which stays far inside the site's size guidance.
+      - name: Mirror the package onto the Pages branch
+        run: |
+          git fetch origin pages 2>/dev/null || true
+          if git rev-parse --verify -q origin/pages >/dev/null; then
+            git checkout -b pages origin/pages
+          else
+            git checkout --orphan pages
+            git rm -rf --cached . -q
+          fi
+
+          git add "$VERSION.ipa"
+          if [ -f "$VERSION.patch" ]; then git add "$VERSION.patch"; fi
+
+          for extension in ipa patch; do
+            total=$(ls -1 *."$extension" 2>/dev/null | wc -l | tr -d ' ')
+            drop=$((total - 5))
+            if [ "$drop" -gt 0 ]; then
+              ls -1 *."$extension" | sort | head -n "$drop" | while read -r stale; do
+                echo "dropping $stale"
+                git rm -q --cached "$stale"
+                rm -f "$stale"
+              done
+            fi
+          done
+
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q --allow-empty -m "Publish $VERSION"
+          git push origin pages
+
       - name: Commit the feed to its own branch
         run: |
           git fetch origin develop-source 2>/dev/null || true
