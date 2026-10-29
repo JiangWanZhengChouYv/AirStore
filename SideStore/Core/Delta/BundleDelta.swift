@@ -107,6 +107,22 @@ struct BundleDelta
         return cacheDirectory.appendingPathComponent(safe + ".asbu")
     }
     
+    /// Whether the next update can be a delta is decided by one file on disk, so the settings page
+    /// says what is there instead of making people read logs. Deliberately no hash: hashing 52 MB to
+    /// draw a row would block the main thread for the sake of a number nobody compares by eye.
+    static func baselineDescription(forBundleID bundleID: String) -> String?
+    {
+        let url = cacheURL(forBundleID: bundleID)
+        guard let attributes = try? FileManager.default.attributesOfItem(atPath: url.path) else { return nil }
+        
+        let bytes = (attributes[.size] as? NSNumber)?.int64Value ?? 0
+        let when = (attributes[.modificationDate] as? Date) ?? Date.distantPast
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM-dd HH:mm"
+        return "\(formatter.string(from: when)) · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))"
+    }
+    
     /// The patch rides the same release as the package it applies to, found by convention so neither
     /// the feed schema nor CoreData has to carry another field: same release tag, same name, `.patch`
     /// instead of `.ipa`. Naming it after the version means the pair for every build stays on the

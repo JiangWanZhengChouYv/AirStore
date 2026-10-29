@@ -172,10 +172,16 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
         if UserDefaults.standard.isIncrementalUpdateEnabled
         {
-            // Cache the unsigned bundle for the next delta. This has to be now rather than after
-            // installing, because signing rewrites the executable, drops in the provisioning profile
-            // and regenerates the signatures, and CI builds its base from the unsigned archive.
-            try? BundleDelta.remember(bundleAt: appBundle.fileURL, forBundleID: self.context.bundleIdentifier)
+            // Cache the bundle as it was extracted, before this app re-signs it with the user's own
+            // certificate -- signing rewrites the executable, drops in the provisioning profile and
+            // regenerates _CodeSignature, and CI cuts its base from the published package's bytes.
+            do {
+                try BundleDelta.remember(bundleAt: appBundle.fileURL, forBundleID: self.context.bundleIdentifier)
+            } catch {
+                // A baseline that failed to be written looks exactly like a delta that failed to
+                // apply from the outside, so say which one happened.
+                debugLog("[DownloadAppOperation] Could not cache the update baseline for \(self.context.bundleIdentifier): \(error)")
+            }
         }
         
         if self.context.bundleIdentifier == StoreApp.dolphinAppID, self.context.bundleIdentifier != appBundle.bundleIdentifier {

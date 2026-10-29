@@ -9153,6 +9153,17 @@
         }
       }
     },
+    "No update baseline cached. The next update downloads in full and writes one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有缓存更新基线。下一次更新会下载完整包并写入一份。"
+          }
+        }
+      }
+    },
     "No valid migration path exists to downgrade this database. Please update AirStore or reset your database.": {
       "extractionState": "manual",
       "localizations": {
@@ -14363,6 +14374,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "正在更新源…"
+          }
+        }
+      }
+    },
+    "Update baseline: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新基线：%@"
           }
         }
       }

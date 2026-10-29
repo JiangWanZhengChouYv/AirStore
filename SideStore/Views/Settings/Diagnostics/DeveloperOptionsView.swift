@@ -77,6 +77,15 @@ struct DeveloperOptionsView: View {
                             }
                         ))
                         
+                        // Whether the next update can be a delta depends on a file this page cannot
+                        // otherwise show, and "it fell back again" is unanswerable from outside.
+                        Text(deltaBaselineText)
+                            .font(.system(size: 12))
+                            .foregroundColor(Color.white.opacity(0.6))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 6)
+                        
                         divider
                         
                         toggleRow(title: "Rotate Logs on Startup", isOn: Binding(
@@ -818,6 +827,14 @@ struct DeveloperOptionsView: View {
             .fill(Color.settingsDivider)
             .frame(height: 0.5)
             .padding(.horizontal, 16)
+    }
+    
+    private var deltaBaselineText: String {
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+        guard let baseline = BundleDelta.baselineDescription(forBundleID: bundleID) else {
+            return NSLocalizedString("No update baseline cached. The next update downloads in full and writes one.", comment: "")
+        }
+        return String(format: NSLocalizedString("Update baseline: %@", comment: ""), baseline)
     }
     
     private func exportDatabase() {
