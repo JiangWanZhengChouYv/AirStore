@@ -91,10 +91,10 @@ public extension URL
 
     /// Every route worth trying for a downloadable GitHub file, best first.
     ///
-    /// Release assets go to this repository's Pages site first, then the measured proxies, then the
-    /// origin. Raw files use jsDelivr first because it is the fast route for the small files sources
-    /// normally point at; IPAs skip it because it refuses anything over 20 MB. Archives and other
-    /// github.com downloads go straight through gh-proxy, then the origin.
+    /// Release assets go through the measured proxies, then the origin, then the leftovers. Raw files
+    /// use jsDelivr first because it is the fast route for the small files sources normally point at;
+    /// IPAs skip it because it refuses anything over 20 MB. Archives and other github.com downloads
+    /// go straight through gh-proxy, then the origin.
     var downloadCandidates: [URL]
     {
         guard let host = self.host?.lowercased() else { return [self] }
@@ -103,7 +103,11 @@ public extension URL
         {
             let primary = URL.releaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
             let lastResort = URL.lastResortReleaseMirrors.compactMap { URL(string: $0 + self.absoluteString) }
-            return Self.distinct([self.pagesURL] + primary + [self] + lastResort)
+            // Pages was tried first for a day and measured 31 KB/s for an 8 MB range on the
+            // maintainer's line -- slower than the origin's 40 KB/s, and nowhere near what the same
+            // file does through a proxy (3 MB/s). It stays at the end as another fallback rather
+            // than as a speed play: when every proxy is down, the site still has the file.
+            return Self.distinct(primary + [self] + lastResort + [self.pagesURL])
         }
 
         if host == "raw.githubusercontent.com" || (host == "github.com" && self.path.contains("/raw/"))
