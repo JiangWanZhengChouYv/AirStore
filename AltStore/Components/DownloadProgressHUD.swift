@@ -23,6 +23,8 @@ final class DownloadProgressHUD
     private final class Card
     {
         let container = UIView()
+        let effect = UIVisualEffectView()
+        let fill = UIView()
         let title = UILabel()
         let percent = UILabel()
         let subtitle = UILabel()
@@ -30,6 +32,8 @@ final class DownloadProgressHUD
         let bar = UIProgressView(progressViewStyle: .bar)
         let chevron = UIImageView(image: UIImage(systemName: "chevron.down"))
 
+        var fillWidth: NSLayoutConstraint?
+        var isGlass = false
         var isExpanded = false
         var isOperation = false
         var lastBytes: Int64 = 0
@@ -99,6 +103,7 @@ final class DownloadProgressHUD
         guard let card = self.cards[id], card.isOperation else { return }
         let clamped = min(max(fraction, 0), 1)
         card.bar.setProgress(Float(clamped), animated: true)
+        self.setProgress(card, clamped)
         card.percent.text = "\(Int(clamped * 100))%"
         if let subtitle { card.subtitle.text = subtitle }
     }
@@ -129,6 +134,7 @@ final class DownloadProgressHUD
         {
             let fraction = min(max(Double(bytes) / Double(total), 0), 1)
             card.bar.setProgress(Float(fraction), animated: true)
+            self.setProgress(card, CGFloat(fraction))
             card.percent.text = "\(Int(fraction * 100))%"
         }
         else
@@ -224,24 +230,51 @@ final class DownloadProgressHUD
     private func configure(_ card: Card)
     {
         card.container.translatesAutoresizingMaskIntoConstraints = false
-        card.container.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.95)
         card.container.layer.cornerRadius = 16
         card.container.layer.masksToBounds = true
 
+        // On iOS 26 the card is glass and the theme colour moves into a fill that grows with the
+        // download; on every earlier release the card stays the solid colour it has always been, and
+        // a fill painted over a solid background of the same colour would show nothing at all.
+        let onGlass: Bool
+        if #available(iOS 26.0, *)
+        {
+            let glass = UIGlassEffect()
+            // A download card is a tap target for the mirror and URL lines, so the glass lifts under
+            // a finger. Operation cards only report, so they must not look pressable.
+            glass.isInteractive = !card.isOperation
+            card.effect.effect = glass
+            card.container.backgroundColor = nil
+            card.isGlass = true
+            onGlass = true
+
+            card.effect.translatesAutoresizingMaskIntoConstraints = false
+            card.container.addSubview(card.effect)
+
+            card.fill.translatesAutoresizingMaskIntoConstraints = false
+            card.fill.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.6)
+            card.effect.contentView.addSubview(card.fill)
+        }
+        else
+        {
+            card.container.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.95)
+            onGlass = false
+        }
+
         card.title.translatesAutoresizingMaskIntoConstraints = false
         card.title.font = .preferredFont(forTextStyle: .footnote)
-        card.title.textColor = .white
+        card.title.textColor = onGlass ? .label : .white
         card.title.lineBreakMode = .byTruncatingMiddle
 
         card.percent.translatesAutoresizingMaskIntoConstraints = false
         card.percent.font = .monospacedDigitSystemFont(ofSize: 13, weight: .semibold)
-        card.percent.textColor = .white
+        card.percent.textColor = onGlass ? .label : .white
         card.percent.textAlignment = .right
         card.percent.setContentHuggingPriority(.required, for: .horizontal)
 
         card.bar.translatesAutoresizingMaskIntoConstraints = false
-        card.bar.trackTintColor = UIColor.white.withAlphaComponent(0.3)
-        card.bar.progressTintColor = .white
+        card.bar.trackTintColor = onGlass ? UIColor.tertiaryLabel : UIColor.white.withAlphaComponent(0.3)
+        card.bar.progressTintColor = onGlass ? .altPrimary : .white
         card.bar.layer.cornerRadius = 2
         card.bar.layer.masksToBounds = true
         // UIProgressView has no height property; scaling it is the usual way to make the line read at
@@ -250,15 +283,15 @@ final class DownloadProgressHUD
 
         card.subtitle.translatesAutoresizingMaskIntoConstraints = false
         card.subtitle.font = .monospacedDigitSystemFont(ofSize: 11, weight: .regular)
-        card.subtitle.textColor = UIColor.white.withAlphaComponent(0.85)
+        card.subtitle.textColor = onGlass ? .secondaryLabel : UIColor.white.withAlphaComponent(0.85)
 
         card.details.translatesAutoresizingMaskIntoConstraints = false
         card.details.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
-        card.details.textColor = UIColor.white.withAlphaComponent(0.75)
+        card.details.textColor = onGlass ? .tertiaryLabel : UIColor.white.withAlphaComponent(0.75)
         card.details.numberOfLines = 0
 
         card.chevron.translatesAutoresizingMaskIntoConstraints = false
-        card.chevron.tintColor = UIColor.white.withAlphaComponent(0.6)
+        card.chevron.tintColor = onGlass ? .secondaryLabel : UIColor.white.withAlphaComponent(0.6)
         card.chevron.contentMode = .scaleAspectFit
 
         [card.title, card.percent, card.bar, card.subtitle, card.details, card.chevron].forEach(card.container.addSubview)
@@ -288,5 +321,32 @@ final class DownloadProgressHUD
             card.details.trailingAnchor.constraint(equalTo: card.container.trailingAnchor, constant: -12),
             card.details.bottomAnchor.constraint(equalTo: card.container.bottomAnchor, constant: -10)
         ])
+
+        if card.isGlass
+        {
+            let fillWidth = card.fill.widthAnchor.constraint(equalToConstant: 0)
+            card.fillWidth = fillWidth
+
+            NSLayoutConstraint.activate([
+                card.effect.topAnchor.constraint(equalTo: card.container.topAnchor),
+                card.effect.leadingAnchor.constraint(equalTo: card.container.leadingAnchor),
+                card.effect.trailingAnchor.constraint(equalTo: card.container.trailingAnchor),
+                card.effect.bottomAnchor.constraint(equalTo: card.container.bottomAnchor),
+
+                card.fill.topAnchor.constraint(equalTo: card.effect.contentView.topAnchor),
+                card.fill.leadingAnchor.constraint(equalTo: card.effect.contentView.leadingAnchor),
+                card.fill.bottomAnchor.constraint(equalTo: card.effect.contentView.bottomAnchor),
+                fillWidth
+            ])
+        }
+    }
+
+    /// The glass card fills itself with the theme colour from the left as the download arrives, so the
+    /// card is the meter rather than carrying one. A width constant rather than a proportional
+    /// constraint: an Auto Layout multiplier cannot be zero, and it cannot be edited once made.
+    private func setProgress(_ card: Card, _ fraction: CGFloat)
+    {
+        guard card.isGlass else { return }
+        card.fillWidth?.constant = card.effect.contentView.bounds.width * min(max(fraction, 0), 1)
     }
 }

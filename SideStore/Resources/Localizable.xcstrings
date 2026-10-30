@@ -12849,6 +12849,17 @@
         }
       }
     },
+    "Source": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "线路"
+          }
+        }
+      }
+    },
     "Source File": {
       "extractionState": "manual",
       "localizations": {
