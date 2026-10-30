@@ -252,7 +252,9 @@ final class DownloadProgressHUD
             card.container.addSubview(card.effect)
 
             card.fill.translatesAutoresizingMaskIntoConstraints = false
-            card.fill.backgroundColor = UIColor.altPrimary.withAlphaComponent(0.6)
+            // The theme colour is whatever the user dragged the picker to, so it goes through the same
+            // brightness clamp the rest of the app uses rather than being trusted to read on glass.
+            card.fill.backgroundColor = UIColor.altPrimary.adjustedForDisplay.withAlphaComponent(0.6)
             card.effect.contentView.addSubview(card.fill)
         }
         else
@@ -274,7 +276,7 @@ final class DownloadProgressHUD
 
         card.bar.translatesAutoresizingMaskIntoConstraints = false
         card.bar.trackTintColor = onGlass ? UIColor.tertiaryLabel : UIColor.white.withAlphaComponent(0.3)
-        card.bar.progressTintColor = onGlass ? .altPrimary : .white
+        card.bar.progressTintColor = onGlass ? UIColor.altPrimary.adjustedForDisplay : .white
         card.bar.layer.cornerRadius = 2
         card.bar.layer.masksToBounds = true
         // UIProgressView has no height property; scaling it is the usual way to make the line read at
@@ -344,9 +346,17 @@ final class DownloadProgressHUD
     /// The glass card fills itself with the theme colour from the left as the download arrives, so the
     /// card is the meter rather than carrying one. A width constant rather than a proportional
     /// constraint: an Auto Layout multiplier cannot be zero, and it cannot be edited once made.
+    ///
+    /// Every progress callback lands here with its own fraction, so this is continuous; the animation
+    /// only keeps the steps between callbacks from reading as steps. Laid out on the glass view alone
+    /// so the labels around it are not dragged through a layout pass three times a second.
     private func setProgress(_ card: Card, _ fraction: CGFloat)
     {
         guard card.isGlass else { return }
         card.fillWidth?.constant = card.effect.contentView.bounds.width * min(max(fraction, 0), 1)
+
+        UIView.animate(withDuration: 0.28, delay: 0, options: [.beginFromCurrentState, .allowUserInteraction, .curveEaseOut]) {
+            card.effect.contentView.layoutIfNeeded()
+        }
     }
 }

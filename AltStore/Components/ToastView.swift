@@ -100,6 +100,9 @@ class ToastView: UIControl
             let glass = UIGlassEffect()
             // A toast is a UIControl: tapping it opens the error log.
             glass.isInteractive = true
+            // The theme colour is the toast's identity, so it tints the glass instead of disappearing:
+            // clamped the same way as every other appearance of it, because the picker takes anything.
+            glass.tintColor = UIColor.altPrimary.adjustedForDisplay
             self.backgroundEffect.effect = glass
             self.backgroundEffect.translatesAutoresizingMaskIntoConstraints = false
             self.insertSubview(self.backgroundEffect, at: 0)
