@@ -76,6 +76,20 @@ class VibrantButton: UIButton
     
     private func initialize()
     {
+        // On iOS 26 the pill is glass, which also means no vibrancy: the .fill style exists to keep
+        // text legible inside a blur, and glass does that itself.
+        let glass: UIVisualEffect?
+        if #available(iOS 26.0, *)
+        {
+            let effect = UIGlassEffect()
+            effect.isInteractive = true
+            glass = effect
+        }
+        else
+        {
+            glass = nil
+        }
+
         #if !os(tvOS)
         let blurEffect = UIBlurEffect(style: .systemThinMaterial)
         let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect, style: .fill) // .fill is more vibrant than .secondaryLabel
@@ -87,7 +101,7 @@ class VibrantButton: UIButton
         if #available(iOS 15, *)
         {
             var backgroundConfig = UIBackgroundConfiguration.clear()
-            backgroundConfig.visualEffect = blurEffect
+            backgroundConfig.visualEffect = glass ?? blurEffect
 
             var config = UIButton.Configuration.plain()
             config.cornerStyle = .capsule
@@ -118,7 +132,7 @@ class VibrantButton: UIButton
             self.insertSubview(blurView, at: 0)
         }
         
-        self.vibrancyView.effect = vibrancyEffect
+        self.vibrancyView.effect = (glass == nil) ? vibrancyEffect : nil
         self.vibrancyView.isUserInteractionEnabled = false
         self.addSubview(self.vibrancyView, pinningEdgesWith: .zero)
     }
