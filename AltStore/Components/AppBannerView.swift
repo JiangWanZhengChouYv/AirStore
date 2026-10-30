@@ -373,6 +373,21 @@ private extension AppBannerView
         
         let tintColor = self.originalTintColor ?? self.tintColor
         self.subtitleLabel.textColor = tintColor
+
+        // On iOS 26 the banner is glass, which means the colour that says *which* source or app this
+        // is becomes the glass tint instead of an opaque paint laid over a blur.
+        let onGlass: Bool
+        if #available(iOS 26.0, *)
+        {
+            let glass = UIGlassEffect()
+            glass.tintColor = tintColor
+            self.backgroundEffectView.effect = glass
+            onGlass = true
+        }
+        else
+        {
+            onGlass = false
+        }
         
         switch self.style
         {
@@ -386,8 +401,8 @@ private extension AppBannerView
             
             self.button.style = .pill
             
-            self.backgroundEffectView.contentView.backgroundColor = UIColor(resource: .blurTint)
-            self.backgroundEffectView.backgroundColor = tintColor
+            self.backgroundEffectView.contentView.backgroundColor = onGlass ? .clear : UIColor(resource: .blurTint)
+            self.backgroundEffectView.backgroundColor = onGlass ? nil : tintColor
             
         case .source:
             self.directionalLayoutMargins.trailing = 20
@@ -395,29 +410,37 @@ private extension AppBannerView
             self.iconImageViewHeightConstraint.constant = 44
             self.iconImageView.style = .circular
             
-            self.titleLabel.textColor = .white
+            self.titleLabel.textColor = onGlass ? .label : .white
             
             self.button.style = .custom
             
-            self.backgroundEffectView.contentView.backgroundColor = tintColor?.adjustedForDisplay
+            self.backgroundEffectView.contentView.backgroundColor = onGlass ? nil : tintColor?.adjustedForDisplay
             self.backgroundEffectView.backgroundColor = nil
             
-            #if !os(tvOS)
-            if let tintColor, tintColor.isTooBright
+            if onGlass
             {
-                let textVibrancyEffect = UIVibrancyEffect(blurEffect: .init(style: .systemChromeMaterialLight), style: .fill)
-                self.vibrancyView.effect = textVibrancyEffect
+                // Vibrancy was how text stayed readable inside a blur; glass does that itself.
+                self.vibrancyView.effect = nil
             }
             else
             {
-                // Thinner == more dull
-                let textVibrancyEffect = UIVibrancyEffect(blurEffect: .init(style: .systemThinMaterialDark), style: .secondaryLabel)
+                #if !os(tvOS)
+                if let tintColor, tintColor.isTooBright
+                {
+                    let textVibrancyEffect = UIVibrancyEffect(blurEffect: .init(style: .systemChromeMaterialLight), style: .fill)
+                    self.vibrancyView.effect = textVibrancyEffect
+                }
+                else
+                {
+                    // Thinner == more dull
+                    let textVibrancyEffect = UIVibrancyEffect(blurEffect: .init(style: .systemThinMaterialDark), style: .secondaryLabel)
+                    self.vibrancyView.effect = textVibrancyEffect
+                }
+                #else
+                let textVibrancyEffect = UIVibrancyEffect(blurEffect: UIBlurEffect(style: .dark))
                 self.vibrancyView.effect = textVibrancyEffect
+                #endif
             }
-            #else
-            let textVibrancyEffect = UIVibrancyEffect(blurEffect: UIBlurEffect(style: .dark))
-            self.vibrancyView.effect = textVibrancyEffect
-            #endif
         }
     }
 }
