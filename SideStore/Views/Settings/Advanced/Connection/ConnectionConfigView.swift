@@ -235,7 +235,7 @@ struct ConnectionConfigView: View {
                 }
                 .padding(24)
                 .frame(width: 320)
-                .background(.ultraThinMaterial)
+                .glassSurface(in: RoundedRectangle(cornerRadius: 30, style: .continuous))
                 .environment(\.colorScheme, .dark)
                 .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
                 .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)

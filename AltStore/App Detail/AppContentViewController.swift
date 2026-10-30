@@ -347,7 +347,7 @@ private struct AppVersionsCard: View
                     }
                 }
             }
-            .background(.regularMaterial)
+            .glassSurface(in: RoundedRectangle(cornerRadius: 20, style: .continuous), material: .regularMaterial)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .padding(.horizontal, 20)

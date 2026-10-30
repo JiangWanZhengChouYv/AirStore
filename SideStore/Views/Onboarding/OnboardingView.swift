@@ -72,8 +72,7 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(.ultraThinMaterial)
-            .clipShape(Capsule())
+            .glassSurface(in: Capsule())
 
             if currentStep > 0 && currentStep < totalSteps - 1 {
                 HStack {
@@ -248,8 +247,7 @@ private struct PairingFileStep: View {
                         .foregroundColor(.accentColor)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(12)
+                        .glassSurface(in: RoundedRectangle(cornerRadius: 12))
                     }
 
                     SwiftUI.Button(action: {
@@ -404,8 +402,7 @@ private struct LocalDevVPNStep: View {
                         .foregroundColor(.accentColor)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(12)
+                        .glassSurface(in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
 
@@ -694,8 +691,7 @@ private struct CompleteStep: View {
                 )
             }
             .padding(16)
-            .background(.ultraThinMaterial)
-            .cornerRadius(16)
+            .glassSurface(in: RoundedRectangle(cornerRadius: 16))
             .frame(maxWidth: 420)
             .padding(.horizontal, 24)
 
