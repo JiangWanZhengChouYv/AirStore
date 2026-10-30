@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.8.3-develop-202610301458.66-61462032",
-          "date": "2026-10-30T15:11:01Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202610301458.66-61462032.ipa",
-          "size": 30154775,
-          "sha256": "fd1bef7319123b770170c32bbfae928589700859ecaf77090b027fb32601565c",
-          "localizedDescription": "Development build 0.8.3-develop-202610301458.66-61462032 from commit 61462032."
+          "version": "0.8.3-develop-202610302334.67-3ca04a11",
+          "date": "2026-10-30T23:45:27Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202610302334.67-3ca04a11.ipa",
+          "size": 30154737,
+          "sha256": "24fbc80abc2c5839f4a895e57872e14b9c4cf9f9a400b6fb267198bf3b54dc33",
+          "localizedDescription": "Development build 0.8.3-develop-202610302334.67-3ca04a11 from commit 3ca04a11."
         },
         {
           "version": "0.8.2",
@@ -56,12 +56,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.3-develop-202610301458.66-61462032",
-              "date": "2026-10-30T15:11:01Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202610301458.66-61462032.ipa",
-              "size": 30154775,
-              "sha256": "fd1bef7319123b770170c32bbfae928589700859ecaf77090b027fb32601565c",
-              "localizedDescription": "Development build 0.8.3-develop-202610301458.66-61462032 from commit 61462032."
+              "version": "0.8.3-develop-202610302334.67-3ca04a11",
+              "date": "2026-10-30T23:45:27Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202610302334.67-3ca04a11.ipa",
+              "size": 30154737,
+              "sha256": "24fbc80abc2c5839f4a895e57872e14b9c4cf9f9a400b6fb267198bf3b54dc33",
+              "localizedDescription": "Development build 0.8.3-develop-202610302334.67-3ca04a11 from commit 3ca04a11."
             }
           ]
         },
