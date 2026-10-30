@@ -202,11 +202,16 @@ jobs:
             --out build/airstore-source.json
 
       # The app asks this repository's Pages site for a release asset before it tries any third-party
-      # proxy, so the package and its patches have to exist there too. Which builds are current is the
+      # proxy, so the package and the patches have to exist there too. Which builds are current is the
       # release's decision, so the mirror is handed the same list the prune step just applied rather
       # than working out its own from file names.
       - name: Mirror the package onto the Pages branch
         run: |
+          # Ask before switching branches: the pages tree holds nothing but assets, so once it is
+          # checked out there is no scripts/ci left to ask. The answer lands in build/, which is
+          # untracked and therefore survives the switch.
+          python3 scripts/ci/delta_assets.py kept --release-json build/release.json --keep 5 > build/kept.txt
+
           git fetch origin pages 2>/dev/null || true
           if git rev-parse --verify -q origin/pages >/dev/null; then
             git checkout -b pages origin/pages
@@ -215,7 +220,6 @@ jobs:
             git rm -rf --cached . -q
           fi
 
-          python3 scripts/ci/delta_assets.py kept --release-json build/release.json --keep 5 > build/kept.txt
           while read -r name; do
             if [ -n "$name" ] && [ -e "$name" ]; then
               git add "$name"
