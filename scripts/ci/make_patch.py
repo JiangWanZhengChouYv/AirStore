@@ -13,7 +13,8 @@ searches -- it only applies instructions.
 
 Why no new feed or CoreData field: an AppVersion attribute would need a new model version plus a
 migration policy, the most dangerous path in this repository. The patch is instead self-describing and
-published under a fixed asset name beside the ipa, so the client needs nothing it does not already get.
+published beside the ipa under a name the client computes from the base in its own cache, so it needs
+nothing it does not already get. See scripts/ci/delta_assets.py for the naming rule.
 
 Safety does not depend on the matcher being right. The header carries the SHA-256 of both sides; the
 client checks its base first and recomputes the whole-file SHA-256 after rebuilding, and either

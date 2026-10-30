@@ -164,7 +164,8 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
         let appBundle: ALTApplication
 
         if UserDefaults.standard.isIncrementalUpdateEnabled, let appVersion,
-           let patchURL = BundleDelta.patchURL(forPackageAt: sourceURL)
+           let baseTag = BundleDelta.cachedBaseTag(forBundleID: self.context.bundleIdentifier),
+           let patchURL = BundleDelta.patchURL(forPackageAt: sourceURL, baseTag: baseTag)
         {
             do
             {

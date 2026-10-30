@@ -9,9 +9,9 @@ name: Develop AirStore build
 #     develop-source branch, which is what the app fetches, so a machine never rewrites what a
 #     human wrote on develop.
 #   - It does not publish to a normal release. All builds land on one rolling prerelease tagged
-#     develop-latest, whose assets are named after the build's version, so the package you are
-#     already on stays downloadable after the next push replaces the feed. The feed carries the
-#     exact URL, so nothing downstream has to guess the name.
+#     develop-latest, whose assets are named after the build's version -- and, for a delta, after the
+#     build it starts from -- so the package you are already on stays downloadable after the next push
+#     replaces the feed. The feed carries the exact URL, so nothing downstream has to guess the name.
 
 on:
   push:
@@ -113,31 +113,46 @@ jobs:
             exit 1
           fi
 
-      # Grab the package that is live right now, before the upload below replaces it. This is the
-      # delta's base, and it has to be the *unsigned* bundle: what lands on a phone gets re-signed
-      # (embedding.mobileprovision, LC_CODE_SIGNATURE, _CodeSignature), so the device caches its
-      # ASBU at unzip time, before signing, and only bytes produced the same way here will match it.
+      # Every package still inside the retention window is a possible base, so a phone that let a few
+      # builds go by takes one delta instead of being sent back to the full download. A base has to be
+      # the *unsigned* bundle: what lands on a phone gets re-signed (embedding.mobileprovision,
+      # LC_CODE_SIGNATURE, _CodeSignature), and the device caches the ASBU of what its own unzip
+      # produced, so only bytes packed this way can equal a phone's cached base.
+      #
       # Newest by upload order, read off the REST asset id. Do not use `gh release view --json assets`
-      # here: its id is a GraphQL node string (RA_kwDOVM69jc4pC5Wr and friends), so max_by compares
-      # characters instead of time and picked a build two behind the live one on 2026-10-29 -- which
-      # shipped a patch cut against a base no phone had. REST returns an increasing number.
-      - name: Fetch the previous package for the delta
+      # for this: its id is a GraphQL node string (RA_kwDOVM69jc4pC5Wr and friends), so ranking it
+      # compares characters instead of time and picked a build two behind the live one on 2026-10-29,
+      # which shipped a patch cut against a base no phone had. REST returns an increasing number.
+      - name: Cut a delta from every package still on the release
         run: |
           mkdir -p build/previous
-          previous=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" --jq \
-            '[.assets[] | select(.name | endswith(".ipa"))] | max_by(.id) | .name' 2>/dev/null || true)
-          echo "base package: ${previous:-none}"
-          if [ -n "$previous" ] && gh release download develop-latest --pattern "$previous" --dir build/previous --clobber; then
-            python3 scripts/ci/make_patch.py pack \
-              --app SideStore.xcarchive/Products/Applications/SideStore.app --out build/target.asbu
-            unzip -qo "build/previous/$previous" -d build/previous/unzipped
-            python3 scripts/ci/make_patch.py pack \
-              --app build/previous/unzipped/Payload/SideStore.app --out build/base.asbu
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" > build/release.json 2>/dev/null \
+            || echo '{"assets":[]}' > build/release.json
+          python3 scripts/ci/make_patch.py pack \
+            --app SideStore.xcarchive/Products/Applications/SideStore.app --out build/target.asbu >/dev/null
+          full_size=$(wc -c < AirStore.ipa | tr -d ' ')
+          for base_name in $(python3 scripts/ci/delta_assets.py bases --release-json build/release.json --limit 4); do
+            if ! gh release download develop-latest --pattern "$base_name" --dir build/previous --clobber; then
+              echo "could not fetch $base_name; shipping without that base"
+              continue
+            fi
+            unzip -qo "build/previous/$base_name" -d build/previous/unzipped
+            base_sha=$(python3 scripts/ci/make_patch.py pack \
+              --app build/previous/unzipped/Payload/SideStore.app --out build/base.asbu \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin)["asbuSHA256"])')
+            patch_name=$(python3 scripts/ci/delta_assets.py name --package "$VERSION.ipa" --base-sha "$base_sha")
             python3 scripts/ci/make_patch.py create \
-              --base build/base.asbu --target build/target.asbu --out AirStore.patch
-          else
-            echo "No previous package on develop-latest yet; shipping without a delta."
-          fi
+              --base build/base.asbu --target build/target.asbu --out "$patch_name"
+            patch_size=$(wc -c < "$patch_name" | tr -d ' ')
+            # A patch that costs nearly the whole download is not a patch. Publishing one would only
+            # make the full-package fallback look like a decision rather than what it is.
+            if [ "$patch_size" -gt $(( full_size * 8 / 10 )) ]; then
+              echo "$patch_name is $patch_size of $full_size bytes; dropping it"
+              rm -f "$patch_name"
+            else
+              echo "$base_name -> $VERSION: $patch_size bytes as $patch_name"
+            fi
+          done
 
       - name: Publish onto the rolling prerelease
         run: |
@@ -147,29 +162,31 @@ jobs:
               --notes "Every build here is a snapshot of develop, replaced by the next push. \
           AirStore offers these as updates when the develop track is selected in Settings. \
           Not for distribution -- sign with your own Apple ID and expect breakage."
-          # The package and the patch take the build's version as their name, so one pair can never
-          # be served with another build's counterpart, and BundleDelta finds the patch by swapping
-          # the extension on the URL the feed already gives it.
+          # The package and its patches take the build's version as their name, so a build can never
+          # be served with another build's counterpart. Each patch carries the base's own tag, which
+          # is what a phone builds the URL from -- see scripts/ci/delta_assets.py.
           cp AirStore.ipa "$VERSION.ipa"
           gh release upload develop-latest "$VERSION.ipa" --clobber
-          if [ -f AirStore.patch ]; then
-            cp AirStore.patch "$VERSION.patch"
-            gh release upload develop-latest "$VERSION.patch" --clobber
-          fi
+          for patch in "$VERSION"-*.patch; do
+            [ -e "$patch" ] || continue
+            gh release upload develop-latest "$patch" --clobber
+          done
 
       - name: Keep only the last few builds on the rolling release
         run: |
-          # Version names would otherwise pile up 30 MB per push, so the five newest pairs stay and
-          # everything older is pruned. Five is the horizon: a build you are still on has to stay
-          # downloadable long enough to be the base of the patch that updates it.
+          # Version names would otherwise pile up 30 MB per push, so the five newest builds stay --
+          # each with every patch cut to or from it -- and anything older goes. Five is the horizon
+          # because that is how far the delta step cuts: a build you are still on has to remain
+          # downloadable exactly as long as it can still be a base.
           # REST again, for the same reason as the delta step: sorting the GraphQL node strings can
           # put the package uploaded seconds ago at the front of that list, and deleting it would
           # leave the feed pointing at an asset that is no longer there.
-          gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" --jq \
-            '[.assets[] | select((.name | endswith(".ipa")) or (.name | endswith(".patch")))]
-             | sort_by(.id) | .[0:-10] | .[].name' 2>/dev/null | while read -r stale; do
-            echo "pruning $stale"
-            gh release delete-asset develop-latest "$stale" --yes || true
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" > build/release.json
+          python3 scripts/ci/delta_assets.py stale --release-json build/release.json --keep 5 | while read -r stale; do
+            if [ -n "$stale" ]; then
+              echo "pruning $stale"
+              gh release delete-asset develop-latest "$stale" --yes || true
+            fi
           done
 
       - name: Generate the source feed
@@ -184,10 +201,10 @@ jobs:
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
             --out build/airstore-source.json
 
-      # The app asks this repository's Pages site for a release asset before it tries any
-      # third-party proxy, so the package and its patch have to exist there. Flat by file name -- the
-      # version in the name is what keeps two builds apart -- and only the five newest pairs are
-      # kept, which stays far inside the site's size guidance.
+      # The app asks this repository's Pages site for a release asset before it tries any third-party
+      # proxy, so the package and its patches have to exist there too. Which builds are current is the
+      # release's decision, so the mirror is handed the same list the prune step just applied rather
+      # than working out its own from file names.
       - name: Mirror the package onto the Pages branch
         run: |
           git fetch origin pages 2>/dev/null || true
@@ -198,18 +215,18 @@ jobs:
             git rm -rf --cached . -q
           fi
 
-          git add "$VERSION.ipa"
-          if [ -f "$VERSION.patch" ]; then git add "$VERSION.patch"; fi
+          python3 scripts/ci/delta_assets.py kept --release-json build/release.json --keep 5 > build/kept.txt
+          while read -r name; do
+            if [ -n "$name" ] && [ -e "$name" ]; then
+              git add "$name"
+            fi
+          done < build/kept.txt
 
-          for extension in ipa patch; do
-            total=$(ls -1 *."$extension" 2>/dev/null | wc -l | tr -d ' ')
-            drop=$((total - 5))
-            if [ "$drop" -gt 0 ]; then
-              ls -1 *."$extension" | sort | head -n "$drop" | while read -r stale; do
-                echo "dropping $stale"
-                git rm -q --cached "$stale"
-                rm -f "$stale"
-              done
+          git ls-files | while read -r tracked; do
+            if ! grep -q -x -- "$tracked" build/kept.txt; then
+              echo "dropping $tracked"
+              git rm -q --cached "$tracked"
+              rm -f "$tracked"
             fi
           done
 

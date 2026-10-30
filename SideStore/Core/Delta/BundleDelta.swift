@@ -13,7 +13,6 @@ import CryptoKit
 enum BundleDeltaError: Error, CustomStringConvertible
 {
     case noBase(URL)
-    case noPatchURL(URL)
     case badMagic(String)
     case truncated
     case inflateFailed
@@ -28,7 +27,6 @@ enum BundleDeltaError: Error, CustomStringConvertible
         switch self
         {
         case .noBase(let url): return "no cached base at \(url.lastPathComponent)"
-        case .noPatchURL(let url): return "no patch URL derived from \(url.absoluteString)"
         case .badMagic(let reason): return "stream header: \(reason)"
         case .truncated: return "stream is truncated"
         case .inflateFailed: return "patch body did not decompress"
@@ -129,11 +127,23 @@ struct BundleDelta
         FileManager.default.fileExists(atPath: cacheURL(forBundleID: bundleID).path)
     }
 
+    /// The first 12 hex digits of the cached base, which is the only thing that decides which patch
+    /// this phone can use. CI puts the same string in the asset name, so the phone names the patch it
+    /// wants instead of fetching a manifest: a base outside CI's retention window simply 404s and the
+    /// caller falls back to the full package.
+    static func cachedBaseTag(forBundleID bundleID: String) -> String?
+    {
+        let url = cacheURL(forBundleID: bundleID)
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return String(hex(sha256(of: url)).prefix(12))
+    }
+
     /// The patch rides the same release as the package it applies to, found by convention so neither
-    /// the feed schema nor CoreData has to carry another field: same release tag, same name, `.patch`
-    /// instead of `.ipa`. Naming it after the version means the pair for every build stays on the
-    /// release together, so a package can never be served with someone else's patch.
-    static func patchURL(forPackageAt packageURL: URL) -> URL?
+    /// the feed schema nor CoreData has to carry another field: same release tag, the package's own
+    /// name with the base it applies to appended, `.patch` instead of `.ipa`. Naming it after the
+    /// version and base means a build can never be served with someone else's patch, and one build
+    /// can ship a patch per retained base.
+    static func patchURL(forPackageAt packageURL: URL, baseTag: String) -> URL?
     {
         let marker = "/releases/download/"
         guard packageURL.host?.hasSuffix("github.com") == true,
@@ -148,7 +158,7 @@ struct BundleDelta
         
         guard var components = URLComponents(url: packageURL, resolvingAgainstBaseURL: false) else { return nil }
         let stem = String(fileName.dropLast(packageURL.pathExtension.count + 1))
-        components.path = String(packageURL.path[..<range.upperBound]) + tag + "/" + stem + ".patch"
+        components.path = String(packageURL.path[..<range.upperBound]) + tag + "/" + stem + "-" + baseTag + ".patch"
         return components.url
     }
     
