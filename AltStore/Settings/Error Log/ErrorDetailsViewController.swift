@@ -31,7 +31,9 @@ class ErrorDetailsViewController: UIViewController
             self.title = NSLocalizedString("Error Details", comment: "")
         }
 
-        self.navigationController?.navigationBar.tintColor = .altPrimary
+        self.applyThemeColour()
+        NotificationCenter.default.addObserver(self, selector: #selector(self.applyThemeColour),
+                                               name: ThemeManager.themeDidChangeNotification, object: nil)
 
         self.textView.isScrollEnabled = true
         self.textView.alwaysBounceVertical = true
@@ -53,5 +55,17 @@ class ErrorDetailsViewController: UIViewController
 
         self.textView.textContainerInset.left = self.view.layoutMargins.left
         self.textView.textContainerInset.right = self.view.layoutMargins.right
+    }
+
+    /// Taking the colour once in `viewDidLoad` is what made the theme picker look inert, so it is a
+    /// method now and the notification re-runs it.
+    @objc private func applyThemeColour()
+    {
+        self.navigationController?.navigationBar.tintColor = .altPrimary
+    }
+
+    deinit
+    {
+        NotificationCenter.default.removeObserver(self)
     }
 }

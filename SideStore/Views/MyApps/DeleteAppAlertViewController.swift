@@ -31,7 +31,7 @@ class DeleteAppAlertViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        checkboxButton.tintColor = .systemBlue
+        checkboxButton.tintColor = .altPrimary
         checkboxButton.imageView?.contentMode = .scaleAspectFit
         checkboxButton.setContentHuggingPriority(.required, for: .horizontal)
         checkboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)

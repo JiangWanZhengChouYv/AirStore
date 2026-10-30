@@ -56,7 +56,9 @@ final class SourcesViewController: UICollectionViewController
         let layout = self.makeLayout()
         self.collectionView.collectionViewLayout = layout
         
-        self.navigationController?.view.tintColor = .altPrimary
+        self.applyThemeColour()
+        NotificationCenter.default.addObserver(self, selector: #selector(self.applyThemeColour),
+                                               name: ThemeManager.themeDidChangeNotification, object: nil)
         
         self.collectionView.register(AppBannerCollectionViewCell.self, forCellWithReuseIdentifier: cellContentGenericCellIdentifier)
         
@@ -117,6 +119,17 @@ final class SourcesViewController: UICollectionViewController
         super.viewDidAppear(animated)
         
         self.handleAddSourceDeepLink()
+    }
+
+    /// The page's own tint, taken in `viewDidLoad`, used to survive a theme change until relaunch.
+    @objc private func applyThemeColour()
+    {
+        self.navigationController?.view.tintColor = .altPrimary
+    }
+
+    deinit
+    {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewDidLayoutSubviews() 

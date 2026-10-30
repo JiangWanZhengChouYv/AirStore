@@ -54,6 +54,7 @@ class ToastView: UIControl
     var opensErrorLog: Bool = false
 
     private let dimmingView = UIView()
+    private let backgroundEffect = UIVisualEffectView()
     private let stackView = UIStackView()
     private let labelsStackView = UIStackView()
     private var dismissTimer: Timer?
@@ -90,9 +91,34 @@ class ToastView: UIControl
         self.textLabel.text = NSLocalizedString(text, comment: "")
         self.detailTextLabel.text = detailedText.map { NSLocalizedString($0, comment: "") }
 
-        self.backgroundColor = .altPrimary
-        self.textLabel.textColor = .white
-        self.detailTextLabel.textColor = .white
+        // On iOS 26 the toast is glass over whatever it landed on, so its text has to be the semantic
+        // colour that survives both appearances; white on glass vanishes in a light page. Earlier
+        // releases keep the solid theme pill exactly as it has always been.
+        let onGlass: Bool
+        if #available(iOS 26.0, *)
+        {
+            let glass = UIGlassEffect()
+            // A toast is a UIControl: tapping it opens the error log.
+            glass.isInteractive = true
+            self.backgroundEffect.effect = glass
+            self.backgroundEffect.translatesAutoresizingMaskIntoConstraints = false
+            self.insertSubview(self.backgroundEffect, at: 0)
+            NSLayoutConstraint.activate([
+                self.backgroundEffect.topAnchor.constraint(equalTo: self.topAnchor),
+                self.backgroundEffect.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+                self.backgroundEffect.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+                self.backgroundEffect.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            ])
+            onGlass = true
+        }
+        else
+        {
+            self.backgroundColor = .altPrimary
+            onGlass = false
+        }
+
+        self.textLabel.textColor = onGlass ? .label : .white
+        self.detailTextLabel.textColor = onGlass ? .label : .white
 
         self.isAccessibilityElement = true
 
@@ -210,8 +236,6 @@ class ToastView: UIControl
         self.layoutMargins = UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
         self.preservesSuperviewLayoutMargins = false
         self.insetsLayoutMarginsFromSafeArea = false
-
-        self.backgroundColor = UIColor(red: 61.0/255.0, green: 172.0/255.0, blue: 247.0/255.0, alpha: 1)
 
         NotificationCenter.default.addObserver(self, selector: #selector(toastViewWillShow(_:)), name: ToastView.willShowNotification, object: nil)
 

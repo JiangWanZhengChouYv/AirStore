@@ -78,7 +78,9 @@ class AddSourceViewController: UICollectionViewController
         super.viewDidLoad()
                 
         self.navigationController?.isModalInPresentation = true
-        self.navigationController?.view.tintColor = .altPrimary
+        self.applyThemeColour()
+        NotificationCenter.default.addObserver(self, selector: #selector(self.applyThemeColour),
+                                               name: ThemeManager.themeDidChangeNotification, object: nil)
         
         let layout = self.makeLayout()
         self.collectionView.collectionViewLayout = layout
@@ -114,6 +116,18 @@ class AddSourceViewController: UICollectionViewController
         {
             self.fetchRecommendedSources()
         }
+    }
+
+    /// The sheet's tint was read once at load time, so picking a new theme colour did nothing here
+    /// until the app was relaunched.
+    @objc private func applyThemeColour()
+    {
+        self.navigationController?.view.tintColor = .altPrimary
+    }
+
+    deinit
+    {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

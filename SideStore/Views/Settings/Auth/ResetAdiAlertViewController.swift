@@ -30,7 +30,7 @@ class ResetAdiAlertViewController: UIViewController {
         
         isKeepHeadersChecked = UserDefaults.standard.keepAnisetteHeadersAfterLogout
         
-        headersCheckboxButton.tintColor = .systemBlue
+        headersCheckboxButton.tintColor = .altPrimary
         headersCheckboxButton.imageView?.contentMode = .scaleAspectFit
         headersCheckboxButton.setContentHuggingPriority(.required, for: .horizontal)
         headersCheckboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)

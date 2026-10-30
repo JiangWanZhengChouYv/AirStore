@@ -102,6 +102,8 @@ class FeaturedViewController: UICollectionViewController
         self.navigationItem.hidesSearchBarWhenScrolling = true
         
         self.navigationItem.largeTitleDisplayMode = .always
+        NotificationCenter.default.addObserver(self, selector: #selector(self.applyThemeColour),
+                                               name: ThemeManager.themeDidChangeNotification, object: nil)
         #endif
     }
     
@@ -109,7 +111,19 @@ class FeaturedViewController: UICollectionViewController
     {
         super.viewDidAppear(animated)
         
+        self.applyThemeColour()
+    }
+
+    /// Every colour this page picks for itself is read after the theme can still change, so the same
+    /// call serves `viewDidAppear` and the theme notification.
+    @objc private func applyThemeColour()
+    {
         self.navigationController?.navigationBar.tintColor = .altPrimary
+    }
+
+    deinit
+    {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

@@ -25,6 +25,15 @@ public extension UIApplication
             .first
     }
     
+    /// Every window of every scene, including the ones that are not key: a sheet presented over a
+    /// settings page is its own window, and anything that only looks at `altKeyWindow` leaves it --
+    /// and every window opened afterwards -- with the colour it had when it was created.
+    var altAllWindows: [UIWindow] {
+        return connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+    }
+    
     func topViewController(base: UIViewController? = nil) -> UIViewController? {
         let root = base ?? altKeyWindow?.rootViewController
         if let nav = root as? UINavigationController {

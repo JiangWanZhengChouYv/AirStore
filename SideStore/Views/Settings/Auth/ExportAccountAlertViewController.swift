@@ -64,7 +64,7 @@ class ExportAccountAlertViewController: UIViewController {
             passwordTextField.widthAnchor.constraint(equalToConstant: 240)
         ])
         
-        includePasswordButton.tintColor = .systemBlue
+        includePasswordButton.tintColor = .altPrimary
         includePasswordButton.imageView?.contentMode = .scaleAspectFit
         includePasswordButton.setContentHuggingPriority(.required, for: .horizontal)
         includePasswordButton.setContentCompressionResistancePriority(.required, for: .horizontal)

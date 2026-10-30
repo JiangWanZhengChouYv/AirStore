@@ -53,7 +53,7 @@ class SignOutAlertViewController: UIViewController {
         isKeepAnisetteHeadersChecked = UserDefaults.standard.keepAnisetteHeadersAfterLogout
         isKeepSideSignHeadersChecked = UserDefaults.standard.keepSideSignHeadersAfterLogout
         
-        certCheckboxButton.tintColor = .systemBlue
+        certCheckboxButton.tintColor = .altPrimary
         certCheckboxButton.imageView?.contentMode = .scaleAspectFit
         certCheckboxButton.setContentHuggingPriority(.required, for: .horizontal)
         certCheckboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -75,7 +75,7 @@ class SignOutAlertViewController: UIViewController {
         certStack.spacing = 8
         certStack.alignment = .center
         
-        anisetteCheckboxButton.tintColor = .systemBlue
+        anisetteCheckboxButton.tintColor = .altPrimary
         anisetteCheckboxButton.imageView?.contentMode = .scaleAspectFit
         anisetteCheckboxButton.setContentHuggingPriority(.required, for: .horizontal)
         anisetteCheckboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -97,7 +97,7 @@ class SignOutAlertViewController: UIViewController {
         anisetteStack.spacing = 8
         anisetteStack.alignment = .center
 
-        anisetteHeadersCheckboxButton.tintColor = .systemBlue
+        anisetteHeadersCheckboxButton.tintColor = .altPrimary
         anisetteHeadersCheckboxButton.imageView?.contentMode = .scaleAspectFit
         anisetteHeadersCheckboxButton.setContentHuggingPriority(.required, for: .horizontal)
         anisetteHeadersCheckboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -119,7 +119,7 @@ class SignOutAlertViewController: UIViewController {
         anisetteHeadersStack.spacing = 8
         anisetteHeadersStack.alignment = .center
 
-        sideSignHeadersCheckboxButton.tintColor = .systemBlue
+        sideSignHeadersCheckboxButton.tintColor = .altPrimary
         sideSignHeadersCheckboxButton.imageView?.contentMode = .scaleAspectFit
         sideSignHeadersCheckboxButton.setContentHuggingPriority(.required, for: .horizontal)
         sideSignHeadersCheckboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)

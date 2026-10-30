@@ -114,7 +114,7 @@ class AppendTeamIDCheckboxView: UIView, UITextFieldDelegate {
     }
     
     private func setup() {
-        checkboxButton.tintColor = .systemBlue
+        checkboxButton.tintColor = .altPrimary
         checkboxButton.imageView?.contentMode = .scaleAspectFit
         checkboxButton.setContentHuggingPriority(.required, for: .horizontal)
         checkboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)

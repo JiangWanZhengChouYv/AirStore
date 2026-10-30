@@ -30,7 +30,7 @@ class RevokeAlertViewController: UIViewController {
         
         updateButtonImage(keepLocalCheckboxButton, isChecked: isKeepLocalChecked)
         
-        keepLocalCheckboxButton.tintColor = .systemBlue
+        keepLocalCheckboxButton.tintColor = .altPrimary
         keepLocalCheckboxButton.imageView?.contentMode = .scaleAspectFit
         keepLocalCheckboxButton.setContentHuggingPriority(.required, for: .horizontal)
         keepLocalCheckboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)
