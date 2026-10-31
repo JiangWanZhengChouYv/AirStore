@@ -1319,36 +1319,34 @@
                                         <edgeInsets key="layoutMargins" top="8" left="30" bottom="8" right="30"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="number" keyPath="style">
-                                                <integer key="value" value="3"/>
+                                                <integer key="value" value="2"/>
                                             </userDefinedRuntimeAttribute>
                                             <userDefinedRuntimeAttribute type="boolean" keyPath="isSelectable" value="YES"/>
                                         </userDefinedRuntimeAttributes>
-                                    </tableViewCell>ell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="51" id="q7f-PG-mTr" customClass="InsetGroupTableViewCell" customModule="SideStore" customModuleProvider="target">
+                                    </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="51" id="ctr-Mgt-Row" customClass="InsetGroupTableViewCell" customModule="SideStore" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="1869.6666622161865" width="402" height="51"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="q7f-PG-mTr" id="PRK-Ed-P87">
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ctr-Mgt-Row" id="ctr-Mgt-ctv">
                                             <rect key="frame" x="0.0" y="0.0" width="402" height="51"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Prompt AppExtns Customization" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fq5-2u-Lge" userLabel="Enable AppExtns Customization">
-                                                    <rect key="frame" x="30" y="15.333333333333334" width="260" height="20.333333333333329"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Container" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ctr-Mgt-lbl" userLabel="Container">
+                                                    <rect key="frame" x="30" y="15.333333333333334" width="110" height="20.333333333333329"/>
                                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="fXy-wl-F5I">
-                                                    <rect key="frame" x="311" y="11.666666666666664" width="63" height="28"/>
-                                                    <connections>
-                                                        <action selector="toggleEnableAppExtensionsCustomization:" destination="aMk-Xp-UL8" eventType="valueChanged" id="gtQ-5M-9Mt"/>
-                                                    </connections>
-                                                </switch>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ctr-Mgt-img">
+                                                    <rect key="frame" x="356.33333333333331" y="14.333333333333334" width="15.666666666666686" height="22.333333333333329"/>
+                                                    <imageReference key="image" image="chevron.right" catalog="system" symbolScale="large"/>
+                                                </imageView>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="Fq5-2u-Lge" firstAttribute="centerY" secondItem="PRK-Ed-P87" secondAttribute="centerY" id="4dM-eV-6Bi"/>
-                                                <constraint firstItem="Fq5-2u-Lge" firstAttribute="leading" secondItem="PRK-Ed-P87" secondAttribute="leadingMargin" id="Pd8-US-Y4V"/>
-                                                <constraint firstAttribute="trailingMargin" secondItem="fXy-wl-F5I" secondAttribute="trailing" id="ZU9-iK-2oz"/>
-                                                <constraint firstItem="fXy-wl-F5I" firstAttribute="centerY" secondItem="PRK-Ed-P87" secondAttribute="centerY" id="fhs-rv-x3K"/>
+                                                <constraint firstItem="ctr-Mgt-lbl" firstAttribute="centerY" secondItem="ctr-Mgt-ctv" secondAttribute="centerY" id="ctr-Mgt-c01"/>
+                                                <constraint firstItem="ctr-Mgt-lbl" firstAttribute="leading" secondItem="ctr-Mgt-ctv" secondAttribute="leadingMargin" id="ctr-Mgt-c02"/>
+                                                <constraint firstItem="ctr-Mgt-img" firstAttribute="centerY" secondItem="ctr-Mgt-ctv" secondAttribute="centerY" id="ctr-Mgt-c03"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="ctr-Mgt-img" secondAttribute="trailing" id="ctr-Mgt-c04"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" white="1" alpha="0.14999999999999999" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1357,6 +1355,7 @@
                                             <userDefinedRuntimeAttribute type="number" keyPath="style">
                                                 <integer key="value" value="3"/>
                                             </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="isSelectable" value="YES"/>
                                         </userDefinedRuntimeAttributes>
                                     </tableViewCell>
                                 </cells>

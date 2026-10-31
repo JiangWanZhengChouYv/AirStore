@@ -641,14 +641,81 @@ extension AppViewController
         }
         else
         {
-            self.downloadApp()
+            self.downloadApp(anchor: sender)
         }
     }
     
-    func downloadApp()
+    func downloadApp(anchor: UIView? = nil)
     {
         guard self.app.installedApp == nil else { return }
-        
+
+        // Container mode changes what "Install" can mean, so the choice is made here instead of
+        // hiding a second install path somewhere else. It stays invisible while the mode is off.
+        if UserDefaults.standard.isContainerModeEnabled
+        {
+            self.presentInstallModeChoice(anchor: anchor)
+            return
+        }
+
+        self.installToSystem()
+    }
+
+    private func presentInstallModeChoice(anchor: UIView?)
+    {
+        guard let version = self.app.latestAvailableVersion else { return }
+
+        let alertController = UIAlertController(
+            title: NSLocalizedString("Install App", comment: ""),
+            message: NSLocalizedString("AirBox runs the app without installing it on the system, so it uses no App ID.", comment: ""),
+            preferredStyle: .actionSheet
+        )
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { [weak self] _ in
+            self?.installToSystem()
+        })
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Run in AirBox", comment: ""), style: .default) { [weak self] _ in
+            self?.installIntoAirBox(version)
+        })
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+
+        if let popoverController = alertController.popoverPresentationController
+        {
+            let sourceView = anchor ?? self.bannerView.button
+            popoverController.sourceView = sourceView
+            popoverController.sourceRect = sourceView?.bounds ?? self.view.bounds
+        }
+        self.present(alertController, animated: true)
+    }
+
+    private func installIntoAirBox(_ version: AppVersion)
+    {
+        let progress = Progress(totalUnitCount: 100)
+        self.bannerView.button.progress = progress
+        self.navigationBarDownloadButton.progress = progress
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do
+            {
+                _ = try await ContainerInstaller.shared.addToAirBox(version, progress: progress)
+                progress.completedUnitCount = 100
+                // The installer hands AirBox the package and opens it, so there is nothing left to
+                // confirm here -- the app is already on screen with the new guest in its list.
+            }
+            catch
+            {
+                let toastView = ToastView(error: error)
+                toastView.opensErrorLog = true
+                toastView.show(in: self)
+            }
+
+            self.bannerView.button.progress = nil
+            self.navigationBarDownloadButton.progress = nil
+            self.update()
+        }
+    }
+
+    private func installToSystem()
+    {
         InstallAppDialog.present(storeApp: self.app, from: self) { [weak self] in
             guard let self else { return }
             let group = AppManager.shared.install(.app(self.app), presentingViewController: self) { (result) in

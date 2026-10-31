@@ -143,6 +143,13 @@ public extension UserDefaults
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
     }
+
+    // Off until someone turns it on: container mode runs other apps inside AirBox, which is a different
+    // trust model from installing them, so it must never be the default.
+    @objc var isContainerModeEnabled: Bool {
+        get { self.bool(forKey: #function) }
+        set { self.set(newValue, forKey: #function) }
+    }
     @objc var isInstallConfirmationEnabled: Bool {
         get {
             guard self.object(forKey: #function) != nil else { return true }

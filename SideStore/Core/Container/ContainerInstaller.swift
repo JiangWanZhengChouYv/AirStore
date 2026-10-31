@@ -37,14 +37,19 @@ final class ContainerInstaller
 {
     static let shared = ContainerInstaller()
 
-    /// AirBox's bundle id is the store's with one more component -- the same rule the container app
-    /// uses to find the shared group, so the two cannot disagree about where a package goes.
-    static var airBoxBundleIdentifier: String { Bundle.Info.appbundleIdentifier + ".AirBox" }
+    /// AirBox's bundle id is the store's with one more component. Taken from the running bundle, not
+    /// from the build constant, because a debug build carries a team suffix the constant does not.
+    static var airBoxBundleIdentifier: String { (Bundle.main.bundleIdentifier ?? Bundle.Info.appbundleIdentifier) + ".AirBox" }
+
+    /// The group both apps are actually signed with. The store's own signature is the only place that
+    /// knows the final name; an installer may have suffixed it with the team id, and anything derived
+    /// from the bundle id would name a group that does not exist on the device.
+    private var sharedAppGroup: String? { Bundle.main.altstoreAppGroup }
 
     private var sharedContainerInbox: URL?
     {
-        let groupIdentifier = "group." + Bundle.Info.appbundleIdentifier
-        guard let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupIdentifier) else { return nil }
+        guard let groupIdentifier = self.sharedAppGroup,
+              let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupIdentifier) else { return nil }
         return container.appendingPathComponent("ContainerInbox", isDirectory: true)
     }
 
@@ -63,13 +68,21 @@ final class ContainerInstaller
         guard let bundleURL = try? FileManager.default.unzipAppBundle(at: packageURL, to: workDirectory) else {
             throw ContainerInstallerError.downloadFailed("the package is not a readable .ipa")
         }
+        progress?.completedUnitCount = 66
 
         if let rejection = ABPrepareGuestBundle(appBundlePath: bundleURL.path)
         {
             throw ContainerInstallerError.patcherRejected(rejection)
         }
+        progress?.completedUnitCount = 72
 
         try await self.sign(bundleURL)
+        progress?.completedUnitCount = 94
+
+        // iOS 26 refuses to load a guest without JITLess, and JITLess needs the certificate inside
+        // AirBox. Upstream reaches these two keys through its settings screen; the store already holds
+        // the same certificate, so it writes them itself and leaves the user with nothing to import.
+        try self.shareCertificate()
 
         // The only keys AirBox reads today: it ships no TweakLoader, so injection stays off.
         let appInfo = ["dontInjectTweakLoader": true]
@@ -85,6 +98,7 @@ final class ContainerInstaller
             try FileManager.default.removeItem(at: destination)
         }
         try FileManager.default.moveItem(at: bundleURL, to: destination)
+        progress?.completedUnitCount = 100
 
         await UIApplication.shared.open(URL(string: "airbox://import")!)
         return name
@@ -99,15 +113,14 @@ final class ContainerInstaller
         {
             do
             {
-                let (fileURL, _) = try await URLSession.shared.download(from: candidate)
                 let destination = directory.appendingPathComponent("App.ipa")
                 try? FileManager.default.removeItem(at: destination)
-                try FileManager.default.moveItem(at: fileURL, to: destination)
+                try await self.download(candidate, to: destination, progress: progress)
 
                 guard (try? FileManager.default.attributesOfItem(atPath: destination.path)[.size] as? Int64 ?? 0) ?? 0 > 1024 else {
                     throw ContainerInstallerError.downloadFailed("the file is too small to be a package")
                 }
-                progress?.completedUnitCount = 50
+                progress?.completedUnitCount = 60
                 return destination
             }
             catch
@@ -116,6 +129,74 @@ final class ContainerInstaller
             }
         }
         throw ContainerInstallerError.downloadFailed(lastError?.localizedDescription ?? "no route answered")
+    }
+
+    /// A download of its own rather than `URLSession.download(from:)`, because the button needs to show
+    /// bytes arriving: the task's own `progress` is polled while the file is in flight, and the result
+    /// is moved into place inside the completion handler, where the temporary file still exists.
+    private func download(_ url: URL, to destination: URL, progress: Progress?) async throws
+    {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            let task = URLSession.shared.downloadTask(with: URLRequest(url: url)) { location, response, error in
+                if let error
+                {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let location,
+                      let httpResponse = response as? HTTPURLResponse,
+                      (200..<300).contains(httpResponse.statusCode) else {
+                    continuation.resume(throwing: ContainerInstallerError.downloadFailed("the server did not send a package"))
+                    return
+                }
+                do
+                {
+                    try? FileManager.default.removeItem(at: destination)
+                    try FileManager.default.moveItem(at: location, to: destination)
+                    continuation.resume()
+                }
+                catch
+                {
+                    continuation.resume(throwing: error)
+                }
+            }
+
+            let monitor = Task {
+                // Only ever move forward: the stages after the download also write to this Progress,
+                // and a late wake-up must not drag the bar back.
+                while task.state != .completed
+                {
+                    let downloaded = Int64(task.progress.fractionCompleted * 60)
+                    if let progress, downloaded > progress.completedUnitCount
+                    {
+                        progress.completedUnitCount = downloaded
+                    }
+                    try? await Task.sleep(nanoseconds: 200_000_000)
+                }
+                if let progress, progress.completedUnitCount < 60
+                {
+                    progress.completedUnitCount = 60
+                }
+            }
+            _ = monitor
+            task.resume()
+        }
+    }
+
+    private func shareCertificate() throws
+    {
+        guard let certificate = CertificateManager.shared.activeCertificate else {
+            throw ContainerInstallerError.noCertificate
+        }
+        guard let groupIdentifier = self.sharedAppGroup,
+              let defaults = UserDefaults(suiteName: groupIdentifier) else {
+            throw ContainerInstallerError.airBoxNotInstalled
+        }
+
+        // The two keys LCUtils and LCSharedUtils read on the other side. Same certificate, same
+        // password: a guest signed with anything else would not load in a JITLess process.
+        defaults.set(certificate.p12Data, forKey: "LCCertificateData")
+        defaults.set(certificate.password ?? certificate.serialNumber, forKey: "LCCertificatePassword")
     }
 
     /// Every guest is signed by AirBox's own profile: the bundle id in that profile is AirBox's, and the

@@ -29,16 +29,13 @@ final class GuestStore: ObservableObject
     @Published private(set) var guests: [Guest] = []
     @Published var lastError: String?
 
-    /// `group.` + this app's bundle id without its own suffix -- the same rule Build.xcconfig uses for
-    /// APP_GROUP_IDENTIFIER, so the two apps cannot drift apart.
+    /// The group the engine resolved for this process. An installer may suffix the declared group
+    /// with the team id, so the name in the signature is the only one that is guaranteed to exist --
+    /// the store writes to the equivalent group on its side.
     private var appGroupIdentifier: String?
     {
-        guard var identifier = Bundle.main.bundleIdentifier else { return nil }
-        if let suffix = identifier.range(of: ".AirBox", options: .backwards)
-        {
-            identifier = String(identifier[..<suffix.lowerBound])
-        }
-        return "group." + identifier
+        guard let identifier = LCSharedUtils.appGroupID(), !identifier.isEmpty, identifier != "Unknown" else { return nil }
+        return identifier
     }
 
     private var documentsDirectory: URL

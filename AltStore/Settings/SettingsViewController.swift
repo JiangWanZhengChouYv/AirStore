@@ -86,6 +86,7 @@ extension SettingsViewController
         case certificateManagement  // row 9 - Certificate Management
         case backupAndRestore       // row 10 - Backup & Restore
         case userCustomizations     // row 11 - User Customizations
+        case container              // row 12 - Container
 
         static var allCases: [AdvancedSettingsRow] {
             var rows: [AdvancedSettingsRow] = [.sendFeedback, .refreshAttempts, .refreshSideJITServer, .pairingFileManagement]
@@ -99,7 +100,8 @@ extension SettingsViewController
                 .profileManagement,
                 .certificateManagement,
                 .backupAndRestore,
-                .userCustomizations
+                .userCustomizations,
+                .container
             ])
             return rows
         }
@@ -1392,7 +1394,14 @@ extension SettingsViewController
                 vc.view.backgroundColor = .settingsBackground
                 vc.title = NSLocalizedString("User Customizations", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
-                
+
+            case .container:
+                let containerView = ContainerSettingsView()
+                let vc = UIHostingController(rootView: containerView)
+                vc.view.backgroundColor = .settingsBackground
+                vc.title = NSLocalizedString("Container", comment: "")
+                self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
+
             case .refreshAttempts: break
             }
         
