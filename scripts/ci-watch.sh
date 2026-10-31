@@ -21,7 +21,11 @@
 set -uo pipefail
 
 REPO="JiangWanZhengChouYv/AirStore"
-INTERVAL=15
+# 60s, not 15: a build runs ~12 minutes, and asking the API every 15 seconds from every terminal
+# that had one of these open burned through GitHub's 5000-an-hour budget in one evening. The bar does
+# not need the traffic -- its percentage is computed from the clock against the run's measured
+# duration on every redraw, so between polls it keeps advancing on its own.
+INTERVAL=60
 IDLE_INTERVAL=180
 MODE="running"          # running | ids
 ONCE=0
@@ -34,7 +38,7 @@ while [ $# -gt 0 ]; do
     -o|--once)     ONCE=1 ;;
     -a|--all)      HISTORY=10 ;;
     -b|--branch)   BRANCH="${2:-}"; shift ;;
-    -i|--interval) INTERVAL="${2:-15}"; shift ;;
+    -i|--interval) INTERVAL="${2:-60}"; shift ;;
     -h|--help)     sed -n '2,17p' "$0"; exit 0 ;;
     ''|--*)        ;;
     *[!0-9]*)      echo "ignoring '$1' (not a run id)" >&2 ;;
@@ -43,7 +47,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-[ "$INTERVAL" -gt 0 ] 2>/dev/null || INTERVAL=15
+[ "$INTERVAL" -gt 0 ] 2>/dev/null || INTERVAL=60
 
 if [ -t 1 ]; then
   C_DIM=$(tput dim); C_RED=$(tput setaf 1); C_GRN=$(tput setaf 2)
@@ -308,7 +312,7 @@ build_frame() {
       status=${fields%%$'\037'*}
       printf '%s' "$status" > "$DETAIL_CACHE_DIR/status.$id"
       append_frame_line "$id" "$(draw_run "$id" "$fields")" || break
-      # A run that has not been given a runner yet has nothing to watch; asking every 15 s about
+      # A run that has not been given a runner yet has nothing to watch; asking every minute about
       # it is just traffic.
       if [ "$(cat "$DETAIL_CACHE_DIR/steps.$id" 2>/dev/null)" -gt 0 ] 2>/dev/null; then
         POLL_FAST=1
