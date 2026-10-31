@@ -686,8 +686,23 @@ extension AppViewController
         self.present(alertController, animated: true)
     }
 
-    private func installIntoAirBox(_ version: AppVersion)
+    private func installIntoAirBox(_ version: AppVersion, airBoxReady: Bool = false)
     {
+        // Nothing can be added before AirBox exists, and its profile is what signs every guest, so the
+        // first "Run in AirBox" offers to install it and then continues with this same request.
+        guard airBoxReady || AirBoxInstaller.isInstalled else
+        {
+            AirBoxInstaller.confirmAndInstall(from: self) { [weak self] installed in
+                guard installed else { return }
+                // The install pipeline reports success before the new row has necessarily reached this
+                // context, so the retry is told to trust the result instead of asking the database again.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self?.installIntoAirBox(version, airBoxReady: true)
+                }
+            }
+            return
+        }
+
         let progress = Progress(totalUnitCount: 100)
         self.bannerView.button.progress = progress
         self.navigationBarDownloadButton.progress = progress

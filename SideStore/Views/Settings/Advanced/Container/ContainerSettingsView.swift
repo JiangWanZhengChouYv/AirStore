@@ -17,6 +17,7 @@ struct ContainerSettingsView: View
     @State private var isEnabled = UserDefaults.standard.isContainerModeEnabled
     @State private var isConfirming = false
     @State private var airBoxInstalled = false
+    @State private var isInstallingAirBox = false
 
     var body: some View
     {
@@ -36,8 +37,15 @@ struct ContainerSettingsView: View
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-        .onAppear { self.airBoxInstalled = Self.isAirBoxInstalled() }
-        .sheet(isPresented: self.$isConfirming)
+        .onAppear { self.airBoxInstalled = AirBoxInstaller.isInstalled }
+        // Turning the mode on without anything to run apps in is a dead end, so the very first thing
+        // offered afterwards is installing it -- still one confirmation, never a silent install.
+        .sheet(isPresented: self.$isConfirming, onDismiss: {
+            if self.isEnabled && !self.airBoxInstalled
+            {
+                self.promptAirBoxInstall()
+            }
+        })
         {
             ContainerConfirmationView
             {
@@ -95,9 +103,24 @@ private extension ContainerSettingsView
 
                     Spacer()
 
-                    Text(self.airBoxInstalled ? NSLocalizedString("Installed", comment: "") : NSLocalizedString("Not installed", comment: ""))
-                        .font(.system(size: 14))
-                        .foregroundColor(self.airBoxInstalled ? Color.white.opacity(0.6) : .orange)
+                    if self.airBoxInstalled
+                    {
+                        Text(NSLocalizedString("Installed", comment: ""))
+                            .font(.system(size: 14))
+                            .foregroundColor(Color.white.opacity(0.6))
+                    }
+                    else if self.isInstallingAirBox
+                    {
+                        ProgressView()
+                    }
+                    else
+                    {
+                        SwiftUI.Button(NSLocalizedString("Install", comment: "")) {
+                            self.promptAirBoxInstall()
+                        }
+                        .font(.system(size: 15, weight: .semibold))
+                        .tint(.white)
+                    }
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 50)
@@ -155,14 +178,16 @@ private extension ContainerSettingsView
         })
     }
 
-    @MainActor
-    static func isAirBoxInstalled() -> Bool
+    func promptAirBoxInstall()
     {
-        let context = DatabaseManager.shared.persistentContainer.viewContext
-        let request = InstalledApp.fetchRequest()
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), ContainerInstaller.airBoxBundleIdentifier)
-        request.fetchLimit = 1
-        return (try? context.count(for: request)) ?? 0 > 0
+        guard !self.isInstallingAirBox, !self.airBoxInstalled else { return }
+        guard let presentingViewController = UIApplication.shared.topViewController() else { return }
+
+        self.isInstallingAirBox = true
+        AirBoxInstaller.confirmAndInstall(from: presentingViewController) { installed in
+            self.isInstallingAirBox = false
+            self.airBoxInstalled = installed || AirBoxInstaller.isInstalled
+        }
     }
 }
 

@@ -14,6 +14,7 @@ import SideSign
 enum ContainerInstallerError: LocalizedError
 {
     case airBoxNotInstalled
+    case airBoxNotAvailable
     case noCertificate
     case noProfileForAirBox
     case downloadFailed(String)
@@ -24,6 +25,7 @@ enum ContainerInstallerError: LocalizedError
         switch self
         {
         case .airBoxNotInstalled: return NSLocalizedString("AirBox is not installed. Install it before adding apps to it.", comment: "")
+        case .airBoxNotAvailable: return NSLocalizedString("AirBox is not published for this build of AirStore.", comment: "")
         case .noCertificate: return NSLocalizedString("No signing certificate is available.", comment: "")
         case .noProfileForAirBox: return NSLocalizedString("AirBox has no provisioning profile. Reinstall it from AirStore, then try again.", comment: "")
         case .downloadFailed(let reason): return String(format: NSLocalizedString("The package could not be downloaded: %@", comment: ""), reason)
@@ -118,6 +120,25 @@ final class ContainerInstaller
 
         await UIApplication.shared.open(URL(string: "airbox://import")!)
         return name
+    }
+
+    /// Downloads the companion AirBox package into a temporary directory the caller owns. Same route
+    /// and mirrors as an app package, so a blocked GitHub costs nothing new.
+    func downloadAirBox(progress: Progress?) async throws -> URL
+    {
+        guard let url = AirBoxInstaller.packageURL else { throw ContainerInstallerError.airBoxNotAvailable }
+
+        let directory = FileManager.default.uniqueTemporaryURL()
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        do
+        {
+            return try await self.download(url, into: directory, progress: progress)
+        }
+        catch
+        {
+            try? FileManager.default.removeItem(at: directory)
+            throw error
+        }
     }
 
     private func download(_ url: URL, into directory: URL, progress: Progress?) async throws -> URL
@@ -221,11 +242,24 @@ final class ContainerInstaller
     private func sign(_ bundleURL: URL) async throws
     {
         let context = DatabaseManager.shared.persistentContainer.viewContext
-        let request = InstalledApp.fetchRequest()
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), Self.airBoxBundleIdentifier)
-        request.fetchLimit = 1
 
-        guard let airBox = try? context.fetch(request).first, let profile = airBox.customProvisioningProfile else {
+        // Right after AirBox itself is installed, its row may not have reached this context yet; a
+        // guest added in that same breath would otherwise be told no profile exists.
+        var profile: ALTProvisioningProfile?
+        for attempt in 0..<6
+        {
+            let request = InstalledApp.fetchRequest()
+            request.predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), Self.airBoxBundleIdentifier)
+            request.fetchLimit = 1
+
+            if let airBox = try? context.fetch(request).first, let found = airBox.customProvisioningProfile
+            {
+                profile = found
+                break
+            }
+            if attempt < 5 { try await Task.sleep(nanoseconds: 300_000_000) }
+        }
+        guard let profile else {
             throw ContainerInstallerError.noProfileForAirBox
         }
         guard let certificate = CertificateManager.shared.activeCertificate?.certificate,
