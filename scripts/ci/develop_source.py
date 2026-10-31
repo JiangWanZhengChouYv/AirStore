@@ -93,7 +93,10 @@ def main() -> None:
         if not companion_ipa.is_file():
             raise SystemExit(f"Missing companion ipa: {companion_ipa}")
 
-        companion_release = make_release(companion_ipa, args.companion_download_url, args.companion_description)
+        # The app-level description is not optional to StoreApp's decoder: it throws and takes the
+        # whole source down with it, so this text is what keeps the other apps readable too.
+        companion_description = args.companion_description or "AirBox runs apps inside itself, so they do not use an App ID."
+        companion_release = make_release(companion_ipa, args.companion_download_url, companion_description)
 
         apps = source.setdefault("apps", [])
         companion = next((app for app in apps if app.get("bundleIdentifier") == args.companion_bundle_id), None)
@@ -103,10 +106,12 @@ def main() -> None:
                 "bundleIdentifier": args.companion_bundle_id,
                 "developerName": args.companion_developer,
                 "subtitle": args.companion_subtitle,
+                "localizedDescription": companion_description,
                 "iconURL": args.companion_icon_url,
                 "tintColor": args.companion_tint,
             }
             apps.append(companion)
+        companion.setdefault("localizedDescription", companion_description)
 
         # The app-level fields follow the newest build, same as a version: that is what the store
         # shows on the page and what `hasUpdate` compares against.
