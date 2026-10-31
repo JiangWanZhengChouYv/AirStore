@@ -39,9 +39,19 @@ final class ContainerInstaller
 {
     static let shared = ContainerInstaller()
 
-    /// AirBox's bundle id is the store's with one more component. Taken from the running bundle, not
-    /// from the build constant, because a debug build carries a team suffix the constant does not.
-    static var airBoxBundleIdentifier: String { (Bundle.main.bundleIdentifier ?? Bundle.Info.appbundleIdentifier) + ".AirBox" }
+    /// Resigning appends the team identifier to the id a package carried, so neither stored id is a
+    /// fixed string the store could rebuild -- and the running bundle is itself suffixed, which put a
+    /// team id in the middle of the name nobody ever installs under. AirBox keeps one component in
+    /// both fields, so that component is what identifies it.
+    static func isAirBox(_ installedApp: InstalledApp) -> Bool
+    {
+        Self.isAirBoxIdentifier(installedApp.bundleIdentifier) || Self.isAirBoxIdentifier(installedApp.resignedBundleIdentifier)
+    }
+
+    private static func isAirBoxIdentifier(_ identifier: String) -> Bool
+    {
+        identifier.split(separator: ".").contains("AirBox")
+    }
 
     /// The group both apps are actually signed with. The store's own signature is the only place that
     /// knows the final name; an installer may have suffixed it with the team id, and anything derived
@@ -273,11 +283,8 @@ final class ContainerInstaller
         var profile: ALTProvisioningProfile?
         for attempt in 0..<6
         {
-            let request = InstalledApp.fetchRequest()
-            request.predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), Self.airBoxBundleIdentifier)
-            request.fetchLimit = 1
-
-            if let airBox = try? context.fetch(request).first, let found = airBox.customProvisioningProfile
+            if let airBox = InstalledApp.all(in: context).first { Self.isAirBox($0) },
+               let found = airBox.customProvisioningProfile
             {
                 profile = found
                 break

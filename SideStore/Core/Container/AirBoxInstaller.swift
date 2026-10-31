@@ -15,10 +15,7 @@ enum AirBoxInstaller
     static var isInstalled: Bool
     {
         let context = DatabaseManager.shared.persistentContainer.viewContext
-        let request = InstalledApp.fetchRequest()
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), ContainerInstaller.airBoxBundleIdentifier)
-        request.fetchLimit = 1
-        return ((try? context.count(for: request)) ?? 0) > 0
+        return InstalledApp.all(in: context).contains { ContainerInstaller.isAirBox($0) }
     }
 
     /// AirBox is published next to the store under the same build stamp, so the address is derived
