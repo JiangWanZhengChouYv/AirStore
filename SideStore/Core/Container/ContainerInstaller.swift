@@ -84,15 +84,31 @@ final class ContainerInstaller
         // the same certificate, so it writes them itself and leaves the user with nothing to import.
         try self.shareCertificate()
 
-        // The only keys AirBox reads today: it ships no TweakLoader, so injection stays off.
-        let appInfo = ["dontInjectTweakLoader": true]
+        let name = bundleURL.deletingPathExtension().lastPathComponent
+        try FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
+        let destination = inbox.appendingPathComponent(bundleURL.lastPathComponent)
+
+        // The engine refuses to start anything without a data container id, and the id is what gives
+        // each app its own data directory. Re-adding an app keeps the id it had, so its data survives.
+        var dataUUID = UUID().uuidString
+        if let data = try? Data(contentsOf: destination.appendingPathComponent("LCAppInfo.plist")),
+           let propertyList = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+           let previous = propertyList as? [String: Any],
+           let previousUUID = previous["LCDataUUID"] as? String
+        {
+            dataUUID = previousUUID
+        }
+
+        // AirBox ships no TweakLoader either, so both the injection and the load stay off.
+        let appInfo: [String: Any] = [
+            "dontInjectTweakLoader": true,
+            "dontLoadTweakLoader": true,
+            "LCDataUUID": dataUUID
+        ]
         let appInfoURL = bundleURL.appendingPathComponent("LCAppInfo.plist")
         try PropertyListSerialization.data(fromPropertyList: appInfo, format: .xml, options: 0).write(to: appInfoURL)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: bundleURL.path)
 
-        let name = bundleURL.deletingPathExtension().lastPathComponent
-        try FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
-        let destination = inbox.appendingPathComponent(bundleURL.lastPathComponent)
         if FileManager.default.fileExists(atPath: destination.path)
         {
             try FileManager.default.removeItem(at: destination)
