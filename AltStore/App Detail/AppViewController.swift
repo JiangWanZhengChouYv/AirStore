@@ -651,29 +651,35 @@ extension AppViewController
 
         // Container mode changes what "Install" can mean, so the choice is made here instead of
         // hiding a second install path somewhere else. It stays invisible while the mode is off.
-        if UserDefaults.standard.isContainerModeEnabled
+        if UserDefaults.standard.isContainerModeEnabled, let version = self.app.latestAvailableVersion
         {
-            self.presentInstallModeChoice(anchor: anchor)
+            self.presentInstallModeChoice(for: version, anchor: anchor) { [weak self] in
+                self?.installToSystem()
+            }
             return
         }
 
         self.installToSystem()
     }
 
-    private func presentInstallModeChoice(anchor: UIView?)
+    /// The one place the mode is offered, whether the tap came from the banner or from a row in the
+    /// version list. `installNormally` is whichever install that entry point would have done.
+    private func presentInstallModeChoice(for version: AppVersion, anchor: UIView?, installNormally: @escaping () -> Void)
     {
-        guard let version = self.app.latestAvailableVersion else { return }
-
         let alertController = UIAlertController(
             title: NSLocalizedString("Install App", comment: ""),
             message: NSLocalizedString("AirBox runs the app without installing it on the system, so it uses no App ID.", comment: ""),
             preferredStyle: .actionSheet
         )
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { [weak self] _ in
-            self?.installToSystem()
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { _ in
+            installNormally()
         })
         alertController.addAction(UIAlertAction(title: NSLocalizedString("Run in AirBox", comment: ""), style: .default) { [weak self] _ in
-            self?.installIntoAirBox(version)
+            // The next step may be another alert (installing AirBox first), and presenting one while
+            // this sheet is still dismissing gets it dropped without a word.
+            DispatchQueue.main.async {
+                self?.installIntoAirBox(version)
+            }
         })
         alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
 
@@ -777,6 +783,21 @@ extension AppViewController
             return
         }
 
+        // The version list has its own install rows; without this they would silently install to the
+        // system even with container mode on.
+        if UserDefaults.standard.isContainerModeEnabled
+        {
+            self.presentInstallModeChoice(for: version, anchor: nil) { [weak self] in
+                self?.installToSystem(version)
+            }
+            return
+        }
+
+        self.installToSystem(version)
+    }
+
+    private func installToSystem(_ version: AppVersion)
+    {
         let group = AppManager.shared.install(.app(version), presentingViewController: self) { [weak self] (result) in
             DispatchQueue.main.async {
                 guard let self else { return }

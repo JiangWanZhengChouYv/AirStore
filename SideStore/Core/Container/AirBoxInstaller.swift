@@ -52,7 +52,22 @@ enum AirBoxInstaller
         alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
             completion(false)
         })
-        presentingViewController.present(alert, animated: true)
+        self.present(alert, from: presentingViewController)
+    }
+
+    /// A view controller that is still dismissing something cannot present, and UIKit drops the
+    /// request silently -- which reads as "nothing happened". Wait for it instead of giving up.
+    private static func present(_ alert: UIAlertController, from viewController: UIViewController, attempts: Int = 6)
+    {
+        guard viewController.presentedViewController == nil else
+        {
+            guard attempts > 0 else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self.present(alert, from: viewController, attempts: attempts - 1)
+            }
+            return
+        }
+        viewController.present(alert, animated: true)
     }
 
     static func install(from presentingViewController: UIViewController,
@@ -108,6 +123,6 @@ enum AirBoxInstaller
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { _ in
             completion(false)
         })
-        presentingViewController.present(alert, animated: true)
+        self.present(alert, from: presentingViewController)
     }
 }
