@@ -180,55 +180,51 @@ private struct ContainerConfirmationView: View
 
     var body: some View
     {
-        NavigationStack
+        ScrollView
         {
-            ScrollView
+            VStack(alignment: .leading, spacing: 16)
             {
-                VStack(alignment: .leading, spacing: 16)
-                {
-                    Text("Enable Container Mode?")
-                        .font(.title3.bold())
+                Text("Enable Container Mode?")
+                    .font(.title3.bold())
 
-                    Text("AirBox can read the data and keychain items of every app running inside it. Only add apps you trust. This feature does not collect any information.")
-                        .font(.system(size: 15))
+                Text("AirBox can read the data and keychain items of every app running inside it. Only add apps you trust. This feature does not collect any information.")
+                    .font(.system(size: 15))
 
-                    Text("Type the sentence below in full to continue.")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                Text("Type the sentence below in full to continue.")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
 
-                    TextField(containerEnglishPhrase, text: self.$typed)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .padding(12)
-                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(uiColor: .secondarySystemBackground)))
+                TextField(containerEnglishPhrase, text: self.$typed)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .padding(12)
+                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(uiColor: .secondarySystemBackground)))
 
-                    Text(verbatim: "\(containerEnglishPhrase)\n\(containerChinesePhrase)")
-                        .font(.system(size: 13, design: .monospaced))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(20)
-            }
-            .navigationTitle("Container")
-            #if !os(tvOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar
-            {
-                ToolbarItem(placement: .cancellationAction)
+                Text(verbatim: "\(containerEnglishPhrase)\n\(containerChinesePhrase)")
+                    .font(.system(size: 13, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // The buttons live in the sheet body rather than the toolbar: the toolbar's overload
+                // set resolves differently between the Xcode versions CI and this machine run, and a
+                // sheet this small does not need a navigation bar.
+                HStack(spacing: 12)
                 {
                     Button("Cancel") { self.dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction)
-                {
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
+
                     Button("Enable") {
                         self.onConfirm()
                         self.dismiss()
                     }
+                    .buttonStyle(.borderedProminent)
                     .disabled(!self.matches)
+                    .frame(maxWidth: .infinity)
                 }
+                .padding(.top, 4)
             }
+            .padding(20)
         }
-        .interactiveDismissDisabled()
     }
 }
