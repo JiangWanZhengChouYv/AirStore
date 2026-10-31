@@ -5,4 +5,10 @@
 PRODUCT_BUNDLE_IDENTIFIER = $(MAIN_BUNDLE_IDENTIFIER).AirBox
 CODE_SIGN_ENTITLEMENTS = AirBox/AirBox.entitlements
 
+// The engine is compiled into this target as two synchronised folders under Dependencies/LiveContainer
+// (the fork's branch), exactly the way upstream compiles it into its own app. Searching the same
+// directories is what lets its sources find each other and the dyld header Apple does not ship.
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/Dependencies/LiveContainer/LiveContainer $(SRCROOT)/Dependencies/LiveContainer/LiveContainer/Tweaks $(SRCROOT)/Dependencies/LiveContainer/litehook/src $(SRCROOT)/Dependencies/LiveContainer/Include
+SWIFT_OBJC_BRIDGING_HEADER = AirBox/AirBox-Bridging-Header.h
+
 #include? "../local.xcconfig"

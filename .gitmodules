@@ -9,3 +9,7 @@
 	url = https://github.com/JiangWanZhengChouYv/SideSign
 	branch = airstore/anisette-client-identity
 
+[submodule "Dependencies/LiveContainer"]
+	path = Dependencies/LiveContainer
+	url = https://github.com/JiangWanZhengChouYv/LiveContainer.git
+	branch = airstore/container-core

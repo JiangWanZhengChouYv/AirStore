@@ -228,6 +228,20 @@
 			);
 			target = A8B0C0000000000000000001 /* AirBox */;
 		};
+		A8B0C0000000000000000010 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				main.c,
+			);
+			target = A8B0C0000000000000000001 /* AirBox */;
+		};
+A8B0C0000000000000000011 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+			);
+			target = A8B0C0000000000000000001 /* AirBox */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -238,6 +252,8 @@
 		A8EEC8412F4B146A00F2436D /* AltStore */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EEC8CB2F4B146B00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, A8EEC8CD2F4B146B00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AltStore; sourceTree = "<group>"; };
 		A8EECF2A2F4B195000F2436D /* SideStore */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EECF492F4B195000F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, A8EECF4A2F4B195000F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = SideStore; sourceTree = "<group>"; };
 		A8B0C0000000000000000009 /* AirBox */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8B0C000000000000000000A /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AirBox; sourceTree = "<group>"; };
+		A8B0C000000000000000000E /* LiveContainerEngine */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8B0C0000000000000000010 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Dependencies/LiveContainer/LiveContainer; sourceTree = "<group>"; };
+		A8B0C000000000000000000F /* LiteHook */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8B0C0000000000000000011 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Dependencies/LiveContainer/litehook/src; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -436,8 +452,12 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A8B0C0000000000000000009 /* AirBox */,
+				A8B0C000000000000000000E /* LiveContainerEngine */,
+				A8B0C000000000000000000F /* LiteHook */,
 			);
 			name = AirBox;
+			packageProductDependencies = (
+			);
 			productName = AirBox;
 			productReference = A8B0C0000000000000000005 /* AirBox.app */;
 			productType = "com.apple.product-type.application";
