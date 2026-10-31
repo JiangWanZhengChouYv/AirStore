@@ -5,6 +5,10 @@
 PRODUCT_BUNDLE_IDENTIFIER = $(MAIN_BUNDLE_IDENTIFIER).AirBox
 CODE_SIGN_ENTITLEMENTS = AirBox/AirBox.entitlements
 
+// A single 1024 icon in the synchronised folder; without the name set, actool compiles the catalog
+// but embeds no app icon at all.
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+
 // The engine is compiled into this target as two synchronised folders under Dependencies/LiveContainer
 // (the fork's branch), exactly the way upstream compiles it into its own app. Searching the same
 // directories is what lets its sources find each other and the dyld header Apple does not ship.

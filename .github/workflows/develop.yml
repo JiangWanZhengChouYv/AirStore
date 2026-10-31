@@ -203,6 +203,10 @@ jobs:
             --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/$VERSION.ipa" \
             --track develop \
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
+            --companion-bundle-id "$(python3 scripts/ci/workflow.py get-bundle-id).AirBox" \
+            --companion-ipa AirBox.ipa \
+            --companion-download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirBox-$VERSION.ipa" \
+            --companion-description "AirBox runs apps inside itself, so they do not use an App ID." \
             --out build/airstore-source.json
 
       # The app asks this repository's Pages site for a release asset before it tries any third-party
