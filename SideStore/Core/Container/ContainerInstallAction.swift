@@ -14,6 +14,26 @@ enum ContainerInstallAction
 {
     static func run(version: AppVersion, appName: String, from presentingViewController: UIViewController, airBoxReady: Bool = false)
     {
+        self.run(appName: appName, from: presentingViewController, airBoxReady: airBoxReady) { progress in
+            try await ContainerInstaller.shared.addToAirBox(version, progress: progress)
+        }
+    }
+
+    /// An .ipa the user picked or was handed: no source entry, no version to compare, still a guest.
+    static func run(ipaAt url: URL, appName: String? = nil, from presentingViewController: UIViewController, airBoxReady: Bool = false)
+    {
+        self.run(appName: appName ?? url.deletingPathExtension().lastPathComponent,
+                 from: presentingViewController,
+                 airBoxReady: airBoxReady) { progress in
+            try await ContainerInstaller.shared.addToAirBox(ipaAt: url, progress: progress)
+        }
+    }
+
+    private static func run(appName: String,
+                            from presentingViewController: UIViewController,
+                            airBoxReady: Bool,
+                            deliver: @escaping (Progress?) async throws -> String)
+    {
         guard airBoxReady || AirBoxInstaller.isInstalled else
         {
             AirBoxInstaller.confirmAndInstall(from: presentingViewController) { installed in
@@ -21,7 +41,7 @@ enum ContainerInstallAction
                 // The install pipeline reports success before the new row has necessarily reached this
                 // context, so the retry is told to trust the result instead of asking the database again.
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.run(version: version, appName: appName, from: presentingViewController, airBoxReady: true)
+                    self.run(appName: appName, from: presentingViewController, airBoxReady: true, deliver: deliver)
                 }
             }
             return
@@ -45,7 +65,7 @@ enum ContainerInstallAction
         Task { @MainActor in
             do
             {
-                _ = try await ContainerInstaller.shared.addToAirBox(version, progress: progress)
+                _ = try await deliver(progress)
             }
             catch
             {

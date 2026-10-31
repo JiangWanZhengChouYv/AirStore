@@ -129,6 +129,17 @@ public enum InstallAppDialog {
         onConfirm: @escaping () -> Void,
         onCancel: @escaping () -> Void = {}
     ) {
+        // An imported .ipa is the other way apps get installed here, and it gets the same choice:
+        // run it inside AirBox, or install it on the system.
+        if UserDefaults.standard.isContainerModeEnabled,
+           let presenter = presentingViewController ?? UIApplication.shared.topViewController()
+        {
+            self.presentContainerChoice(from: presenter, onInstall: onConfirm, onRunInAirBox: {
+                ContainerInstallAction.run(ipaAt: ipaURL, from: presenter)
+            }, onCancel: onCancel)
+            return
+        }
+
         let message: String
         if ipaURL.isFileURL {
             let appName = ipaURL.deletingPathExtension().lastPathComponent
@@ -159,7 +170,9 @@ public enum InstallAppDialog {
            let chosenVersion = version ?? storeApp.latestAvailableVersion,
            let presenter = presentingViewController ?? UIApplication.shared.topViewController()
         {
-            self.presentContainerChoice(storeApp: storeApp, version: chosenVersion, from: presenter, onInstall: onConfirm, onCancel: onCancel)
+            self.presentContainerChoice(from: presenter, onInstall: onConfirm, onRunInAirBox: {
+                ContainerInstallAction.run(version: chosenVersion, appName: storeApp.name, from: presenter)
+            }, onCancel: onCancel)
             return
         }
 
@@ -173,10 +186,9 @@ public enum InstallAppDialog {
     }
 
     private static func presentContainerChoice(
-        storeApp: StoreApp,
-        version: AppVersion,
         from presentingViewController: UIViewController,
         onInstall: @escaping () -> Void,
+        onRunInAirBox: @escaping () -> Void,
         onCancel: @escaping () -> Void
     ) {
         let alertController = UIAlertController(
@@ -191,7 +203,7 @@ public enum InstallAppDialog {
             // The next step may be another alert (installing AirBox first), and presenting one while
             // this sheet is still dismissing gets it dropped without a word.
             DispatchQueue.main.async {
-                ContainerInstallAction.run(version: version, appName: storeApp.name, from: presentingViewController)
+                onRunInAirBox()
             }
         })
         alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in

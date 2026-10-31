@@ -58,7 +58,6 @@ final class ContainerInstaller
     /// Returns the name of the guest that landed in AirBox's inbox.
     func addToAirBox(_ version: AppVersion, progress: Progress? = nil) async throws -> String
     {
-        guard let inbox = self.sharedContainerInbox else { throw ContainerInstallerError.airBoxNotInstalled }
         guard let downloadURL = version.url else { throw ContainerInstallerError.downloadFailed(NSLocalizedString("no download URL", comment: "")) }
 
         let workDirectory = FileManager.default.uniqueTemporaryURL()
@@ -66,6 +65,32 @@ final class ContainerInstaller
         defer { try? FileManager.default.removeItem(at: workDirectory) }
 
         let packageURL = try await self.download(downloadURL, into: workDirectory, progress: progress)
+        return try await self.deliver(packageURL: packageURL, workDirectory: workDirectory, progress: progress)
+    }
+
+    /// The same route for a package that is already on disk -- an .ipa imported from Files -- or for
+    /// a URL the caller has not downloaded yet. Imported bundles are as much a guest as a source app.
+    func addToAirBox(ipaAt url: URL, progress: Progress? = nil) async throws -> String
+    {
+        let workDirectory = FileManager.default.uniqueTemporaryURL()
+        try FileManager.default.createDirectory(at: workDirectory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: workDirectory) }
+
+        let packageURL: URL
+        if url.isFileURL
+        {
+            packageURL = url
+        }
+        else
+        {
+            packageURL = try await self.download(url, into: workDirectory, progress: progress)
+        }
+        return try await self.deliver(packageURL: packageURL, workDirectory: workDirectory, progress: progress)
+    }
+
+    private func deliver(packageURL: URL, workDirectory: URL, progress: Progress?) async throws -> String
+    {
+        guard let inbox = self.sharedContainerInbox else { throw ContainerInstallerError.airBoxNotInstalled }
 
         guard let bundleURL = try? FileManager.default.unzipAppBundle(at: packageURL, to: workDirectory) else {
             throw ContainerInstallerError.downloadFailed(NSLocalizedString("the package is not a readable .ipa", comment: ""))
