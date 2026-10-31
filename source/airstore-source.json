@@ -115,6 +115,7 @@
       "bundleIdentifier": "com.SideStore.SideStore.AirBox",
       "developerName": "AirStore团队",
       "subtitle": "Run apps inside AirBox without using App IDs",
+      "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID.",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AirBox/Assets.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "8B5CF6",
       "version": "0.8.3-develop-202610310824.86-044b5c0b",
