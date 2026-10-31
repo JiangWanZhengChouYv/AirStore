@@ -33,7 +33,15 @@ public extension UIColor
     static let altBackground = namedColor("Background")!
 
     static var settingsBackground: UIColor {
+        #if WIDGET_EXTENSION
         return namedColor("SettingsBackground")!
+        #else
+        // The asset is a fixed dark blue, so a picked colour could never reach the settings pages --
+        // including the one page where it is picked. Follow the theme once there is one; stay on the
+        // shipped asset otherwise, so nobody who never opened the picker sees a different app.
+        guard ThemeManager.shared.isUsingCustomTheme else { return namedColor("SettingsBackground")! }
+        return ThemeManager.shared.settingsSurfaceColor
+        #endif
     }
 
     static var settingsHighlighted: UIColor {

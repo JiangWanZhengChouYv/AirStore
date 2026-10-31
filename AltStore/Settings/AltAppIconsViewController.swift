@@ -74,6 +74,7 @@ class AltAppIconsViewController: UICollectionViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        self.adoptThemeSurface()
         
         self.title = NSLocalizedString("Change App Icon", comment: "")
         

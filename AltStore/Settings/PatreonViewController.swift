@@ -15,6 +15,7 @@ final class PatreonViewController: UICollectionViewController, UICollectionViewD
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        self.adoptThemeSurface()
         
         let aboutHeaderNib = UINib(nibName: "AboutPatreonHeaderView", bundle: nil)
         self.prototypeAboutHeader = aboutHeaderNib.instantiate(withOwner: nil, options: nil)[0] as? AboutPatreonHeaderView

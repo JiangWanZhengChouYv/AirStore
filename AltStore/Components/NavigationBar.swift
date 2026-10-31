@@ -44,16 +44,43 @@ class NavigationBar: UINavigationBar
     private func initialize()
     {
         #if !os(tvOS)
+        self.applyBarColour()
+        // This bar sits on the page whose button opens the colour picker, so it has to be able to
+        // change while it is on screen.
+        NotificationCenter.default.addObserver(self, selector: #selector(self.refreshBarColour),
+                                               name: ThemeManager.themeDidChangeNotification, object: nil)
+        #else
+        if let tintColor = self.barTintColor {
+            self.barTintColor = tintColor
+            self.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+        }
+        #endif
+    }
+
+    @objc private func refreshBarColour()
+    {
+        #if !os(tvOS)
+        self.applyBarColour()
+        #endif
+    }
+
+    private func applyBarColour()
+    {
+        #if !os(tvOS)
+        // The storyboard hands over the stock asset as barTintColor; a picked colour has to win here,
+        // otherwise the settings bar stays blue above a page that is now teal.
+        let barColor = ThemeManager.shared.isUsingCustomTheme ? UIColor.settingsBackground : self.barTintColor
+
         let standardAppearance = UINavigationBarAppearance()
         standardAppearance.configureWithDefaultBackground()
         standardAppearance.shadowColor = nil
         
         let edgeAppearance = UINavigationBarAppearance()
         edgeAppearance.configureWithOpaqueBackground()
-        edgeAppearance.backgroundColor = self.barTintColor
+        edgeAppearance.backgroundColor = barColor
         edgeAppearance.shadowColor = nil
         
-        if let tintColor = self.barTintColor
+        if let tintColor = barColor
         {
             let textAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
             
@@ -71,11 +98,6 @@ class NavigationBar: UINavigationBar
         
         self.scrollEdgeAppearance = edgeAppearance
         self.standardAppearance = standardAppearance
-        #else
-        if let tintColor = self.barTintColor {
-            self.barTintColor = tintColor
-            self.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-        }
         #endif
     }
     

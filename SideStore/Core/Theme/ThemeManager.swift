@@ -61,6 +61,35 @@ public final class ThemeManager: ObservableObject {
         self.primaryColor = .defaultAltPrimary
         UserDefaults.standard.removeObject(forKey: Self.userDefaultsKey)
     }
+
+    /// Whether the colour came from the picker rather than from the shipped asset. The settings
+    /// surfaces only follow the theme in that case -- the stock look must not change for anyone who
+    /// never touched the picker.
+    public var isUsingCustomTheme: Bool {
+        UserDefaults.standard.string(forKey: Self.userDefaultsKey) != nil
+    }
+
+    /// The settings page's own surface: a dark shade of whatever colour was picked, so the page where
+    /// the colour is chosen is itself affected by it. The two brightness numbers come from the shipped
+    /// pair -- Primary #3B82F6 has a settings surface of #1E3A8A (0.54) and #172554 in dark mode
+    /// (0.33) -- and saturation is capped so a neon pick cannot make the page unreadable.
+    public var settingsSurfaceColor: UIColor {
+        UIColor { traits in
+            ThemeManager.surfaceColor(for: self.primaryColor, isDark: traits.userInterfaceStyle == .dark)
+        }
+    }
+
+    public static func surfaceColor(for color: UIColor, isDark: Bool) -> UIColor {
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        guard color.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) else {
+            // Achromatic colours (black, white, pure grey) have no hue to keep; leave them alone.
+            return color
+        }
+        return UIColor(hue: hue, saturation: min(saturation, 0.8), brightness: isDark ? 0.33 : 0.54, alpha: 1)
+    }
 }
 
 public extension UIColor {

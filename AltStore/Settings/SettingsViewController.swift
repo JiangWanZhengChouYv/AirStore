@@ -225,6 +225,7 @@ final class SettingsViewController: UITableViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        self.adoptThemeSurface()
         
         // Cells and section headers look their text up again as they are configured; the table's own
         // footer view ("Follow AirStore for updates") is none of those, so it has to be walked here.
