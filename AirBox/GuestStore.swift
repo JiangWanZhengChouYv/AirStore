@@ -21,6 +21,31 @@ struct Guest: Identifiable
         let displayName = NSDictionary(contentsOf: info)?["CFBundleDisplayName"] as? String
         return displayName ?? self.directory.deletingPathExtension().lastPathComponent
     }
+    var version: String?
+    {
+        NSDictionary(contentsOf: self.directory.appendingPathComponent("Info.plist"))?["CFBundleShortVersionString"] as? String
+    }
+
+    /// The first loose icon file the bundle carries. Asset-catalog icons live inside `Assets.car`, which
+    /// cannot be copied out as an image, so those guests show up without one.
+    var iconFile: String?
+    {
+        guard let info = NSDictionary(contentsOf: self.directory.appendingPathComponent("Info.plist")),
+              let icons = info["CFBundleIcons"] as? [String: Any],
+              let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
+              let files = primary["CFBundleIconFiles"] as? [String] else { return nil }
+
+        let finder = FileManager.default
+        for name in files
+        {
+            for (scale, ext) in [("@2x", "png"), ("@3x", "png"), ("", "png")]
+            {
+                let url = self.directory.appendingPathComponent(name + scale).appendingPathExtension(ext)
+                if finder.fileExists(atPath: url.path) { return url.lastPathComponent }
+            }
+        }
+        return nil
+    }
 }
 
 @MainActor
@@ -60,16 +85,35 @@ final class GuestStore: ObservableObject
         self.documentsDirectory.appendingPathComponent("Applications", isDirectory: true)
     }
 
-    private var sharedInboxDirectory: URL?
+    private var sharedDirectory: URL?
     {
         guard let identifier = self.appGroupIdentifier else { return nil }
-        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)?
-            .appendingPathComponent("ContainerInbox", isDirectory: true)
+        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
+    }
+
+    private var sharedInboxDirectory: URL?
+    {
+        self.sharedDirectory?.appendingPathComponent("ContainerInbox", isDirectory: true)
+    }
+
+    /// What AirBox holds, published for the store to show. The guest bundles live in AirBox's own
+    /// container, which the store's sandbox cannot read, so this listing -- one plist plus the loose
+    /// icon per guest, keyed by directory name -- is the only thing the store can see.
+    private var sharedManifestDirectory: URL?
+    {
+        self.sharedDirectory?.appendingPathComponent("ContainerApps", isDirectory: true)
+    }
+
+    /// Deletions the store asked for, one empty file per guest, consumed the next time AirBox runs.
+    private var sharedDeleteDirectory: URL?
+    {
+        self.sharedDirectory?.appendingPathComponent("ContainerDelete", isDirectory: true)
     }
 
     func reload() async
     {
         try? FileManager.default.createDirectory(at: self.applicationsDirectory, withIntermediateDirectories: true)
+        self.applyPendingDeletions()
 
         let entries = (try? FileManager.default.contentsOfDirectory(at: self.applicationsDirectory,
                                                                     includingPropertiesForKeys: nil,
@@ -85,6 +129,54 @@ final class GuestStore: ObservableObject
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 
         self.takeLaunchError()
+        self.publish()
+    }
+
+    private func applyPendingDeletions()
+    {
+        let finder = FileManager.default
+        guard let directory = self.sharedDeleteDirectory,
+              let requested = try? finder.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil) else { return }
+
+        for marker in requested
+        {
+            // Named exactly like the guest's folder, extension included, because that is the name the
+            // store knows it by.
+            let name = marker.lastPathComponent
+            try? finder.removeItem(at: self.applicationsDirectory.appendingPathComponent(name))
+            try? finder.removeItem(at: marker)
+        }
+    }
+
+    /// Rewritten from scratch every time, so a guest that went away by any route stops being listed.
+    private func publish()
+    {
+        let finder = FileManager.default
+        guard let directory = self.sharedManifestDirectory else { return }
+        try? finder.createDirectory(at: directory, withIntermediateDirectories: true)
+        try? finder.removeItem(at: directory)
+        try? finder.createDirectory(at: directory, withIntermediateDirectories: true)
+
+        for guest in self.guests
+        {
+            var record: [String: Any] = [
+                "directoryName": guest.directory.lastPathComponent,
+                "name": guest.name
+            ]
+            if let bundleIdentifier = guest.bundleIdentifier { record["bundleIdentifier"] = bundleIdentifier }
+            if let version = guest.version { record["version"] = version }
+
+            if let iconFile = guest.iconFile,
+               let icon = finder.contentsOfDirectory(at: guest.directory, includingPropertiesForKeys: nil)?
+                            .first(where: { $0.lastPathComponent == iconFile }),
+               let data = try? Data(contentsOf: icon)
+            {
+                record["iconFileName"] = iconFile
+                try? data.write(to: directory.appendingPathComponent("\(guest.directory.lastPathComponent)-\(iconFile)"))
+            }
+
+            (record as NSDictionary).write(to: directory.appendingPathComponent("\(guest.directory.lastPathComponent).plist"), atomically: true)
+        }
     }
 
     /// Whatever the store app left in the shared inbox: already unpacked, patched and signed bundles.
@@ -119,10 +211,15 @@ final class GuestStore: ObservableObject
     /// process over: `main.m` reads this file and skips the list entirely.
     func launch(_ guest: Guest)
     {
+        self.launch(directoryName: guest.directory.lastPathComponent)
+    }
+
+    func launch(directoryName: String)
+    {
         let marker = self.documentsDirectory.appendingPathComponent("PendingLaunch")
         do
         {
-            try guest.directory.deletingPathExtension().lastPathComponent.write(to: marker, atomically: true, encoding: .utf8)
+            try directoryName.write(to: marker, atomically: true, encoding: .utf8)
             exit(0)
         }
         catch
