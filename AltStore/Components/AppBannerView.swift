@@ -57,6 +57,22 @@ class AppBannerView: NibView
     }
     
     var style: Style = .app
+
+    /// How much of a row's own colour is left through the glass -- translucent, not a paint. The update
+    /// cards use the same number so the two kinds of box on one screen match.
+    static let glassFillAlpha: CGFloat = 0.5
+
+    /// The colour left visible *inside* the glass, for rows in a list that are told apart by colour
+    /// alone. System glass brings no colour of its own, so a row that sets this reads as a tinted panel
+    /// while everywhere else keeps the clear glass the detail page was approved with.
+    var glassFillColor: UIColor?
+    {
+        didSet
+        {
+            guard oldValue != self.glassFillColor else { return }
+            self.update()
+        }
+    }
     
     private var originalTintColor: UIColor?
     
@@ -401,7 +417,8 @@ private extension AppBannerView
             
             self.button.style = .pill
             
-            self.backgroundEffectView.contentView.backgroundColor = onGlass ? .clear : UIColor(resource: .blurTint)
+            let glassFill = self.glassFillColor.map { $0.adjustedForDisplay.withAlphaComponent(Self.glassFillAlpha) }
+            self.backgroundEffectView.contentView.backgroundColor = onGlass ? glassFill : UIColor(resource: .blurTint)
             self.backgroundEffectView.backgroundColor = onGlass ? nil : tintColor
             
         case .source:

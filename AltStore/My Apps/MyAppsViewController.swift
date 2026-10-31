@@ -500,6 +500,7 @@ private extension MyAppsViewController
             cell.layoutMargins.left = self.view.layoutMargins.left
             cell.layoutMargins.right = self.view.layoutMargins.right
             cell.tintColor = tintColor
+            cell.bannerView.glassFillColor = cell.tintColor
             
             cell.deactivateBadge?.isHidden = false
             
@@ -592,6 +593,7 @@ private extension MyAppsViewController
             cell.layoutMargins.left = self.view.layoutMargins.left
             cell.layoutMargins.right = self.view.layoutMargins.right
             cell.tintColor = UIColor.gray
+            cell.bannerView.glassFillColor = cell.tintColor
             
             if cell.bundleIdentifier != installedApp.bundleIdentifier
             {

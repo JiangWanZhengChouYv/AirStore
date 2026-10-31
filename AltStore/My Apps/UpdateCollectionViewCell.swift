@@ -116,8 +116,23 @@ private extension UpdateCollectionViewCell
         case .expanded: self.versionDescriptionTextView.isCollapsed = false
         }
         
-        self.blurView.backgroundColor = self.originalTintColor ?? self.tintColor
-        self.bannerView.button.progressTintColor = self.originalTintColor ?? self.tintColor
+        // The box was a blur painted over with the app's colour. On iOS 26 it is glass carrying that
+        // colour at half strength, which keeps the row identifiable without the flat fill.
+        let tintColor: UIColor? = self.originalTintColor ?? self.tintColor
+        
+        if #available(iOS 26.0, *)
+        {
+            let glass = UIGlassEffect()
+            glass.tintColor = tintColor
+            self.blurView.effect = glass
+            self.blurView.contentView.backgroundColor = tintColor?.adjustedForDisplay.withAlphaComponent(AppBannerView.glassFillAlpha)
+        }
+        else
+        {
+            self.blurView.backgroundColor = tintColor
+        }
+        
+        self.bannerView.button.progressTintColor = tintColor
         
         self.setNeedsLayout()
         self.layoutIfNeeded()
