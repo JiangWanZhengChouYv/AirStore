@@ -228,6 +228,8 @@
 		A8B0C000000000000000000A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AirBox.entitlements,
+				AirBoxPackaging.entitlements,
 				Info.plist,
 			);
 			target = A8B0C0000000000000000001 /* AirBox */;

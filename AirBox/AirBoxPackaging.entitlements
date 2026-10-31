@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- What the fake signature on the packaged AirBox.ipa carries. It is the build-time
+     AirBox.entitlements with its build settings written out: ldid applies a plist verbatim, so the
+     installer would otherwise read a literal "group.$(APP_GROUP_IDENTIFIER)" and refuse it
+     (FetchProvisioningProfilesOperation). Mirrors AltStore/Resources/ReleaseEntitlements.plist,
+     which does the same for the store and hardcodes the CI team the same way. -->
+<plist version="1.0">
+<dict>
+	<key>application-identifier</key>
+	<string>XYZ0123456.com.SideStore.SideStore.AirBox</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>XYZ0123456</string>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.SideStore.SideStore</string>
+	</array>
+	<key>com.apple.developer.kernel.increased-memory-limit</key>
+	<true/>
+	<key>com.apple.developer.kernel.extended-virtual-addressing</key>
+	<true/>
+	<key>get-task-allow</key>
+	<true/>
+</dict>
+</plist>

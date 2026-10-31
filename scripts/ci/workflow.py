@@ -158,6 +158,7 @@ def build():
         raise
     run("make fakesign | tee -a build/logs/build.log")
     run("make ipa | tee -a build/logs/build.log")
+    run("make ipa-airbox | tee -a build/logs/build.log")
     run("zip -r -9 ./AirStore.dSYMs.zip ./SideStore.xcarchive/dSYMs")
 
 # ----------------------------------------------------------

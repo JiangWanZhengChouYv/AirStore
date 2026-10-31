@@ -277,6 +277,23 @@ ipa:
 	zip -r AirStore.ipa Payload
 	rm -rf Payload*/
 
+# AirBox ships beside the store rather than inside it: its entitlements (the two memory limits) are
+# the reason it has to be installed as its own app, so the fake signature has to carry them the same
+# way SideStore's does. The packaging copy is the build-time file with its build settings expanded --
+# ldid does not know about xcconfig placeholders, and an installer that reads a raw
+# $(APP_GROUP_IDENTIFIER) rejects the app outright.
+fakesign-airbox:
+	ldid -SAirBox/AirBoxPackaging.entitlements SideStore.xcarchive/Products/Applications/AirBox.app/AirBox
+
+ipa-airbox: fakesign-airbox
+	@echo ''
+	@echo "fake-signing and packing AirBox"
+	mkdir -p AirBoxPayload/Payload/AirBox.app
+	cp -R SideStore.xcarchive/Products/Applications/AirBox.app/ AirBoxPayload/Payload/AirBox.app/
+	rm -f     AirBox.ipa
+	pushd AirBoxPayload > /dev/null; zip -r ../AirBox.ipa Payload; popd > /dev/null
+	rm -rf AirBoxPayload
+
 # Global Variables
 
 # Ensure this is set by the environment or passed as an argument
@@ -385,4 +402,5 @@ clean-sidebackup:
 
 clean: clean-sidebackup
 	@rm -rf AirStore.ipa
+	@rm -rf AirBox.ipa
 	@rm -rf build/

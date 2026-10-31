@@ -30,6 +30,11 @@ BASE_TAG_LENGTH = 12      # hex digits of the base hash that go into a patch's n
 PACKAGE_SUFFIX = ".ipa"
 PATCH_SUFFIX = ".patch"
 
+# AirBox is packed beside the store but is not a store build: no phone ever updates it through the
+# delta machinery, and patching it against the store's packages would be meaningless. It is matched
+# by name prefix and kept out of the base rotation; only the newest one stays on the release.
+COMPANION_PREFIXES = ("AirBox-",)
+
 
 def load_release(path):
     """Asset list of a release, tolerant of the release not existing yet."""
@@ -44,9 +49,24 @@ def load_release(path):
     return document.get("assets") or []
 
 
+def is_companion(name):
+    """True for an app packed next to the store rather than being the store."""
+    return any(name.startswith(prefix) for prefix in COMPANION_PREFIXES)
+
+
 def packages(assets):
-    """The .ipa assets, newest upload first."""
-    found = [asset for asset in assets if (asset.get("name") or "").endswith(PACKAGE_SUFFIX)]
+    """The store's .ipa assets, newest upload first."""
+    found = [
+        asset for asset in assets
+        if (asset.get("name") or "").endswith(PACKAGE_SUFFIX)
+        and not is_companion(asset["name"])
+    ]
+    return sorted(found, key=lambda asset: asset.get("id") or 0, reverse=True)
+
+
+def companions(assets):
+    """AirBox packages, newest upload first."""
+    found = [asset for asset in assets if is_companion(asset.get("name") or "")]
     return sorted(found, key=lambda asset: asset.get("id") or 0, reverse=True)
 
 
@@ -76,14 +96,21 @@ def stale_names(assets, keep):
     cut to or from it go together. A patch carries the base tag after its own version's name and a
     package never does, so matching the stem plus a dash is enough -- no hash parsing, and the older
     fixed-name patches still follow the build they were published with.
+
+    Companions follow the same rule one step coarser: only the newest AirBox stays, because it is a
+    single app and every build would otherwise leave another copy behind.
     """
     kept = [stem_of(asset["name"]) for asset in packages(assets)[:keep]]
+    newest_companion = companions(assets)[0]["name"] if companions(assets) else None
 
-    def stays(name):
+    def stays(asset):
+        name = asset.get("name") or ""
+        if is_companion(name):
+            return name == newest_companion
         stem = stem_of(name)
         return any(stem == owner or stem.startswith(owner + "-") for owner in kept)
 
-    return [asset["name"] for asset in assets if not stays(asset.get("name") or "")]
+    return [asset["name"] for asset in assets if not stays(asset)]
 
 
 def pruned_names(assets, keep):

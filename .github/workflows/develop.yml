@@ -167,6 +167,10 @@ jobs:
           # is what a phone builds the URL from -- see scripts/ci/delta_assets.py.
           cp AirStore.ipa "$VERSION.ipa"
           gh release upload develop-latest "$VERSION.ipa" --clobber
+          # AirBox rides along as a companion rather than a build: it never takes part in the delta
+          # rotation, and pruning keeps only the newest copy (scripts/ci/delta_assets.py).
+          cp AirBox.ipa "AirBox-$VERSION.ipa"
+          gh release upload develop-latest "AirBox-$VERSION.ipa" --clobber
           for patch in "$VERSION"-*.patch; do
             [ -e "$patch" ] || continue
             gh release upload develop-latest "$patch" --clobber
