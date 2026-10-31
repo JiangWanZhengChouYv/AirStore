@@ -111,12 +111,17 @@ public extension Bundle
 }
 
 public extension String {
+    /// Only the store itself -- not everything installed under its identifier. Re-signing appends the
+    /// team id as one extra component, so both forms are compared as a whole; a substring test would
+    /// also answer yes for the companion targets (`AirBox`, `SideBackup`, `AltWidget`), and the install
+    /// pipeline then skipped caching their provisioning profiles on the grounds that they were the app
+    /// doing the caching.
     var isAltStoreAppID: Bool {
         let activeID   = Bundle.Info.activeBundleIdentifier
         let altstoreID = Bundle.Info.appbundleIdentifier
         
-        let matchesActiveBundle   = !activeID.isEmpty && self.contains(activeID)
-        let matchesAltStoreBundle = !altstoreID.isEmpty && self.contains(altstoreID)
+        let matchesActiveBundle   = !activeID.isEmpty && self == activeID
+        let matchesAltStoreBundle = !altstoreID.isEmpty && self == altstoreID
         
         return matchesActiveBundle || matchesAltStoreBundle
     }
