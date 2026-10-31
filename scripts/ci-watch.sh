@@ -27,6 +27,10 @@ REPO="JiangWanZhengChouYv/AirStore"
 # duration on every redraw, so between polls it keeps advancing on its own.
 INTERVAL=60
 IDLE_INTERVAL=180
+# 1 = this pass may spend API calls; 0 = redraw from the copies on disk. The screen is redrawn every
+# second either way, and the percentage is derived from the clock at draw time -- so between polls the
+# bar keeps moving while the network stays quiet.
+FETCH=1
 MODE="running"          # running | ids
 ONCE=0
 BRANCH=""
@@ -120,22 +124,33 @@ running_ids() {
     printf '%s\n' "${RUN_IDS[@]}"
     return
   fi
+  local cache="$DETAIL_CACHE_DIR/running.ids"
+  if [ "$FETCH" = 0 ] && [ -f "$cache" ]; then cat "$cache"; return; fi
   local q="repos/$REPO/actions/runs?per_page=30"
   [ -n "$BRANCH" ] && q="$q&branch=$BRANCH"
-  gh api "$q&status=queued" --jq '.workflow_runs[].id' 2>/dev/null
-  gh api "$q&status=in_progress" --jq '.workflow_runs[].id' 2>/dev/null
+  {
+    gh api "$q&status=queued" --jq '.workflow_runs[].id' 2>/dev/null
+    gh api "$q&status=in_progress" --jq '.workflow_runs[].id' 2>/dev/null
+  } > "$cache"
+  cat "$cache"
 }
 
 recent_ids() {
+  local cache="$DETAIL_CACHE_DIR/recent.ids"
+  if [ "$FETCH" = 0 ] && [ -f "$cache" ]; then cat "$cache"; return; fi
   local q="repos/$REPO/actions/runs?per_page=$(( HISTORY + 10 ))"
   [ -n "$BRANCH" ] && q="$q&branch=$BRANCH"
-  gh api "$q" --jq ".workflow_runs[:$HISTORY][].id" 2>/dev/null
+  gh api "$q" --jq ".workflow_runs[:$HISTORY][].id" 2>/dev/null > "$cache"
+  cat "$cache"
 }
 
 run_fields() {
+  local cache="$DETAIL_CACHE_DIR/fields.$1"
+  if [ "$FETCH" = 0 ] && [ -f "$cache" ]; then cat "$cache"; return; fi
   gh api "repos/$REPO/actions/runs/$1" --jq \
     '[.status, (.conclusion // ""), .name, .head_branch, .head_sha, .run_started_at, .updated_at, (.run_attempt // 1|tostring), .path] | join("\u001f")' \
-    2>/dev/null
+    2>/dev/null > "$cache"
+  cat "$cache"
 }
 
 # Prints one line for a run. Reads the run plus its job steps, so two API calls per run per poll.
@@ -149,8 +164,14 @@ draw_run() {
   local started="$6" updated="$7" attempt="$8" wf_path="$9"
 
   local steps done_steps total current
-  steps=$(gh api "repos/$REPO/actions/runs/$id/jobs" --jq \
-    '.jobs[].steps[] | "\(.status)\t\(.conclusion // "-")\t\(.name)"' 2>/dev/null)
+  local stepsCache="$DETAIL_CACHE_DIR/stepsraw.$id"
+  if [ "$FETCH" = 0 ] && [ -f "$stepsCache" ]; then
+    steps=$(cat "$stepsCache")
+  else
+    steps=$(gh api "repos/$REPO/actions/runs/$id/jobs" --jq \
+      '.jobs[].steps[] | "\(.status)\t\(.conclusion // "-")\t\(.name)"' 2>/dev/null)
+    printf '%s' "$steps" > "$stepsCache"
+  fi
   total=$(printf '%s\n' "$steps" | grep -c . )
   done_steps=$(printf '%s\n' "$steps" | grep -cE '^completed')
   current=$(printf '%s\n' "$steps" | awk -F'\t' '$1=="in_progress"{print $3; exit}')
@@ -230,7 +251,13 @@ draw_finished() {
   local mm=$(( elapsed / 60 )) ss=$(( elapsed % 60 ))
 
   local artifacts
-  artifacts=$(gh api "repos/$REPO/actions/runs/$id/artifacts" --jq '[.artifacts[].name] | join(" · ")' 2>/dev/null)
+  local artifactsCache="$DETAIL_CACHE_DIR/artifacts.$id"
+  if [ "$FETCH" = 0 ] && [ -f "$artifactsCache" ]; then
+    artifacts=$(cat "$artifactsCache")
+  else
+    artifacts=$(gh api "repos/$REPO/actions/runs/$id/artifacts" --jq '[.artifacts[].name] | join(" · ")' 2>/dev/null)
+    printf '%s' "$artifacts" > "$artifactsCache"
+  fi
 
   printf '%s%s%s %-12s %-10s %s  %02d:%02d  %s%s%s' \
     "$colour" "$state" "$C_OFF" "$(shorten_workflow "$workflow")" "${branch:0:10}" "${sha:0:8}" \
@@ -541,6 +568,7 @@ while :; do
   now=$(now_epoch)
 
   if [ "$now" -ge "$next_poll" ]; then
+    FETCH=1
     build_frame
     if [ "$ANY_RUNNING" = 1 ] && [ "$POLL_FAST" = 1 ]; then
       next_poll=$(( now + INTERVAL ))
@@ -551,6 +579,14 @@ while :; do
     case "$FRAME" in *"${C_RED}失败"*) failed_any=1 ;; esac
     render
     [ "$ONCE" = 1 ] && break
+  else
+    # This pass asks GitHub nothing. The rows come back out of the copies on disk and the percentage
+    # is derived from the clock again on the way out, so the bar and the elapsed time keep advancing
+    # between polls. Only a real screen is redrawn: a redirected log should keep one frame per poll
+    # instead of filling up with a copy a second.
+    FETCH=0
+    build_frame
+    if [ "$SCREEN_ACTIVE" = 1 ]; then render; fi
   fi
 
   # One key, no echo. A pipe or a redirect means nobody is listening, so do not spin on EOF.
