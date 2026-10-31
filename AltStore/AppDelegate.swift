@@ -394,6 +394,32 @@ private extension AppDelegate
 
 extension AppDelegate
 {
+    /// Says what the launch-time source refresh found. The background fetch does the same from a
+    /// notification; opening the app is the other moment someone expects to be told, and until now
+    /// the badge only changed when iOS decided to run that fetch.
+    @MainActor
+    func announceAvailableUpdates()
+    {
+        let context = DatabaseManager.shared.viewContext
+        // count(for:) only accepts the untyped request; see the note in fetchSources.
+        let request = InstalledApp.supportedUpdatesFetchRequest() as! NSFetchRequest<NSFetchRequestResult>
+        request.includesPendingChanges = false
+        let count = (try? context.count(for: request)) ?? 0
+
+        UIApplication.shared.applicationIconBadgeNumber = count
+
+        guard count > 0,
+              UIApplication.shared.applicationState == .active,
+              let window = UIApplication.shared.connectedScenes
+                  .compactMap({ ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) })
+                  .first
+        else { return }
+
+        let detail = String(format: NSLocalizedString("%d update(s) available", comment: ""), count)
+        let toastView = ToastView(text: "New Update Available", detailText: detail)
+        toastView.show(in: window)
+    }
+
     private func prepareForBackgroundFetch()
     {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (success, error) in
@@ -585,7 +611,8 @@ private extension AppDelegate
                 DispatchQueue.main.async {
                     if UIApplication.shared.applicationState == .active {
                         if !updates.isEmpty, let window = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) }).first {
-                            let toastView = ToastView(text: "New Update Available", detailText: "\(updates.count) update(s) available")
+                            let detail = String(format: NSLocalizedString("%d update(s) available", comment: ""), updates.count)
+                            let toastView = ToastView(text: "New Update Available", detailText: detail)
                             toastView.show(in: window)
                         }
                     } else {

@@ -179,7 +179,12 @@ final class LaunchViewController: UIViewController {
         await AppManager.shared.reconcileInstalledApps()
         splashViewModel.updateStatus(NSLocalizedString("Updating sources…", comment: ""))
         AppManager.shared.updateAllSources { result in
-            guard case .failure(let error) = result else { return }
+            guard case .failure(let error) = result else {
+                // The same source refresh already knows whether anything is out of date; say so now
+                // instead of waiting for a background fetch iOS may not run for hours.
+                (UIApplication.shared.delegate as? AppDelegate)?.announceAvailableUpdates()
+                return
+            }
             debugLog("Failed to update sources on launch. \(error.localizedDescription)")
             
             let errorDesc = ErrorProcessing(.fullError).getDescription(error: error as NSError)

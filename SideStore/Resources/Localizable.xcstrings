@@ -15884,6 +15884,17 @@
           }
         }
       }
+    },
+    "%d update(s) available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d 个更新可用"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
