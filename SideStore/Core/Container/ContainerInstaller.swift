@@ -132,10 +132,13 @@ final class ContainerInstaller
             throw ContainerInstallerError.noProfileForAirBox
         }
         guard let certificate = CertificateManager.shared.activeCertificate?.certificate,
-              let team = DatabaseManager.shared.activeTeam(in: context) else {
+              let databaseTeam = DatabaseManager.shared.activeTeam(in: context) else {
             throw ContainerInstallerError.noCertificate
         }
 
+        // The Core Data team and the signer's team are different types; this is the same conversion
+        // AuthManager performs before anything else touches the signer.
+        let team = ALTTeam(identifier: databaseTeam.identifier, name: databaseTeam.name, type: databaseTeam.type)
         let signer = ALTSigner(team: team, certificate: certificate)
         try await signer.signApp(at: bundleURL, provisioningProfiles: [profile], progress: nil)
     }
