@@ -205,16 +205,15 @@ private struct ContainerConfirmationView: View
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                // The buttons live in the sheet body rather than the toolbar: the toolbar's overload
-                // set resolves differently between the Xcode versions CI and this machine run, and a
-                // sheet this small does not need a navigation bar.
+                // Spelled out as SwiftUI.Button: this module has its own `Button` (a UIButton
+                // subclass), so the short name resolves to that and not to SwiftUI's.
                 HStack(spacing: 12)
                 {
-                    Button("Cancel") { self.dismiss() }
+                    SwiftUI.Button("Cancel") { self.dismiss() }
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
 
-                    Button("Enable") {
+                    SwiftUI.Button("Enable") {
                         self.onConfirm()
                         self.dismiss()
                     }
