@@ -26,9 +26,9 @@ struct Guest: Identifiable
         NSDictionary(contentsOf: self.directory.appendingPathComponent("Info.plist"))?["CFBundleShortVersionString"] as? String
     }
 
-    /// The first loose icon file the bundle carries. Asset-catalog icons live inside `Assets.car`, which
-    /// cannot be copied out as an image, so those guests show up without one.
-    var iconFile: String?
+    /// The first loose icon file the bundle carries, located on disk. Asset-catalog icons live inside
+    /// `Assets.car`, which cannot be copied out as an image, so those guests show up without one.
+    var iconFileURL: URL?
     {
         guard let info = NSDictionary(contentsOf: self.directory.appendingPathComponent("Info.plist")),
               let icons = info["CFBundleIcons"] as? [String: Any],
@@ -38,10 +38,10 @@ struct Guest: Identifiable
         let finder = FileManager.default
         for name in files
         {
-            for (scale, ext) in [("@2x", "png"), ("@3x", "png"), ("", "png")]
+            for suffix in ["@2x", "@3x", ""]
             {
-                let url = self.directory.appendingPathComponent(name + scale).appendingPathExtension(ext)
-                if finder.fileExists(atPath: url.path) { return url.lastPathComponent }
+                let url = self.directory.appendingPathComponent(name + suffix).appendingPathExtension("png")
+                if finder.fileExists(atPath: url.path) { return url }
             }
         }
         return nil
@@ -153,7 +153,6 @@ final class GuestStore: ObservableObject
     {
         let finder = FileManager.default
         guard let directory = self.sharedManifestDirectory else { return }
-        try? finder.createDirectory(at: directory, withIntermediateDirectories: true)
         try? finder.removeItem(at: directory)
         try? finder.createDirectory(at: directory, withIntermediateDirectories: true)
 
@@ -166,13 +165,10 @@ final class GuestStore: ObservableObject
             if let bundleIdentifier = guest.bundleIdentifier { record["bundleIdentifier"] = bundleIdentifier }
             if let version = guest.version { record["version"] = version }
 
-            if let iconFile = guest.iconFile,
-               let icon = finder.contentsOfDirectory(at: guest.directory, includingPropertiesForKeys: nil)?
-                            .first(where: { $0.lastPathComponent == iconFile }),
-               let data = try? Data(contentsOf: icon)
+            if let icon = guest.iconFileURL, let data = try? Data(contentsOf: icon)
             {
-                record["iconFileName"] = iconFile
-                try? data.write(to: directory.appendingPathComponent("\(guest.directory.lastPathComponent)-\(iconFile)"))
+                record["iconFileName"] = icon.lastPathComponent
+                try? data.write(to: directory.appendingPathComponent("\(guest.directory.lastPathComponent)-\(icon.lastPathComponent)"))
             }
 
             (record as NSDictionary).write(to: directory.appendingPathComponent("\(guest.directory.lastPathComponent).plist"), atomically: true)
