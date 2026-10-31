@@ -111,5 +111,33 @@
       }
     }
   ],
-  "news": []
+  "news": [
+    {
+      "identifier": "liquid-glass-20261031",
+      "date": "2026-10-31T00:00:00Z",
+      "title": "Glass that fills up as you download",
+      "caption": "On iOS 26 the download card is Liquid Glass, and the theme colour now pours in from the left with the download instead of sitting behind it. Toasts, banners and the buttons follow the same material. Picking a colour in Settings restarts the app so every page shows it at once — and the settings pages finally take their surface from that colour too.",
+      "tintColor": "19D3B5",
+      "appID": "com.SideStore.SideStore",
+      "notify": false
+    },
+    {
+      "identifier": "incremental-updates-20261030",
+      "date": "2026-10-30T00:00:00Z",
+      "title": "Updates that only download what changed",
+      "caption": "With incremental updates on in Developer options, an update now fetches a patch instead of the whole 30 MB package. Each build publishes a patch for every recent build, so skipping a version no longer forces a full download: measured between the last few builds, 8 KB to 8 MB per update, and anything that does not fit falls back to the full package by itself.",
+      "tintColor": "8B5CF6",
+      "appID": "com.SideStore.SideStore",
+      "notify": false
+    },
+    {
+      "identifier": "ios-26-sign-in-20261029",
+      "date": "2026-10-29T00:00:00Z",
+      "title": "Why signing in works on iOS 26.4",
+      "caption": "AirStore exists for one reason: the -80045 sign-in loop on iOS 26.4 and later. The client identity sent to Apple is made to match the Anisette server that mints the headers, the single-use X-Apple-I-MD value is refreshed at every step, and the default server runs on a real Windows ADI. Apple ID sign-in, installs, refreshes and JIT all work from the phone, with no computer involved.",
+      "tintColor": "3B82F6",
+      "appID": "com.SideStore.SideStore",
+      "notify": false
+    }
+  ]
 }
