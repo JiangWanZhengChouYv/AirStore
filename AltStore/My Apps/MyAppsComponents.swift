@@ -57,6 +57,40 @@ final class InstalledAppCollectionViewCell: UICollectionViewCell
     }
 }
 
+/// A guest running inside AirBox. Built in code because nothing in a storyboard knows about these rows,
+/// and the banner is the same view every other row on this screen uses.
+final class ContainerAppCollectionViewCell: UICollectionViewCell
+{
+    let bannerView = AppBannerView(frame: .zero)
+
+    override init(frame: CGRect)
+    {
+        super.init(frame: frame)
+
+        self.contentView.preservesSuperviewLayoutMargins = true
+
+        self.bannerView.translatesAutoresizingMaskIntoConstraints = false
+        self.contentView.addSubview(self.bannerView)
+
+        NSLayoutConstraint.activate([
+            self.bannerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
+            self.bannerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
+            self.bannerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 4),
+            self.bannerView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -4)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func prepareForReuse()
+    {
+        super.prepareForReuse()
+        self.bannerView.button.resetDisplayState()
+    }
+}
+
 final class InstalledAppsCollectionFooterView: UICollectionReusableView
 {
     @IBOutlet var textLabel: UILabel!

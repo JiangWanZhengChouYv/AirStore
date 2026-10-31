@@ -232,6 +232,17 @@
         }
       }
     },
+    "%@ will stop running inside AirBox. Its data goes with it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 将不再在 AirBox 里运行，它的数据也会被一起删除。"
+          }
+        }
+      }
+    },
     "%d Pending Actions": {
       "extractionState": "manual",
       "localizations": {
@@ -1724,6 +1735,17 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "连着 AirStore 的 VPN 时，App 会在后台自动刷新！"
+          }
+        }
+      }
+    },
+    "Apps in AirBox": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 里的 App"
           }
         }
       }
@@ -9494,6 +9516,17 @@
         }
       }
     },
+    "Open in AirBox": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 AirBox 中打开"
+          }
+        }
+      }
+    },
     "Operation Failed": {
       "extractionState": "manual",
       "localizations": {
@@ -11019,6 +11052,28 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "取消作为首选"
+          }
+        }
+      }
+    },
+    "Remove from AirBox": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 AirBox 移除"
+          }
+        }
+      }
+    },
+    "Remove from AirBox?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 AirBox 移除？"
           }
         }
       }
@@ -14396,6 +14451,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "更新基线：%@"
+          }
+        }
+      }
+    },
+    "Update in AirBox": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 AirBox 中更新"
           }
         }
       }

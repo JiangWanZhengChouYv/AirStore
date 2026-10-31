@@ -140,6 +140,25 @@ class AppBannerView: NibView
 
 extension AppBannerView
 {
+    /// A row for something the store does not manage -- a guest running inside AirBox. The same view, so
+    /// the row matches the ones above it, but there is no InstalledApp or StoreApp behind it: the caller
+    /// names it, hands over its icon and chooses the button's title.
+    func configureGuest(name: String, subtitle: String, icon: UIImage?, tintColor: UIColor?, buttonTitle: String)
+    {
+        self.style = .app
+        self.originalTintColor = tintColor
+        self.glassFillColor = tintColor
+        self.titleLabel.text = name
+        self.subtitleLabel.text = subtitle
+        self.iconImageView.image = icon
+        self.iconImageView.isIndicatingActivity = false
+        self.iconImageView.style = .icon
+        self.button.style = .pill
+        self.button.removeTarget(nil, action: nil, for: .allEvents)
+        self.button.setTitle(buttonTitle, for: .normal)
+        self.update()
+    }
+
     func configure(for app: AppProtocol, action: AppAction? = nil, showSourceIcon: Bool = true)
     {
         struct AppValues

@@ -28,6 +28,7 @@ extension MyAppsViewController
         case updates
         case activeApps
         case inactiveApps
+        case containerApps
     }
 }
 
@@ -43,6 +44,8 @@ class MyAppsViewController: UICollectionViewController
     private lazy var updatesDataSource = self.makeUpdatesDataSource()
     private lazy var activeAppsDataSource = self.makeActiveAppsDataSource()
     private lazy var inactiveAppsDataSource = self.makeInactiveAppsDataSource()
+    private lazy var containerDataSource = self.makeContainerDataSource()
+    private var containerApps: [ContainerApp] = []
     private lazy var unsupportedUpdates = Set<StoreApp>()
     
     private var prototypeUpdateCell: UpdateCollectionViewCell!
@@ -126,6 +129,8 @@ class MyAppsViewController: UICollectionViewController
         self.collectionView.register(UpdatesCollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "UpdatesHeader")
         self.collectionView.register(InstalledAppsCollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "ActiveAppsHeader")
         self.collectionView.register(InstalledAppsCollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "InactiveAppsHeader")
+        self.collectionView.register(ContainerAppCollectionViewCell.self, forCellWithReuseIdentifier: "ContainerCell")
+        self.collectionView.register(InstalledAppsCollectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "ContainerAppsHeader")
         
         #if !os(tvOS)
         let refreshControl = UIRefreshControl()
@@ -206,6 +211,10 @@ class MyAppsViewController: UICollectionViewController
         super.viewDidAppear(animated)
         
         _viewDidAppear = true
+
+        // What AirBox is holding only changes when one of the two apps touches it, so the listing is
+        // read when this screen comes back rather than watched.
+        self.refreshContainerApps()
 
         if let pendingURL = self.pendingImportURL {
             self.pendingImportURL = nil
@@ -347,7 +356,8 @@ private extension MyAppsViewController
             self.noUpdatesDataSource,
             self.updatesDataSource,
             self.activeAppsDataSource,
-            self.inactiveAppsDataSource
+            self.inactiveAppsDataSource,
+            self.containerDataSource
         ])
         dataSource.proxy = self
         return dataSource
@@ -380,6 +390,35 @@ private extension MyAppsViewController
                 cell.textLabel.text = NSLocalizedString("No Updates Available", comment: "")
                 cell.button.isHidden = true
             }
+        }
+        
+        return dynamicDataSource
+    }
+    
+    func makeContainerDataSource() -> DynamicCollectionViewDataSource<InstalledApp>
+    {
+        let dynamicDataSource = DynamicCollectionViewDataSource<InstalledApp>()
+        dynamicDataSource.numberOfSectionsHandler = { 1 }
+        dynamicDataSource.numberOfItemsHandler = { _ in self.containerApps.count }
+        dynamicDataSource.cellIdentifierHandler = { _ in "ContainerCell" }
+        dynamicDataSource.dynamicCellConfigurationHandler = { (cell, indexPath) in
+            guard let app = self.containerApp(at: indexPath) else { return }
+            let cell = cell as! ContainerAppCollectionViewCell
+
+            cell.layoutMargins.left = self.view.layoutMargins.left
+            cell.layoutMargins.right = self.view.layoutMargins.right
+
+            let (source, newestVersion) = self.sourceApp(for: app)
+            let hasUpdate = (newestVersion != nil && newestVersion != app.version)
+
+            cell.bannerView.configureGuest(name: app.name,
+                                           subtitle: app.version ?? app.bundleIdentifier ?? app.directoryName,
+                                           icon: app.iconFileURL.flatMap { UIImage(contentsOfFile: $0.path) },
+                                           tintColor: source?.tintColor ?? .altPrimary,
+                                           buttonTitle: hasUpdate ? NSLocalizedString("Update", comment: "") : NSLocalizedString("Open", comment: ""))
+
+            cell.bannerView.button.tag = indexPath.item
+            cell.bannerView.button.addTarget(self, action: #selector(MyAppsViewController.containerAppButtonTapped(_:)), for: .primaryActionTriggered)
         }
         
         return dynamicDataSource
@@ -2072,6 +2111,27 @@ extension MyAppsViewController
             
             return headerView
             
+        case .containerApps where kind == UICollectionView.elementKindSectionHeader:
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "ContainerAppsHeader", for: indexPath) as! InstalledAppsCollectionHeaderView
+
+            UIView.performWithoutAnimation {
+                headerView.layoutMargins.left = self.view.layoutMargins.left
+                headerView.layoutMargins.right = self.view.layoutMargins.right
+
+                headerView.textLabel.text = NSLocalizedString("Apps in AirBox", comment: "")
+                headerView.button.setTitle(nil, for: .normal)
+                headerView.button.setImage(nil, for: .normal)
+
+                // These rows do not expire and are not the store's to manage, so the section says so by
+                // being absent rather than by showing an empty box.
+                headerView.isHidden = self.containerApps.isEmpty
+            }
+
+            return headerView
+
+        case .containerApps:
+            return UICollectionReusableView()
+
         case .activeApps, .inactiveApps:
             let footerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "InstalledAppsFooter", for: indexPath) as! InstalledAppsCollectionFooterView
             
@@ -2113,8 +2173,106 @@ extension MyAppsViewController
             guard let cell = collectionView.cellForItem(at: indexPath) else { break }
             self.performSegue(withIdentifier: "showUpdate", sender: cell)
             
+        case .containerApps:
+            guard let app = self.containerApp(at: indexPath) else { break }
+            self.act(on: app)
+
         default: break
         }
+    }
+}
+
+extension MyAppsViewController
+{
+    /// AirBox owns those bundles, so this is a read of the listing it publishes into the shared group.
+    private func refreshContainerApps()
+    {
+        self.containerApps = ContainerLibrary.shared.apps()
+        self.collectionView.reloadData()
+    }
+
+    private func containerApp(at indexPath: IndexPath) -> ContainerApp?
+    {
+        guard indexPath.section == Section.containerApps.rawValue, indexPath.item < self.containerApps.count else { return nil }
+        return self.containerApps[indexPath.item]
+    }
+
+    /// Which source a guest came from, and what that source is offering now. AirBox's listing carries the
+    /// bundle identifier it was delivered under and nothing else, so the source is looked up by that.
+    private func sourceApp(for app: ContainerApp) -> (storeApp: StoreApp?, newestVersion: String?)
+    {
+        guard let bundleIdentifier = app.bundleIdentifier else { return (nil, nil) }
+
+        let request = StoreApp.fetchRequest()
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), bundleIdentifier)
+        request.fetchLimit = 1
+
+        let context = DatabaseManager.shared.persistentContainer.viewContext
+        guard let storeApp = (try? context.fetch(request))?.first else { return (nil, nil) }
+        return (storeApp, storeApp.latestAvailableVersion?.version)
+    }
+
+    @objc private func containerAppButtonTapped(_ sender: UIButton)
+    {
+        guard let app = self.containerApp(at: IndexPath(item: sender.tag, section: Section.containerApps.rawValue)) else { return }
+        self.act(on: app)
+    }
+
+    private func act(on app: ContainerApp)
+    {
+        let (storeApp, newestVersion) = self.sourceApp(for: app)
+
+        guard let version = storeApp?.latestAvailableVersion, newestVersion != app.version else {
+            ContainerLibrary.shared.launch(app)
+            return
+        }
+
+        // Handing the same app over again keeps its data container id, so this is an update and not a
+        // second copy of it.
+        ContainerInstallAction.run(version: version, appName: app.name, from: self)
+    }
+
+    private func containerContextMenu(for app: ContainerApp) -> UIMenu
+    {
+        let (storeApp, newestVersion) = self.sourceApp(for: app)
+
+        let open = UIAction(title: NSLocalizedString("Open in AirBox", comment: ""), image: UIImage(systemName: "shippingbox")) { _ in
+            ContainerLibrary.shared.launch(app)
+        }
+
+        let remove = UIAction(title: NSLocalizedString("Remove from AirBox", comment: ""), image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+            self.confirmRemoval(of: app)
+        }
+
+        var groups = [UIMenuElement]()
+
+        if let version = storeApp?.latestAvailableVersion, newestVersion != app.version
+        {
+            let update = UIAction(title: NSLocalizedString("Update in AirBox", comment: ""), image: UIImage(systemName: "arrow.triangle.2.circlepath")) { _ in
+                ContainerInstallAction.run(version: version, appName: app.name, from: self)
+            }
+            groups.append(UIMenu(title: "", options: .displayInline, children: [open, update]))
+        }
+        else
+        {
+            groups.append(UIMenu(title: "", options: .displayInline, children: [open]))
+        }
+
+        groups.append(UIMenu(title: "", options: .displayInline, children: [remove]))
+        return UIMenu(title: "", children: groups)
+    }
+
+    private func confirmRemoval(of app: ContainerApp)
+    {
+        let alert = UIAlertController(title: NSLocalizedString("Remove from AirBox?", comment: ""),
+                                      message: String(format: NSLocalizedString("%@ will stop running inside AirBox. Its data goes with it.", comment: ""), app.name),
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Remove", comment: ""), style: .destructive) { _ in
+            ContainerLibrary.shared.remove(app)
+            self.refreshContainerApps()
+        })
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+        self.present(alert, animated: true)
     }
 }
 
@@ -2433,6 +2591,11 @@ extension MyAppsViewController
         switch section
         {
         case .updates, .noUpdates: return nil
+        case .containerApps:
+            guard let app = self.containerApp(at: indexPath) else { return nil }
+            return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { _ in
+                self.containerContextMenu(for: app)
+            }
         case .activeApps, .inactiveApps:
             let installedApp = self.dataSource.item(at: indexPath)
             guard !AppManager.shared.isActivelyManagingApp(withBundleID: installedApp.bundleIdentifier) else { return nil }
@@ -2495,7 +2658,7 @@ extension MyAppsViewController: UICollectionViewDelegateFlowLayout
             self.cachedUpdateSizes[item.bundleIdentifier] = size
             return size
             
-        case .activeApps, .inactiveApps:
+        case .activeApps, .inactiveApps, .containerApps:
             return CGSize(width: collectionView.bounds.width, height: 88)
         }
     }
@@ -2513,6 +2676,8 @@ extension MyAppsViewController: UICollectionViewDelegateFlowLayout
         case .activeApps: return CGSize(width: collectionView.bounds.width, height: 29)
         case .inactiveApps where self.inactiveAppsDataSource.itemCount == 0: return .zero
         case .inactiveApps: return CGSize(width: collectionView.bounds.width, height: 29)
+        case .containerApps where self.containerApps.isEmpty: return .zero
+        case .containerApps: return CGSize(width: collectionView.bounds.width, height: 29)
         }
     }
     
@@ -2547,6 +2712,7 @@ extension MyAppsViewController: UICollectionViewDelegateFlowLayout
             
         case .inactiveApps where self.inactiveAppsDataSource.itemCount == 0: return .zero
         case .inactiveApps: return appIDsFooterSize()
+        case .containerApps: return .zero
         }
     }
     
