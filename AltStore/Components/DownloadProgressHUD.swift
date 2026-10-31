@@ -45,6 +45,10 @@ final class DownloadProgressHUD
     private var stack: UIStackView?
     private var cards: [String: Card] = [:]
 
+    /// True while any card is on screen, i.e. while an install is mid-flight and must not be
+    /// interrupted -- the theme manager asks before restarting the app to show a new colour.
+    var hasActiveCards: Bool { !self.cards.isEmpty }
+
     private init() {}
 
     func begin(id: String, appName: String, url: URL)

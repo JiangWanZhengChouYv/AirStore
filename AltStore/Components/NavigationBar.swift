@@ -68,8 +68,11 @@ class NavigationBar: UINavigationBar
     {
         #if !os(tvOS)
         // The storyboard hands over the stock asset as barTintColor; a picked colour has to win here,
-        // otherwise the settings bar stays blue above a page that is now teal.
-        let barColor = ThemeManager.shared.isUsingCustomTheme ? UIColor.settingsBackground : self.barTintColor
+        // otherwise the settings bar stays blue above a page that is now teal. A nil barTintColor is a
+        // deliberate "use the system bar" (Browse, Sources, Main), and painting those with the settings
+        // surface put an opaque block across the top of every one of them.
+        let themedBarColor = (ThemeManager.shared.isUsingCustomTheme && self.barTintColor != nil) ? UIColor.settingsBackground : nil
+        let barColor = themedBarColor ?? self.barTintColor
 
         let standardAppearance = UINavigationBarAppearance()
         standardAppearance.configureWithDefaultBackground()

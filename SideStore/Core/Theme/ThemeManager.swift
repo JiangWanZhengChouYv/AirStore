@@ -44,6 +44,13 @@ public final class ThemeManager: ObservableObject {
                 {
                     window.tintColor = self.primaryColor
                 }
+
+                // Nearly every surface reads the colour once, at load, so the reliable way to show a
+                // new one is to start the app over. Skipped while a download is on screen: those cards
+                // are a running install and killing them would lose more than a stale colour. The
+                // short delay lets the picker finish its own dismissal animation first.
+                guard !DownloadProgressHUD.shared.hasActiveCards else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { exit(0) }
             }
         }
     }
