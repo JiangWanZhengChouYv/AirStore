@@ -86,13 +86,35 @@ def stale_names(assets, keep):
     return [asset["name"] for asset in assets if not stays(asset.get("name") or "")]
 
 
+def pruned_names(assets, keep):
+    """Everything to delete: older builds entirely, plus every patch that is not the newest build's.
+
+    A build's patches only ever take a phone *to that build*. Once the next build publishes its own
+    set, the previous set can no longer be the answer to any question -- a device on any base it
+    covered is covered by the newer set too, as long as that base is still inside the window. Keeping
+    the old ones only made the release page a wall of similar file names.
+    """
+    stale = list(stale_names(assets, keep))
+    newest = packages(assets)[0]["name"] if packages(assets) else None
+    if newest:
+        newest_stem = stem_of(newest)
+        for asset in assets:
+            name = asset.get("name") or ""
+            if not name.endswith(PATCH_SUFFIX):
+                continue
+            if not name.startswith(newest_stem + "-"):
+                if name not in stale:
+                    stale.append(name)
+    return stale
+
+
 def kept_names(assets, keep):
     """The mirror of `stale_names`: what a release should hold after pruning.
 
     Listed separately because the Pages branch is a copy of the release and has to end up holding the
     same set of files, so it is asked here rather than working out its own idea of a build.
     """
-    stale = set(stale_names(assets, keep))
+    stale = set(pruned_names(assets, keep))
     return [asset["name"] for asset in assets if asset.get("name") not in stale]
 
 
@@ -108,6 +130,10 @@ def main():
     name.add_argument("--package", required=True)
     name.add_argument("--base-sha", required=True)
 
+    prune = commands.add_parser("prune", help="everything to delete: old builds and old builds' patches")
+    prune.add_argument("--release-json", required=True)
+    prune.add_argument("--keep", type=int, default=5)
+
     stale = commands.add_parser("stale", help="assets of builds past the retention window")
     stale.add_argument("--release-json", required=True)
     stale.add_argument("--keep", type=int, default=5)
@@ -119,6 +145,8 @@ def main():
     arguments = parser.parse_args()
     if arguments.command == "bases":
         print("\n".join(base_names(load_release(arguments.release_json), arguments.limit)))
+    elif arguments.command == "prune":
+        print("\n".join(pruned_names(load_release(arguments.release_json), arguments.keep)))
     elif arguments.command == "stale":
         print("\n".join(stale_names(load_release(arguments.release_json), arguments.keep)))
     elif arguments.command == "kept":

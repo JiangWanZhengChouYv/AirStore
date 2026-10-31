@@ -182,7 +182,7 @@ jobs:
           # put the package uploaded seconds ago at the front of that list, and deleting it would
           # leave the feed pointing at an asset that is no longer there.
           gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" > build/release.json
-          python3 scripts/ci/delta_assets.py stale --release-json build/release.json --keep 5 | while read -r stale; do
+          python3 scripts/ci/delta_assets.py prune --release-json build/release.json --keep 5 | while read -r stale; do
             if [ -n "$stale" ]; then
               echo "pruning $stale"
               gh release delete-asset develop-latest "$stale" --yes || true
