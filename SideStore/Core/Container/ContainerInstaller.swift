@@ -59,7 +59,7 @@ final class ContainerInstaller
     func addToAirBox(_ version: AppVersion, progress: Progress? = nil) async throws -> String
     {
         guard let inbox = self.sharedContainerInbox else { throw ContainerInstallerError.airBoxNotInstalled }
-        guard let downloadURL = version.url else { throw ContainerInstallerError.downloadFailed("no download URL") }
+        guard let downloadURL = version.url else { throw ContainerInstallerError.downloadFailed(NSLocalizedString("no download URL", comment: "")) }
 
         let workDirectory = FileManager.default.uniqueTemporaryURL()
         try FileManager.default.createDirectory(at: workDirectory, withIntermediateDirectories: true)
@@ -68,7 +68,7 @@ final class ContainerInstaller
         let packageURL = try await self.download(downloadURL, into: workDirectory, progress: progress)
 
         guard let bundleURL = try? FileManager.default.unzipAppBundle(at: packageURL, to: workDirectory) else {
-            throw ContainerInstallerError.downloadFailed("the package is not a readable .ipa")
+            throw ContainerInstallerError.downloadFailed(NSLocalizedString("the package is not a readable .ipa", comment: ""))
         }
         progress?.completedUnitCount = 66
 
@@ -155,7 +155,7 @@ final class ContainerInstaller
                 try await self.download(candidate, to: destination, progress: progress)
 
                 guard (try? FileManager.default.attributesOfItem(atPath: destination.path)[.size] as? Int64 ?? 0) ?? 0 > 1024 else {
-                    throw ContainerInstallerError.downloadFailed("the file is too small to be a package")
+                    throw ContainerInstallerError.downloadFailed(NSLocalizedString("the file is too small to be a package", comment: ""))
                 }
                 progress?.completedUnitCount = 60
                 return destination
@@ -165,7 +165,7 @@ final class ContainerInstaller
                 lastError = error
             }
         }
-        throw ContainerInstallerError.downloadFailed(lastError?.localizedDescription ?? "no route answered")
+        throw ContainerInstallerError.downloadFailed(lastError?.localizedDescription ?? NSLocalizedString("no route answered", comment: ""))
     }
 
     /// A download of its own rather than `URLSession.download(from:)`, because the button needs to show
@@ -183,7 +183,7 @@ final class ContainerInstaller
                 guard let location,
                       let httpResponse = response as? HTTPURLResponse,
                       (200..<300).contains(httpResponse.statusCode) else {
-                    continuation.resume(throwing: ContainerInstallerError.downloadFailed("the server did not send a package"))
+                    continuation.resume(throwing: ContainerInstallerError.downloadFailed(NSLocalizedString("the server did not send a package", comment: "")))
                     return
                 }
                 do

@@ -15543,6 +15543,347 @@
           }
         }
       }
+    },
+    "Container": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器"
+          }
+        }
+      }
+    },
+    "CONTAINER": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器"
+          }
+        }
+      }
+    },
+    "Container Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器模式"
+          }
+        }
+      }
+    },
+    "Run apps inside AirBox instead of installing them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 AirBox 中运行 App，而不是安装到系统。"
+          }
+        }
+      }
+    },
+    "Container mode is optional. Apps installed this way do not use an App ID and do not appear on the Home Screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器模式是可选的。以这种方式运行的 App 不占用 App ID，也不会显示在主屏幕上。"
+          }
+        }
+      }
+    },
+    "Install AirBox from AirStore first. Apps can only be added to a mode that has somewhere to run them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先在 AirStore 中安装 AirBox。这个模式需要有可运行的位置，才能添加 App。"
+          }
+        }
+      }
+    },
+    "BEFORE YOU ENABLE IT": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用前须知"
+          }
+        }
+      }
+    },
+    "AirBox can read the data and keychain items of every app running inside it. Only add apps you trust.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 可以读取其中运行的每个 App 的数据和钥匙串项目。只添加你信任的 App。"
+          }
+        }
+      }
+    },
+    "These apps do not use App IDs, so the 3-app and 10-App-ID limits do not apply.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些 App 不占用 App ID，因此不受 3 个 App、10 个 App ID 的限制。"
+          }
+        }
+      }
+    },
+    "This feature does not collect any information.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此功能不收集任何信息。"
+          }
+        }
+      }
+    },
+    "Enable Container Mode?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用容器模式？"
+          }
+        }
+      }
+    },
+    "AirBox can read the data and keychain items of every app running inside it. Only add apps you trust. This feature does not collect any information.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 可以读取其中运行的每个 App 的数据和钥匙串项目。只添加你信任的 App。此功能不收集任何信息。"
+          }
+        }
+      }
+    },
+    "Type the sentence below in full to continue.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请完整输入下面的句子以继续。"
+          }
+        }
+      }
+    },
+    "Enable": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用"
+          }
+        }
+      }
+    },
+    "Install AirBox?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装 AirBox？"
+          }
+        }
+      }
+    },
+    "AirBox is installed like any other app, so it takes one App ID and one of the three active app slots. Apps it runs use neither.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 像普通 App 一样安装，会占用 1 个 App ID 和 3 个活跃名额中的 1 个。它运行的 App 两者都不占用。"
+          }
+        }
+      }
+    },
+    "AirBox Not Available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法安装 AirBox"
+          }
+        }
+      }
+    },
+    "AirBox is published with develop builds of AirStore. Update AirStore to a develop build to install it from here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 随 AirStore 的 develop 构建一起发布。请先将 AirStore 更新到 develop 构建，再从这里安装。"
+          }
+        }
+      }
+    },
+    "AirBox is not published for this build of AirStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本的 AirStore 没有发布 AirBox。"
+          }
+        }
+      }
+    },
+    "AirBox is not installed. Install it before adding apps to it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未安装 AirBox。请先安装，再往里添加 App。"
+          }
+        }
+      }
+    },
+    "AirBox has no provisioning profile. Reinstall it from AirStore, then try again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 没有描述文件。请从 AirStore 重新安装后再试。"
+          }
+        }
+      }
+    },
+    "The package could not be downloaded: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法下载安装包：%@"
+          }
+        }
+      }
+    },
+    "The app cannot run in AirBox: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个 App 无法在 AirBox 中运行：%@"
+          }
+        }
+      }
+    },
+    "AirBox runs the app without installing it on the system, so it uses no App ID.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 在不安装到系统的情况下运行这个 App，因此不占用 App ID。"
+          }
+        }
+      }
+    },
+    "Run in AirBox": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 AirBox 中运行"
+          }
+        }
+      }
+    },
+    "No signing certificate is available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可用的签名证书。"
+          }
+        }
+      }
+    },
+    "no download URL": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有下载地址"
+          }
+        }
+      }
+    },
+    "the package is not a readable .ipa": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个文件不是可读取的 .ipa"
+          }
+        }
+      }
+    },
+    "the file is too small to be a package": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件太小，不是有效的安装包"
+          }
+        }
+      }
+    },
+    "no route answered": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有下载线路都没有响应"
+          }
+        }
+      }
+    },
+    "the server did not send a package": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器没有返回安装包"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
