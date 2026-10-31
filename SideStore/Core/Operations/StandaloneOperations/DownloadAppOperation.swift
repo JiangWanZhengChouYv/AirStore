@@ -163,7 +163,10 @@ final class DownloadAppOperation: BasePipelineOperation<InstallAppOperationConte
 
         let appBundle: ALTApplication
 
+        // Only the store itself is cut into patches. Every other package on a release has no
+        // counterpart asset, so asking for one is a guaranteed 404 on the way to the full download.
         if UserDefaults.standard.isIncrementalUpdateEnabled, let appVersion,
+           self.context.bundleIdentifier == StoreApp.altstoreAppID,
            let baseTag = BundleDelta.cachedBaseTag(forBundleID: self.context.bundleIdentifier),
            let patchURL = BundleDelta.patchURL(forPackageAt: sourceURL, baseTag: baseTag)
         {
