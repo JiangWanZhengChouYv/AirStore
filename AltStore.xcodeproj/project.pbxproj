@@ -17,6 +17,8 @@
 		A8E8DEA63059BC8800F69B47 /* CodeSignKit in Frameworks */ = {isa = PBXBuildFile; productRef = A8E8DEA53059BC8800F69B47 /* CodeSignKit */; };
 		A8E8DEA93059BC9800F69B47 /* CodeSignKit in Frameworks */ = {isa = PBXBuildFile; productRef = A8E8DEA83059BC9800F69B47 /* CodeSignKit */; };
 		A8F5E9AF30422E3600DBD7E1 /* SideSign in Frameworks */ = {isa = PBXBuildFile; productRef = A8F5E9AE30422E3600DBD7E1 /* SideSign */; };
+		A8B0C0000000000000000015 /* LCMachOUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A8B0C0000000000000000014 /* LCMachOUtils.m */; };
+		A8B0C0000000000000000017 /* litehook.c in Sources */ = {isa = PBXBuildFile; fileRef = A8B0C0000000000000000016 /* litehook.c */; };
 		A8F5E9B230422E3600DBD7E4 /* StikJIT in Frameworks */ = {isa = PBXBuildFile; productRef = A8F5E9B130422E3600DBD7E3 /* StikJIT */; };
 		BF989177250AABF4002ACF50 /* AltWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BF989167250AABF3002ACF50 /* AltWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A8F010000000000000000003 /* Authentication.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A8F010000000000000000001 /* Authentication.storyboard */; platformFilter = ios; };
@@ -72,6 +74,8 @@
 		B3C39606284F4C8400DA9E2F /* CodeSigning.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = CodeSigning.xcconfig; sourceTree = "<group>"; };
 		B3C39607284F4C8400DA9E2F /* Build.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Build.xcconfig; sourceTree = "<group>"; };
 		B3C39608284F4C8400DA9E2F /* CodeSigning.xcconfig.sample */ = {isa = PBXFileReference; lastKnownFileType = text; path = CodeSigning.xcconfig.sample; sourceTree = "<group>"; };
+		A8B0C0000000000000000014 /* LCMachOUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Dependencies/LiveContainer/LiveContainer/LCMachOUtils.m; sourceTree = "<group>"; };
+		A8B0C0000000000000000016 /* litehook.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Dependencies/LiveContainer/litehook/src/litehook.c; sourceTree = "<group>"; };
 		BF58047B246A28F7008AE704 /* SideBackup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SideBackup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8B0C0000000000000000005 /* AirBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF989167250AABF3002ACF50 /* AltWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AltWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -601,6 +605,8 @@ A8B0C0000000000000000011 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = 
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A8B0C0000000000000000015 /* LCMachOUtils.m in Sources */,
+				A8B0C0000000000000000017 /* litehook.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

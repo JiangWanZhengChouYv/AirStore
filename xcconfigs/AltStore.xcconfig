@@ -5,4 +5,10 @@ PRODUCT_BUNDLE_IDENTIFIER = $(MAIN_BUNDLE_IDENTIFIER)
 // for ios14 and above swift runtime is included
 ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO
 
+// Container mode: preparing a guest means rewriting its Mach-O, which is two files out of the
+// LiveContainer fork plus the header Apple does not ship. Signing stays in SideSign; nothing else of
+// the engine is compiled into the store.
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/SideStore/Core/Container $(SRCROOT)/Dependencies/LiveContainer/LiveContainer $(SRCROOT)/Dependencies/LiveContainer/litehook/src $(SRCROOT)/Dependencies/LiveContainer/Include
+SWIFT_OBJC_BRIDGING_HEADER = SideStore/Core/Container/AirStore-Bridging-Header.h
+
 #include? "../local.xcconfig"
