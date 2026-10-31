@@ -100,6 +100,8 @@ final class ContainerInstaller
 
     private func deliver(packageURL: URL, workDirectory: URL, progress: Progress?) async throws -> String
     {
+        debugLog("[ContainerInstaller] Delivering \(packageURL.lastPathComponent) into \(self.sharedAppGroup ?? "no shared group")")
+
         guard let inbox = self.sharedContainerInbox else { throw ContainerInstallerError.airBoxNotInstalled }
 
         guard let bundleURL = try? FileManager.default.unzipAppBundle(at: packageURL, to: workDirectory) else {
@@ -151,6 +153,7 @@ final class ContainerInstaller
             try FileManager.default.removeItem(at: destination)
         }
         try FileManager.default.moveItem(at: bundleURL, to: destination)
+        debugLog("[ContainerInstaller] \(destination.lastPathComponent) is in the inbox")
         progress?.completedUnitCount = 100
 
         await UIApplication.shared.open(URL(string: "airbox://import")!)
@@ -269,6 +272,10 @@ final class ContainerInstaller
         // password: a guest signed with anything else would not load in a JITLess process.
         defaults.set(certificate.p12Data, forKey: "LCCertificateData")
         defaults.set(certificate.password ?? certificate.serialNumber, forKey: "LCCertificatePassword")
+
+        // Size and origin only -- this log is something the user reads back to us, and neither the
+        // certificate nor its password belongs in it.
+        debugLog("[ContainerInstaller] Published \(certificate.p12Data.count) bytes of certificate into \(groupIdentifier) (password from \(certificate.password == nil ? "the serial number" : "the keychain"))")
     }
 
     /// Every guest is signed by AirBox's own profile: the bundle id in that profile is AirBox's, and the
@@ -283,11 +290,22 @@ final class ContainerInstaller
         var profile: ALTProvisioningProfile?
         for attempt in 0..<6
         {
-            if let airBox = InstalledApp.all(in: context).first { Self.isAirBox($0) },
-               let found = airBox.customProvisioningProfile
+            if let airBox = InstalledApp.all(in: context).first { Self.isAirBox($0) }
             {
-                profile = found
-                break
+                // The cached copy is what carries the profile out of the install pipeline, and it is
+                // missing when the pipeline has decided this app is the store itself.
+                let cached = airBox.customProvisioningProfileURL
+                debugLog("[ContainerInstaller] AirBox row \(airBox.bundleIdentifier) / \(airBox.resignedBundleIdentifier): cached profile \(cached?.lastPathComponent ?? "none")")
+
+                if let found = airBox.customProvisioningProfile
+                {
+                    profile = found
+                    break
+                }
+            }
+            else
+            {
+                debugLog("[ContainerInstaller] No AirBox row among \(InstalledApp.all(in: context).count) installed apps")
             }
             if attempt < 5 { try await Task.sleep(nanoseconds: 300_000_000) }
         }

@@ -69,6 +69,8 @@ enum ContainerInstallAction
             }
             catch
             {
+                debugLog("[ContainerInstaller] Adding \(appName) to AirBox failed: \(error.localizedDescription)")
+
                 let toastView = ToastView(error: error)
                 toastView.opensErrorLog = true
                 toastView.show(in: presentingViewController)
