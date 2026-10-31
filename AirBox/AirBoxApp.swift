@@ -100,5 +100,16 @@ struct GuestListView: View
             }
         }
         .task { await self.store.reload() }
+        // The second alert goes on the stack rather than beside the other one: two alerts on the same
+        // view fight over presentation and one of them never shows.
+        .alert("Launch Failed", isPresented: Binding(get: { self.store.launchError != nil },
+                                                     set: { if !$0 { self.store.launchError = nil } }))
+        {
+            Button("OK", role: .cancel) {}
+        }
+        message:
+        {
+            Text(self.store.launchError ?? "")
+        }
     }
 }

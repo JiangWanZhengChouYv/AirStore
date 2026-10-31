@@ -34,6 +34,17 @@
         }
       }
     },
+    "Launch Failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启动失败"
+          }
+        }
+      }
+    },
     "No apps yet": {
       "extractionState": "manual",
       "localizations": {

@@ -28,6 +28,18 @@ final class GuestStore: ObservableObject
 {
     @Published private(set) var guests: [Guest] = []
     @Published var lastError: String?
+    @Published var launchError: String?
+
+    /// A guest that cannot load does not say so on screen: the engine writes the reason into the standard
+    /// defaults and exits, and the list is only running again on the next launch. Reading it back there is
+    /// the difference between a crash and a message.
+    private func takeLaunchError()
+    {
+        let defaults = UserDefaults.standard
+        guard let error = defaults.string(forKey: "error") else { return }
+        defaults.removeObject(forKey: "error")
+        self.launchError = error
+    }
 
     /// The group the engine resolved for this process. An installer may suffix the declared group
     /// with the team id, so the name in the signature is the only one that is guaranteed to exist --
@@ -71,6 +83,8 @@ final class GuestStore: ObservableObject
                 return Guest(directory: url, bundleIdentifier: identifier)
             }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+
+        self.takeLaunchError()
     }
 
     /// Whatever the store app left in the shared inbox: already unpacked, patched and signed bundles.
