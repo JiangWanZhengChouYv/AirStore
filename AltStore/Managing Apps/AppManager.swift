@@ -69,6 +69,39 @@ final class AppManager: ObservableObject, @unchecked Sendable
             .store(in: &self.cancellables)
     }
 
+    /// An app installed from a file or a URL has no store app attached, so a source that lists the
+    /// same bundle id later never makes it updatable -- it keeps reading as 侧载 in My Apps. Runs
+    /// after every source refresh, which is exactly when the missing half arrives.
+    func attachStoreAppsToInstalledApps() async
+    {
+        let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+        await context.perform {
+            let unattached = InstalledApp.all(satisfying: NSPredicate(format: "%K == nil", #keyPath(InstalledApp.storeApp)), in: context)
+            guard !unattached.isEmpty else { return }
+
+            var didChange = false
+            for installedApp in unattached
+            {
+                let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), installedApp.bundleIdentifier)
+                guard let storeApp = StoreApp.first(satisfying: predicate, in: context) else { continue }
+
+                installedApp.storeApp = storeApp
+                didChange = true
+                debugLog("[AppManager] Attached store app \(storeApp.bundleIdentifier) to its installed row")
+            }
+
+            guard didChange else { return }
+            do
+            {
+                try context.save()
+            }
+            catch
+            {
+                debugLog("[AppManager] Failed to save attached store apps: \(error)")
+            }
+        }
+    }
+
     func reconcileInstalledApps() async {
         guard !self.isActivelyManagingAnyApp else {
             debugLog("[AppManager] Skipping reconcileInstalledApps: operations in progress")
@@ -397,6 +430,7 @@ final class AppManager: ObservableObject, @unchecked Sendable
                     DispatchQueue.main.async {
                         self.updateSourcesResult = .success(())
                         completion(.success(()))
+                        Task { await self.attachStoreAppsToInstalledApps() }
                     }
                 }
                 catch let error as AppManager.FetchSourcesError
