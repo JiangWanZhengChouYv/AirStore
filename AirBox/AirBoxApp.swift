@@ -3,35 +3,41 @@
 //  AirBox
 //
 //  Runs other apps inside this process instead of installing them, so the free
-//  developer account's three-app / ten-App-ID limits do not apply. Stage 1: the
-//  shell that imports packages and lists them. The loader lands next.
+//  developer account's three-app / ten-App-ID limits do not apply.
 //
 
 import SwiftUI
-import UniformTypeIdentifiers
 
-@main
-struct AirBoxApp: App
+/// The list, hosted from a UIKit delegate because `main.m` has to be able to skip it entirely and
+/// start a guest instead.
+@objc(AirBoxDelegate)
+final class AirBoxDelegate: UIResponder, UIApplicationDelegate
 {
-    @StateObject private var store = GuestStore()
+    var window: UIWindow?
+    private let store = GuestStore()
 
-    var body: some Scene
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
     {
-        WindowGroup {
-            GuestListView(store: store)
-                .onOpenURL { url in
-                    // airbox://import — how AirStore hands over a package once the two apps share a group.
-                    guard url.host == "import" else { return }
-                    Task { await store.importFromSharedInbox() }
-                }
-        }
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = UIHostingController(rootView: GuestListView(store: self.store))
+        window.makeKeyAndVisible()
+        self.window = window
+        return true
+    }
+
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool
+    {
+        // airbox://import -- how AirStore hands over a package once the two apps share a group.
+        guard url.host == "import" else { return false }
+        Task { await self.store.importFromSharedInbox() }
+        return true
     }
 }
 
 struct GuestListView: View
 {
     @ObservedObject var store: GuestStore
-    @State private var isPickingPackage = false
 
     var body: some View
     {
@@ -39,21 +45,28 @@ struct GuestListView: View
         {
             Group
             {
-                if self.store.packages.isEmpty
+                if self.store.guests.isEmpty
                 {
                     ContentUnavailableView("No apps yet",
                                            systemImage: "shippingbox",
-                                           description: Text("Add an unsigned .ipa. Apps run inside AirBox, so they do not use an App ID or expire in seven days."))
+                                           description: Text("Apps run inside AirBox, so they do not use an App ID or expire in seven days."))
                 }
                 else
                 {
-                    List(self.store.packages) { package in
-                        VStack(alignment: .leading, spacing: 2)
+                    List(self.store.guests) { guest in
+                        Button
                         {
-                            Text(package.name).font(.body)
-                            Text(package.fileURL.lastPathComponent)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            self.store.launch(guest)
+                        }
+                        label:
+                        {
+                            VStack(alignment: .leading, spacing: 2)
+                            {
+                                Text(guest.name).font(.body).foregroundStyle(.primary)
+                                Text(guest.bundleIdentifier ?? guest.directory.lastPathComponent)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -63,24 +76,17 @@ struct GuestListView: View
             {
                 ToolbarItem(placement: .primaryAction)
                 {
+                    // Nothing is unpacked here on purpose: a guest has to be signed with the same
+                    // certificate as AirBox, and the store app is the one holding it. This looks in the
+                    // shared inbox for whatever it prepared.
                     Button
                     {
-                        self.isPickingPackage = true
+                        Task { await self.store.importFromSharedInbox() }
                     }
                     label:
                     {
-                        Label("Add App", systemImage: "plus")
+                        Label("Add Apps", systemImage: "arrow.down.circle")
                     }
-                }
-            }
-            .fileImporter(isPresented: self.$isPickingPackage,
-                          allowedContentTypes: [UTType(filenameExtension: "ipa") ?? .archive],
-                          allowsMultipleSelection: false)
-            { result in
-                switch result
-                {
-                case .success(let urls): self.store.importPackage(at: urls[0])
-                case .failure(let error): self.store.lastError = error.localizedDescription
                 }
             }
             .alert("Import Failed", isPresented: Binding(get: { self.store.lastError != nil },

@@ -2,30 +2,35 @@
 //  GuestStore.swift
 //  AirBox
 //
-//  Packages land in Documents/Packages and, once AirStore can hand them over, in the shared
-//  container's inbox. Stage 1 only imports and lists them: unpacking and running is the loader's job,
-//  and pretending otherwise here would be a list that cannot do what it says.
+//  Lists the prepared bundles under Documents/Applications and takes new ones from the shared inbox.
+//  Preparing a package -- unpacking it, rewriting its Mach-O and signing it with the same certificate
+//  AirBox runs under -- belongs to the store app, which already has a signer; AirBox only launches.
 //
 
 import Foundation
 
-struct ImportedPackage: Identifiable
+struct Guest: Identifiable
 {
-    let fileURL: URL
+    let directory: URL
+    let bundleIdentifier: String?
 
-    var id: String { self.fileURL.lastPathComponent }
-    var name: String { self.fileURL.deletingPathExtension().lastPathComponent }
+    var id: String { self.directory.lastPathComponent }
+    var name: String
+    {
+        let info = self.directory.appendingPathComponent("Info.plist")
+        let displayName = NSDictionary(contentsOf: info)?["CFBundleDisplayName"] as? String
+        return displayName ?? self.directory.deletingPathExtension().lastPathComponent
+    }
 }
 
 @MainActor
 final class GuestStore: ObservableObject
 {
-    @Published private(set) var packages: [ImportedPackage] = []
+    @Published private(set) var guests: [Guest] = []
     @Published var lastError: String?
 
-    /// `group.` + this app's bundle id without its own suffix, which is exactly how Build.xcconfig
-    /// derives APP_GROUP_IDENTIFIER for the store app. Kept as a rule rather than a copied string so
-    /// the two apps cannot drift apart.
+    /// `group.` + this app's bundle id without its own suffix -- the same rule Build.xcconfig uses for
+    /// APP_GROUP_IDENTIFIER, so the two apps cannot drift apart.
     private var appGroupIdentifier: String?
     {
         guard var identifier = Bundle.main.bundleIdentifier else { return nil }
@@ -36,10 +41,14 @@ final class GuestStore: ObservableObject
         return "group." + identifier
     }
 
-    private var packagesDirectory: URL
+    private var documentsDirectory: URL
     {
-        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return documents.appendingPathComponent("Packages", isDirectory: true)
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    private var applicationsDirectory: URL
+    {
+        self.documentsDirectory.appendingPathComponent("Applications", isDirectory: true)
     }
 
     private var sharedInboxDirectory: URL?
@@ -51,55 +60,63 @@ final class GuestStore: ObservableObject
 
     func reload() async
     {
-        let directory = self.packagesDirectory
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: self.applicationsDirectory, withIntermediateDirectories: true)
 
-        let files = (try? FileManager.default.contentsOfDirectory(at: directory,
-                                                                  includingPropertiesForKeys: nil,
-                                                                  options: [.skipsHiddenFiles])) ?? []
+        let entries = (try? FileManager.default.contentsOfDirectory(at: self.applicationsDirectory,
+                                                                    includingPropertiesForKeys: nil,
+                                                                    options: [.skipsHiddenFiles])) ?? []
 
-        self.packages = files
-            .filter { $0.pathExtension.lowercased() == "ipa" }
-            .sorted { $0.lastPathComponent.localizedStandardCompare($1.lastPathComponent) == .orderedAscending }
-            .map(ImportedPackage.init(fileURL:))
+        self.guests = entries
+            .filter { $0.pathExtension == "app" }
+            .compactMap { url in
+                guard FileManager.default.fileExists(atPath: url.appendingPathComponent("Info.plist").path) else { return nil }
+                let identifier = NSDictionary(contentsOf: url.appendingPathComponent("Info.plist"))?["CFBundleIdentifier"] as? String
+                return Guest(directory: url, bundleIdentifier: identifier)
+            }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
-    /// Copy the picked package into our own container. The picker hands back a URL outside the
-    /// sandbox, so it has to be opened for the duration of the copy.
-    func importPackage(at url: URL)
+    /// Whatever the store app left in the shared inbox: already unpacked, patched and signed bundles.
+    func importFromSharedInbox() async
     {
-        let isScoped = url.startAccessingSecurityScopedResource()
-        defer { if isScoped { url.stopAccessingSecurityScopedResource() } }
+        defer { Task { await self.reload() } }
+        guard let inbox = self.sharedInboxDirectory else { return }
 
+        let entries = (try? FileManager.default.contentsOfDirectory(at: inbox,
+                                                                    includingPropertiesForKeys: nil,
+                                                                    options: [.skipsHiddenFiles])) ?? []
+        for entry in entries where entry.pathExtension == "app"
+        {
+            let destination = self.applicationsDirectory.appendingPathComponent(entry.lastPathComponent)
+            do
+            {
+                try FileManager.default.createDirectory(at: self.applicationsDirectory, withIntermediateDirectories: true)
+                if FileManager.default.fileExists(atPath: destination.path)
+                {
+                    try FileManager.default.removeItem(at: destination)
+                }
+                try FileManager.default.moveItem(at: entry, to: destination)
+            }
+            catch
+            {
+                self.lastError = error.localizedDescription
+            }
+        }
+    }
+
+    /// The guest can only be loaded before UIApplicationMain, so asking for one means starting the
+    /// process over: `main.m` reads this file and skips the list entirely.
+    func launch(_ guest: Guest)
+    {
+        let marker = self.documentsDirectory.appendingPathComponent("PendingLaunch")
         do
         {
-            try FileManager.default.createDirectory(at: self.packagesDirectory, withIntermediateDirectories: true)
-            let destination = self.packagesDirectory.appendingPathComponent(url.lastPathComponent)
-            if FileManager.default.fileExists(atPath: destination.path)
-            {
-                try FileManager.default.removeItem(at: destination)
-            }
-            try FileManager.default.copyItem(at: url, to: destination)
-            Task { await self.reload() }
+            try guest.directory.deletingPathExtension().lastPathComponent.write(to: marker, atomically: true, encoding: .utf8)
+            exit(0)
         }
         catch
         {
             self.lastError = error.localizedDescription
         }
-    }
-
-    /// Whatever AirStore left in the shared inbox before opening `airbox://import`.
-    func importFromSharedInbox() async
-    {
-        guard let inbox = self.sharedInboxDirectory else { return }
-        let files = (try? FileManager.default.contentsOfDirectory(at: inbox,
-                                                                  includingPropertiesForKeys: nil,
-                                                                  options: [.skipsHiddenFiles])) ?? []
-        for file in files where file.pathExtension.lowercased() == "ipa"
-        {
-            self.importPackage(at: file)
-            try? FileManager.default.removeItem(at: file)
-        }
-        await self.reload()
     }
 }
