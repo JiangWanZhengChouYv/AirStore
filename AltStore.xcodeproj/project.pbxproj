@@ -73,6 +73,7 @@
 		B3C39607284F4C8400DA9E2F /* Build.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Build.xcconfig; sourceTree = "<group>"; };
 		B3C39608284F4C8400DA9E2F /* CodeSigning.xcconfig.sample */ = {isa = PBXFileReference; lastKnownFileType = text; path = CodeSigning.xcconfig.sample; sourceTree = "<group>"; };
 		BF58047B246A28F7008AE704 /* SideBackup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SideBackup.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8B0C0000000000000000005 /* AirBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AirBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF989167250AABF3002ACF50 /* AltWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AltWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFD2476A2284B9A500981D42 /* SideStore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SideStore.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8F0100000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Authentication.storyboard; sourceTree = "<group>"; };
@@ -220,6 +221,13 @@
 			);
 			target = BF989166250AABF3002ACF50 /* AltWidgetExtension */;
 		};
+		A8B0C000000000000000000A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A8B0C0000000000000000001 /* AirBox */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -229,6 +237,7 @@
 		A8EEC71D2F4B10D900F2436D /* xcconfigs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = xcconfigs; sourceTree = "<group>"; };
 		A8EEC8412F4B146A00F2436D /* AltStore */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EEC8CB2F4B146B00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, A8EEC8CD2F4B146B00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AltStore; sourceTree = "<group>"; };
 		A8EECF2A2F4B195000F2436D /* SideStore */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EECF492F4B195000F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, A8EECF4A2F4B195000F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = SideStore; sourceTree = "<group>"; };
+		A8B0C0000000000000000009 /* AirBox */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8B0C000000000000000000A /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AirBox; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +269,13 @@
 				A8C37039302DA8D90010213A /* SemanticVersion in Frameworks */,
 				A87939D3303A89CA004D9227 /* Minimuxer in Frameworks */,
 				A8F5E9B230422E3600DBD7E4 /* StikJIT in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A8B0C0000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +316,7 @@
 				A8EEC3482F4B0D8600F2436D /* Shared */,
 				A8EECF2A2F4B195000F2436D /* SideStore */,
 				A8EEC3D92F4B0FC800F2436D /* SideBackup */,
+				A8B0C0000000000000000009 /* AirBox */,
 				A8EEC71D2F4B10D900F2436D /* xcconfigs */,
 				BFD2476B2284B9A500981D42 /* Products */,
 				B3C39607284F4C8400DA9E2F /* Build.xcconfig */,
@@ -405,6 +422,26 @@
 			productReference = BFD2476A2284B9A500981D42 /* SideStore.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A8B0C0000000000000000001 /* AirBox */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A8B0C0000000000000000002 /* Build configuration list for PBXNativeTarget "AirBox" */;
+			buildPhases = (
+				A8B0C0000000000000000006 /* Sources */,
+				A8B0C0000000000000000007 /* Frameworks */,
+				A8B0C0000000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				A8B0C0000000000000000009 /* AirBox */,
+			);
+			name = AirBox;
+			productName = AirBox;
+			productReference = A8B0C0000000000000000005 /* AirBox.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -464,6 +501,7 @@
 			targets = (
 				BFD247692284B9A500981D42 /* SideStore */,
 				BF58047A246A28F7008AE704 /* SideBackup */,
+				A8B0C0000000000000000001 /* AirBox */,
 				BF989166250AABF3002ACF50 /* AltWidgetExtension */,
 			);
 		};
@@ -490,6 +528,13 @@
 			files = (
 				A8F010000000000000000003 /* Authentication.storyboard in Resources */,
 				A84596F62F7DC4C90000B8CD /* SideStore.conf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A8B0C0000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -533,6 +578,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		BFD247662284B9A500981D42 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A8B0C0000000000000000006 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -935,6 +987,62 @@
 			};
 			name = Release;
 		};
+		A8B0C0000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = A8EEC71D2F4B10D900F2436D /* xcconfigs */;
+			baseConfigurationReferenceRelativePath = AirBox.xcconfig;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_ENTITLEMENTS = "$(CODE_SIGN_ENTITLEMENTS)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
+				ENABLE_DEBUG_DYLIB = NO;
+				INFOPLIST_FILE = AirBox/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A8B0C0000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = A8EEC71D2F4B10D900F2436D /* xcconfigs */;
+			baseConfigurationReferenceRelativePath = AirBox.xcconfig;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_ENTITLEMENTS = "$(CODE_SIGN_ENTITLEMENTS)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
+				ENABLE_DEBUG_DYLIB = NO;
+				INFOPLIST_FILE = AirBox/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -970,6 +1078,15 @@
 			buildConfigurations = (
 				BFD2477F2284B9A700981D42 /* Debug */,
 				BFD247802284B9A700981D42 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A8B0C0000000000000000002 /* Build configuration list for PBXNativeTarget "AirBox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A8B0C0000000000000000003 /* Debug */,
+				A8B0C0000000000000000004 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

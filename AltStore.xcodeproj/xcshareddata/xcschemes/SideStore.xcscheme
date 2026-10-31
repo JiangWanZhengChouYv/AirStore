@@ -21,6 +21,20 @@
                ReferencedContainer = "container:AltStore.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A8B0C0000000000000000001"
+               BuildableName = "AirBox.app"
+               BlueprintName = "AirBox"
+               ReferencedContainer = "container:AltStore.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

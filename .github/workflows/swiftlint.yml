@@ -40,7 +40,7 @@ jobs:
       # Only first-party targets. Dependencies/ is vendored submodule code and is not ours to format.
       - name: Lint
         run: |
-          swiftlint lint --quiet AltStore SideStore Shared SideBackup AltWidget > swiftlint.log || true
+          swiftlint lint --quiet AltStore SideStore Shared SideBackup AltWidget AirBox > swiftlint.log || true
           # || true because grep exits 1 on a zero count, which is exactly the case this job is
           # working toward -- it must not turn into a red step of its own.
           errors=$(grep -c ': error:' swiftlint.log || true)

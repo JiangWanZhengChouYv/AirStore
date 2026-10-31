@@ -1,0 +1,8 @@
+#include "../Build.xcconfig"
+
+// A second app that runs other apps inside itself. Its bundle id is the store's with one more
+// component, which is also how it finds the shared app group at runtime (GuestStore.swift).
+PRODUCT_BUNDLE_IDENTIFIER = $(MAIN_BUNDLE_IDENTIFIER).AirBox
+CODE_SIGN_ENTITLEMENTS = AirBox/AirBox.entitlements
+
+#include? "../local.xcconfig"
