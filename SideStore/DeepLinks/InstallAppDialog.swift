@@ -147,10 +147,22 @@ public enum InstallAppDialog {
     
     public static func present(
         storeApp: StoreApp,
+        version: AppVersion? = nil,
         from presentingViewController: UIViewController? = nil,
         onConfirm: @escaping () -> Void,
         onCancel: @escaping () -> Void = {}
     ) {
+        // Container mode changes what installing means, so the choice replaces the plain confirmation
+        // here -- this is the one place every install entry point (browse, featured, source detail,
+        // app page) goes through before it starts anything.
+        if UserDefaults.standard.isContainerModeEnabled,
+           let chosenVersion = version ?? storeApp.latestAvailableVersion,
+           let presenter = presentingViewController ?? UIApplication.shared.topViewController()
+        {
+            self.presentContainerChoice(storeApp: storeApp, version: chosenVersion, from: presenter, onInstall: onConfirm, onCancel: onCancel)
+            return
+        }
+
         let message = String(format: NSLocalizedString("Do you want to continue? This will install \"%@\".", comment: ""), storeApp.name)
         self.presentConfirmation(
             message: message,
@@ -158,6 +170,40 @@ public enum InstallAppDialog {
             onConfirm: onConfirm,
             onCancel: onCancel
         )
+    }
+
+    private static func presentContainerChoice(
+        storeApp: StoreApp,
+        version: AppVersion,
+        from presentingViewController: UIViewController,
+        onInstall: @escaping () -> Void,
+        onCancel: @escaping () -> Void
+    ) {
+        let alertController = UIAlertController(
+            title: NSLocalizedString("Install App", comment: ""),
+            message: NSLocalizedString("AirBox runs the app without installing it on the system, so it uses no App ID.", comment: ""),
+            preferredStyle: .actionSheet
+        )
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { _ in
+            onInstall()
+        })
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Run in AirBox", comment: ""), style: .default) { _ in
+            // The next step may be another alert (installing AirBox first), and presenting one while
+            // this sheet is still dismissing gets it dropped without a word.
+            DispatchQueue.main.async {
+                ContainerInstallAction.run(version: version, appName: storeApp.name, from: presentingViewController)
+            }
+        })
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+            onCancel()
+        })
+
+        if let popoverController = alertController.popoverPresentationController
+        {
+            popoverController.sourceView = presentingViewController.view
+            popoverController.sourceRect = presentingViewController.view.bounds
+        }
+        presentingViewController.present(alertController, animated: true)
     }
 
     public static func present(

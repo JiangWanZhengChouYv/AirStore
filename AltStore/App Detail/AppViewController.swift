@@ -641,98 +641,14 @@ extension AppViewController
         }
         else
         {
-            self.downloadApp(anchor: sender)
+            self.downloadApp()
         }
     }
     
-    func downloadApp(anchor: UIView? = nil)
+    func downloadApp()
     {
         guard self.app.installedApp == nil else { return }
-
-        // Container mode changes what "Install" can mean, so the choice is made here instead of
-        // hiding a second install path somewhere else. It stays invisible while the mode is off.
-        if UserDefaults.standard.isContainerModeEnabled, let version = self.app.latestAvailableVersion
-        {
-            self.presentInstallModeChoice(for: version, anchor: anchor) { [weak self] in
-                self?.installToSystem()
-            }
-            return
-        }
-
         self.installToSystem()
-    }
-
-    /// The one place the mode is offered, whether the tap came from the banner or from a row in the
-    /// version list. `installNormally` is whichever install that entry point would have done.
-    private func presentInstallModeChoice(for version: AppVersion, anchor: UIView?, installNormally: @escaping () -> Void)
-    {
-        let alertController = UIAlertController(
-            title: NSLocalizedString("Install App", comment: ""),
-            message: NSLocalizedString("AirBox runs the app without installing it on the system, so it uses no App ID.", comment: ""),
-            preferredStyle: .actionSheet
-        )
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { _ in
-            installNormally()
-        })
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Run in AirBox", comment: ""), style: .default) { [weak self] _ in
-            // The next step may be another alert (installing AirBox first), and presenting one while
-            // this sheet is still dismissing gets it dropped without a word.
-            DispatchQueue.main.async {
-                self?.installIntoAirBox(version)
-            }
-        })
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
-
-        if let popoverController = alertController.popoverPresentationController
-        {
-            let sourceView = anchor ?? self.bannerView.button
-            popoverController.sourceView = sourceView
-            popoverController.sourceRect = sourceView?.bounds ?? self.view.bounds
-        }
-        self.present(alertController, animated: true)
-    }
-
-    private func installIntoAirBox(_ version: AppVersion, airBoxReady: Bool = false)
-    {
-        // Nothing can be added before AirBox exists, and its profile is what signs every guest, so the
-        // first "Run in AirBox" offers to install it and then continues with this same request.
-        guard airBoxReady || AirBoxInstaller.isInstalled else
-        {
-            AirBoxInstaller.confirmAndInstall(from: self) { [weak self] installed in
-                guard installed else { return }
-                // The install pipeline reports success before the new row has necessarily reached this
-                // context, so the retry is told to trust the result instead of asking the database again.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self?.installIntoAirBox(version, airBoxReady: true)
-                }
-            }
-            return
-        }
-
-        let progress = Progress(totalUnitCount: 100)
-        self.bannerView.button.progress = progress
-        self.navigationBarDownloadButton.progress = progress
-
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            do
-            {
-                _ = try await ContainerInstaller.shared.addToAirBox(version, progress: progress)
-                progress.completedUnitCount = 100
-                // The installer hands AirBox the package and opens it, so there is nothing left to
-                // confirm here -- the app is already on screen with the new guest in its list.
-            }
-            catch
-            {
-                let toastView = ToastView(error: error)
-                toastView.opensErrorLog = true
-                toastView.show(in: self)
-            }
-
-            self.bannerView.button.progress = nil
-            self.navigationBarDownloadButton.progress = nil
-            self.update()
-        }
     }
 
     private func installToSystem()
@@ -783,11 +699,11 @@ extension AppViewController
             return
         }
 
-        // The version list has its own install rows; without this they would silently install to the
-        // system even with container mode on.
+        // The version list normally installs without a confirmation; container mode still has to be
+        // able to offer itself there, so that one case asks.
         if UserDefaults.standard.isContainerModeEnabled
         {
-            self.presentInstallModeChoice(for: version, anchor: nil) { [weak self] in
+            InstallAppDialog.present(storeApp: self.app, version: version, from: self) { [weak self] in
                 self?.installToSystem(version)
             }
             return

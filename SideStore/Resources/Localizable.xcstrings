@@ -15895,6 +15895,17 @@
           }
         }
       }
+    },
+    "Adding to AirBox…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在添加到 AirBox…"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
