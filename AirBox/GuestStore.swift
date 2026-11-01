@@ -151,6 +151,8 @@ final class GuestStore: ObservableObject
 
         self.takeLaunchError()
 
+        self.sharedDefaults?.set(NSHomeDirectory(), forKey: "LCHostHomePath")
+
         // The two facts the extension is asked with, in the log the store routes: how many guests there
         // are, and which folder it will be told to load from.
         AirBoxLogging.log("\(self.guests.count) guests in \(self.applicationsDirectory.path); "

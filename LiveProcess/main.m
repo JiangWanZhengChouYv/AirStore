@@ -13,6 +13,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
+#import <stdio.h>
 #import <string.h>
 
 #import "LCSharedUtils.h"
@@ -47,35 +48,77 @@ static NSDictionary *retrievedAppInfo;
 
 extern int LiveContainerMain(int argc, char *argv[]);
 
+/// Whether this process started at all, and what it was told to run, has to be readable from the store's
+/// log: nothing here is on screen, and a request that never arrives is otherwise silent. Written straight
+/// into the group's file rather than through stderr, because the stderr redirect is itself unproven.
+static FILE *boxLog;
+
+static void openBoxLog(void)
+{
+    if (boxLog) return;
+
+    NSString *group = [LCSharedUtils appGroupID];
+    if (!group.length) return;
+
+    NSURL *directory = [NSFileManager.defaultManager containerURLForSecurityApplicationGroupIdentifier:group];
+    if (!directory) return;
+
+    boxLog = fopen([directory URLByAppendingPathComponent:@"airbox.log"].fileSystemRepresentation, "ae");
+    if (boxLog) setvbuf(boxLog, NULL, _IONBF, 0);
+}
+
+static void traceLog(NSString *message)
+{
+    openBoxLog();
+    if (!boxLog) return;
+
+    static NSDateFormatter *formatter;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        formatter = [NSDateFormatter new];
+        formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        formatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ss.SSS";
+    });
+
+    NSString *timestamp = [formatter stringFromDate:NSDate.date];
+    fprintf(boxLog, "%s [LiveProcess] %s\n", timestamp.UTF8String, message.UTF8String);
+}
+
+static void pointStderrAtBoxLog(void)
+{
+    NSString *group = [LCSharedUtils appGroupID];
+    if (!group.length) return;
+
+    NSURL *directory = [NSFileManager.defaultManager containerURLForSecurityApplicationGroupIdentifier:group];
+    if (!directory) return;
+
+    freopen([directory URLByAppendingPathComponent:@"airbox.log"].fileSystemRepresentation, "a", stderr);
+}
+
 int LiveProcessMain(int argc, char *argv[])
 {
+    traceLog(@"started");
+    pointStderrAtBoxLog();
+
     // NSExtensionMain brings up UIKit, which calls the UIApplicationMain below; the request has not
-    // arrived until then, so hold here for it.
+    // arrived yet, so wait for it -- but only for two seconds, because a request that never comes would
+    // otherwise leave this process waiting with nothing on screen and nothing to say.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CFRunLoopStop(CFRunLoopGetMain());
+    });
     CFRunLoopRun();
 
     // LP_HOME stays this process's own, because a binary the loader will not mmap from where it lies is
-    // moved here first. Which guest to run, and from which container, is the box's to say: a second
-    // process cannot guess either.
+    // moved here first.
     setenv("LP_HOME_PATH", getenv("HOME"), 1);
 
     NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
     NSDictionary *appInfo = LiveProcessHandler.retrievedAppInfo;
 
-    // Everything the engine and the guest print leaves this process on stderr, so pointing it at the
-    // box's log file in the group is what makes those lines reach the store's exported log. Needs proper
-    // testing: a line that goes only to os_log would still be invisible here.
-    NSString *group = [LCSharedUtils appGroupID];
-    if (group.length)
-    {
-        NSURL *directory = [NSFileManager.defaultManager containerURLForSecurityApplicationGroupIdentifier:group];
-        if (directory)
-        {
-            freopen([directory URLByAppendingPathComponent:@"airbox.log"].fileSystemRepresentation, "a", stderr);
-        }
-    }
-
     if (appInfo)
     {
+        traceLog([NSString stringWithFormat:@"the request arrived: %@", appInfo[@"selected"]]);
+
         NSString *hostHome = appInfo[@"lcHomePath"];
         if (hostHome.length)
         {
@@ -93,6 +136,26 @@ int LiveProcessMain(int argc, char *argv[])
             }
         }
     }
+    else
+    {
+        // No request. The box left the same information in the group instead, which the engine reads for
+        // itself -- provided this process is the one whose scheme it expects, and the note is fresh.
+        NSString *group = [LCSharedUtils appGroupID];
+        NSUserDefaults *shared = group.length ? [[NSUserDefaults alloc] initWithSuiteName:group] : nil;
+
+        traceLog([NSString stringWithFormat:@"no request within 2s; the group says %@ in %@",
+                  [shared stringForKey:@"LCLaunchExtensionBundleID"],
+                  [shared stringForKey:@"LCHostHomePath"]]);
+
+        NSString *hostHome = [shared stringForKey:@"LCHostHomePath"];
+        if (hostHome.length)
+        {
+            setenv("LC_HOME_PATH", hostHome.fileSystemRepresentation, 1);
+        }
+    }
+
+    traceLog([NSString stringWithFormat:@"handing to the engine: selected=%@ home=%s",
+              [defaults stringForKey:@"selected"], getenv("LC_HOME_PATH")]);
 
     return LiveContainerMain(argc, argv);
 }

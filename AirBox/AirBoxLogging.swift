@@ -23,6 +23,14 @@ enum AirBoxLogging
         return formatter
     }()
 
+    /// The group's own defaults. A request is how a guest is normally asked for; this is where the same
+    /// information goes so the extension can still find it if the request never reaches it.
+    static var sharedDefaults: UserDefaults?
+    {
+        guard let group = LCSharedUtils.appGroupID(), !group.isEmpty, group != "Unknown" else { return nil }
+        return UserDefaults(suiteName: group)
+    }
+
     /// The file all three write into, named the way the store's router expects it.
     static var fileURL: URL?
     {

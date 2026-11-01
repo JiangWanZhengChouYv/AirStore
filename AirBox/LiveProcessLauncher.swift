@@ -66,6 +66,16 @@ enum LiveProcessLauncher
         let item = NSExtensionItem()
         item.userInfo = userInfo
 
+        // Left in the group as well, in case the request itself never reaches the extension: it waits two
+        // seconds for one and then reads these instead. The engine picks them up on its own, but only if
+        // this note is less than three seconds old, so it is written immediately before the request.
+        if let defaults = AirBoxLogging.sharedDefaults
+        {
+            defaults.set("liveprocess", forKey: "LCLaunchExtensionScheme")
+            defaults.set(guest.directory.lastPathComponent, forKey: "LCLaunchExtensionBundleID")
+            defaults.set(Date(), forKey: "LCLaunchExtensionLaunchDate")
+        }
+
         let ext = try NSExtension(identifier: identifier)
         ext.setRequestInterruptionBlock { _ in
             Task { @MainActor in
