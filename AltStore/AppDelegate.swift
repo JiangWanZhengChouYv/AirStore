@@ -101,6 +101,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         consoleLog.updateConfiguration(baseName: "console", suffixFormat: suffixFormat, policy: .subsequent)
         consoleLog.startCapturing()
 
+        // AirBox prints into the shared group rather than here, because it is a different app; this is
+        // what pulls those lines into this file with [AirBox] in front of each one.
+        AirBoxLogRouter.start()
+
         // register crash handler
         setupCrashHandler()
         

@@ -53,8 +53,23 @@ struct Guest: Identifiable
 final class GuestStore: ObservableObject
 {
     @Published private(set) var guests: [Guest] = []
+    /// Anything the list shows as a failure is also written to the log the store routes, because the
+    /// alert is gone by the time he can send me anything.
     @Published var lastError: String?
+    {
+        didSet
+        {
+            if let lastError = self.lastError { AirBoxLogging.log(lastError) }
+        }
+    }
+
     @Published var launchError: String?
+    {
+        didSet
+        {
+            if let launchError = self.launchError { AirBoxLogging.log("the guest refused to load: \(launchError)") }
+        }
+    }
 
     /// A guest that cannot load does not say so on screen, and the process that failed is the extension's
     /// own -- its defaults belong to a domain this app cannot read. The engine writes the reason into the
@@ -139,6 +154,11 @@ final class GuestStore: ObservableObject
         // Where this app's container is, left for the extension that runs a guest: it has to know which
         // Documents/Applications to load from and cannot ask across a sandbox.
         self.sharedDefaults?.set(NSHomeDirectory(), forKey: "LCHostHomePath")
+
+        // The two facts the extension depends on, in the log the store routes: whether there is a group
+        // at all, and which folder it will be told to look in.
+        AirBoxLogging.log("\(self.guests.count) guests in \(self.applicationsDirectory.path); "
+                          + "home left in \(self.appGroupIdentifier ?? "no shared group") for the extension")
 
         self.publish()
     }
@@ -234,7 +254,7 @@ final class GuestStore: ObservableObject
         guard let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "liveprocess://livecontainer-launch?bundle-name=\(encoded)") else { return }
 
-        NSLog("[AirBox] Handing \(name) to the extension through \(url.scheme ?? "")")
+        AirBoxLogging.log("Handing \(name) to the extension at \(url.absoluteString)")
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }

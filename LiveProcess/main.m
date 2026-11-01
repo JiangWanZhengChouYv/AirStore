@@ -67,6 +67,19 @@ int LiveProcessMain(int argc, char *argv[])
 
     NSString *group = [LCSharedUtils appGroupID];
     NSUserDefaults *shared = group.length ? [[NSUserDefaults alloc] initWithSuiteName:group] : nil;
+
+    // Everything the engine and the guest print leaves this process on stderr, so pointing stderr at the
+    // box's log file in the group is what makes it reach the store's exported log. Needs proper testing:
+    // a line that goes to os_log only, and not to stderr, would be invisible here.
+    if (group.length)
+    {
+        NSURL *directory = [NSFileManager.defaultManager containerURLForSecurityApplicationGroupIdentifier:group];
+        if (directory)
+        {
+            freopen([directory URLByAppendingPathComponent:@"airbox.log"].fileSystemRepresentation, "a", stderr);
+        }
+    }
+
     NSString *hostHome = [shared stringForKey:@"LCHostHomePath"];
     if (hostHome.length)
     {
