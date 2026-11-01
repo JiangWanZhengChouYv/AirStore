@@ -419,7 +419,19 @@ final class ContainerInstaller
 
         for file in unsigned
         {
-            try? CodeSigner.sign(appPath: file.resolvingSymlinksInPath().path, keyData: keyData, entitlementProvider: { _ in noEntitlements }, progress: {})
+            // The device log says these eight came out of the bundle pass unsigned even after this loop
+            // ran, so whatever the signer objects to has to be written down instead of swallowed.
+            let target = file.deletingLastPathComponent().pathExtension == "framework" ? file.deletingLastPathComponent() : file
+
+            do
+            {
+                try CodeSigner.sign(appPath: target.resolvingSymlinksInPath().path, keyData: keyData, entitlementProvider: { _ in noEntitlements }, progress: {})
+                debugLog("[ContainerInstaller] Signed \(target.lastPathComponent) separately: \(MachOSignature.digest(ofExecutableAt: file) != nil)")
+            }
+            catch
+            {
+                debugLog("[ContainerInstaller] Signing \(target.lastPathComponent) separately failed: \(error.localizedDescription)")
+            }
         }
 
         unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
