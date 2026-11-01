@@ -124,6 +124,8 @@ private extension UpdateCollectionViewCell
         {
             let glass = UIGlassEffect()
             glass.tintColor = tintColor
+            // The card expands under a tap, so it gets the same lift the download card has.
+            glass.isInteractive = true
             self.blurView.effect = glass
             self.blurView.contentView.backgroundColor = tintColor?.adjustedForDisplay.withAlphaComponent(AppBannerView.glassFillAlpha)
         }

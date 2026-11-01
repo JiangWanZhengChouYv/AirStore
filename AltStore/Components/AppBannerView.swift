@@ -416,6 +416,10 @@ private extension AppBannerView
         {
             let glass = UIGlassEffect()
             glass.tintColor = tintColor
+            // Same as the download card: a card you can tap lifts under the finger, and that lift is most
+            // of what reads as glass. Only rows that opted into the tinted treatment ask for it, so the
+            // detail page and the store lists keep the glass they were approved with.
+            glass.isInteractive = self.glassFillColor != nil
             self.backgroundEffectView.effect = glass
             onGlass = true
         }
@@ -439,6 +443,13 @@ private extension AppBannerView
             let glassFill = self.glassFillColor.map { $0.adjustedForDisplay.withAlphaComponent(Self.glassFillAlpha) }
             self.backgroundEffectView.contentView.backgroundColor = onGlass ? glassFill : UIColor(resource: .blurTint)
             self.backgroundEffectView.backgroundColor = onGlass ? nil : tintColor
+
+            if onGlass, self.glassFillColor != nil
+            {
+                // Vibrancy is a second layer keyed to the blur this card used to be; left on it reads as a
+                // plate over the glass. Only the tinted rows give up the look they were approved with.
+                self.vibrancyView.effect = nil
+            }
             
         case .source:
             self.directionalLayoutMargins.trailing = 20
