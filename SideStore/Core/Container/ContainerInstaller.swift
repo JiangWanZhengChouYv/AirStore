@@ -295,6 +295,32 @@ final class ContainerInstaller
         return bundleURL.appendingPathComponent(name)
     }
 
+    /// Every Mach-O the guest bundle carries: the executable, each framework's binary, and any loose
+    /// dylib. A package that arrives with no signature at all gives a signer nothing to point at, so the
+    /// list is written out here rather than left to a traversal.
+    private func machOFiles(in bundleURL: URL) -> [URL]
+    {
+        let finder = FileManager.default
+        var files = [URL]()
+
+        if let executable = self.executableURL(in: bundleURL) { files.append(executable) }
+
+        let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
+        for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
+        {
+            if entry.pathExtension == "framework"
+            {
+                files.append(entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent))
+            }
+            else if entry.pathExtension == "dylib"
+            {
+                files.append(entry)
+            }
+        }
+
+        return files.filter { finder.fileExists(atPath: $0.path) }
+    }
+
     private func sign(_ bundleURL: URL) async throws
     {
         let context = DatabaseManager.shared.persistentContainer.viewContext
@@ -343,6 +369,8 @@ final class ContainerInstaller
         var guestEntitlements: [String: Any] = [
             "application-identifier": "\(teamPrefix).\(guestIdentifier)",
             "com.apple.developer.team-identifier": teamPrefix,
+            "com.apple.developer.kernel.increased-memory-limit": true,
+            "com.apple.developer.kernel.extended-virtual-addressing": true,
             "get-task-allow": true
         ]
         if let groups = profile.entitlements["com.apple.security.application-groups"] { guestEntitlements["com.apple.security.application-groups"] = groups }
@@ -363,13 +391,13 @@ final class ContainerInstaller
 
         let keyData = try certificate.certificate.unencryptedP12Data()
         let appURL = bundleURL.resolvingSymlinksInPath()
+        let executableURL = self.executableURL(in: bundleURL)
 
         // A signer that finds a signature in place may leave it alone, and the one in place covers the
         // binary as it was before this app patched it -- which dyld reports as an invalid signature.
-        if let executable = self.executableURL(in: bundleURL)
+        for file in self.machOFiles(in: bundleURL)
         {
-            let stripped = MachOSignature.stripSignature(ofExecutableAt: executable)
-            debugLog("[ContainerInstaller] Stripped the guest's previous signature: \(stripped)")
+            MachOSignature.stripSignature(ofExecutableAt: file)
         }
 
         try CodeSigner.sign(appPath: appURL.path, keyData: keyData, entitlementProvider: { path in
@@ -380,6 +408,14 @@ final class ContainerInstaller
             guard url.pathExtension.lowercased() != "framework", !url.lastPathComponent.hasSuffix(".dylib") else { return "" }
             return (url == appURL || url.deletingLastPathComponent() == appURL) ? xml : ""
         }, progress: {})
+
+        let files = self.machOFiles(in: bundleURL)
+        let unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
+        debugLog("[ContainerInstaller] \(files.count) Mach-O files in the guest, still unsigned: \(unsigned.map { $0.lastPathComponent })")
+
+        guard !unsigned.contains(where: { $0 == executableURL }) else {
+            throw ContainerInstallerError.patcherRejected(NSLocalizedString("the signer left the executable unsigned", comment: ""))
+        }
 
         debugLog("[ContainerInstaller] Signed the guest without a profile; entitlements: \(profile.entitlements.keys.sorted())")
     }
