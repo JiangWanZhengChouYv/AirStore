@@ -402,7 +402,10 @@ private extension MyAppsViewController
         dynamicDataSource.numberOfItemsHandler = { _ in self.containerApps.count }
         dynamicDataSource.cellIdentifierHandler = { _ in "ContainerCell" }
         dynamicDataSource.dynamicCellConfigurationHandler = { (cell, indexPath) in
-            guard let app = self.containerApp(at: indexPath) else { return }
+            // The handler is given this data source's own index path, whose section is the one inside the
+            // composite, not the one on screen -- so the item is looked up by position, not re-derived.
+            guard indexPath.item < self.containerApps.count else { return }
+            let app = self.containerApps[indexPath.item]
             let cell = cell as! ContainerAppCollectionViewCell
 
             cell.layoutMargins.left = self.view.layoutMargins.left
