@@ -330,16 +330,27 @@ final class ContainerInstaller
             throw ContainerInstallerError.noCertificate
         }
 
-        // The profile is read for its entitlements and deliberately *not* embedded: the only profile
-        // there is belongs to AirBox, and a guest bundle carrying a profile whose identifier is not its
-        // own is what dyld reports as `code signature invalid`. Upstream's JITLess path signs the same
-        // way -- same certificate, no profile -- with zsign.
+        // The profile is read for its team prefix and deliberately *not* embedded, and its entitlements
+        // are not copied either: they name AirBox's identifier, and a signature whose identifier does not
+        // match the binary it covers is what AMFI calls an invalid signature. Each guest is signed as
+        // itself, under the same team and the same certificate AirBox itself carries.
         try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
+
+        let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
+        let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
+        let guestIdentifier = (NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist"))?["CFBundleIdentifier"] as? String) ?? ""
+
+        var guestEntitlements: [String: Any] = [
+            "application-identifier": "\(teamPrefix).\(guestIdentifier)",
+            "com.apple.developer.team-identifier": teamPrefix,
+            "get-task-allow": true
+        ]
+        if let groups = profile.entitlements["com.apple.security.application-groups"] { guestEntitlements["com.apple.security.application-groups"] = groups }
 
         let xml: String
         do
         {
-            let data = try PropertyListSerialization.data(fromPropertyList: profile.entitlements, format: .xml, options: 0)
+            let data = try PropertyListSerialization.data(fromPropertyList: guestEntitlements, format: .xml, options: 0)
             guard let text = String(data: data, encoding: .utf8) else {
                 throw ContainerInstallerError.noCertificate
             }
@@ -347,6 +358,8 @@ final class ContainerInstaller
         }
         catch let error as ContainerInstallerError { throw error }
         catch { throw ContainerInstallerError.patcherRejected(error.localizedDescription) }
+
+        debugLog("[ContainerInstaller] Signing the guest as \(teamPrefix).\(guestIdentifier)")
 
         let keyData = try certificate.certificate.unencryptedP12Data()
         let appURL = bundleURL.resolvingSymlinksInPath()
