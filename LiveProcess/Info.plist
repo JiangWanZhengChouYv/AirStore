@@ -12,6 +12,10 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
+	<!-- installd refuses an app extension whose bundle has no display name of its own:
+	     "does not have a CFBundleDisplayName key with a non-zero length string value". -->
+	<key>CFBundleDisplayName</key>
+	<string>LiveProcess</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
