@@ -5,6 +5,14 @@
 PRODUCT_BUNDLE_IDENTIFIER = $(MAIN_BUNDLE_IDENTIFIER).AirBox.LiveProcess
 CODE_SIGN_ENTITLEMENTS = LiveProcess/LiveProcess.entitlements
 
+// Nothing in this binary is called from inside it: NSExtensionMain hands the process to UIKit, and UIKit
+// finds UIApplicationMain -- which then reaches LiveProcessMain and the engine -- by symbol name, and the
+// system looks LiveProcessHandler up by class name. Dead-code stripping sees no reference to either and
+// deletes them, and the extension dies on a missing symbol before it can say anything at all. Upstream
+// turns stripping off for this same target; it cannot be turned off here because this target also links
+// the engine, where two files define the same global and only the stripping pass merges them.
+OTHER_LDFLAGS = $(inherited) -Wl,-u,_UIApplicationMain -Wl,-u,_OBJC_CLASS_$_LiveProcessHandler
+
 // The engine is compiled in here as well as into the box: this is the process that has to run a guest,
 // and a second copy of the same sources is cheaper than turning the engine into a dylib both bundles
 // load. Same search paths as AirBox.xcconfig, for the same reason -- the engine's sources include each
