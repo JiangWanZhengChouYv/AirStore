@@ -10,6 +10,7 @@
 import Foundation
 import UIKit
 import SideSign
+import CodeSignKit
 
 enum ContainerInstallerError: LocalizedError
 {
@@ -312,15 +313,40 @@ final class ContainerInstaller
         guard let profile else {
             throw ContainerInstallerError.noProfileForAirBox
         }
-        guard let certificate = CertificateManager.shared.activeCertificate?.certificate,
-              let databaseTeam = DatabaseManager.shared.activeTeam(in: context) else {
+        guard let certificate = CertificateManager.shared.activeCertificate else {
             throw ContainerInstallerError.noCertificate
         }
 
-        // The Core Data team and the signer's team are different types; this is the same conversion
-        // AuthManager performs before anything else touches the signer.
-        let team = ALTTeam(identifier: databaseTeam.identifier, name: databaseTeam.name, type: databaseTeam.type)
-        let signer = ALTSigner(team: team, certificate: certificate)
-        try await signer.signApp(at: bundleURL, provisioningProfiles: [profile], progress: nil)
+        // The profile is read for its entitlements and deliberately *not* embedded: the only profile
+        // there is belongs to AirBox, and a guest bundle carrying a profile whose identifier is not its
+        // own is what dyld reports as `code signature invalid`. Upstream's JITLess path signs the same
+        // way -- same certificate, no profile -- with zsign.
+        try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
+
+        let xml: String
+        do
+        {
+            let data = try PropertyListSerialization.data(fromPropertyList: profile.entitlements, format: .xml, options: 0)
+            guard let text = String(data: data, encoding: .utf8) else {
+                throw ContainerInstallerError.noCertificate
+            }
+            xml = text
+        }
+        catch let error as ContainerInstallerError { throw error }
+        catch { throw ContainerInstallerError.patcherRejected(error.localizedDescription) }
+
+        let keyData = try certificate.certificate.unencryptedP12Data()
+        let appURL = bundleURL.resolvingSymlinksInPath()
+
+        try CodeSigner.sign(appPath: appURL.path, keyData: keyData, entitlementProvider: { path in
+            let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return xml }
+
+            let url = (trimmed.hasPrefix("/") ? URL(fileURLWithPath: trimmed) : bundleURL.appendingPathComponent(trimmed)).resolvingSymlinksInPath()
+            guard url.pathExtension.lowercased() != "framework", !url.lastPathComponent.hasSuffix(".dylib") else { return "" }
+            return (url == appURL || url.deletingLastPathComponent() == appURL) ? xml : ""
+        }, progress: {})
+
+        debugLog("[ContainerInstaller] Signed the guest without a profile; entitlements: \(profile.entitlements.keys.sorted())")
     }
 }
