@@ -73,10 +73,12 @@ final class ContainerAppCollectionViewCell: UICollectionViewCell
         self.contentView.addSubview(self.bannerView)
 
         NSLayoutConstraint.activate([
-            self.bannerView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-            self.bannerView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-            self.bannerView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 4),
-            self.bannerView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -4)
+            // Same box as every other row on this screen: full row height, side margins from the cell's
+            // layout margins -- the storyboard's AppCell pins its banner exactly this way.
+            self.bannerView.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor),
+            self.bannerView.trailingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.trailingAnchor),
+            self.bannerView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+            self.bannerView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
         ])
     }
 
