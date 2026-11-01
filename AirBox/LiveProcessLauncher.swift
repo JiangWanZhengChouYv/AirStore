@@ -63,6 +63,16 @@ enum LiveProcessLauncher
             userInfo["selectedContainer"] = dataUUID
         }
 
+        // The extension runs in a container of its own, so the folder is handed over as a bookmark rather
+        // than as a path -- the box's own Documents is otherwise not readable from in there. This is the
+        // same option value upstream passes (URL.BookmarkCreationOptions's security-scope bit).
+        if let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last,
+           let bookmark = try? documents.bookmarkData(options: URL.BookmarkCreationOptions(rawValue: 1 << 11),
+                                                     includingResourceValuesForKeys: nil, relativeTo: nil)
+        {
+            userInfo["bookmarks"] = [bookmark]
+        }
+
         let item = NSExtensionItem()
         item.userInfo = userInfo
 

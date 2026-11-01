@@ -119,6 +119,18 @@ int LiveProcessMain(int argc, char *argv[])
     {
         traceLog([NSString stringWithFormat:@"the request arrived: %@", appInfo[@"selected"]]);
 
+        // The paths come from another container, so they are only readable once the bookmark they were
+        // wrapped in has been opened. Without this, LCAppInfo.plist is simply not there to read.
+        for (NSData *data in appInfo[@"bookmarks"])
+        {
+            BOOL stale = false;
+            NSError *error = nil;
+            NSURL *opened = [NSURL URLByResolvingBookmarkData:data options:0 relativeToURL:nil bookmarkDataIsStale:&stale error:&error];
+            traceLog([NSString stringWithFormat:@"bookmark for %@: %@ (%@)", opened.path,
+                      [opened startAccessingSecurityScopedResource] ? @"readable" : @"refused",
+                      error.localizedDescription ?: @"no error"]);
+        }
+
         NSString *hostHome = appInfo[@"lcHomePath"];
         if (hostHome.length)
         {
