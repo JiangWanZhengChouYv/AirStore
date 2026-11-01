@@ -417,20 +417,32 @@ final class ContainerInstaller
         // with no entitlements at all -- which is what a library is supposed to carry.
         let noEntitlements = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict/>\n</plist>\n"
 
+        let cms = CMSSigner(p12Data: keyData, password: "")
+
         for file in unsigned
         {
-            // The device log says these eight came out of the bundle pass unsigned even after this loop
-            // ran, so whatever the signer objects to has to be written down instead of swallowed.
-            let target = file.deletingLastPathComponent().pathExtension == "framework" ? file.deletingLastPathComponent() : file
+            // `CodeSigner.sign` only reaches the libraries it finds by walking a bundle, and a framework
+            // handed to it as the bundle signs nothing. This is the layer underneath that: the binary in,
+            // the binary out, with a library's own name as its identifier and no entitlements -- which is
+            // what a framework is supposed to carry.
+            guard let binary = try? Data(contentsOf: file) else { continue }
 
+            let signer = MachOSigner(binaryData: binary,
+                                     bundleIdentifier: file.deletingPathExtension().lastPathComponent,
+                                     teamIdentifier: teamPrefix,
+                                     entitlementsXML: nil,
+                                     infoPlistData: nil,
+                                     codeResourcesData: nil,
+                                     cmsSigner: cms)
             do
             {
-                try CodeSigner.sign(appPath: target.resolvingSymlinksInPath().path, keyData: keyData, entitlementProvider: { _ in noEntitlements }, progress: {})
-                debugLog("[ContainerInstaller] Signed \(target.lastPathComponent) separately: \(MachOSignature.digest(ofExecutableAt: file) != nil)")
+                let signed = try signer.sign()
+                try signed.write(to: file, options: .atomic)
+                debugLog("[ContainerInstaller] Signed \(file.lastPathComponent) directly: \(MachOSignature.digest(ofExecutableAt: file) != nil)")
             }
             catch
             {
-                debugLog("[ContainerInstaller] Signing \(target.lastPathComponent) separately failed: \(error.localizedDescription)")
+                debugLog("[ContainerInstaller] Signing \(file.lastPathComponent) directly failed: \(error.localizedDescription)")
             }
         }
 
