@@ -410,7 +410,19 @@ final class ContainerInstaller
         }, progress: {})
 
         let files = self.machOFiles(in: bundleURL)
-        let unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
+        var unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
+
+        // The bundle pass leaves anything it has no entitlements for completely unsigned, and on iOS an
+        // unsigned framework is as fatal as an unsigned executable. Each of those gets signed on its own,
+        // with no entitlements at all -- which is what a library is supposed to carry.
+        let noEntitlements = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict/>\n</plist>\n"
+
+        for file in unsigned
+        {
+            try? CodeSigner.sign(appPath: file.resolvingSymlinksInPath().path, keyData: keyData, entitlementProvider: { _ in noEntitlements }, progress: {})
+        }
+
+        unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
         debugLog("[ContainerInstaller] \(files.count) Mach-O files in the guest, still unsigned: \(unsigned.map { $0.lastPathComponent })")
 
         guard !unsigned.contains(where: { $0 == executableURL }) else {
