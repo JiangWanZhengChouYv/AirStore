@@ -116,7 +116,13 @@ final class ContainerInstaller
         }
         progress?.completedUnitCount = 72
 
+        let executableURL = self.executableURL(in: bundleURL)
+        let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+
         try await self.sign(bundleURL)
+
+        let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+        debugLog("[ContainerInstaller] Signature blob \(digestBefore) -> \(digestAfter)\(digestBefore == digestAfter ? " (unchanged, the signer skipped it)" : "")")
         progress?.completedUnitCount = 94
 
         // iOS 26 refuses to load a guest without JITLess, and JITLess needs the certificate inside
@@ -282,6 +288,13 @@ final class ContainerInstaller
     /// Every guest is signed by AirBox's own profile: the bundle id in that profile is AirBox's, and the
     /// signer falls back to the first profile it was handed, which is exactly what a guest needs -- the
     /// same team as the process that will dlopen it.
+    private func executableURL(in bundleURL: URL) -> URL?
+    {
+        guard let info = NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist")),
+              let name = info["CFBundleExecutable"] as? String else { return nil }
+        return bundleURL.appendingPathComponent(name)
+    }
+
     private func sign(_ bundleURL: URL) async throws
     {
         let context = DatabaseManager.shared.persistentContainer.viewContext
