@@ -151,14 +151,10 @@ final class GuestStore: ObservableObject
 
         self.takeLaunchError()
 
-        // Where this app's container is, left for the extension that runs a guest: it has to know which
-        // Documents/Applications to load from and cannot ask across a sandbox.
-        self.sharedDefaults?.set(NSHomeDirectory(), forKey: "LCHostHomePath")
-
-        // The two facts the extension depends on, in the log the store routes: whether there is a group
-        // at all, and which folder it will be told to look in.
+        // The two facts the extension is asked with, in the log the store routes: how many guests there
+        // are, and which folder it will be told to load from.
         AirBoxLogging.log("\(self.guests.count) guests in \(self.applicationsDirectory.path); "
-                          + "home left in \(self.appGroupIdentifier ?? "no shared group") for the extension")
+                          + "group \(self.appGroupIdentifier ?? "none")")
 
         self.publish()
     }
@@ -234,27 +230,34 @@ final class GuestStore: ObservableObject
         }
     }
 
-    /// A guest does not run in this process: it runs in the extension embedded under PlugIns, which is
-    /// the only process the engine lets a guest's libraries into. Which guest is left in the group and
-    /// the extension's own scheme is opened; the extension picks that up as long as it is fresh, so a
-    /// hand-over nobody took dies on its own.
-    func launch(_ guest: Guest)
+    /// What the store asks for, by the folder name it was shown in the listing the box publishes.
+    func launch(named directoryName: String) async
     {
-        guard let defaults = self.sharedDefaults else
+        if self.guests.isEmpty { await self.reload() }
+
+        guard let guest = self.guests.first(where: { $0.directory.lastPathComponent == directoryName }) else
         {
-            self.lastError = "No shared group to write the launch into."
+            self.lastError = "Nothing named \(directoryName) is inside AirBox."
             return
         }
 
-        let name = guest.directory.lastPathComponent
-        defaults.set("liveprocess", forKey: "LCLaunchExtensionScheme")
-        defaults.set(name, forKey: "LCLaunchExtensionBundleID")
-        defaults.set(Date(), forKey: "LCLaunchExtensionLaunchDate")
+        self.launch(guest)
+    }
 
-        guard let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "liveprocess://livecontainer-launch?bundle-name=\(encoded)") else { return }
-
-        AirBoxLogging.log("Handing \(name) to the extension at \(url.absoluteString)")
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    /// A guest does not run in this process: it runs in the extension under PlugIns, which is the only
+    /// process the engine lets a guest's libraries into. Asking that extension is all there is to it.
+    func launch(_ guest: Guest)
+    {
+        Task
+        {
+            do
+            {
+                try await LiveProcessLauncher.run(guest)
+            }
+            catch
+            {
+                self.lastError = error.localizedDescription
+            }
+        }
     }
 }

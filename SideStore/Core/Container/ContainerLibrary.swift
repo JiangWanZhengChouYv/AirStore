@@ -62,27 +62,15 @@ final class ContainerLibrary
         .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
-    /// A guest is not started by AirBox's own process: it is started by the extension AirBox embeds, and
-    /// that is the only shape the engine loads a guest's libraries in. Which guest travels through the
-    /// group both apps share, and opening the extension's scheme is what picks it up.
+    /// The guest is run by the extension AirBox embeds, and a request to another app's extension is not
+    /// something this app can make, so the box is asked to do it and stays open itself -- the guest comes
+    /// up in the extension while the list is still there to come back to.
     func launch(_ app: ContainerApp)
     {
-        guard let group = Bundle.main.altstoreAppGroup, let handover = UserDefaults(suiteName: group) else
-        {
-            debugLog("[ContainerLibrary] No shared group to write the launch into")
-            return
-        }
-
-        // The extension only takes this up within three seconds of it being written, so it has to be the
-        // last thing before the open, and the folder name is what the engine looks the guest up by.
-        handover.set("liveprocess", forKey: "LCLaunchExtensionScheme")
-        handover.set(app.directoryName, forKey: "LCLaunchExtensionBundleID")
-        handover.set(Date(), forKey: "LCLaunchExtensionLaunchDate")
-
         guard let encoded = app.directoryName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "liveprocess://livecontainer-launch?bundle-name=\(encoded)") else { return }
+              let url = URL(string: "airbox://launch?name=\(encoded)") else { return }
 
-        debugLog("[ContainerLibrary] Handing \(app.directoryName) to the extension through \(group)")
+        debugLog("[ContainerLibrary] Asking AirBox to run \(app.directoryName)")
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 

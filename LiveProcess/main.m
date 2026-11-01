@@ -24,17 +24,22 @@
 @implementation LiveProcessHandler
 
 static NSExtensionContext *extensionContext;
+static NSDictionary *retrievedAppInfo;
 
 + (NSExtensionContext *)extensionContext
 {
     return extensionContext;
 }
 
++ (NSDictionary *)retrievedAppInfo
+{
+    return retrievedAppInfo;
+}
+
 - (void)beginRequestWithExtensionContext:(NSExtensionContext *)context
 {
     extensionContext = context;
-    // The request carries nothing we need: which guest to run is already in the app group's defaults,
-    // written by AirBox before it opened this scheme. This only stops the process waiting forever.
+    retrievedAppInfo = [context.inputItems.firstObject userInfo];
     CFRunLoopStop(CFRunLoopGetMain());
 }
 
@@ -42,35 +47,24 @@ static NSExtensionContext *extensionContext;
 
 extern int LiveContainerMain(int argc, char *argv[]);
 
-/// AirBox's own url scheme, which is what a guest has to open to get back to the list.
-static NSString *hostUrlScheme(void)
-{
-    // .../AirBox.app/PlugIns/LiveProcess.appex, so two steps back is the box itself.
-    NSURL *hostURL = [[NSBundle.mainBundle.bundleURL URLByDeletingLastPathComponent] URLByDeletingLastPathComponent];
-    NSDictionary *info = [NSBundle bundleWithURL:hostURL].infoDictionary;
-    NSArray *urlTypes = (NSArray *)info[@"CFBundleURLTypes"];
-    NSArray *schemes = ((NSDictionary *)urlTypes.firstObject)[@"CFBundleURLSchemes"];
-    return (NSString *)schemes.firstObject;
-}
-
 int LiveProcessMain(int argc, char *argv[])
 {
-    // NSExtensionMain brings up UIKit, which calls the UIApplicationMain below; until the context has
-    // arrived the hand-over is not ours to read, so hold here for it.
+    // NSExtensionMain brings up UIKit, which calls the UIApplicationMain below; the request has not
+    // arrived until then, so hold here for it.
     CFRunLoopRun();
 
-    // LP_HOME stays this process's own, because a binary that the loader will not mmap from where it is
-    // gets moved here first. Where the guests themselves are is not something this process can guess, so
-    // the box writes its own home into the group each time it looks at the list, and that folder's
-    // Documents/Applications is what the engine then reads. Left unset, the engine falls back to HOME.
+    // LP_HOME stays this process's own, because a binary the loader will not mmap from where it lies is
+    // moved here first. Which guest to run, and from which container, is the box's to say: a second
+    // process cannot guess either.
     setenv("LP_HOME_PATH", getenv("HOME"), 1);
 
-    NSString *group = [LCSharedUtils appGroupID];
-    NSUserDefaults *shared = group.length ? [[NSUserDefaults alloc] initWithSuiteName:group] : nil;
+    NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
+    NSDictionary *appInfo = LiveProcessHandler.retrievedAppInfo;
 
-    // Everything the engine and the guest print leaves this process on stderr, so pointing stderr at the
-    // box's log file in the group is what makes it reach the store's exported log. Needs proper testing:
-    // a line that goes to os_log only, and not to stderr, would be invisible here.
+    // Everything the engine and the guest print leaves this process on stderr, so pointing it at the
+    // box's log file in the group is what makes those lines reach the store's exported log. Needs proper
+    // testing: a line that goes only to os_log would still be invisible here.
+    NSString *group = [LCSharedUtils appGroupID];
     if (group.length)
     {
         NSURL *directory = [NSFileManager.defaultManager containerURLForSecurityApplicationGroupIdentifier:group];
@@ -80,18 +74,24 @@ int LiveProcessMain(int argc, char *argv[])
         }
     }
 
-    NSString *hostHome = [shared stringForKey:@"LCHostHomePath"];
-    if (hostHome.length)
+    if (appInfo)
     {
-        setenv("LC_HOME_PATH", hostHome.fileSystemRepresentation, 1);
-    }
+        NSString *hostHome = appInfo[@"lcHomePath"];
+        if (hostHome.length)
+        {
+            setenv("LC_HOME_PATH", hostHome.fileSystemRepresentation, 1);
+        }
 
-    NSString *scheme = hostUrlScheme();
-    if (scheme)
-    {
-        // The engine swaps its own scheme for this one as soon as it notices a live process, so that
-        // what the guest is told to open is the box rather than an extension nobody installed.
-        [NSUserDefaults.standardUserDefaults setObject:scheme forKey:@"hostUrlScheme"];
+        // The engine reads these out of our own defaults once it sees a live process, and swaps its
+        // scheme for hostUrlScheme so that what the guest is told to open is the box.
+        for (NSString *key in @[ @"selected", @"selectedContainer", @"hostUrlScheme", @"launchAppUrlScheme" ])
+        {
+            id value = appInfo[key];
+            if (value)
+            {
+                [defaults setObject:value forKey:key];
+            }
+        }
     }
 
     return LiveContainerMain(argc, argv);
