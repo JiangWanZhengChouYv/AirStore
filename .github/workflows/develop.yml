@@ -22,6 +22,7 @@ on:
       - '.editorconfig'
       - '.gitignore'
       - '.gitmodules'
+      - '.swiftlint.yml'
       - '.github/**'
       - 'source/**'
   workflow_dispatch:
