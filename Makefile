@@ -284,6 +284,7 @@ ipa:
 # $(APP_GROUP_IDENTIFIER) rejects the app outright.
 fakesign-airbox:
 	ldid -SAirBox/AirBoxPackaging.entitlements SideStore.xcarchive/Products/Applications/AirBox.app/AirBox
+	ldid -SLiveProcess/LiveProcessPackaging.entitlements SideStore.xcarchive/Products/Applications/AirBox.app/PlugIns/LiveProcess.appex/LiveProcess
 
 ipa-airbox: fakesign-airbox
 	@echo ''

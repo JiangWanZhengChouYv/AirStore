@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import UIKit
 
 struct Guest: Identifiable
 {
@@ -55,14 +56,13 @@ final class GuestStore: ObservableObject
     @Published var lastError: String?
     @Published var launchError: String?
 
-    /// A guest that cannot load does not say so on screen: the engine writes the reason into the standard
-    /// defaults and exits, and the list is only running again on the next launch. Reading it back there is
-    /// the difference between a crash and a message.
+    /// A guest that cannot load does not say so on screen, and the process that failed is the extension's
+    /// own -- its defaults belong to a domain this app cannot read. The engine writes the reason into the
+    /// group instead, which is what turns a silent crash back into a message.
     private func takeLaunchError()
     {
-        let defaults = UserDefaults.standard
-        guard let error = defaults.string(forKey: "error") else { return }
-        defaults.removeObject(forKey: "error")
+        guard let defaults = self.sharedDefaults, let error = defaults.string(forKey: "LCGuestError") else { return }
+        defaults.removeObject(forKey: "LCGuestError")
         self.launchError = error
     }
 
@@ -73,6 +73,12 @@ final class GuestStore: ObservableObject
     {
         guard let identifier = LCSharedUtils.appGroupID(), !identifier.isEmpty, identifier != "Unknown" else { return nil }
         return identifier
+    }
+
+    private var sharedDefaults: UserDefaults?
+    {
+        guard let identifier = self.appGroupIdentifier else { return nil }
+        return UserDefaults(suiteName: identifier)
     }
 
     private var documentsDirectory: URL
@@ -129,6 +135,11 @@ final class GuestStore: ObservableObject
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 
         self.takeLaunchError()
+
+        // Where this app's container is, left for the extension that runs a guest: it has to know which
+        // Documents/Applications to load from and cannot ask across a sandbox.
+        self.sharedDefaults?.set(NSHomeDirectory(), forKey: "LCHostHomePath")
+
         self.publish()
     }
 
@@ -203,24 +214,27 @@ final class GuestStore: ObservableObject
         }
     }
 
-    /// The guest can only be loaded before UIApplicationMain, so asking for one means starting the
-    /// process over: `main.m` reads this file and skips the list entirely.
+    /// A guest does not run in this process: it runs in the extension embedded under PlugIns, which is
+    /// the only process the engine lets a guest's libraries into. Which guest is left in the group and
+    /// the extension's own scheme is opened; the extension picks that up as long as it is fresh, so a
+    /// hand-over nobody took dies on its own.
     func launch(_ guest: Guest)
     {
-        self.launch(directoryName: guest.directory.lastPathComponent)
-    }
+        guard let defaults = self.sharedDefaults else
+        {
+            self.lastError = "No shared group to write the launch into."
+            return
+        }
 
-    func launch(directoryName: String)
-    {
-        let marker = self.documentsDirectory.appendingPathComponent("PendingLaunch")
-        do
-        {
-            try directoryName.write(to: marker, atomically: true, encoding: .utf8)
-            exit(0)
-        }
-        catch
-        {
-            self.lastError = error.localizedDescription
-        }
+        let name = guest.directory.lastPathComponent
+        defaults.set("liveprocess", forKey: "LCLaunchExtensionScheme")
+        defaults.set(name, forKey: "LCLaunchExtensionBundleID")
+        defaults.set(Date(), forKey: "LCLaunchExtensionLaunchDate")
+
+        guard let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "liveprocess://livecontainer-launch?bundle-name=\(encoded)") else { return }
+
+        NSLog("[AirBox] Handing \(name) to the extension through \(url.scheme ?? "")")
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 }

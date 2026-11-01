@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Same group as the box, because this is where it is told which guest to run and which
+	     certificate to re-sign it with. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.$(APP_GROUP_IDENTIFIER)</string>
+	</array>
+	<!-- Setting hardware debug registers on itself is how the engine intercepts the loader, and that
+	     is only allowed in a debuggable process. -->
+	<key>get-task-allow</key>
+	<true/>
+	<key>com.apple.developer.kernel.increased-memory-limit</key>
+	<true/>
+	<key>com.apple.developer.kernel.extended-virtual-addressing</key>
+	<true/>
+</dict>
+</plist>

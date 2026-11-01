@@ -1,0 +1,14 @@
+#include "../Build.xcconfig"
+
+// An extension's identifier has to sit underneath the app that embeds it -- the store refuses any other
+// shape when it registers the App ID for it (FetchProvisioningProfilesOperation).
+PRODUCT_BUNDLE_IDENTIFIER = $(MAIN_BUNDLE_IDENTIFIER).AirBox.LiveProcess
+CODE_SIGN_ENTITLEMENTS = LiveProcess/LiveProcess.entitlements
+
+// The engine is compiled in here as well as into the box: this is the process that has to run a guest,
+// and a second copy of the same sources is cheaper than turning the engine into a dylib both bundles
+// load. Same search paths as AirBox.xcconfig, for the same reason -- the engine's sources include each
+// other by name, and one header Apple does not ship is vendored in Include.
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/Dependencies/LiveContainer/LiveContainer $(SRCROOT)/Dependencies/LiveContainer/LiveContainer/Tweaks $(SRCROOT)/Dependencies/LiveContainer/litehook/src $(SRCROOT)/Dependencies/LiveContainer/Include
+
+#include? "../local.xcconfig"

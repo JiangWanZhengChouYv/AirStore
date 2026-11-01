@@ -28,28 +28,17 @@ final class AirBoxDelegate: UIResponder, UIApplicationDelegate
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool
     {
-        // airbox://import -- how AirStore hands over a package once the two apps share a group.
-        // airbox://launch?name=<directory> -- the same hand-over for a guest already here: the store
-        // cannot start one, because only this process can take over itself before UIApplicationMain.
+        // airbox://import -- how AirStore hands over a package once the two apps share a group. A guest
+        // already inside is not asked for here: the store opens the extension's own scheme instead.
         switch url.host
         {
         case "import":
             Task { await self.store.importFromSharedInbox() }
             return true
 
-        case "launch":
-            guard let name = self.queryValue(for: url, key: "name"), !name.isEmpty else { return false }
-            Task { self.store.launch(directoryName: name) }
-            return true
-
         default:
             return false
         }
-    }
-
-    private func queryValue(for url: URL, key: String) -> String?
-    {
-        URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == key }?.value
     }
 }
 
