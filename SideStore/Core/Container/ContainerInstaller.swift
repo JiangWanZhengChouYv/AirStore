@@ -351,6 +351,14 @@ final class ContainerInstaller
         let keyData = try certificate.certificate.unencryptedP12Data()
         let appURL = bundleURL.resolvingSymlinksInPath()
 
+        // A signer that finds a signature in place may leave it alone, and the one in place covers the
+        // binary as it was before this app patched it -- which dyld reports as an invalid signature.
+        if let executable = self.executableURL(in: bundleURL)
+        {
+            let stripped = MachOSignature.stripSignature(ofExecutableAt: executable)
+            debugLog("[ContainerInstaller] Stripped the guest's previous signature: \(stripped)")
+        }
+
         try CodeSigner.sign(appPath: appURL.path, keyData: keyData, entitlementProvider: { path in
             let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { return xml }
