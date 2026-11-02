@@ -356,77 +356,37 @@ final class ContainerInstaller
             throw ContainerInstallerError.noCertificate
         }
 
-        // The profile is read for the identifier it grants AirBox and deliberately *not* embedded. Each
-        // guest is signed with that same identifier and with nothing else worth naming: upstream passes
-        // zsign no entitlements at all, and that is the point -- a guest is dlopened into the extension,
-        // so permissions belong to the *process*, which the extension's own profile already covers. Any
-        // profile-backed key on the guest binary itself (the two memory limits, app groups, keychain
-        // groups, get-task-allow) is an entitlement no provisioning profile is vouching for, which is
-        // exactly what AMFI reports as an invalid signature.
+        // The profile is read for the identifier it grants AirBox and deliberately *not* embedded. The
+        // guest is then signed with that identifier and with **no entitlements at all**, which is exactly
+        // what upstream does: zsign's own code reads `IsExecute() ? entitlements : ""`, and a guest has
+        // been patched into a MH_DYLIB, so it carries none. Permissions belong to the process -- the
+        // extension's profile already grants the memory limits, the group and get-task-allow -- and a
+        // profile-backed key on a binary with no profile is what AMFI reports as an invalid signature.
         try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
 
         let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
         let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
 
-        let guestEntitlements: [String: Any] = [
-            "application-identifier": profileIdentifier,
-            "com.apple.developer.team-identifier": teamPrefix,
-        ]
-
-        let xml: String
-        do
-        {
-            let data = try PropertyListSerialization.data(fromPropertyList: guestEntitlements, format: .xml, options: 0)
-            guard let text = String(data: data, encoding: .utf8) else {
-                throw ContainerInstallerError.noCertificate
-            }
-            xml = text
-        }
-        catch let error as ContainerInstallerError { throw error }
-        catch { throw ContainerInstallerError.patcherRejected(error.localizedDescription) }
-
-        debugLog("[ContainerInstaller] Signing the guest as the box itself: \(profileIdentifier)")
+        debugLog("[ContainerInstaller] Signing the guest as the box itself: \(profileIdentifier), no entitlements;"
+                 + " the box's own profile carries \(profile.entitlements.keys.sorted())")
 
         let keyData = try certificate.certificate.unencryptedP12Data()
-        let appURL = bundleURL.resolvingSymlinksInPath()
-        let executableURL = self.executableURL(in: bundleURL)
+        let cms = CMSSigner(p12Data: keyData, password: "")
 
-        // A signer that finds a signature in place may leave it alone, and the one in place covers the
-        // binary as it was before this app patched it -- which dyld reports as an invalid signature.
-        for file in self.machOFiles(in: bundleURL)
+        // Strip first: a signature left in place covers the binary as it was before this app patched its
+        // header, which dyld reports as an invalid signature.
+        let files = self.machOFiles(in: bundleURL)
+        for file in files
         {
             MachOSignature.stripSignature(ofExecutableAt: file)
         }
 
-        try CodeSigner.sign(appPath: appURL.path, keyData: keyData, entitlementProvider: { path in
-            let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return xml }
-
-            let url = (trimmed.hasPrefix("/") ? URL(fileURLWithPath: trimmed) : bundleURL.appendingPathComponent(trimmed)).resolvingSymlinksInPath()
-            guard url.pathExtension.lowercased() != "framework", !url.lastPathComponent.hasSuffix(".dylib") else { return "" }
-            return (url == appURL || url.deletingLastPathComponent() == appURL) ? xml : ""
-        }, progress: {})
-
-        let files = self.machOFiles(in: bundleURL)
-        var unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
-
-        // The bundle pass leaves anything it has no entitlements for completely unsigned, and on iOS an
-        // unsigned framework is as fatal as an unsigned executable. Each of those gets signed on its own,
-        // with no entitlements at all -- which is what a library is supposed to carry.
-        let noEntitlements = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict/>\n</plist>\n"
-
-        let cms = CMSSigner(p12Data: keyData, password: "")
-
-        for file in unsigned
+        for file in files
         {
-            // `CodeSigner.sign` only reaches the libraries it finds by walking a bundle, and a framework
-            // handed to it as the bundle signs nothing. This is the layer underneath that: the binary in,
-            // the binary out, with a library's own name as its identifier and no entitlements -- which is
-            // what a framework is supposed to carry.
             guard let binary = try? Data(contentsOf: file) else { continue }
 
             let signer = MachOSigner(binaryData: binary,
-                                     bundleIdentifier: file.deletingPathExtension().lastPathComponent,
+                                     bundleIdentifier: profileIdentifier,
                                      teamIdentifier: teamPrefix,
                                      entitlementsXML: nil,
                                      infoPlistData: nil,
@@ -436,21 +396,23 @@ final class ContainerInstaller
             {
                 let signed = try signer.sign()
                 try signed.write(to: file, options: .atomic)
-                debugLog("[ContainerInstaller] Signed \(file.lastPathComponent) directly: \(MachOSignature.digest(ofExecutableAt: file) != nil)")
+                debugLog("[ContainerInstaller] Signed \(file.lastPathComponent): \(MachOSignature.digest(ofExecutableAt: file) != nil ? "ok" : "still unsigned")")
             }
             catch
             {
-                debugLog("[ContainerInstaller] Signing \(file.lastPathComponent) directly failed: \(error.localizedDescription)")
+                debugLog("[ContainerInstaller] Signing \(file.lastPathComponent) failed: \(error.localizedDescription)")
             }
         }
 
-        unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
+        let unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
         debugLog("[ContainerInstaller] \(files.count) Mach-O files in the guest, still unsigned: \(unsigned.map { $0.lastPathComponent })")
 
-        guard !unsigned.contains(where: { $0 == executableURL }) else {
+        // Only the main executable is checked, not that list: MachOSignature reads thin Mach-Os, and
+        // MeloNX's ffmpeg libraries are universal containers, so they are reported unsigned even when
+        // they are signed. The executable is the one thing a wrong answer here would hide.
+        guard let executableURL = self.executableURL(in: bundleURL),
+              MachOSignature.digest(ofExecutableAt: executableURL) != nil else {
             throw ContainerInstallerError.patcherRejected(NSLocalizedString("the signer left the executable unsigned", comment: ""))
         }
-
-        debugLog("[ContainerInstaller] Signed the guest without a profile; entitlements: \(profile.entitlements.keys.sorted())")
     }
 }
