@@ -116,20 +116,6 @@ final class ContainerInstaller
         }
         progress?.completedUnitCount = 72
 
-        let executableURL = self.executableURL(in: bundleURL)
-        let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-
-        try await self.sign(bundleURL)
-
-        let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        debugLog("[ContainerInstaller] Signature blob \(digestBefore) -> \(digestAfter)\(digestBefore == digestAfter ? " (unchanged, the signer skipped it)" : "")")
-        progress?.completedUnitCount = 94
-
-        // iOS 26 refuses to load a guest without JITLess, and JITLess needs the certificate inside
-        // AirBox. Upstream reaches these two keys through its settings screen; the store already holds
-        // the same certificate, so it writes them itself and leaves the user with nothing to import.
-        try self.shareCertificate()
-
         let name = bundleURL.deletingPathExtension().lastPathComponent
         try FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
         let destination = inbox.appendingPathComponent(bundleURL.lastPathComponent)
@@ -154,6 +140,22 @@ final class ContainerInstaller
         let appInfoURL = bundleURL.appendingPathComponent("LCAppInfo.plist")
         try PropertyListSerialization.data(fromPropertyList: appInfo, format: .xml, options: 0).write(to: appInfoURL)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: bundleURL.path)
+
+        // Ahead of the signing, because the bundle's own resource list seals this file: written after,
+        // the seal would describe a bundle that no longer matches what is on disk.
+        let executableURL = self.executableURL(in: bundleURL)
+        let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+
+        try await self.sign(bundleURL)
+
+        let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+        debugLog("[ContainerInstaller] Signature blob \(digestBefore) -> \(digestAfter)\(digestBefore == digestAfter ? " (unchanged, the signer skipped it)" : "")")
+        progress?.completedUnitCount = 94
+
+        // iOS 26 refuses to load a guest without JITLess, and JITLess needs the certificate inside
+        // AirBox. Upstream reaches these two keys through its settings screen; the store already holds
+        // the same certificate, so it writes them itself and leaves the user with nothing to import.
+        try self.shareCertificate()
 
         if FileManager.default.fileExists(atPath: destination.path)
         {
@@ -295,30 +297,63 @@ final class ContainerInstaller
         return bundleURL.appendingPathComponent(name)
     }
 
-    /// Every Mach-O the guest bundle carries: the executable, each framework's binary, and any loose
-    /// dylib. A package that arrives with no signature at all gives a signer nothing to point at, so the
-    /// list is written out here rather than left to a traversal.
-    private func machOFiles(in bundleURL: URL) -> [URL]
+    /// A binary the guest carries, together with the bundle whose Info.plist and resources its signature
+    /// has to bind. A framework belongs to its own .framework and the executable to the .app; a loose
+    /// dylib under Frameworks/ belongs to neither, which is why Apple's signer leaves those unbound.
+    private struct GuestBinary
+    {
+        let url: URL
+        let bundle: URL?
+    }
+
+    /// Every Mach-O the guest bundle carries, in the order they have to be signed: nested things first,
+    /// because the .app seals the bytes its frameworks end up with, so its resource list cannot be built
+    /// before they are final. A package that arrives with no signature at all gives a signer nothing to
+    /// point at, so the list is written out here rather than left to a traversal.
+    private func guestBinaries(in bundleURL: URL) -> [GuestBinary]
     {
         let finder = FileManager.default
-        var files = [URL]()
-
-        if let executable = self.executableURL(in: bundleURL) { files.append(executable) }
+        var binaries = [GuestBinary]()
 
         let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
         for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
         {
-            if entry.pathExtension == "framework"
+            switch entry.pathExtension
             {
-                files.append(entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent))
-            }
-            else if entry.pathExtension == "dylib"
-            {
-                files.append(entry)
+            case "framework":
+                let binary = entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent)
+                if finder.fileExists(atPath: binary.path) { binaries.append(GuestBinary(url: binary, bundle: entry)) }
+            case "dylib":
+                binaries.append(GuestBinary(url: entry, bundle: nil))
+            default:
+                break
             }
         }
 
-        return files.filter { finder.fileExists(atPath: $0.path) }
+        if let executable = self.executableURL(in: bundleURL) { binaries.append(GuestBinary(url: executable, bundle: bundleURL)) }
+        return binaries
+    }
+
+    /// The bundle's own resource list, written where a validator looks for it. Leaving it out is what the
+    /// store did until now, and Apple's validator answers that shape -- for the file, not just the
+    /// directory -- with "code has no resources but signature indicates they must be present".
+    private func sealResources(in bundleURL: URL, executableName: String) -> (info: Data?, resources: Data?)
+    {
+        let info = try? Data(contentsOf: bundleURL.appendingPathComponent("Info.plist"))
+        do
+        {
+            let resources = try CodeResourcesBuilder(bundleURL: bundleURL, executableName: executableName).build()
+            let directory = bundleURL.appendingPathComponent("_CodeSignature", isDirectory: true)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try resources.write(to: directory.appendingPathComponent("CodeResources"), options: .atomic)
+            debugLog("[ContainerInstaller] Sealed \(bundleURL.lastPathComponent) with \(resources.count) bytes of resource list")
+            return (info, resources)
+        }
+        catch
+        {
+            debugLog("[ContainerInstaller] Could not seal \(bundleURL.lastPathComponent): \(error.localizedDescription)")
+            return (info, nil)
+        }
     }
 
     private func sign(_ bundleURL: URL) async throws
@@ -375,37 +410,42 @@ final class ContainerInstaller
 
         // Strip first: a signature left in place covers the binary as it was before this app patched its
         // header, which dyld reports as an invalid signature.
-        let files = self.machOFiles(in: bundleURL)
-        for file in files
+        let binaries = self.guestBinaries(in: bundleURL)
+        for binary in binaries
         {
-            MachOSignature.stripSignature(ofExecutableAt: file)
+            MachOSignature.stripSignature(ofExecutableAt: binary.url)
         }
 
-        for file in files
+        for binary in binaries
         {
-            guard let binary = try? Data(contentsOf: file) else { continue }
+            // Each bundle binds its own Info.plist and resource list; a loose dylib belongs to no bundle
+            // and is signed the way Apple signs those -- with neither.
+            let bindings = binary.bundle.map { self.sealResources(in: $0, executableName: binary.url.lastPathComponent) }
+                ?? (info: nil, resources: nil)
 
-            let signer = MachOSigner(binaryData: binary,
+            guard let data = try? Data(contentsOf: binary.url) else { continue }
+
+            let signer = MachOSigner(binaryData: data,
                                      bundleIdentifier: profileIdentifier,
                                      teamIdentifier: teamPrefix,
                                      entitlementsXML: nil,
-                                     infoPlistData: nil,
-                                     codeResourcesData: nil,
+                                     infoPlistData: bindings.info,
+                                     codeResourcesData: bindings.resources,
                                      cmsSigner: cms)
             do
             {
                 let signed = try signer.sign()
-                try signed.write(to: file, options: .atomic)
-                debugLog("[ContainerInstaller] Signed \(file.lastPathComponent): \(MachOSignature.digest(ofExecutableAt: file) != nil ? "ok" : "still unsigned")")
+                try signed.write(to: binary.url, options: .atomic)
+                debugLog("[ContainerInstaller] Signed \(binary.url.lastPathComponent): \(MachOSignature.digest(ofExecutableAt: binary.url) != nil ? "ok" : "still unsigned")")
             }
             catch
             {
-                debugLog("[ContainerInstaller] Signing \(file.lastPathComponent) failed: \(error.localizedDescription)")
+                debugLog("[ContainerInstaller] Signing \(binary.url.lastPathComponent) failed: \(error.localizedDescription)")
             }
         }
 
-        let unsigned = files.filter { MachOSignature.digest(ofExecutableAt: $0) == nil }
-        debugLog("[ContainerInstaller] \(files.count) Mach-O files in the guest, still unsigned: \(unsigned.map { $0.lastPathComponent })")
+        let unsigned = binaries.filter { MachOSignature.digest(ofExecutableAt: $0.url) == nil }
+        debugLog("[ContainerInstaller] \(binaries.count) Mach-O files in the guest, still unsigned: \(unsigned.map { $0.url.lastPathComponent })")
 
         // Only the main executable is checked, not that list: MachOSignature reads thin Mach-Os, and
         // MeloNX's ffmpeg libraries are universal containers, so they are reported unsigned even when
