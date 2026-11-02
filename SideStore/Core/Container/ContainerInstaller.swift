@@ -357,22 +357,21 @@ final class ContainerInstaller
         }
 
         // The profile is read for the identifier it grants AirBox and deliberately *not* embedded. Each
-        // guest is signed with that same identifier, which is what upstream does: dyld compares an image
-        // being dlopened against the process that loads it, so a guest signed under its own bundle id is
-        // refused as "code signature invalid" even when the blob is present and covers every byte.
+        // guest is signed with that same identifier and with nothing else worth naming: upstream passes
+        // zsign no entitlements at all, and that is the point -- a guest is dlopened into the extension,
+        // so permissions belong to the *process*, which the extension's own profile already covers. Any
+        // profile-backed key on the guest binary itself (the two memory limits, app groups, keychain
+        // groups, get-task-allow) is an entitlement no provisioning profile is vouching for, which is
+        // exactly what AMFI reports as an invalid signature.
         try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
 
         let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
         let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
 
-        var guestEntitlements: [String: Any] = [
+        let guestEntitlements: [String: Any] = [
             "application-identifier": profileIdentifier,
             "com.apple.developer.team-identifier": teamPrefix,
-            "com.apple.developer.kernel.increased-memory-limit": true,
-            "com.apple.developer.kernel.extended-virtual-addressing": true,
-            "get-task-allow": true
         ]
-        if let groups = profile.entitlements["com.apple.security.application-groups"] { guestEntitlements["com.apple.security.application-groups"] = groups }
 
         let xml: String
         do
