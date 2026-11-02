@@ -356,18 +356,17 @@ final class ContainerInstaller
             throw ContainerInstallerError.noCertificate
         }
 
-        // The profile is read for its team prefix and deliberately *not* embedded, and its entitlements
-        // are not copied either: they name AirBox's identifier, and a signature whose identifier does not
-        // match the binary it covers is what AMFI calls an invalid signature. Each guest is signed as
-        // itself, under the same team and the same certificate AirBox itself carries.
+        // The profile is read for the identifier it grants AirBox and deliberately *not* embedded. Each
+        // guest is signed with that same identifier, which is what upstream does: dyld compares an image
+        // being dlopened against the process that loads it, so a guest signed under its own bundle id is
+        // refused as "code signature invalid" even when the blob is present and covers every byte.
         try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
 
         let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
         let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
-        let guestIdentifier = (NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist"))?["CFBundleIdentifier"] as? String) ?? ""
 
         var guestEntitlements: [String: Any] = [
-            "application-identifier": "\(teamPrefix).\(guestIdentifier)",
+            "application-identifier": profileIdentifier,
             "com.apple.developer.team-identifier": teamPrefix,
             "com.apple.developer.kernel.increased-memory-limit": true,
             "com.apple.developer.kernel.extended-virtual-addressing": true,
@@ -387,7 +386,7 @@ final class ContainerInstaller
         catch let error as ContainerInstallerError { throw error }
         catch { throw ContainerInstallerError.patcherRejected(error.localizedDescription) }
 
-        debugLog("[ContainerInstaller] Signing the guest as \(teamPrefix).\(guestIdentifier)")
+        debugLog("[ContainerInstaller] Signing the guest as the box itself: \(profileIdentifier)")
 
         let keyData = try certificate.certificate.unencryptedP12Data()
         let appURL = bundleURL.resolvingSymlinksInPath()
