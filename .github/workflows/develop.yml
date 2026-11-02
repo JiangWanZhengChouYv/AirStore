@@ -72,38 +72,49 @@ jobs:
           echo "VERSION=${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}" | tee -a $GITHUB_ENV
           echo "SHORT_COMMIT=${SHORT}" | tee -a $GITHUB_ENV
 
-      - name: Restore Cache (exact)
-        id: xcode-cache-exact
+      - name: Restore the last build's cache
+        id: build-cache
         uses: actions/cache/restore@v3
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-${{ github.sha }}
-
-      - name: Restore Cache (last)
-        if: steps.xcode-cache-exact.outputs.cache-hit != 'true'
-        id: xcode-cache-fallback
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-
+          # A key no run has ever written, so the lookup always falls through to restore-keys and takes
+          # the newest cache whoever ran before left behind -- which is the only one that can make this
+          # build incremental. Keying the save on the commit and asking for nothing in return, as this
+          # file used to, meant every run restored nothing and compiled the whole app from scratch.
+          key: xcode-build-cache-develop-${{ github.run_id }}
+          restore-keys: |
+            xcode-build-cache-develop-
 
       - name: Build
         env:
           MARKETING_VERSION: ${{ env.VERSION }}
         run: python3 scripts/ci/workflow.py build
 
+      - name: Check the extension kept its entry point
+        run: |
+          # UIKit finds UIApplicationMain by name at runtime, so nothing inside the binary refers to it and
+          # dead-code stripping deletes the whole chain -- which reads on device as a tap that does
+          # nothing, with no crash and no log line. Cheap to prove, expensive to miss.
+          appex=SideStore.xcarchive/Products/Applications/AirBox.app/PlugIns/LiveProcess.appex/LiveProcess
+          if [ ! -f "$appex" ]; then
+            echo "::error::$appex is missing from the archive; AirBox shipped without the extension"
+            exit 1
+          fi
+          if ! nm -gU "$appex" | grep -q "_UIApplicationMain"; then
+            echo "::error::$appex exports no _UIApplicationMain; the linker stripped the extension's entry"
+            exit 1
+          fi
+          echo "$appex keeps _UIApplicationMain"
+
       - name: Save Cache
-        if: ${{ steps.xcode-cache-fallback.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v3
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-${{ github.sha }}
+          key: xcode-build-cache-develop-${{ github.run_id }}
 
       - name: Verify the Chinese resources compiled
         run: |
