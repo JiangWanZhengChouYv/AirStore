@@ -8,12 +8,12 @@
 #   ciw -b develop -i 5      # one branch, refresh every 5s while runs are active
 #   ciw --no-revive          # never re-queue anything by itself (see below)
 #   ESTIMATE=600 ciw         # override the seconds a build is expected to take
-#   QUEUE_TIMEOUT=600 MAX_REVIVE=1 REVIVE_COOLDOWN=300 ciw   # tune the re-queue
+#   QUEUE_TIMEOUT=600 MAX_DISPATCH=1 ciw   # tune the re-queue
 #
 # A run that has been sitting with no runner for over QUEUE_TIMEOUT seconds gets put back in the
 # queue: the runner pool has been swallowing queued runs, and a run that never started loses nothing
-# by re-queueing. One run is touched at most MAX_REVIVE times, and no two touches happen within
-# REVIVE_COOLDOWN seconds. The row says what was done.
+# by re-queueing. Caps: MAX_REVIVE touches per run, MAX_DISPATCH dispatches in total, and no two
+# touches within REVIVE_COOLDOWN seconds. The row says what was done.
 #
 # Keys: r = refresh now, q = quit, 1-9 = expand the Nth row. When nothing is running it keeps the
 # finished runs on screen and checks again every three minutes, so a push made from another window
@@ -35,9 +35,11 @@ REPO="JiangWanZhengChouYv/AirStore"
 INTERVAL=60
 IDLE_INTERVAL=180
 # Seconds a run may sit with no runner at all before this watcher puts it back in the queue, how many
-# times it may do that to one run, and the minimum gap between any two of those writes.
+# times it may do that to one run, how many dispatches the whole machine may have (a dispatch
+# invents a run id the per-run counter has never seen), and the minimum gap between any two writes.
 QUEUE_TIMEOUT=${QUEUE_TIMEOUT:-300}
 MAX_REVIVE=${MAX_REVIVE:-2}
+MAX_DISPATCH=${MAX_DISPATCH:-3}
 REVIVE_COOLDOWN=${REVIVE_COOLDOWN:-180}
 NO_REVIVE=0
 REVIVE_STATE="${TMPDIR:-/tmp}/ciw-revive-state"
@@ -172,14 +174,15 @@ run_fields() {
 }
 
 # A run that has never been handed a runner has lost nothing by going back to the front of the queue,
-# and the pool has been swallowing queued runs whole. GitHub refuses to rerun anything that has not
-# finished -- it answers "This workflow is already running (HTTP 403)" -- so the lever is cancel, wait
-# for the cancel to land, then rerun the same run at the same commit. Re-dispatching the workflow is
-# the last resort and only when the stuck commit is still the branch head, so it cannot build a
-# different revision than the one being watched. Attempts are counted per run id and globally
-# throttled: this is a handful of writes against a rate budget that has already bitten once.
+# and the pool has been swallowing queued runs whole. GitHub will not rerun anything that has not
+# finished -- it answers "This workflow is already running (HTTP 403)" -- and the cancel that would
+# unlock the rerun takes 20-25 seconds to land, which is a lot of frozen screen for nothing: this
+# workflow's concurrency group cancels the stuck run the moment a new one is created (measured: the
+# old run flipped to cancelled 8s after the fresh run appeared). So one dispatch is the whole action.
+# It is allowed only when the stuck commit is still the branch head, so a re-queue can never quietly
+# build a different revision than the row being watched; a stale commit gets dropped instead.
 revive_run() {
-  local id="$1" wf_file="$2" branch="$3" sha="$4" now last count tries=0 note=""
+  local id="$1" wf_file="$2" branch="$3" sha="$4" now last count head
   now=$(now_epoch)
   mkdir -p "$REVIVE_STATE" 2>/dev/null
   last=$(cat "$REVIVE_STATE/last" 2>/dev/null || echo 0)
@@ -189,24 +192,30 @@ revive_run() {
   case "$count" in (''|*[!0-9]*) count=0 ;; esac
   [ "$count" -ge "$MAX_REVIVE" ] && return 1
 
-  show_status "正在把 #$id 重新排队…"
-  if gh run cancel "$id" --yes >/dev/null 2>&1; then
-    # The rerun is refused until the cancel has actually landed, and that takes as long as the run
-    # needs to give up its queue slot -- measured at ~15s. Polling the status beats guessing a sleep.
-    tries=0
-    while [ "$tries" -lt 4 ]; do
-      sleep 5
-      [ "$(gh api "repos/$REPO/actions/runs/$id" --jq .status 2>/dev/null)" = "completed" ] && break
-      tries=$(( tries + 1 ))
-    done
-    gh run rerun "$id" >/dev/null 2>&1 && note="re-queued"
+  local note
+  # The per-run counter cannot bound this on its own: a dispatch creates a run with a brand new id,
+  # which the next poll has never seen. So dispatches get their own ceiling -- three, then stop and
+  # say so -- because a pool jammed this badly is not fixed by an endless line of fresh runs.
+  local dispatches dispatched
+  dispatches=$(cat "$REVIVE_STATE/dispatch.count" 2>/dev/null || echo 0)
+  case "$dispatches" in (''|*[!0-9]*) dispatches=0 ;; esac
+  # A counter that has not been touched in half a day describes a different afternoon's queue.
+  [ -n "$(find "$REVIVE_STATE/dispatch.count" -mmin +720 2>/dev/null)" ] && dispatches=0
+
+  head=$(gh api "repos/$REPO/commits?sha=$branch&per_page=1" --jq '.[0].sha' 2>/dev/null)
+  if [ -z "$head" ]; then
+    note="no branch head"
+  elif [ "$head" != "$sha" ]; then
+    gh run cancel "$id" --yes >/dev/null 2>&1 && note="dropped (newer push)" || note="cancel failed"
+  elif [ "$dispatches" -ge "$MAX_DISPATCH" ]; then
+    note="stopped after $dispatches"
+  elif gh workflow run "$wf_file" --ref "$branch" >/dev/null 2>&1; then
+    dispatched=$(( dispatches + 1 ))
+    printf '%s\n' "$dispatched" > "$REVIVE_STATE/dispatch.count"
+    note="re-dispatched $dispatched/$MAX_DISPATCH"
+  else
+    note="dispatch failed"
   fi
-  if [ -z "$note" ] && [ -n "$wf_file" ] && [ -n "$branch" ] &&
-     [ "$(gh api "repos/$REPO/commits?sha=$branch&per_page=1" --jq '.[0].sha' 2>/dev/null)" = "$sha" ] &&
-     gh workflow run "$wf_file" --ref "$branch" >/dev/null 2>&1; then
-    note="re-dispatched"
-  fi
-  [ -z "$note" ] && note="rerun failed"
 
   printf '%s\n' "$(( count + 1 ))" > "$REVIVE_STATE/run.$id"
   printf '%s\n' "$now" > "$REVIVE_STATE/last"
@@ -227,6 +236,7 @@ maybe_revive() {
   [ -s "$DETAIL_CACHE_DIR/note.$id" ] && return 1
   local waited=$(( $(now_epoch) - $(to_epoch "$started") ))
   [ "$waited" -lt "$QUEUE_TIMEOUT" ] && return 1
+  [ -z "${wf_path##*/}" ] && return 1
   local note
   note=$(revive_run "$id" "${wf_path##*/}" "$branch" "$sha") || return 1
   [ -n "$note" ] && printf '%s' "$note" > "$DETAIL_CACHE_DIR/note.$id"
