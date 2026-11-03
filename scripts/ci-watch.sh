@@ -6,7 +6,14 @@
 #   ciw --all                # start with a longer history
 #   ciw 39786651476 ...      # specific run ids
 #   ciw -b develop -i 5      # one branch, refresh every 5s while runs are active
+#   ciw --no-revive          # never re-queue anything by itself (see below)
 #   ESTIMATE=600 ciw         # override the seconds a build is expected to take
+#   QUEUE_TIMEOUT=600 MAX_REVIVE=1 REVIVE_COOLDOWN=300 ciw   # tune the re-queue
+#
+# A run that has been sitting with no runner for over QUEUE_TIMEOUT seconds gets put back in the
+# queue: the runner pool has been swallowing queued runs, and a run that never started loses nothing
+# by re-queueing. One run is touched at most MAX_REVIVE times, and no two touches happen within
+# REVIVE_COOLDOWN seconds. The row says what was done.
 #
 # Keys: r = refresh now, q = quit, 1-9 = expand the Nth row. When nothing is running it keeps the
 # finished runs on screen and checks again every three minutes, so a push made from another window
@@ -27,6 +34,13 @@ REPO="JiangWanZhengChouYv/AirStore"
 # duration on every redraw, so between polls it keeps advancing on its own.
 INTERVAL=60
 IDLE_INTERVAL=180
+# Seconds a run may sit with no runner at all before this watcher puts it back in the queue, how many
+# times it may do that to one run, and the minimum gap between any two of those writes.
+QUEUE_TIMEOUT=${QUEUE_TIMEOUT:-300}
+MAX_REVIVE=${MAX_REVIVE:-2}
+REVIVE_COOLDOWN=${REVIVE_COOLDOWN:-180}
+NO_REVIVE=0
+REVIVE_STATE="${TMPDIR:-/tmp}/ciw-revive-state"
 # 1 = this pass may spend API calls; 0 = redraw from the copies on disk. The screen is redrawn every
 # second either way, and the percentage is derived from the clock at draw time -- so between polls the
 # bar keeps moving while the network stays quiet.
@@ -43,7 +57,8 @@ while [ $# -gt 0 ]; do
     -a|--all)      HISTORY=10 ;;
     -b|--branch)   BRANCH="${2:-}"; shift ;;
     -i|--interval) INTERVAL="${2:-60}"; shift ;;
-    -h|--help)     sed -n '2,17p' "$0"; exit 0 ;;
+    --no-revive) NO_REVIVE=1 ;;
+    -h|--help)     sed -n '2,26p' "$0"; exit 0 ;;
     ''|--*)        ;;
     *[!0-9]*)      echo "ignoring '$1' (not a run id)" >&2 ;;
     *)             MODE="ids"; RUN_IDS+=("$1") ;;
@@ -118,7 +133,9 @@ estimate_for() {
 }
 
 # The status filter takes exactly one value: `status=queued,in_progress` is accepted by the API and
-# answers with nothing at all, which reads as "no CI is running".
+# answers with nothing at all, which reads as "no CI is running". `pending` is a separate value and
+# the one a run sits in when no runner has been assigned yet -- querying only `queued` makes exactly
+# the stuck runs invisible.
 running_ids() {
   if [ "$MODE" = "ids" ]; then
     printf '%s\n' "${RUN_IDS[@]}"
@@ -130,8 +147,9 @@ running_ids() {
   [ -n "$BRANCH" ] && q="$q&branch=$BRANCH"
   {
     gh api "$q&status=queued" --jq '.workflow_runs[].id' 2>/dev/null
+    gh api "$q&status=pending" --jq '.workflow_runs[].id' 2>/dev/null
     gh api "$q&status=in_progress" --jq '.workflow_runs[].id' 2>/dev/null
-  } > "$cache"
+  } | awk '!seen[$1]++' > "$cache"
   cat "$cache"
 }
 
@@ -151,6 +169,67 @@ run_fields() {
     '[.status, (.conclusion // ""), .name, .head_branch, .head_sha, .run_started_at, .updated_at, (.run_attempt // 1|tostring), .path] | join("\u001f")' \
     2>/dev/null > "$cache"
   cat "$cache"
+}
+
+# A run that has never been handed a runner has lost nothing by going back to the front of the queue,
+# and the pool has been swallowing queued runs whole. GitHub refuses to rerun anything that has not
+# finished -- it answers "This workflow is already running (HTTP 403)" -- so the lever is cancel, wait
+# for the cancel to land, then rerun the same run at the same commit. Re-dispatching the workflow is
+# the last resort and only when the stuck commit is still the branch head, so it cannot build a
+# different revision than the one being watched. Attempts are counted per run id and globally
+# throttled: this is a handful of writes against a rate budget that has already bitten once.
+revive_run() {
+  local id="$1" wf_file="$2" branch="$3" sha="$4" now last count tries=0 note=""
+  now=$(now_epoch)
+  mkdir -p "$REVIVE_STATE" 2>/dev/null
+  last=$(cat "$REVIVE_STATE/last" 2>/dev/null || echo 0)
+  case "$last" in (''|*[!0-9]*) last=0 ;; esac
+  [ $(( now - last )) -lt "$REVIVE_COOLDOWN" ] && return 1
+  count=$(cat "$REVIVE_STATE/run.$id" 2>/dev/null || echo 0)
+  case "$count" in (''|*[!0-9]*) count=0 ;; esac
+  [ "$count" -ge "$MAX_REVIVE" ] && return 1
+
+  show_status "正在把 #$id 重新排队…"
+  if gh run cancel "$id" --yes >/dev/null 2>&1; then
+    # The rerun is refused until the cancel has actually landed, and that takes as long as the run
+    # needs to give up its queue slot -- measured at ~15s. Polling the status beats guessing a sleep.
+    tries=0
+    while [ "$tries" -lt 4 ]; do
+      sleep 5
+      [ "$(gh api "repos/$REPO/actions/runs/$id" --jq .status 2>/dev/null)" = "completed" ] && break
+      tries=$(( tries + 1 ))
+    done
+    gh run rerun "$id" >/dev/null 2>&1 && note="re-queued"
+  fi
+  if [ -z "$note" ] && [ -n "$wf_file" ] && [ -n "$branch" ] &&
+     [ "$(gh api "repos/$REPO/commits?sha=$branch&per_page=1" --jq '.[0].sha' 2>/dev/null)" = "$sha" ] &&
+     gh workflow run "$wf_file" --ref "$branch" >/dev/null 2>&1; then
+    note="re-dispatched"
+  fi
+  [ -z "$note" ] && note="rerun failed"
+
+  printf '%s\n' "$(( count + 1 ))" > "$REVIVE_STATE/run.$id"
+  printf '%s\n' "$now" > "$REVIVE_STATE/last"
+  printf '%s' "$note"
+}
+
+# One queued run, seen once per session. The row keeps its note file so the action stays on screen
+# instead of vanishing on the next poll.
+maybe_revive() {
+  local id="$1" fields="$2"
+  [ "$NO_REVIVE" = 1 ] && return 1
+  local IFS=$'\037'
+  # shellcheck disable=SC2086
+  set -- $fields
+  unset IFS
+  local status="$1" branch="$4" sha="$5" started="$6" wf_path="$9"
+  case "$status" in queued|pending) ;; *) return 1 ;; esac
+  [ -s "$DETAIL_CACHE_DIR/note.$id" ] && return 1
+  local waited=$(( $(now_epoch) - $(to_epoch "$started") ))
+  [ "$waited" -lt "$QUEUE_TIMEOUT" ] && return 1
+  local note
+  note=$(revive_run "$id" "${wf_path##*/}" "$branch" "$sha") || return 1
+  [ -n "$note" ] && printf '%s' "$note" > "$DETAIL_CACHE_DIR/note.$id"
 }
 
 # Prints one line for a run. Reads the run plus its job steps, so two API calls per run per poll.
@@ -218,6 +297,12 @@ draw_run() {
   fi
 
   local label="${current:-}"
+  # The note replaces the label rather than following it: the column is width-clamped, and this shell
+  # clamps by bytes under a C locale, so a CJK note would print half a character. Keep it ASCII. Only
+  # while the run is still waiting, or it would hide the real step name once a runner takes it.
+  if [ "$total" -eq 0 ] && [ -s "$DETAIL_CACHE_DIR/note.$id" ]; then
+    label=$(cat "$DETAIL_CACHE_DIR/note.$id")
+  fi
   printf '%s%s%s %-12s %-10s %s %s%3d%%%s %2d/%-2d步 %02d:%02d ' \
     "$colour" "$state" "$C_OFF" "$(shorten_workflow "$workflow")" "${branch:0:10}" "${sha:0:8}" \
     "$colour" "$pct" "$C_OFF" "$done_steps" "$total" "$mm" "$ss"
@@ -343,6 +428,10 @@ build_frame() {
       # it is just traffic.
       if [ "$(cat "$DETAIL_CACHE_DIR/steps.$id" 2>/dev/null)" -gt 0 ] 2>/dev/null; then
         POLL_FAST=1
+      elif [ "$FETCH" = 1 ] && maybe_revive "$id" "$fields"; then
+        POLL_FAST=1     # something was just re-queued; look again on the short interval
+      elif [ -s "$DETAIL_CACHE_DIR/note.$id" ]; then
+        POLL_FAST=1     # still waiting for the outcome of the re-queue this session already did
       fi
       if is_expanded "$id"; then
         while IFS= read -r line; do
