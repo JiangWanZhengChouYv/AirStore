@@ -233,6 +233,10 @@ jobs:
       # release's decision, so the mirror is handed the same list the prune step just applied rather
       # than working out its own from file names.
       - name: Mirror the package onto the Pages branch
+        env:
+          # A push that cannot authenticate asks for a username on stdin, and on a runner with no
+          # terminal that turns into a six-minute silence instead of an error. Fail fast instead.
+          GIT_TERMINAL_PROMPT: 0
         run: |
           # Ask before switching branches: the pages tree holds nothing but assets, so once it is
           # checked out there is no scripts/ci left to ask. The answer lands in build/, which is
@@ -264,9 +268,12 @@ jobs:
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit -q --allow-empty -m "Publish $VERSION"
-          git push origin pages
+          # Bounded so a stalled write shows up as a red step rather than eating the job's hours.
+          timeout 300 git push origin pages
 
       - name: Commit the feed to its own branch
+        env:
+          GIT_TERMINAL_PROMPT: 0
         run: |
           git fetch origin develop-source 2>/dev/null || true
           if git rev-parse --verify -q origin/develop-source >/dev/null; then
@@ -281,7 +288,7 @@ jobs:
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit --allow-empty -m "Develop build $VERSION"
-          git push origin develop-source
+          timeout 300 git push origin develop-source
 
       - name: Purge the CDN copy of the feed
         run: |
