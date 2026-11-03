@@ -165,10 +165,11 @@ public enum AppConstants {
         public static let errorCodesDocumentation   = URL(string: "https://docs.sidestore.io/docs/troubleshooting/error-codes")!
         public static let sideStoreWebsite          = URL(string: "https://sidestore.io")!
 
-        // AirStore's own channels. Feedback goes to these two only; the upstream org's Mastodon,
-        // Threads, Twitter, Discord and Patreon are deliberately not offered anywhere in the app.
+        // AirStore's own channels. Feedback goes to these; the upstream org's Mastodon, Threads,
+        // Twitter and Patreon are deliberately not offered anywhere in the app.
         public static let airStoreGitHub            = URL(string: "https://github.com/JiangWanZhengChouYv/AirStore")!
         public static let airStoreIssues            = URL(string: "https://github.com/JiangWanZhengChouYv/AirStore/issues")!
+        public static let airStoreDiscord           = URL(string: "https://discord.gg/kN9Rm3kkZ")!
         public static let supportEmail              = "markzhang946@gmail.com"
     }
 

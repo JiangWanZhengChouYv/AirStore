@@ -1263,49 +1263,29 @@ extension SettingsViewController
                                                         preferredStyle: .actionSheet)
 
                 // AirStore is maintained by one person, so these are the only two channels. Upstream's
-                // Discord, Mastodon, Threads, Twitter and Patreon are deliberately not offered.
-                alertController.addAction(UIAlertAction(title: "GitHub", style: .default) { _ in
-                    self.openWebURL(AppConstants.URLs.airStoreIssues, preferredTintColor: .altPrimary)
+                // Mastodon, Threads, Twitter and Patreon are deliberately not offered anywhere.
+                //
+                // Handing the link to the system rather than presenting a browser from this handler is
+                // what keeps the row alive: presenting while the sheet it came from is still on screen
+                // is the crash this used to be, and a Discord address wants the Discord app anyway.
+                // One cancel action only -- a second one is what the old code added on top.
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Report an Issue on GitHub", comment: ""), style: .default) { _ in
+                    UIApplication.shared.open(AppConstants.URLs.airStoreIssues, options: [:])
                 })
 
-                #if !os(tvOS)
-                alertController.addAction(UIAlertAction(title: NSLocalizedString("Send Email", comment: ""), style: .default) { _ in
-                    if MFMailComposeViewController.canSendMail() {
-                        let mailViewController = MFMailComposeViewController()
-                        mailViewController.mailComposeDelegate = self
-                        mailViewController.setToRecipients([AppConstants.URLs.supportEmail])
-
-                        // TODO: MARKETING_VERSION is going to be set anyways so this needs to be fixed for beta
-                        if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
-                            mailViewController.setSubject("AirStore \(version) Feedback")
-                        } else {
-                            mailViewController.setSubject("AirStore Feedback")
-                        }
-
-                       self.present(mailViewController, animated: true, completion: nil)
-                    } else {
-                      // mailto: is the only fallback that works when the device cannot send mail itself.
-                      if let url = URL(string: "mailto:" + AppConstants.URLs.supportEmail), UIApplication.shared.canOpenURL(url) {
-                          UIApplication.shared.open(url, options: [:])
-                      } else {
-                          let toastView = ToastView(text: NSLocalizedString("Cannot Send Mail", comment: ""),
-                                                    detailText: AppConstants.URLs.supportEmail)
-                          toastView.show(in: self)
-                      }
-                    }
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Give Feedback on Discord", comment: ""), style: .default) { _ in
+                    UIApplication.shared.open(AppConstants.URLs.airStoreDiscord, options: [:])
                 })
-                #endif
 
-                // Cancel action
-                alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel, handler: nil))
-                alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-                
-                // For iPad: Set the source view if presenting on iPad to avoid crashes
-                if let popoverController = alertController.popoverPresentationController {
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+
+                // An action sheet needs a place to come from on the wider idiom.
+                if UIDevice.current.userInterfaceIdiom == .pad, let popoverController = alertController.popoverPresentationController
+                {
                     popoverController.sourceView = self.view
                     popoverController.sourceRect = self.view.bounds
                 }
-                
+
                 // Present the action sheet
                 self.present(alertController, animated: true, completion: nil)
                 
