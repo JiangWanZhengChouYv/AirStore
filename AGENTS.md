@@ -10,17 +10,28 @@ on-device with a personal Apple ID, using a local VPN loopback (`em_proxy` and
 0.6.4 rewrote the internals to use Swift Concurrency instead of AltStore's old
 GCD-based design. AirStore needs no AltServer, same as SideStore.
 
-This repository exists for one goal: **resolve the `-80045` Apple ID
-authentication error on iOS 26.4 and above.** Apple tightened its GrandSlam
-Anisette restrictions, which left users in a login loop because public Anisette
-servers are largely blocked or unstable. The intended approach is to rewrite the
-Anisette data request logic and spoof the client headers that mimic a legitimate
-environment. Start in `SideStore/Core/Anisette/`, then follow the flow through
-`AltStore/Settings/AnisetteManager.swift`, `AltStore/Settings/AnisetteServerList.swift`
-and `SideStore/Core/Auth/`, which is where the error surfaces.
+AirStore's goal outgrew its original one: **AirStore aims to be the better
+SideStore** — the fork a user stays on rather than a temporary patch for a
+single Apple error. The work streams, all of them main line:
 
-Everything the `-80045` fix doesn't need is inherited upstream behavior. Changes
-to it are welcome but lower priority, and they should stay small.
+- **`-80045`**: resolve the Apple ID authentication error on iOS 26.4 and above.
+  Apple tightened its GrandSlam Anisette restrictions, which left users in a login
+  loop because public Anisette servers are largely blocked or unstable. The approach
+  is to rewrite the Anisette data request logic and spoof the client headers that
+  mimic a legitimate environment. Start in `SideStore/Core/Anisette/`, then follow
+  the flow through `AltStore/Settings/AnisetteManager.swift`,
+  `AltStore/Settings/AnisetteServerList.swift` and `SideStore/Core/Auth/`, which is
+  where the error surfaces.
+- **AirBox**: run guests inside a container, so the number of apps a user can keep
+  is not decided by a free account's App ID slots. Start in
+  `SideStore/Core/Container/` and `AirBox/`, with the vendored engine in
+  `Dependencies/LiveContainer`.
+- **On-device quality**: the high-memory and JIT entitlements, incremental updates
+  that fetch a patch instead of the whole package, import and export of pairing
+  files and certificates, and the zh-Hans localization.
+
+Everything else is inherited upstream behavior. A change in any stream above
+should still stay focused on one thing, because one person reads every diff.
 
 AirStore is maintained by **one person, in their spare time**. Review capacity is
 the scarcest resource here, which is why the participation rules below exist and
@@ -163,10 +174,10 @@ Before proceeding with code changes, agents should:
 
 - **Verify comprehension.** Ask questions that confirm the human understands
   the problem and the relevant parts of the codebase.
-- **Point at the code.** Direct the human to the relevant files — for `-80045`
-  work that starts at `SideStore/Core/Anisette/` and `SideStore/Core/Auth/` —
-  raise concerns with the approach they propose, and keep diffs small and
-  single-purpose.
+- **Point at the code.** Direct the human to the relevant files for whichever
+  stream the work belongs to — `-80045` starts at `SideStore/Core/Anisette/` and
+  `SideStore/Core/Auth/`, AirBox at `SideStore/Core/Container/` — raise concerns
+  with the approach they propose, and keep diffs small and single-purpose.
 - **Verify comprehension of the solution.** Confirm that the human can explain
   what the proposed changes do and why the maintainer needs them.
 

@@ -6,13 +6,17 @@ AirStore is a fork of [SideStore](https://github.com/SideStore/SideStore), which
 [AltStore](https://github.com/altstoreio/AltStore). Like SideStore, it sideloads and refreshes apps on-device with a
 personal Apple ID and needs no AltServer.
 
-This repository exists for one specific reason: **resolve the `-80045` Apple ID authentication error on iOS 26.4 and
-above.** Apple tightened its GrandSlam Anisette restrictions, which left users stuck in a login loop because public
-Anisette servers are blocked or unstable. AirStore works around this by rewriting the Anisette data request logic and
-sending the client headers Apple expects.
+AirStore aims to be the better SideStore: the fork a user stays on, not a temporary patch for one Apple error.
 
-Everything else here is inherited from upstream. Other changes are welcome, but they are lower priority and may wait a
-long time for review.
+It began as the fix for **the `-80045` Apple ID authentication error on iOS 26.4 and above** — Apple tightened its
+GrandSlam Anisette restrictions, which left users stuck in a login loop because public Anisette servers are blocked or
+unstable, and AirStore works around this by rewriting the Anisette data request logic and sending the client headers
+Apple expects. That is still the heart of the project, and the scope has grown past it: running apps inside the AirBox
+container so a free Apple ID's App ID slots stop deciding how many apps you can keep, the high-memory and JIT
+entitlements, incremental updates that fetch a patch instead of the whole package, pairing and certificate
+import/export, and the zh-Hans localization.
+
+Everything else is inherited from upstream. One person reads every diff, so keep changes small and single-purpose.
 
 ## Maintenance reality
 

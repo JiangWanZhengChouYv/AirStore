@@ -7,7 +7,7 @@
 </p>
 
 
-**AirStore is a fork of SideStore that does not require an AltServer. Our primary goal is to resolve the notorious `-80045` authentication error for iOS 26.4 and above.**
+**AirStore is a fork of SideStore that does not require an AltServer. It aims to be the better SideStore — the place a user stays, not a temporary fix for one Apple error. It started by resolving the notorious `-80045` authentication error for iOS 26.4 and above, and kept going from there.**
 
 中文说明见 [README_zh.md](README_zh.md)。
 
@@ -32,7 +32,14 @@ Public Anisette servers are largely blocked or unstable. AirStore gets past this
 
 - **No AltServer Required:** Just like the original SideStore.
 - **`-80045` Bypass:** Fixes the Apple server restrictions and login loops on iOS 26.4+.
+- **Higher memory ceiling and on-device JIT:** Apps that need more RAM, and JIT for the ones that need it, requested with a free personal account.
+- **Incremental updates:** An update fetches a patch against the build you have instead of the whole package.
+- **Pairing and certificate import/export:** Set up a second device, or survive a reinstall, without redoing the whole pairing dance.
+- **Simplified Chinese interface.**
 - **Lightweight:** Minimal footprint on your device.
+
+In progress: **AirBox**, a container that runs apps without spending one of a free account's three App ID slots. It is
+in the develop builds and it does not load guests yet.
 
 ## 🛠️ Installation
 
