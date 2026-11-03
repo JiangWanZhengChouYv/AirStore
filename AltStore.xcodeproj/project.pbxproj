@@ -1350,9 +1350,9 @@
 		};
 		A8E8DEA43059BC8800F69B47 /* XCRemoteSwiftPackageReference "CodeSignKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mahee96/CodeSignKit";
+			repositoryURL = "https://github.com/JiangWanZhengChouYv/CodeSignKit";
 			requirement = {
-				branch = main;
+				branch = "airstore/guest-page-size";
 				kind = branch;
 			};
 		};

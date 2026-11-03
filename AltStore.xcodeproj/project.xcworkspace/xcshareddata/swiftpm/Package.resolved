@@ -1,5 +1,5 @@
 {
-  "originHash" : "7f482fba8fa6b0b7ca118621a37366c67b88dd615017766ff3bbb30980f2eda6",
+  "originHash" : "88bdbbe31031824fd3be0a14ed8345ed5d4360f773e28af662b71b80a33f19e9",
   "pins" : [
     {
       "identity" : "anisettekit",
@@ -13,10 +13,10 @@
     {
       "identity" : "codesignkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mahee96/CodeSignKit",
+      "location" : "https://github.com/JiangWanZhengChouYv/CodeSignKit",
       "state" : {
-        "branch" : "main",
-        "revision" : "d0c67710fda9a2646b9e829cb2cf443892728371"
+        "branch" : "airstore/guest-page-size",
+        "revision" : "7332c0a6d0c881b3595d7521d33383168e641d42"
       }
     },
     {

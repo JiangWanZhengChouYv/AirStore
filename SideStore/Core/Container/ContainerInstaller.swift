@@ -431,7 +431,11 @@ final class ContainerInstaller
                                      entitlementsXML: nil,
                                      infoPlistData: bindings.info,
                                      codeResourcesData: bindings.resources,
-                                     cmsSigner: cms)
+                                     cmsSigner: cms,
+                                     // 4096, the size every signature iOS is known to accept for a mapped
+                                     // library pages at. The signer's own rule picks 16384 on arm64, which
+                                     // is the macOS page size, and a guest is only ever loaded by dyld.
+                                     pageSizeShift: 12)
             do
             {
                 let signed = try signer.sign()
