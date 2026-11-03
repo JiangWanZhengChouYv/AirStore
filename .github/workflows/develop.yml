@@ -335,16 +335,18 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          # Bilingual because the channel is read by people who file issues in either language.
           case "$STATUS" in
-            success)   colour=3092790;  word="绿了" ;;
-            cancelled) colour=16763904; word="被取消" ;;
-            *)         colour=15158332; word="失败" ;;
+            success)   colour=3092790;  word="build succeeded / 构建成功" ;;
+            cancelled) colour=16763904; word="cancelled / 构建被取消" ;;
+            *)         colour=15158332; word="failed / 构建失败" ;;
           esac
           short="${SHORT:0:8}"
-          body="commit ${short} · [构建日志](${RUN_URL})"
-          # \\n stays a two-character escape so the JSON payload stays valid; Discord renders the break.
-          [ "$STATUS" = "success" ] && body="${body}\\n\\n手机上等一分钟就能看到更新"
-          payload=$(printf '{"embeds":[{"title":"AirStore develop %s · %s","description":"%s","color":%s}]}' \
-            "$word" "${VERSION:-未出版本号}" "$body" "$colour")
+          # Breaks travel as \\n escapes: a raw newline inside the string makes the JSON payload invalid
+          # and Discord answers 400.
+          body="${VERSION:-no version yet}\\n\\ncommit ${short} · [build log / 构建日志](${RUN_URL})"
+          [ "$STATUS" = "success" ] && body="${body}\\n\\nUpdate on the phone within a minute / 手机上等一分钟就能看到更新"
+          payload=$(printf '{"embeds":[{"title":"AirStore develop %s","description":"%s","color":%s}]}' \
+            "$word" "$body" "$colour")
           curl -fsS -m 20 -H 'content-type: application/json' -X POST "$WEBHOOK" -d "$payload" >/dev/null \
             || echo "::warning::the Discord webhook did not answer"

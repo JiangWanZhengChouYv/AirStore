@@ -160,12 +160,13 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # published release red.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          # Bilingual, same as the develop channel's notice.
           case "$STATUS" in
-            success)   colour=3092790;  word="已发布" ;;
-            cancelled) colour=16763904; word="被取消" ;;
-            *)         colour=15158332; word="失败" ;;
+            success)   colour=3092790;  word="released / 已发布" ;;
+            cancelled) colour=16763904; word="cancelled / 发布被取消" ;;
+            *)         colour=15158332; word="failed / 发布失败" ;;
           esac
-          payload=$(printf '{"embeds":[{"title":"AirStore %s %s","description":"[下载页](%s) · [构建日志](%s)","color":%s}]}' \
+          payload=$(printf '{"embeds":[{"title":"AirStore %s %s","description":"[downloads / 下载页](%s) · [build log / 构建日志](%s)","color":%s}]}' \
             "$word" "$VERSION" "$RELEASE_URL" "$RUN_URL" "$colour")
           curl -fsS -m 20 -H 'content-type: application/json' -X POST "$WEBHOOK" -d "$payload" >/dev/null \
             || echo "::warning::the Discord webhook did not answer"
