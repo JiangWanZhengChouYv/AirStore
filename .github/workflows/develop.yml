@@ -42,6 +42,9 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,6 +59,7 @@ jobs:
           xcode-version: "26.4"
 
       - name: Version this build
+        id: version
         run: |
           BASE=$(python3 scripts/ci/workflow.py get-marketing-version)
           SHORT=$(python3 scripts/ci/workflow.py commit-id)
@@ -71,6 +75,9 @@ jobs:
           STAMP=$(python3 -c 'import datetime; print(datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M"))')
           echo "VERSION=${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}" | tee -a $GITHUB_ENV
           echo "SHORT_COMMIT=${SHORT}" | tee -a $GITHUB_ENV
+          # The notification runs on a runner of its own, which cannot read this job's environment,
+          # so the version has to leave as an output.
+          echo "version=${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}" >> $GITHUB_OUTPUT
 
       - name: Restore the last build's cache
         id: build-cache
@@ -306,3 +313,38 @@ jobs:
         with:
           name: airstore-source-${{ env.SHORT_COMMIT }}.json
           path: build/airstore-source.json
+
+  # Its own job, listed after the build the way Pages' deployment follows a push: the notification
+  # needs a machine of its own for a two-second curl, and a build that got cancelled or died on the
+  # Mac runner still has to say so. ubuntu-latest starts in seconds, so the note never delays a build.
+  notify:
+    name: Tell Discord how this build went
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post the result
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
+          STATUS: ${{ needs.build.result }}
+          VERSION: ${{ needs.build.outputs.version }}
+          SHORT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # No webhook configured means silent, and a webhook that does not answer must never turn a
+          # finished build red: this reports, it does not gate.
+          if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          case "$STATUS" in
+            success)   colour=3092790;  word="绿了" ;;
+            cancelled) colour=16763904; word="被取消" ;;
+            *)         colour=15158332; word="失败" ;;
+          esac
+          short="${SHORT:0:8}"
+          body="commit ${short} · [构建日志](${RUN_URL})"
+          # \\n stays a two-character escape so the JSON payload stays valid; Discord renders the break.
+          [ "$STATUS" = "success" ] && body="${body}\\n\\n手机上等一分钟就能看到更新"
+          payload=$(printf '{"embeds":[{"title":"AirStore develop %s · %s","description":"%s","color":%s}]}' \
+            "$word" "${VERSION:-未出版本号}" "$body" "$colour")
+          curl -fsS -m 20 -H 'content-type: application/json' -X POST "$WEBHOOK" -d "$payload" >/dev/null \
+            || echo "::warning::the Discord webhook did not answer"

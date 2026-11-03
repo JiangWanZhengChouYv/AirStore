@@ -138,3 +138,34 @@ jobs:
             "$GITHUB_REPOSITORY" \
             "$UPSTREAM_CHANNEL" \
             "true"
+
+  # Its own job, listed after the build the way Pages' deployment follows a push: a release that
+  # died on the Mac runner still has to say so, and a two-second curl does not need one.
+  notify:
+    name: Tell Discord how the release went
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post the result
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
+          STATUS: ${{ needs.build.result }}
+          # For a stable build the tag is the version, so nothing has to cross over from the build job.
+          VERSION: ${{ github.ref_name }}
+          RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # No webhook configured means silent, and a webhook that does not answer must never turn a
+          # published release red.
+          if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          case "$STATUS" in
+            success)   colour=3092790;  word="已发布" ;;
+            cancelled) colour=16763904; word="被取消" ;;
+            *)         colour=15158332; word="失败" ;;
+          esac
+          payload=$(printf '{"embeds":[{"title":"AirStore %s %s","description":"[下载页](%s) · [构建日志](%s)","color":%s}]}' \
+            "$word" "$VERSION" "$RELEASE_URL" "$RUN_URL" "$colour")
+          curl -fsS -m 20 -H 'content-type: application/json' -X POST "$WEBHOOK" -d "$payload" >/dev/null \
+            || echo "::warning::the Discord webhook did not answer"
