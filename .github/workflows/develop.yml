@@ -38,6 +38,9 @@ jobs:
   build:
     name: Build and publish the develop channel
     runs-on: macos-26
+    # The ceiling a hung push used to eat by hand: builds measure 16-18 minutes here, so 45 is room
+    # for a slow one without letting a stalled write bill a macOS runner for six hours.
+    timeout-minutes: 45
 
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -268,8 +271,10 @@ jobs:
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit -q --allow-empty -m "Publish $VERSION"
-          # Bounded so a stalled write shows up as a red step rather than eating the job's hours.
-          timeout 300 git push origin pages
+          # GIT_TERMINAL_PROMPT=0 is the whole cure: the stall was `git push` waiting on stdin for a
+          # username. `timeout` is not installed on the macOS runner, so bounding each command here
+          # would only make the step red -- timeout-minutes on the job is the real ceiling.
+          git push origin pages
 
       - name: Commit the feed to its own branch
         env:
@@ -288,7 +293,7 @@ jobs:
           git -c user.name="github-actions[bot]" \
               -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
               commit --allow-empty -m "Develop build $VERSION"
-          timeout 300 git push origin develop-source
+          git push origin develop-source
 
       - name: Purge the CDN copy of the feed
         run: |
