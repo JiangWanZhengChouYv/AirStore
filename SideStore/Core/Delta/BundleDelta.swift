@@ -97,6 +97,14 @@ struct BundleDelta
         return root.appendingPathComponent("BundleDelta", isDirectory: true)
     }
     
+    /// The same directory, for anyone who has to show or measure it. iOS counts everything under
+    /// Caches as the app's own data, and one base is a full uncompressed copy of the app it patches,
+    /// so this is the largest thing the app keeps that no settings page used to point at.
+    static var baselinesDirectory: URL
+    {
+        cacheDirectory
+    }
+    
     static func cacheURL(forBundleID bundleID: String) -> URL
     {
         // Identifiers are alphanumerics, "." and "-", but this string arrives from a source JSON, so

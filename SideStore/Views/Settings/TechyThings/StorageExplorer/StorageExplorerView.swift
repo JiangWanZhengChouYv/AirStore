@@ -129,6 +129,21 @@ public struct StorageExplorerView: View {
                 url: tmpURL
             ))
             
+            // 5. Update baselines
+            // A base is a full uncompressed copy of the app it patches, kept in the app's own Caches.
+            // iOS bills it as this app's data, but it sits under Library/Caches, which none of the
+            // roots above reach and which "Clear Cache" never deletes -- so without this row the
+            // gigabytes have no in-app explanation and no in-app way out.
+            let baselinesURL = BundleDelta.baselinesDirectory
+            if fileManager.fileExists(atPath: baselinesURL.path) {
+                locs.append(StorageLocation(
+                    name: "Update Baselines (Caches)",
+                    subtitle: baselinesURL.path,
+                    iconName: "arrow.triangle.2.circlepath",
+                    url: baselinesURL
+                ))
+            }
+            
             Task { @MainActor in
                 self.locations = locs
             }
@@ -162,10 +177,12 @@ public struct StorageExplorerView: View {
                     containerURLs.append(groupURL)
                 }
             }
-            if let backupsURL = fileManager.appBackupsDirectory {
-                containerURLs.append(backupsURL)
-            }
-            containerURLs.append(fileManager.temporaryDirectory)
+            // Caches is walked as one root, which is what keeps the total honest: the backups
+            // directory is <app group>/Backups and the temporary directory is <app container>/
+            // Library/Caches/tmp, so listing either of them next to its parent charged every byte
+            // in them twice. Unlike the old list, this one now reaches the update baselines and the
+            // image cache -- the two things iOS bills to this app that the footer could not explain.
+            containerURLs.append(contentsOf: fileManager.urls(for: .cachesDirectory, in: .userDomainMask))
             
             var seenPaths = Set<String>()
             for containerURL in containerURLs {
