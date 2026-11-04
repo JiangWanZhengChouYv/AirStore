@@ -84,6 +84,51 @@ public final class MaintenanceManager {
         debugLog("[MaintenanceManager] Maintenance up to counter \(Self.currentMaintenanceCounter) complete.")
     }
 
+    /// The sweep that 设置 → 技术选项 → 清除数据缓存 offers by hand, run once a day on launch instead of
+    /// waiting for someone to notice how much room the app is taking. What it removes is the image
+    /// cache, temporary files, and the backups of apps that are no longer installed -- and a backup
+    /// whose app has been gone for a week has nobody left to restore it.
+    public func performDailyCacheCleanupIfNeeded() async
+    {
+        let key = "lastDailyCacheCleanupDate"
+        let now = Date()
+
+        if let last = UserDefaults.standard.object(forKey: key) as? Date,
+           Calendar.current.isDate(last, inSameDayAs: now)
+        {
+            debugLog("[MaintenanceManager] Daily cache cleanup already ran at \(last).")
+            return
+        }
+
+        guard !AppManager.shared.isActivelyManagingAnyApp else
+        {
+            // The sweep empties the temporary directory, which is where an install in flight keeps the
+            // bundle it is re-signing. Skipping costs nothing; tomorrow is another day.
+            debugLog("[MaintenanceManager] Daily cache cleanup skipped: an install or refresh is running.")
+            return
+        }
+
+        let before = CacheManager.shared.calculateCacheSize()
+
+        do
+        {
+            try await AppManager.shared.clearAppCache()
+        }
+        catch
+        {
+            // Not marked as done, so the next launch tries again rather than a failure buying a whole
+            // day of growing backups.
+            debugLog("[MaintenanceManager] Daily cache cleanup failed: \(error.localizedDescription)")
+            return
+        }
+
+        UserDefaults.standard.set(now, forKey: key)
+
+        let after = CacheManager.shared.calculateCacheSize()
+        let freed = max(0, before - after)
+        debugLog("[MaintenanceManager] Daily cache cleanup freed \(ByteCountFormatter.string(fromByteCount: freed, countStyle: .file)) (\(before) -> \(after) bytes).")
+    }
+
 }
 
 private extension MaintenanceManager {

@@ -193,15 +193,23 @@ final class AppManager: ObservableObject, @unchecked Sendable
         return activeApps.filter { $0.bundleIdentifier != StoreApp.altstoreAppID }
     }
     
+    func clearAppCache() async throws
+    {
+        let dbBackgroundContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+        let context = StandaloneOperationContext(steps: .clearAppCache, dbBackgroundContext: dbBackgroundContext)
+        try await ClearAppCacheOperation(context: context).execute()
+    }
+    
     func clearAppCache(completion: @escaping (Result<Void, Error>) -> Void)
     {
         Task.detached {
-            do {
-                let dbBackgroundContext = DatabaseManager.shared.persistentContainer.newBackgroundContext()
-                let context = StandaloneOperationContext(steps: .clearAppCache, dbBackgroundContext: dbBackgroundContext)
-                try await ClearAppCacheOperation(context: context).execute()
+            do
+            {
+                try await self.clearAppCache()
                 completion(.success(()))
-            } catch {
+            }
+            catch
+            {
                 completion(.failure(error))
             }
         }

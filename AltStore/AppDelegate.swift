@@ -211,6 +211,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
                 // Perform one-time maintenance tasks after database is started
                 await MaintenanceManager.shared.performMaintenanceIfNeeded()
+                
+                // Then the recurring one: free the space a hand-tapped button should not have to be
+                // remembered for. Needs the database running, which is why it sits down here.
+                await MaintenanceManager.shared.performDailyCacheCleanupIfNeeded()
             }
             catch
             {
