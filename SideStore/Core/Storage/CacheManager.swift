@@ -91,8 +91,14 @@ public final class CacheManager {
                options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles]) {
             
             // Get installed app bundle IDs
+            // Both names, as ClearAppCacheOperation does: the figure in the dialog has to describe the
+            // directories the button is about to delete, and a backup is filed under the identifier
+            // the app was installed with, not the one it shipped with.
             let context = DatabaseManager.shared.viewContext
-            let installedAppBundleIDs = Set(InstalledApp.all(in: context).map { $0.bundleIdentifier })
+            let installedAppBundleIDs = InstalledApp.all(in: context).reduce(into: Set<String>()) { ids, app in
+                ids.insert(app.bundleIdentifier)
+                ids.insert(app.resignedBundleIdentifier)
+            }
             
             for backupDirectory in fileURLs {
                 if let resourceValues = try? backupDirectory.resourceValues(forKeys: [.isDirectoryKey, .nameKey]),

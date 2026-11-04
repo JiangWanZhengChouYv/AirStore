@@ -127,7 +127,13 @@ class ClearAppCacheOperation: BaseStandaloneOperation<StandaloneOperationContext
         }
         
         let installedAppBundleIDs = await DatabaseManager.shared.persistentContainer.performBackgroundTask { context in
-            Set(InstalledApp.all(in: context).map { $0.bundleIdentifier })
+            // Directories are named by the identifier the app was installed under, while InstalledApp
+            // carries both that and the original. Matching only the original made every app whose
+            // bundle id was rewritten on install look uninstalled here -- and swept a live backup.
+            InstalledApp.all(in: context).reduce(into: Set<String>()) { ids, app in
+                ids.insert(app.bundleIdentifier)
+                ids.insert(app.resignedBundleIdentifier)
+            }
         }
         
         let intent = NSFileAccessIntent.writingIntent(with: backupsDirectory, options: [.forDeleting])
