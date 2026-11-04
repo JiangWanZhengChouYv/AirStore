@@ -50,44 +50,4 @@ enum MachOSignature
         return nil
     }
 
-    /// Removes the existing signature so a signer cannot decide the bundle is already signed. The blob
-    /// sits at the end of the file, so the load command is cleared and the file cut back to where the
-    /// blob started.
-    @discardableResult
-    static func stripSignature(ofExecutableAt url: URL) -> Bool
-    {
-        guard var data = try? Data(contentsOf: url), data.count > 32 else { return false }
-
-        func uint32(at offset: Int) -> UInt32? {
-            guard offset >= 0, offset + 4 <= data.count else { return nil }
-            return data.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: offset, as: UInt32.self) }
-        }
-
-        guard uint32(at: 0) == machO64Magic, let commandCount = uint32(at: 16) else { return false }
-
-        var offset = 32
-        for _ in 0..<commandCount
-        {
-            guard let command = uint32(at: offset), let commandSize = uint32(at: offset + 4), commandSize >= 8 else { return false }
-
-            if command == codeSignatureCommand
-            {
-                guard let dataOffset = uint32(at: offset + 8) else { return false }
-
-                var cleared: UInt32 = 0
-                withUnsafeBytes(of: &cleared) { data.replaceSubrange((offset + 8)..<(offset + 12), with: $0) }
-                withUnsafeBytes(of: &cleared) { data.replaceSubrange((offset + 12)..<(offset + 16), with: $0) }
-
-                let end = Int(dataOffset)
-                guard end <= data.count, end > 0 else { return false }
-                data = data.prefix(end)
-
-                return (try? data.write(to: url, options: .atomic)) != nil
-            }
-
-            offset += Int(commandSize)
-        }
-
-        return false
-    }
 }

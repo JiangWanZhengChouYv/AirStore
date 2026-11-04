@@ -3,21 +3,18 @@
 //  AirStore
 //
 //  Turns a source app into something AirBox can run: download the package, unpack it, rewrite the
-//  executable so it can be dlopen'd, sign it with the certificate every guest shares, and drop it in
-//  the group AirBox reads. No App ID is registered and nothing is installed on the system.
+//  executable so it can be dlopen'd, and drop it in the group AirBox reads. No App ID is registered,
+//  nothing is installed on the system, and -- since the mode that works is JIT, which bypasses library
+//  validation rather than asking the kernel to bless these bytes -- nothing is signed here.
 //
 
 import Foundation
 import UIKit
-import SideSign
-import CodeSignKit
 
 enum ContainerInstallerError: LocalizedError
 {
     case airBoxNotInstalled
     case airBoxNotAvailable
-    case noCertificate
-    case noProfileForAirBox
     case downloadFailed(String)
     case patcherRejected(String)
 
@@ -27,8 +24,6 @@ enum ContainerInstallerError: LocalizedError
         {
         case .airBoxNotInstalled: return NSLocalizedString("AirBox is not installed. Install it before adding apps to it.", comment: "")
         case .airBoxNotAvailable: return NSLocalizedString("AirBox is not published for this build of AirStore.", comment: "")
-        case .noCertificate: return NSLocalizedString("No signing certificate is available.", comment: "")
-        case .noProfileForAirBox: return NSLocalizedString("AirBox has no provisioning profile. Reinstall it from AirStore, then try again.", comment: "")
         case .downloadFailed(let reason): return String(format: NSLocalizedString("The package could not be downloaded: %@", comment: ""), reason)
         case .patcherRejected(let reason): return String(format: NSLocalizedString("The app cannot run in AirBox: %@", comment: ""), reason)
         }
@@ -141,21 +136,32 @@ final class ContainerInstaller
         try PropertyListSerialization.data(fromPropertyList: appInfo, format: .xml, options: 0).write(to: appInfoURL)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: bundleURL.path)
 
-        // Ahead of the signing, because the bundle's own resource list seals this file: written after,
-        // the seal would describe a bundle that no longer matches what is on disk.
+        // The guest is delivered patched and **not signed**. That is deliberate: the mode that works
+        // without a signature the kernel accepts is JIT, where the engine bypasses library validation
+        // instead of asking the kernel to bless these bytes (LCBootstrap's init_bypassDyldLibValidation).
+        // Signing here was the JITLess route, and every shape we tried -- bound Info.plist and resource
+        // list, 4096-byte pages, the host's own identifier -- came back refused by fcntl(F_ADDFILESIGS_RETURN).
+        // The digest is still logged, because "signed or not" is the one thing this delivery changes.
         let executableURL = self.executableURL(in: bundleURL)
-        let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+        let digest = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+        debugLog("[ContainerInstaller] Delivering the guest unsigned, as JIT mode requires: executable seal \(digest)")
 
-        try await self.sign(bundleURL)
-
-        let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        debugLog("[ContainerInstaller] Signature blob \(digestBefore) -> \(digestAfter)\(digestBefore == digestAfter ? " (unchanged, the signer skipped it)" : "")")
+        // JIT mode is chosen by the engine on one condition: no certificate published. Builds before
+        // this one wrote both keys into the group, so on a device that has ever added a guest they are
+        // still there and the engine would keep taking the JITLess branch. Removing them is what
+        // actually switches the device over.
+        if let groupIdentifier = self.sharedAppGroup, let defaults = UserDefaults(suiteName: groupIdentifier)
+        {
+            let published = defaults.object(forKey: "LCCertificatePassword") != nil
+            defaults.removeObject(forKey: "LCCertificateData")
+            defaults.removeObject(forKey: "LCCertificatePassword")
+            debugLog("[ContainerInstaller] \(groupIdentifier): certificate keys \(published ? "were published, now cleared" : "already absent")")
+        }
+        else
+        {
+            debugLog("[ContainerInstaller] No app group to clear the certificate keys from")
+        }
         progress?.completedUnitCount = 94
-
-        // iOS 26 refuses to load a guest without JITLess, and JITLess needs the certificate inside
-        // AirBox. Upstream reaches these two keys through its settings screen; the store already holds
-        // the same certificate, so it writes them itself and leaves the user with nothing to import.
-        try self.shareCertificate()
 
         if FileManager.default.fileExists(atPath: destination.path)
         {
@@ -267,196 +273,10 @@ final class ContainerInstaller
         }
     }
 
-    private func shareCertificate() throws
-    {
-        guard let certificate = CertificateManager.shared.activeCertificate else {
-            throw ContainerInstallerError.noCertificate
-        }
-        guard let groupIdentifier = self.sharedAppGroup,
-              let defaults = UserDefaults(suiteName: groupIdentifier) else {
-            throw ContainerInstallerError.airBoxNotInstalled
-        }
-
-        // The two keys LCUtils and LCSharedUtils read on the other side. Same certificate, same
-        // password: a guest signed with anything else would not load in a JITLess process.
-        defaults.set(certificate.p12Data, forKey: "LCCertificateData")
-        defaults.set(certificate.password ?? certificate.serialNumber, forKey: "LCCertificatePassword")
-
-        // Size and origin only -- this log is something the user reads back to us, and neither the
-        // certificate nor its password belongs in it.
-        debugLog("[ContainerInstaller] Published \(certificate.p12Data.count) bytes of certificate into \(groupIdentifier) (password from \(certificate.password == nil ? "the serial number" : "the keychain"))")
-    }
-
-    /// Every guest is signed by AirBox's own profile: the bundle id in that profile is AirBox's, and the
-    /// signer falls back to the first profile it was handed, which is exactly what a guest needs -- the
-    /// same team as the process that will dlopen it.
     private func executableURL(in bundleURL: URL) -> URL?
     {
         guard let info = NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist")),
               let name = info["CFBundleExecutable"] as? String else { return nil }
         return bundleURL.appendingPathComponent(name)
-    }
-
-    /// A binary the guest carries, together with the bundle whose Info.plist and resources its signature
-    /// has to bind. A framework belongs to its own .framework and the executable to the .app; a loose
-    /// dylib under Frameworks/ belongs to neither, which is why Apple's signer leaves those unbound.
-    private struct GuestBinary
-    {
-        let url: URL
-        let bundle: URL?
-    }
-
-    /// Every Mach-O the guest bundle carries, in the order they have to be signed: nested things first,
-    /// because the .app seals the bytes its frameworks end up with, so its resource list cannot be built
-    /// before they are final. A package that arrives with no signature at all gives a signer nothing to
-    /// point at, so the list is written out here rather than left to a traversal.
-    private func guestBinaries(in bundleURL: URL) -> [GuestBinary]
-    {
-        let finder = FileManager.default
-        var binaries = [GuestBinary]()
-
-        let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
-        for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
-        {
-            switch entry.pathExtension
-            {
-            case "framework":
-                let binary = entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent)
-                if finder.fileExists(atPath: binary.path) { binaries.append(GuestBinary(url: binary, bundle: entry)) }
-            case "dylib":
-                binaries.append(GuestBinary(url: entry, bundle: nil))
-            default:
-                break
-            }
-        }
-
-        if let executable = self.executableURL(in: bundleURL) { binaries.append(GuestBinary(url: executable, bundle: bundleURL)) }
-        return binaries
-    }
-
-    /// The bundle's own resource list, written where a validator looks for it. Leaving it out is what the
-    /// store did until now, and Apple's validator answers that shape -- for the file, not just the
-    /// directory -- with "code has no resources but signature indicates they must be present".
-    private func sealResources(in bundleURL: URL, executableName: String) -> (info: Data?, resources: Data?)
-    {
-        let info = try? Data(contentsOf: bundleURL.appendingPathComponent("Info.plist"))
-        do
-        {
-            let resources = try CodeResourcesBuilder(bundleURL: bundleURL, executableName: executableName).build()
-            let directory = bundleURL.appendingPathComponent("_CodeSignature", isDirectory: true)
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            try resources.write(to: directory.appendingPathComponent("CodeResources"), options: .atomic)
-            debugLog("[ContainerInstaller] Sealed \(bundleURL.lastPathComponent) with \(resources.count) bytes of resource list")
-            return (info, resources)
-        }
-        catch
-        {
-            debugLog("[ContainerInstaller] Could not seal \(bundleURL.lastPathComponent): \(error.localizedDescription)")
-            return (info, nil)
-        }
-    }
-
-    private func sign(_ bundleURL: URL) async throws
-    {
-        let context = DatabaseManager.shared.persistentContainer.viewContext
-
-        // Right after AirBox itself is installed, its row may not have reached this context yet; a
-        // guest added in that same breath would otherwise be told no profile exists.
-        var profile: ALTProvisioningProfile?
-        for attempt in 0..<6
-        {
-            if let airBox = InstalledApp.all(in: context).first { Self.isAirBox($0) }
-            {
-                // The cached copy is what carries the profile out of the install pipeline, and it is
-                // missing when the pipeline has decided this app is the store itself.
-                let cached = airBox.customProvisioningProfileURL
-                debugLog("[ContainerInstaller] AirBox row \(airBox.bundleIdentifier) / \(airBox.resignedBundleIdentifier): cached profile \(cached?.lastPathComponent ?? "none")")
-
-                if let found = airBox.customProvisioningProfile
-                {
-                    profile = found
-                    break
-                }
-            }
-            else
-            {
-                debugLog("[ContainerInstaller] No AirBox row among \(InstalledApp.all(in: context).count) installed apps")
-            }
-            if attempt < 5 { try await Task.sleep(nanoseconds: 300_000_000) }
-        }
-        guard let profile else {
-            throw ContainerInstallerError.noProfileForAirBox
-        }
-        guard let certificate = CertificateManager.shared.activeCertificate else {
-            throw ContainerInstallerError.noCertificate
-        }
-
-        // The profile is read for the identifier it grants AirBox and deliberately *not* embedded. The
-        // guest is then signed with that identifier and with **no entitlements at all**, which is exactly
-        // what upstream does: zsign's own code reads `IsExecute() ? entitlements : ""`, and a guest has
-        // been patched into a MH_DYLIB, so it carries none. Permissions belong to the process -- the
-        // extension's profile already grants the memory limits, the group and get-task-allow -- and a
-        // profile-backed key on a binary with no profile is what AMFI reports as an invalid signature.
-        try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
-
-        let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
-        let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
-
-        debugLog("[ContainerInstaller] Signing the guest as the box itself: \(profileIdentifier), no entitlements;"
-                 + " the box's own profile carries \(profile.entitlements.keys.sorted())")
-
-        let keyData = try certificate.certificate.unencryptedP12Data()
-        let cms = CMSSigner(p12Data: keyData, password: "")
-
-        // Strip first: a signature left in place covers the binary as it was before this app patched its
-        // header, which dyld reports as an invalid signature.
-        let binaries = self.guestBinaries(in: bundleURL)
-        for binary in binaries
-        {
-            MachOSignature.stripSignature(ofExecutableAt: binary.url)
-        }
-
-        for binary in binaries
-        {
-            // Each bundle binds its own Info.plist and resource list; a loose dylib belongs to no bundle
-            // and is signed the way Apple signs those -- with neither.
-            let bindings = binary.bundle.map { self.sealResources(in: $0, executableName: binary.url.lastPathComponent) }
-                ?? (info: nil, resources: nil)
-
-            guard let data = try? Data(contentsOf: binary.url) else { continue }
-
-            let signer = MachOSigner(binaryData: data,
-                                     bundleIdentifier: profileIdentifier,
-                                     teamIdentifier: teamPrefix,
-                                     entitlementsXML: nil,
-                                     infoPlistData: bindings.info,
-                                     codeResourcesData: bindings.resources,
-                                     cmsSigner: cms,
-                                     // 4096, the size every signature iOS is known to accept for a mapped
-                                     // library pages at. The signer's own rule picks 16384 on arm64, which
-                                     // is the macOS page size, and a guest is only ever loaded by dyld.
-                                     pageSizeShift: 12)
-            do
-            {
-                let signed = try signer.sign()
-                try signed.write(to: binary.url, options: .atomic)
-                debugLog("[ContainerInstaller] Signed \(binary.url.lastPathComponent): \(MachOSignature.digest(ofExecutableAt: binary.url) != nil ? "ok" : "still unsigned")")
-            }
-            catch
-            {
-                debugLog("[ContainerInstaller] Signing \(binary.url.lastPathComponent) failed: \(error.localizedDescription)")
-            }
-        }
-
-        let unsigned = binaries.filter { MachOSignature.digest(ofExecutableAt: $0.url) == nil }
-        debugLog("[ContainerInstaller] \(binaries.count) Mach-O files in the guest, still unsigned: \(unsigned.map { $0.url.lastPathComponent })")
-
-        // Only the main executable is checked, not that list: MachOSignature reads thin Mach-Os, and
-        // MeloNX's ffmpeg libraries are universal containers, so they are reported unsigned even when
-        // they are signed. The executable is the one thing a wrong answer here would hide.
-        guard let executableURL = self.executableURL(in: bundleURL),
-              MachOSignature.digest(ofExecutableAt: executableURL) != nil else {
-            throw ContainerInstallerError.patcherRejected(NSLocalizedString("the signer left the executable unsigned", comment: ""))
-        }
     }
 }
