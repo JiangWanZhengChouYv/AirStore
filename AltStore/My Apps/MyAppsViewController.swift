@@ -2226,7 +2226,7 @@ extension MyAppsViewController
         let (storeApp, newestVersion) = self.sourceApp(for: app)
 
         guard let version = storeApp?.latestAvailableVersion, newestVersion != app.version else {
-            ContainerLibrary.shared.launch(app)
+            self.openInAirBox(app)
             return
         }
 
@@ -2235,12 +2235,42 @@ extension MyAppsViewController
         ContainerInstallAction.run(version: version, appName: app.name, from: self)
     }
 
+    /// Opening a guest is one tap on purpose: the request is written first, then the JIT flow starts
+    /// AirBox suspended and attaches before its own main() runs, so the process that resumes is the one
+    /// with JIT and it picks the guest up as it comes up. Relaunching an already-running AirBox would do
+    /// the opposite -- the debugger, and with it JIT, belongs to the pid that dies.
+    private func openInAirBox(_ app: ContainerApp)
+    {
+        guard ContainerLibrary.shared.stageLaunch(app) else
+        {
+            let alert = UIAlertController(title: NSLocalizedString("Unable to Open App", comment: ""),
+                                          message: NSLocalizedString("AirStore could not reach the shared folder AirBox reads.", comment: ""),
+                                          preferredStyle: .alert)
+            alert.addAction(.ok)
+            self.present(alert, animated: true)
+            return
+        }
+
+        let context = DatabaseManager.shared.viewContext
+        guard let airBox = InstalledApp.all(in: context).first(where: { ContainerInstaller.isAirBox($0) }) else
+        {
+            let alert = UIAlertController(title: NSLocalizedString("Unable to Open App", comment: ""),
+                                          message: NSLocalizedString("AirBox is not installed. Install it before opening apps in it.", comment: ""),
+                                          preferredStyle: .alert)
+            alert.addAction(.ok)
+            self.present(alert, animated: true)
+            return
+        }
+
+        self.enableJIT(for: airBox)
+    }
+
     private func containerContextMenu(for app: ContainerApp) -> UIMenu
     {
         let (storeApp, newestVersion) = self.sourceApp(for: app)
 
         let open = UIAction(title: NSLocalizedString("Open in AirBox", comment: ""), image: UIImage(systemName: "shippingbox")) { _ in
-            ContainerLibrary.shared.launch(app)
+            self.openInAirBox(app)
         }
 
         let remove = UIAction(title: NSLocalizedString("Remove from AirBox", comment: ""), image: UIImage(systemName: "trash"), attributes: .destructive) { _ in

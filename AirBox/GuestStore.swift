@@ -71,10 +71,6 @@ final class GuestStore: ObservableObject
         }
     }
 
-    /// The name to show while a launch is in flight. Opening a guest means this app goes away and comes
-    /// back as something else, which without a card on screen is indistinguishable from a hang.
-    @Published private(set) var launchingGuestName: String?
-
     /// A guest that cannot load has to say so on screen, or the tap looks like nothing happened and the
     /// only proof is a log he has to fight a frozen app to send. The engine writes its reason into this
     /// app's own defaults before it hands the process back, so the message is here when the list comes
@@ -251,78 +247,13 @@ final class GuestStore: ObservableObject
         self.launch(guest)
     }
 
-    /// A guest does not run in this process as it stands: it runs in the *next* one. The engine cannot
-    /// load a guest into a process that is already up -- it dlopens the binary and jumps to its main() --
-    /// and JIT is attached per pid, so the extension under PlugIns is out (measured: CS_DEBUGGED clear in
-    /// every LiveProcess). So write the request where the engine reads it, ask FrontBoard to bring this
-    /// bundle id back, and die: the process that comes up runs main.m, sees the request, and hands itself
-    /// over with JIT already on it.
+    /// Opening a guest belongs to the store, and not for lack of trying here: JIT is a debugger attached
+    /// to one pid, so the process that loads a guest has to be the one the JIT flow started -- relaunching
+    /// a running box loses the attach along with the pid. AirBox cannot enable JIT at all (the pairing
+    /// tunnel, the developer image and the attach are the store's), so a tap here can only name the tap
+    /// that works.
     func launch(_ guest: Guest)
     {
-        guard self.launchingGuestName == nil else
-        {
-            // Five taps on a silent button is five processes spun up and thrown away, which is what the
-            // log looked like last time. One request at a time.
-            AirBoxLogging.log("a launch is already pending, ignoring the tap on \(guest.name)")
-            return
-        }
-
-        guard !AirBoxIsBeingDebugged() else
-        {
-            // Measured: a tap landing while Enable JIT is mid-flight asks FrontBoard to relaunch the very
-            // process the debugger holds. The process goes away under the script, the script then reads
-            // garbage where it expected instructions, and it looped 39,575 times without ever finishing.
-            self.launchError = "AirBox is being restarted to enable JIT. Wait for the JIT notification, then open \(guest.name) again."
-            return
-        }
-
-        self.launchingGuestName = guest.name
-
-        let defaults = UserDefaults.standard
-        defaults.set(guest.directory.lastPathComponent, forKey: "selected")
-
-        let appInfo = NSDictionary(contentsOf: guest.directory.appendingPathComponent("LCAppInfo.plist"))
-        if let dataUUID = appInfo?["LCDataUUID"] as? String, !dataUUID.isEmpty
-        {
-            defaults.set(dataUUID, forKey: "selectedContainer")
-        }
-        // No synchronize() and no wait: the values live in cfprefsd, not in this process, so the next one
-        // reads them even though this one is about to be killed.
-
-        AirBoxLogging.log("requested \(guest.name) for the next launch of this process "
-                          + "(container \(appInfo?["LCDataUUID"] as? String ?? "left to the engine"))")
-
-        AirBoxAskToRelaunchSelf { success, reason in
-            guard success else
-            {
-                DispatchQueue.main.async
-                {
-                    self.failLaunch(guest, reason: "AirBox could not ask to restart itself: \(reason ?? "no reason given")")
-                }
-                return
-            }
-
-            // Dying is the request. The relaunched process is the one that takes the guest over, and
-            // staying alive would only mean two boxes on the same pending launch. FrontBoard answers on a
-            // thread of its own, and SIGKILL does not care which one.
-            AirBoxLogging.log("restart accepted, giving up this process so the next one loads \(guest.name)")
-            raise(SIGKILL)
-        }
-
-        Task { [weak self] in
-            // A silent FrontBoard is what left the card spinning for two minutes last time. Six seconds is
-            // longer than the restart has ever taken and short enough to read as an answer.
-            try? await Task.sleep(nanoseconds: 6_000_000_000)
-            guard let self, self.launchingGuestName == guest.name else { return }
-            self.failLaunch(guest, reason: "FrontBoard never answered the restart request.")
-        }
-    }
-
-    private func failLaunch(_ guest: Guest, reason: String)
-    {
-        UserDefaults.standard.removeObject(forKey: "selected")
-        UserDefaults.standard.removeObject(forKey: "selectedContainer")
-        self.launchingGuestName = nil
-        self.launchError = "AirBox could not open \(guest.name): \(reason)"
+        self.launchError = String(format: NSLocalizedString("Open %@ from AirStore: My Apps → %@ → Open in AirBox. AirStore starts AirBox with JIT already on, which is what lets a guest load.", comment: ""), guest.name, guest.name)
     }
 }

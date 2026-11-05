@@ -16,12 +16,31 @@
 #import <UIKit/UIKit.h>
 #import <os/log.h>
 
+#import "LCSharedUtils.h"
+
 extern int LiveContainerMain(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
     NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
     NSString *selected = [defaults stringForKey:@"selected"];
+
+    if (selected.length == 0)
+    {
+        // The store stages the request in the shared group *before* it launches this app suspended and
+        // attaches the debugger, so the request is waiting here by the time main() runs, and this is the
+        // pid that has JIT. A relaunch of an already-running box would have had neither: the debugger,
+        // and with it JIT, belongs to the process that dies.
+        NSUserDefaults *shared = [[NSUserDefaults alloc] initWithSuiteName:[LCSharedUtils appGroupID]];
+        NSString *staged = [shared stringForKey:@"ABLaunchGuest"];
+        if (staged.length > 0)
+        {
+            [shared removeObjectForKey:@"ABLaunchGuest"];
+            [defaults setObject:staged forKey:@"selected"];
+            selected = staged;
+            os_log(OS_LOG_DEFAULT, "[AirBox] main: picked up the staged request for %{public}@", staged);
+        }
+    }
 
     if (selected.length > 0)
     {

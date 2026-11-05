@@ -1,10 +1,8 @@
 //
 //  AirBox-Bridging-Header.h
 //
-//  Swift needs the group name the engine itself resolved -- that one is the group AirBox was actually
-//  signed with, which a name derived from the bundle id cannot know once an installer has suffixed it --
-//  and the private class that asks this app's own extension to start.
+//  Swift needs the group name the engine itself resolved: an installer may suffix the declared group
+//  with the team id, so the name in the signature is the only one guaranteed to exist on the device.
 //
 
-#import "AirBoxPrivate.h"
 #import "LCSharedUtils.h"

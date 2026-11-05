@@ -41,6 +41,15 @@ final class ContainerLibrary
         self.groupDirectory?.appendingPathComponent("ContainerDelete", isDirectory: true)
     }
 
+    /// The same group the inbox is in, as defaults rather than as files: this is the domain AirBox reads
+    /// at startup, and it is the only place either app can leave a message for a process that has not
+    /// started yet.
+    private var sharedDefaults: UserDefaults?
+    {
+        guard let group = Bundle.main.altstoreAppGroup else { return nil }
+        return UserDefaults(suiteName: group)
+    }
+
     func apps() -> [ContainerApp]
     {
         let finder = FileManager.default
@@ -62,16 +71,26 @@ final class ContainerLibrary
         .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
-    /// The guest is run by the extension AirBox embeds, and a request to another app's extension is not
-    /// something this app can make, so the box is asked to do it and stays open itself -- the guest comes
-    /// up in the extension while the list is still there to come back to.
-    func launch(_ app: ContainerApp)
+    /// Writes the request the next AirBox process will read, and returns whether it landed.
+    ///
+    /// The store cannot ask another app's extension to start, and a relaunch would drop the debugger --
+    /// JIT *is* a debugger attached to one pid, so a process that comes up afterwards is not the one
+    /// that was enabled. What works is the other order: write the request first, then let the store
+    /// launch AirBox suspended and attach to it before its own main() runs. The process that resumes
+    /// finds the request waiting and takes the guest over with JIT already on it.
+    ///
+    /// Only the directory name goes across. The engine resolves the data container itself, the same way
+    /// it does upstream, and the store cannot read AirBox's sandbox to name it anyway.
+    func stageLaunch(_ app: ContainerApp) -> Bool
     {
-        guard let encoded = app.directoryName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "airbox://launch?name=\(encoded)") else { return }
-
-        debugLog("[ContainerLibrary] Asking AirBox to run \(app.directoryName)")
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        guard let defaults = self.sharedDefaults else
+        {
+            debugLog("[ContainerLibrary] No shared group to write the launch request into")
+            return false
+        }
+        defaults.set(app.directoryName, forKey: "ABLaunchGuest")
+        debugLog("[ContainerLibrary] Staged \(app.directoryName) for the next AirBox launch")
+        return true
     }
 
     func remove(_ app: ContainerApp)
