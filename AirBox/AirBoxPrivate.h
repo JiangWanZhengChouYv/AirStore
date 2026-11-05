@@ -29,6 +29,10 @@
 
 @end
 
+/// YES when a debugger is attached to this process. While Enable JIT is running that is exactly the
+/// case, and it is the thing a relaunch request must not do: the debugger holds this pid.
+FOUNDATION_EXPORT BOOL AirBoxIsBeingDebugged(void);
+
 /// Asks FrontBoard to open this app's own bundle id again. Returns NO when the request could not even be
 /// made; the completion carries FrontBoard's answer, which is where the caller either gives up this
 /// process so the relaunched one takes the guest, or explains why it cannot.

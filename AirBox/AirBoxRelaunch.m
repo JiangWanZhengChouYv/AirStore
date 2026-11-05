@@ -13,7 +13,30 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 
+// The iOS SDK declares none of this. The engine carries the same two lines in
+// Dependencies/LiveContainer/LiveContainer/utils.h, and CS_DEBUGGED there is 0x10000000 -- which is the
+// value the device log has been reporting against (flags 0x22003305 with CS_DEBUGGED clear).
+#ifndef AirBoxCSDebugged
+#define AirBoxCSDebugged 0x10000000
+#endif
+
+int csops(pid_t pid, unsigned int ops, void *useraddr, size_t usersize);
+
 #import "AirBoxPrivate.h"
+
+BOOL AirBoxIsBeingDebugged(void)
+{
+    // The same question the engine asks before loading a guest, asked here before asking to be
+    // relaunched. A debugger attached to this pid means Enable JIT is still running, and a relaunch
+    // would kill exactly the process its script is reading -- which is how one tap ended up spinning
+    // 39,575 unreadable stops.
+    int flags = 0;
+    if (csops(getpid(), 0, &flags, sizeof(flags)) != 0)
+    {
+        return NO;
+    }
+    return (flags & AirBoxCSDebugged) != 0;
+}
 
 BOOL AirBoxAskToRelaunchSelf(void (^completion)(BOOL success, NSString *_Nullable reason))
 {

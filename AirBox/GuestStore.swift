@@ -267,6 +267,15 @@ final class GuestStore: ObservableObject
             return
         }
 
+        guard !AirBoxIsBeingDebugged() else
+        {
+            // Measured: a tap landing while Enable JIT is mid-flight asks FrontBoard to relaunch the very
+            // process the debugger holds. The process goes away under the script, the script then reads
+            // garbage where it expected instructions, and it looped 39,575 times without ever finishing.
+            self.launchError = "AirBox is being restarted to enable JIT. Wait for the JIT notification, then open \(guest.name) again."
+            return
+        }
+
         self.launchingGuestName = guest.name
 
         let defaults = UserDefaults.standard
@@ -298,6 +307,14 @@ final class GuestStore: ObservableObject
             // thread of its own, and SIGKILL does not care which one.
             AirBoxLogging.log("restart accepted, giving up this process so the next one loads \(guest.name)")
             raise(SIGKILL)
+        }
+
+        Task { [weak self] in
+            // A silent FrontBoard is what left the card spinning for two minutes last time. Six seconds is
+            // longer than the restart has ever taken and short enough to read as an answer.
+            try? await Task.sleep(nanoseconds: 6_000_000_000)
+            guard let self, self.launchingGuestName == guest.name else { return }
+            self.failLaunch(guest, reason: "FrontBoard never answered the restart request.")
         }
     }
 

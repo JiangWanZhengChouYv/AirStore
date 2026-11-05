@@ -300,38 +300,105 @@ private func enableJITWithStikJIT(targetPID: UInt32?, bundleIdentifier: String, 
 
     progress?(83, NSLocalizedString("Turning off cellular data…", comment: ""))
     await CellularRefreshManager.shared.turnOffDataIfNeeded()
+    // Two guards on the vendored script, both here rather than inside the framework. The universal
+    // script loops on any stop it does not recognise and logs every pass: measured at 39,575 lines in
+    // three and a half minutes after the process it was attached to was relaunched underneath it. So the
+    // chatter is capped, and the call gets a deadline -- past it the target is killed, which is also what
+    // ends the script's loop, and the user gets an answer instead of a frozen icon.
+    let chatter = JITChatter(limit: 400)
+
     do
     {
-        try await runOnStikJITQueue {
-            progress?(85, NSLocalizedString("Enabling JIT…", comment: ""))
-            try StikJIT.enableJIT(targetPID: resolvedPID,
-                                  pairingFile: pairingFile,
-                                  ddiPaths: ddiPaths,
-                                  configuration: .default,
-                                  script: .universal,
-                                  forceScript: false,
-                                  preparationProgress: { _ in },
-                                  progress: { message in
-                                      debugLog("[StikJIT] \(message)")
-                                      progress?(85, message)
-                                  })
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await runOnStikJITQueue {
+                    progress?(85, NSLocalizedString("Enabling JIT…", comment: ""))
+                    try StikJIT.enableJIT(targetPID: resolvedPID,
+                                          pairingFile: pairingFile,
+                                          ddiPaths: ddiPaths,
+                                          configuration: .default,
+                                          script: .universal,
+                                          forceScript: false,
+                                          preparationProgress: { _ in },
+                                          progress: { message in
+                                              chatter.record(message)
+                                              progress?(85, message)
+                                          })
+                }
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: 90_000_000_000)
+                throw JITAttempt.timedOut
+            }
+            try await group.next()
+            group.cancelAll()
         }
         await CellularRefreshManager.shared.turnOnDataIfNeeded()
+        chatter.reportDropped()
     }
     catch
     {
         await CellularRefreshManager.shared.turnOnDataIfNeeded()
+        chatter.reportDropped()
         if launchedSuspended
         {
-            // The app is sitting suspended with nothing attached to it; killing it lets the user
-            // open it again instead of finding a frozen icon.
+            // The app is sitting suspended with nothing attached to it, or attached to a script that
+            // will not stop; killing it lets the user open it again instead of finding a frozen icon.
             try? await killProcess(UInt32(resolvedPID))
         }
-        throw OperationError.invalidParameters("StikJIT could not enable JIT: \(error.localizedDescription)")
+        let reason = (error is JITAttempt)
+            ? NSLocalizedString("the script never finished within 90 seconds and the target was killed", comment: "")
+            : error.localizedDescription
+        throw OperationError.invalidParameters("StikJIT could not enable JIT: \(reason)")
     }
 
     progress?(100, NSLocalizedString("Done", comment: ""))
     await notifyJITSuccess(appName: appName)
+}
+
+/// StikJIT's script reports every pass it makes, which is a dozen lines when it works and a wall when it
+/// does not -- 14 MB of them last time, all from a loop that would never end. The first `limit` lines are
+/// written as they arrive and the rest are counted, so a stuck run stays legible instead of burying the
+/// lines that came before it.
+private final class JITChatter: @unchecked Sendable
+{
+    private let lock = NSLock()
+    private let limit: Int
+    private var seen = 0
+    private var dropped = 0
+
+    init(limit: Int)
+    {
+        self.limit = limit
+    }
+
+    func record(_ message: String)
+    {
+        lock.lock()
+        self.seen += 1
+        let write = self.seen <= self.limit
+        if !write { self.dropped += 1 }
+        lock.unlock()
+
+        if write { debugLog("[StikJIT] \(message)") }
+    }
+
+    func reportDropped()
+    {
+        lock.lock()
+        let dropped = self.dropped
+        self.dropped = 0
+        lock.unlock()
+
+        guard dropped > 0 else { return }
+        debugLog("[StikJIT] \(dropped) further lines were dropped rather than logged -- a script that keeps "
+                 + "repeating itself has not finished enabling JIT.")
+    }
+}
+
+private enum JITAttempt: Error
+{
+    case timedOut
 }
 
 private struct DDIFile: Sendable
