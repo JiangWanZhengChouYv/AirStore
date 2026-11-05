@@ -71,13 +71,18 @@ final class GuestStore: ObservableObject
         }
     }
 
-    /// A guest that cannot load does not say so on screen, and the process that failed is the extension's
-    /// own -- its defaults belong to a domain this app cannot read. The engine writes the reason into the
-    /// group instead, which is what turns a silent crash back into a message.
+    /// The name to show while a launch is in flight. Opening a guest means this app goes away and comes
+    /// back as something else, which without a card on screen is indistinguishable from a hang.
+    @Published private(set) var launchingGuestName: String?
+
+    /// A guest that cannot load has to say so on screen, or the tap looks like nothing happened and the
+    /// only proof is a log he has to fight a frozen app to send. The engine writes its reason into this
+    /// app's own defaults before it hands the process back, so the message is here when the list comes
+    /// up again.
     private func takeLaunchError()
     {
-        guard let defaults = self.sharedDefaults, let error = defaults.string(forKey: "LCGuestError") else { return }
-        defaults.removeObject(forKey: "LCGuestError")
+        guard let error = UserDefaults.standard.string(forKey: "error") else { return }
+        UserDefaults.standard.removeObject(forKey: "error")
         self.launchError = error
     }
 
@@ -246,20 +251,61 @@ final class GuestStore: ObservableObject
         self.launch(guest)
     }
 
-    /// A guest does not run in this process: it runs in the extension under PlugIns, which is the only
-    /// process the engine lets a guest's libraries into. Asking that extension is all there is to it.
+    /// A guest does not run in this process as it stands: it runs in the *next* one. The engine cannot
+    /// load a guest into a process that is already up -- it dlopens the binary and jumps to its main() --
+    /// and JIT is attached per pid, so the extension under PlugIns is out (measured: CS_DEBUGGED clear in
+    /// every LiveProcess). So write the request where the engine reads it, ask FrontBoard to bring this
+    /// bundle id back, and die: the process that comes up runs main.m, sees the request, and hands itself
+    /// over with JIT already on it.
     func launch(_ guest: Guest)
     {
-        Task
+        guard self.launchingGuestName == nil else
         {
-            do
-            {
-                try await LiveProcessLauncher.run(guest)
-            }
-            catch
-            {
-                self.lastError = error.localizedDescription
-            }
+            // Five taps on a silent button is five processes spun up and thrown away, which is what the
+            // log looked like last time. One request at a time.
+            AirBoxLogging.log("a launch is already pending, ignoring the tap on \(guest.name)")
+            return
         }
+
+        self.launchingGuestName = guest.name
+
+        let defaults = UserDefaults.standard
+        defaults.set(guest.directory.lastPathComponent, forKey: "selected")
+
+        let appInfo = NSDictionary(contentsOf: guest.directory.appendingPathComponent("LCAppInfo.plist"))
+        if let dataUUID = appInfo?["LCDataUUID"] as? String, !dataUUID.isEmpty
+        {
+            defaults.set(dataUUID, forKey: "selectedContainer")
+        }
+        // No synchronize() and no wait: the values live in cfprefsd, not in this process, so the next one
+        // reads them even though this one is about to be killed.
+
+        AirBoxLogging.log("requested \(guest.name) for the next launch of this process "
+                          + "(container \(appInfo?["LCDataUUID"] as? String ?? "left to the engine"))")
+
+        AirBoxAskToRelaunchSelf { success, reason in
+            guard success else
+            {
+                DispatchQueue.main.async
+                {
+                    self.failLaunch(guest, reason: "AirBox could not ask to restart itself: \(reason ?? "no reason given")")
+                }
+                return
+            }
+
+            // Dying is the request. The relaunched process is the one that takes the guest over, and
+            // staying alive would only mean two boxes on the same pending launch. FrontBoard answers on a
+            // thread of its own, and SIGKILL does not care which one.
+            AirBoxLogging.log("restart accepted, giving up this process so the next one loads \(guest.name)")
+            raise(SIGKILL)
+        }
+    }
+
+    private func failLaunch(_ guest: Guest, reason: String)
+    {
+        UserDefaults.standard.removeObject(forKey: "selected")
+        UserDefaults.standard.removeObject(forKey: "selectedContainer")
+        self.launchingGuestName = nil
+        self.launchError = "AirBox could not open \(guest.name): \(reason)"
     }
 }

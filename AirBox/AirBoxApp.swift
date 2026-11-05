@@ -116,6 +116,33 @@ struct GuestListView: View
             {
                 Text(self.store.lastError ?? "")
             }
+            .alert("Could Not Open It", isPresented: Binding(get: { self.store.launchError != nil },
+                                                             set: { if !$0 { self.store.launchError = nil } }))
+            {
+                Button("OK", role: .cancel) {}
+            }
+            message:
+            {
+                // The engine's own words, which is the whole point: last time a refused guest produced no
+                // message at all, so the tap looked like a hang and the log was the only evidence.
+                Text(self.store.launchError ?? "")
+            }
+            .overlay
+            {
+                if let name = self.store.launchingGuestName
+                {
+                    VStack(spacing: 12)
+                    {
+                        ProgressView()
+                        Text("Opening \(name)…").font(.headline)
+                        Text("AirBox restarts once to load it.").font(.caption).foregroundStyle(.secondary)
+                    }
+                    .padding(24)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(.black.opacity(0.25))
+                }
+            }
         }
         .task { await self.store.reload() }
         // The second alert goes on the stack rather than beside the other one: two alerts on the same
