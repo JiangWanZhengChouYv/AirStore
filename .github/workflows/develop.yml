@@ -341,8 +341,10 @@ jobs:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
           STATUS: ${{ needs.build.result }}
           VERSION: ${{ needs.build.outputs.version }}
-          SHORT: ${{ github.sha }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
@@ -353,12 +355,44 @@ jobs:
             cancelled) colour=16763904; word="cancelled / 构建被取消" ;;
             *)         colour=15158332; word="failed / 构建失败" ;;
           esac
-          short="${SHORT:0:8}"
-          # Breaks travel as \\n escapes: a raw newline inside the string makes the JSON payload invalid
-          # and Discord answers 400.
-          body="${VERSION:-no version yet}\\n\\ncommit ${short} · [build log / 构建日志](${RUN_URL})"
-          [ "$STATUS" = "success" ] && body="${body}\\n\\nUpdate on the phone within a minute / 手机上等一分钟就能看到更新"
-          payload=$(printf '{"embeds":[{"title":"AirStore develop %s","description":"%s","color":%s}]}' \
-            "$word" "$body" "$colour")
+          # What the build actually contains: a hash is not a changelog, and the one person reading this
+          # at 11pm is deciding whether to update. Read from the commit rather than from the event
+          # payload, because a re-run or a dispatch has no head_commit to offer.
+          NOTES=$(gh api "repos/$REPO/commits/$SHA" --jq '.commit.message' 2>/dev/null || echo "")
+          export NOTES
+          # Python builds the JSON instead of printf, because a commit message is exactly the kind of
+          # text that contains quotes, backslashes and newlines -- and an invalid payload means the
+          # notice silently never arrives.
+          payload=$(python3 - "$word" "$colour" <<'PY'
+          import json, os, sys
+
+          word, colour = sys.argv[1], int(sys.argv[2])
+          version = os.environ.get("VERSION") or "no version yet"
+          sha = os.environ.get("SHA", "")[:8]
+          run_url = os.environ.get("RUN_URL", "")
+          notes = (os.environ.get("NOTES") or "").strip().splitlines()
+          subject = notes[0].strip() if notes else ""
+          body = "\n".join(notes[1:]).strip()
+          # An embed description caps at 4096 characters; the subject is short by convention and the
+          # body is what could run long.
+          if len(body) > 900:
+              body = body[:900].rstrip() + "…"
+
+          lines = [version]
+          if subject:
+              lines.append("**%s**" % subject.replace("*", "\\*").replace("_", "\\_"))
+          if body:
+              lines.append(body.replace("`", "'"))
+          lines.append("commit %s · [build log / 构建日志](%s)" % (sha, run_url))
+          if os.environ.get("STATUS") == "success":
+              lines.append("Update on the phone within a minute / 手机上等一分钟就能看到更新")
+
+          print(json.dumps({"embeds": [{
+              "title": "AirStore develop %s" % word,
+              "description": "\n\n".join(lines),
+              "color": colour,
+          }]}))
+          PY
+          )
           curl -fsS -m 20 -H 'content-type: application/json' -X POST "$WEBHOOK" -d "$payload" >/dev/null \
             || echo "::warning::the Discord webhook did not answer"
