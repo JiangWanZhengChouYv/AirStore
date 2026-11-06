@@ -14,7 +14,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <os/log.h>
 
 #import "LCSharedUtils.h"
 
@@ -22,6 +21,19 @@ extern int LiveContainerMain(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
+    // The takeover happens before the store's console logger exists, so anything printed here -- the
+    // engine's own NSLog lines included -- would land nowhere anyone reads. Handing stderr to the group's
+    // airbox.log is what the extension already does (LiveProcess/main.m), and the store's router forwards
+    // whatever is new in that file into the exported log with [AirBox] in front.
+    NSString *group = [LCSharedUtils appGroupID];
+    NSURL *shared = group.length > 0
+        ? [NSFileManager.defaultManager containerURLForSecurityApplicationGroupIdentifier:group]
+        : nil;
+    if (shared)
+    {
+        freopen([[shared URLByAppendingPathComponent:@"airbox.log"] fileSystemRepresentation], "a", stderr);
+    }
+
     NSUserDefaults *defaults = NSUserDefaults.standardUserDefaults;
     NSString *selected = [defaults stringForKey:@"selected"];
 
@@ -38,13 +50,13 @@ int main(int argc, char *argv[])
             [shared removeObjectForKey:@"ABLaunchGuest"];
             [defaults setObject:staged forKey:@"selected"];
             selected = staged;
-            os_log(OS_LOG_DEFAULT, "[AirBox] main: picked up the staged request for %{public}@", staged);
+            NSLog(@"[AirBox] main: picked up the staged request for %@", staged);
         }
     }
 
     if (selected.length > 0)
     {
-        os_log(OS_LOG_DEFAULT, "[AirBox] main: a guest was requested (%{public}@), handing this process to the engine", selected);
+        NSLog(@"[AirBox] main: a guest was requested (%@), handing this process to the engine", selected);
 
         int result = LiveContainerMain(argc, argv);
 
@@ -53,8 +65,7 @@ int main(int argc, char *argv[])
         // is the difference between a message and a vanished app, and the refusal AirBox actually hits
         // (no JIT) happens before the engine hooks anything, so the app is still sound.
         NSString *reason = [defaults stringForKey:@"error"];
-        os_log(OS_LOG_DEFAULT, "[AirBox] main: the engine came back with %d: %{public}@",
-               result, reason ?: @"no reason recorded");
+        NSLog(@"[AirBox] main: the engine came back with %d: %@", result, reason ?: @"no reason recorded");
         [defaults removeObjectForKey:@"selected"];
         [defaults removeObjectForKey:@"selectedContainer"];
     }
