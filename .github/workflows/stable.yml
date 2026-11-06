@@ -150,7 +150,10 @@ jobs:
     steps:
       - name: Post the result
         env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
+          # Releases go to the announcement channel when that webhook exists, and fall back to the CI
+          # channel when it does not -- a missing secret must not silence a release notice entirely.
+          WEBHOOK_ANNOUNCE: ${{ secrets.DISCORD_WEBHOOK_ANNOUNCE }}
+          WEBHOOK_CI: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
           STATUS: ${{ needs.build.result }}
           # For a stable build the tag is the version, so nothing has to cross over from the build job.
           VERSION: ${{ github.ref_name }}
@@ -159,7 +162,9 @@ jobs:
         run: |
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # published release red.
-          if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          WEBHOOK="${WEBHOOK_ANNOUNCE:-$WEBHOOK_CI}"
+          if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_ANNOUNCE or DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          if [ -n "$WEBHOOK_ANNOUNCE" ]; then echo "posting to the announcement channel"; else echo "DISCORD_WEBHOOK_ANNOUNCE is not set, falling back to the ci channel"; fi
           # Bilingual, same as the develop channel's notice.
           case "$STATUS" in
             success)   colour=5763719;  word="released / 已发布" ;;
