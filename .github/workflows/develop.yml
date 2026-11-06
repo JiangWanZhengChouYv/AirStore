@@ -343,6 +343,7 @@ jobs:
           VERSION: ${{ needs.build.outputs.version }}
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -370,20 +371,27 @@ jobs:
           version = os.environ.get("VERSION") or "no version yet"
           sha = os.environ.get("SHA", "")[:8]
           run_url = os.environ.get("RUN_URL", "")
+          commit_url = os.environ.get("COMMIT_URL", "")
           notes = (os.environ.get("NOTES") or "").strip().splitlines()
           subject = notes[0].strip() if notes else ""
           body = "\n".join(notes[1:]).strip()
-          # An embed description caps at 4096 characters; the subject is short by convention and the
-          # body is what could run long.
-          if len(body) > 900:
-              body = body[:900].rstrip() + "…"
+          # The only client that reads this is a phone, and Discord folds a long description behind
+          # "see more" -- so the body gets one paragraph's budget and the rest lives behind a link.
+          budget = 280
+          if len(body) > budget:
+              cut = body[:budget]
+              cut = cut[:cut.rfind("\n")] if "\n" in cut[-90:] else cut
+              body = cut.rstrip() + "…"
 
           lines = [version]
           if subject:
               lines.append("**%s**" % subject.replace("*", "\\*").replace("_", "\\_"))
           if body:
               lines.append(body.replace("`", "'"))
-          lines.append("commit %s · [build log / 构建日志](%s)" % (sha, run_url))
+          footer = "commit %s" % sha
+          if commit_url:
+              footer += " · [full message / 完整说明](%s)" % commit_url
+          lines.append(footer + " · [build log / 构建日志](%s)" % run_url)
           if os.environ.get("STATUS") == "success":
               lines.append("Update on the phone within a minute / 手机上等一分钟就能看到更新")
 
