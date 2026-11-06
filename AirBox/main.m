@@ -67,12 +67,26 @@ int main(int argc, char *argv[])
         // and with it JIT, belongs to the process that dies.
         NSUserDefaults *shared = [[NSUserDefaults alloc] initWithSuiteName:[LCSharedUtils appGroupID]];
         NSString *staged = [shared stringForKey:@"ABLaunchGuest"];
-        if (staged.length > 0)
+        NSDate *stagedAt = [shared objectForKey:@"ABLaunchGuestDate"];
+        // Two minutes is longer than the JIT flow has ever taken and short enough that a request left
+        // behind by an interrupted one cannot hijack whatever launches the box next. Measured: a stale
+        // request turned an import hand-off into a takeover attempt, which exited, so the guest was never
+        // imported and the list stayed empty.
+        BOOL fresh = stagedAt != nil && -[stagedAt timeIntervalSinceNow] < 120.0;
+        if (staged.length > 0 && fresh)
         {
             [shared removeObjectForKey:@"ABLaunchGuest"];
+            [shared removeObjectForKey:@"ABLaunchGuestDate"];
             [defaults setObject:staged forKey:@"selected"];
             selected = staged;
             AirBoxLogDirect(@"[AirBox] main: picked up the staged request for %@", staged);
+        }
+        else if (staged.length > 0)
+        {
+            [shared removeObjectForKey:@"ABLaunchGuest"];
+            [shared removeObjectForKey:@"ABLaunchGuestDate"];
+            AirBoxLogDirect(@"[AirBox] main: dropped a stale request for %@ (staged %@)", staged,
+                            stagedAt ? [NSString stringWithFormat:@"%.0fs ago", -[stagedAt timeIntervalSinceNow]] : @"without a date");
         }
     }
 

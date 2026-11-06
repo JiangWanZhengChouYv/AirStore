@@ -89,6 +89,11 @@ final class ContainerLibrary
             return false
         }
         defaults.set(app.directoryName, forKey: "ABLaunchGuest")
+        // Stamped because the request is consumed by main() of a *later* launch, and nothing guarantees
+        // that launch is the one this request was staged for: an import hand-off, a manual tap, or a
+        // failed JIT flow can start AirBox first. A request that outlives its launch is a hijack -- it
+        // made AirBox take over and exit on the import open, so the guest was never imported.
+        defaults.set(Date(), forKey: "ABLaunchGuestDate")
         debugLog("[ContainerLibrary] Staged \(app.directoryName) for the next AirBox launch")
         return true
     }
