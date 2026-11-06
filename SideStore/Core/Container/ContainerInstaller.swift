@@ -10,12 +10,15 @@
 
 import Foundation
 import UIKit
+import SideSign
 import CodeSignKit
 
 enum ContainerInstallerError: LocalizedError
 {
     case airBoxNotInstalled
     case airBoxNotAvailable
+    case noCertificate
+    case noProfileForAirBox
     case downloadFailed(String)
     case patcherRejected(String)
 
@@ -25,6 +28,8 @@ enum ContainerInstallerError: LocalizedError
         {
         case .airBoxNotInstalled: return NSLocalizedString("AirBox is not installed. Install it before adding apps to it.", comment: "")
         case .airBoxNotAvailable: return NSLocalizedString("AirBox is not published for this build of AirStore.", comment: "")
+        case .noCertificate: return NSLocalizedString("No signing certificate is available.", comment: "")
+        case .noProfileForAirBox: return NSLocalizedString("AirBox has no provisioning profile. Reinstall it from AirStore, then try again.", comment: "")
         case .downloadFailed(let reason): return String(format: NSLocalizedString("The package could not be downloaded: %@", comment: ""), reason)
         case .patcherRejected(let reason): return String(format: NSLocalizedString("The app cannot run in AirBox: %@", comment: ""), reason)
         }
@@ -137,15 +142,16 @@ final class ContainerInstaller
         try PropertyListSerialization.data(fromPropertyList: appInfo, format: .xml, options: 0).write(to: appInfoURL)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: bundleURL.path)
 
-        // The guest is signed ad-hoc -- a CodeDirectory, no certificate, no CMS. Measured today: with JIT
-        // on, the engine's bypass of library validation is in place, and dyld still refused the unsigned
-        // guest with "missing code signature in <uuid>". So the requirement left is not "a signature the
-        // kernel trusts" (that is the JITLess route, dead here) but "a signature at all".
+        // Signed with the certificate the store already holds, the same team as the process that will
+        // dlopen it. Both other shapes were measured on the device: no signature at all gives "missing code
+        // signature", and an ad-hoc CodeDirectory gives "code signature invalid (errno=1)" -- which reads
+        // like library validation refusing a binary that belongs to no team. Upstream's guests never hit
+        // this because they are installed by the store and therefore already carry the user's certificate.
         let executableURL = self.executableURL(in: bundleURL)
         let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        try self.signAdHoc(bundleURL)
+        try await self.sign(bundleURL)
         let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        debugLog("[ContainerInstaller] Ad-hoc seal \(digestBefore) -> \(digestAfter)")
+        debugLog("[ContainerInstaller] Seal \(digestBefore) -> \(digestAfter)")
 
         // JIT mode is chosen by the engine on one condition: no certificate published. Builds before
         // this one wrote both keys into the group, so on a device that has ever added a guest they are
@@ -337,19 +343,43 @@ final class ContainerInstaller
         }
     }
 
-    /// Ad-hoc for every Mach-O in the bundle, nested first: a CodeDirectory with no certificate and no CMS.
-    /// The old signature goes first, because the patch rewrote the load commands and anything left in place
-    /// describes bytes that no longer exist.
-    private func signAdHoc(_ bundleURL: URL) throws
+    /// Signs every Mach-O with AirBox's own profile: same team as the process that dlopens it, no
+    /// entitlements and no embedded profile, because permissions belong to the process -- the box's
+    /// profile already grants the memory limits, the app group and get-task-allow, and a profile-backed
+    /// key on a binary with no profile is what AMFI reports as an invalid signature.
+    private func sign(_ bundleURL: URL) async throws
     {
+        let context = DatabaseManager.shared.persistentContainer.viewContext
+
+        // Right after AirBox itself is installed its row may not be visible yet; a guest added in that
+        // same breath would otherwise be told no profile exists.
+        var profile: ALTProvisioningProfile?
+        for attempt in 0..<6
+        {
+            if let airBox = InstalledApp.all(in: context).first(where: { Self.isAirBox($0) }),
+               let found = airBox.customProvisioningProfile
+            {
+                profile = found
+                break
+            }
+            if attempt < 5 { try await Task.sleep(nanoseconds: 300_000_000) }
+        }
+        guard let profile else { throw ContainerInstallerError.noProfileForAirBox }
+        guard let certificate = CertificateManager.shared.activeCertificate else {
+            throw ContainerInstallerError.noCertificate
+        }
+
+        try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
+
+        let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
+        let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
+        let cms = CMSSigner(p12Data: try certificate.certificate.unencryptedP12Data(), password: "")
+
         let binaries = self.guestBinaries(in: bundleURL)
         for binary in binaries
         {
             MachOSignature.stripSignature(ofExecutableAt: binary.url)
         }
-
-        let info = NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist"))
-        let identifier = (info?["CFBundleIdentifier"] as? String) ?? bundleURL.deletingPathExtension().lastPathComponent
 
         for binary in binaries
         {
@@ -359,14 +389,14 @@ final class ContainerInstaller
             guard let data = try? Data(contentsOf: binary.url) else { continue }
 
             let signer = MachOSigner(binaryData: data,
-                                     bundleIdentifier: identifier,
-                                     teamIdentifier: nil,
+                                     bundleIdentifier: profileIdentifier,
+                                     teamIdentifier: teamPrefix,
                                      entitlementsXML: nil,
                                      infoPlistData: bindings.info,
                                      codeResourcesData: bindings.resources,
-                                     cmsSigner: nil,
-                                     // 4096, the size iOS maps library pages at. The signer's own rule picks
-                                     // 16384 on arm64, which is the macOS page size.
+                                     cmsSigner: cms,
+                                     // 4096, the size iOS is known to map library pages at. The signer's own
+                                     // rule picks 16384 on arm64, which is the macOS page size.
                                      pageSizeShift: 12)
             do
             {
@@ -374,11 +404,12 @@ final class ContainerInstaller
             }
             catch
             {
-                debugLog("[ContainerInstaller] Ad-hoc signing \(binary.url.lastPathComponent) failed: \(error.localizedDescription)")
+                debugLog("[ContainerInstaller] Signing \(binary.url.lastPathComponent) failed: \(error.localizedDescription)")
             }
         }
 
         let unsigned = binaries.filter { MachOSignature.digest(ofExecutableAt: $0.url) == nil }
-        debugLog("[ContainerInstaller] \(binaries.count) Mach-O files, still without a seal: \(unsigned.map { $0.url.lastPathComponent })")
+        debugLog("[ContainerInstaller] Signed as \(profileIdentifier): \(binaries.count) Mach-O files, "
+                 + "still without a seal (fat files read as unsigned here): \(unsigned.map { $0.url.lastPathComponent })")
     }
 }
