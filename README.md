@@ -34,6 +34,7 @@ Public Anisette servers are largely blocked or unstable. AirStore gets past this
 - **`-80045` Bypass:** Fixes the Apple server restrictions and login loops on iOS 26.4+.
 - **Higher memory ceiling and on-device JIT:** Apps that need more RAM, and JIT for the ones that need it, requested with a free personal account.
 - **Incremental updates:** An update fetches a patch against the build you have instead of the whole package.
+- **Installs over mobile data:** No Wi-Fi needed to sideload or refresh. Verified on the maintainer's device with a free personal account and Wi-Fi turned off -- the "connect to a network" refusal most guides describe is not a limit here.
 - **Pairing and certificate import/export:** Set up a second device, or survive a reinstall, without redoing the whole pairing dance.
 - **Simplified Chinese interface.**
 - **Lightweight:** Minimal footprint on your device.
