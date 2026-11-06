@@ -106,6 +106,11 @@ class ConsoleLog {
         let fileExists = FileManager.default.fileExists(atPath: url.path)
         if !fileExists {
             FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
+            // Creating a file is the moment the pile grows by one, so it is the moment to trim it. The
+            // file just made is the newest of them and always survives.
+            let prefix = activeLogInfo?.name ?? ConsoleLog.consoleLogNamePrefix
+            let removed = LogRetention.prune(in: consoleLogsDir, named: prefix)
+            if removed > 0 { debugLog("[LogRetention] Removed \(removed) old log file(s), keeping the newest \(LogRetention.keep)") }
         }
         let handle = try? FileHandle(forWritingTo: url)
         handle?.seekToEndOfFile()

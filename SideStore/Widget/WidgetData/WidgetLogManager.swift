@@ -48,6 +48,9 @@ public enum WidgetLogManager {
         let destinationURL = widgetLogsDirectory.appendingPathComponent(rotatedFilename)
         
         try data.write(to: destinationURL, options: Data.WritingOptions.atomic)
+        // A rotation happens every time the widget refreshes, which is far more often than the app
+        // launches -- this is the pile that actually reached hundreds of files.
+        LogRetention.prune(in: widgetLogsDirectory, named: "widget")
         
         try fileHandle.truncate(atOffset: 0)
         try fileHandle.seek(toOffset: 0)

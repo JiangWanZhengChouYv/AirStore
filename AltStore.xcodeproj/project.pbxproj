@@ -238,6 +238,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Utils/datastructures/SingletonGenericMap.swift,
+				Utils/iostreams/LogRetention.swift,
 				Utils/pagination/PaginationDataHolder.swift,
 				Widget/WidgetData/WidgetDataManager.swift,
 				Widget/WidgetData/WidgetLogManager.swift,
