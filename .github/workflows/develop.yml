@@ -375,9 +375,10 @@ jobs:
           notes = (os.environ.get("NOTES") or "").strip().splitlines()
           subject = notes[0].strip() if notes else ""
           body = "\n".join(notes[1:]).strip()
-          # The only client that reads this is a phone, and Discord folds a long description behind
-          # "see more" -- so the body gets one paragraph's budget and the rest lives behind a link.
-          budget = 280
+          # Discord caps an embed description at 4096 characters, so the body gets a budget and the rest
+          # lives behind the commit link. Generous on purpose: whoever posts the daily announcement reads
+          # this on a phone and writes from it, so more context here means less switching between apps.
+          budget = 900
           if len(body) > budget:
               cut = body[:budget]
               cut = cut[:cut.rfind("\n")] if "\n" in cut[-90:] else cut
