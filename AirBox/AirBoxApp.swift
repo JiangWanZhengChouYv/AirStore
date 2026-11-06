@@ -116,8 +116,8 @@ struct GuestListView: View
             {
                 Text(self.store.lastError ?? "")
             }
-            .alert("Open From AirStore", isPresented: Binding(get: { self.store.launchError != nil },
-                                                              set: { if !$0 { self.store.launchError = nil } }))
+            .alert("Could Not Open It", isPresented: Binding(get: { self.store.launchError != nil },
+                                                             set: { if !$0 { self.store.launchError = nil } }))
             {
                 Button("OK", role: .cancel) {}
             }
