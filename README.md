@@ -4,6 +4,7 @@
 <p align="center">
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/latest"><img src="https://img.shields.io/github/v/release/JiangWanZhengChouYv/AirStore?label=release&color=blue" alt="Latest release"></a>
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/actions/workflows/swiftlint.yml"><img src="https://img.shields.io/github/actions/workflow/status/JiangWanZhengChouYv/AirStore/swiftlint.yml?label=swiftlint&branch=develop" alt="SwiftLint"></a>
+  <a href="https://discord.gg/kN9Rm3kkZ"><img src="https://img.shields.io/badge/discord-join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 
@@ -79,6 +80,18 @@ make build fakesign ipa        # produces AirStore.ipa
 `fakesign` means the build carries no developer certificate, which is what you want: the app gets
 its own identity from your Apple ID at first sign-in. CI builds the same way, so a packaged IPA is
 also available from the Actions run for any commit.
+
+## 💬 Feedback & Community
+
+Settings → Send Feedback in the app offers two ways side by side: **Report an Issue on GitHub** and
+**Give Feedback on Discord**.
+
+- Issues: <https://github.com/JiangWanZhengChouYv/AirStore/issues> — attach the log, which lives in the
+  Files app under **AirStore → ConsoleLogs** (newest `console_….log`). A report without one usually
+  cannot be reproduced.
+- Discord: <https://discord.gg/kN9Rm3kkZ> — discussion, and where the develop builds announce
+  themselves. It is the fastest way to reach me; the issue tracker is still where a fix gets followed
+  up.
 
 ## 🤝 Contributing
 

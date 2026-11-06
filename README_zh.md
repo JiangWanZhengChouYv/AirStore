@@ -4,6 +4,7 @@
 <p align="center">
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/latest"><img src="https://img.shields.io/github/v/release/JiangWanZhengChouYv/AirStore?label=release&color=blue" alt="Latest release"></a>
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/actions/workflows/swiftlint.yml"><img src="https://img.shields.io/github/actions/workflow/status/JiangWanZhengChouYv/AirStore/swiftlint.yml?label=swiftlint&branch=develop" alt="SwiftLint"></a>
+  <a href="https://discord.gg/kN9Rm3kkZ"><img src="https://img.shields.io/badge/discord-join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 
@@ -92,6 +93,14 @@ make build fakesign ipa        # 产出 AirStore.ipa
 ## 关于名字
 
 主屏名字、权限弹窗、注册到苹果设备列表里的机器名，以及打包产物文件名（`AirStore.ipa`），都已经是 AirStore；但 bundle id（`com.SideStore.SideStore`）和 App Group 故意没动：改这些会换签名标识，牵动 iCloud 容器和能用的描述文件，还会让已有安装变成孤儿。
+
+## 反馈与交流
+
+App 里 设置 → 提交反馈 并排放着两个入口：**在 GitHub 提交 Issue** 和 **在 Discord 反馈**。
+
+- Issue：<https://github.com/JiangWanZhengChouYv/AirStore/issues>，请务必带上日志——它在「文件」App 里
+  **AirStore → ConsoleLogs**，取名字最新的那个 `console_….log`。没有日志的反馈基本复现不出来。
+- Discord：<https://discord.gg/kN9Rm3kkZ>，日常讨论和 develop 每日构建的通知都在这里。找我最快的地方是 Discord，但一个修复有没有被跟进，还是看 Issue。
 
 ## 参与贡献
 
