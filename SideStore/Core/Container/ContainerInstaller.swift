@@ -10,6 +10,7 @@
 
 import Foundation
 import UIKit
+import CodeSignKit
 
 enum ContainerInstallerError: LocalizedError
 {
@@ -136,15 +137,15 @@ final class ContainerInstaller
         try PropertyListSerialization.data(fromPropertyList: appInfo, format: .xml, options: 0).write(to: appInfoURL)
         try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: bundleURL.path)
 
-        // The guest is delivered patched and **not signed**. That is deliberate: the mode that works
-        // without a signature the kernel accepts is JIT, where the engine bypasses library validation
-        // instead of asking the kernel to bless these bytes (LCBootstrap's init_bypassDyldLibValidation).
-        // Signing here was the JITLess route, and every shape we tried -- bound Info.plist and resource
-        // list, 4096-byte pages, the host's own identifier -- came back refused by fcntl(F_ADDFILESIGS_RETURN).
-        // The digest is still logged, because "signed or not" is the one thing this delivery changes.
+        // The guest is signed ad-hoc -- a CodeDirectory, no certificate, no CMS. Measured today: with JIT
+        // on, the engine's bypass of library validation is in place, and dyld still refused the unsigned
+        // guest with "missing code signature in <uuid>". So the requirement left is not "a signature the
+        // kernel trusts" (that is the JITLess route, dead here) but "a signature at all".
         let executableURL = self.executableURL(in: bundleURL)
-        let digest = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        debugLog("[ContainerInstaller] Delivering the guest unsigned, as JIT mode requires: executable seal \(digest)")
+        let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+        try self.signAdHoc(bundleURL)
+        let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
+        debugLog("[ContainerInstaller] Ad-hoc seal \(digestBefore) -> \(digestAfter)")
 
         // JIT mode is chosen by the engine on one condition: no certificate published. Builds before
         // this one wrote both keys into the group, so on a device that has ever added a guest they are
@@ -278,5 +279,106 @@ final class ContainerInstaller
         guard let info = NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist")),
               let name = info["CFBundleExecutable"] as? String else { return nil }
         return bundleURL.appendingPathComponent(name)
+    }
+
+    /// A binary the guest carries, with the bundle whose Info.plist and resource list its signature has to
+    /// bind. Nested things come first: the .app seals the bytes its frameworks end up with.
+    private struct GuestBinary
+    {
+        let url: URL
+        let bundle: URL?
+    }
+
+    private func guestBinaries(in bundleURL: URL) -> [GuestBinary]
+    {
+        let finder = FileManager.default
+        var binaries = [GuestBinary]()
+
+        let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
+        for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
+        {
+            switch entry.pathExtension
+            {
+            case "framework":
+                let binary = entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent)
+                if finder.fileExists(atPath: binary.path) { binaries.append(GuestBinary(url: binary, bundle: entry)) }
+            case "dylib":
+                binaries.append(GuestBinary(url: entry, bundle: nil))
+            default:
+                break
+            }
+        }
+
+        if let executable = self.executableURL(in: bundleURL)
+        {
+            binaries.append(GuestBinary(url: executable, bundle: bundleURL))
+        }
+        return binaries
+    }
+
+    /// The bundle's own resource list, written where a validator looks for it. Left out, a signature that
+    /// says it has resources is answered with "code has no resources but signature indicates they must be
+    /// present" -- for the file, not just the directory.
+    private func sealResources(in bundleURL: URL, executableName: String) -> (info: Data?, resources: Data?)
+    {
+        let info = try? Data(contentsOf: bundleURL.appendingPathComponent("Info.plist"))
+        do
+        {
+            let resources = try CodeResourcesBuilder(bundleURL: bundleURL, executableName: executableName).build()
+            let directory = bundleURL.appendingPathComponent("_CodeSignature", isDirectory: true)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try resources.write(to: directory.appendingPathComponent("CodeResources"), options: .atomic)
+            return (info, resources)
+        }
+        catch
+        {
+            debugLog("[ContainerInstaller] Could not seal \(bundleURL.lastPathComponent): \(error.localizedDescription)")
+            return (info, nil)
+        }
+    }
+
+    /// Ad-hoc for every Mach-O in the bundle, nested first: a CodeDirectory with no certificate and no CMS.
+    /// The old signature goes first, because the patch rewrote the load commands and anything left in place
+    /// describes bytes that no longer exist.
+    private func signAdHoc(_ bundleURL: URL) throws
+    {
+        let binaries = self.guestBinaries(in: bundleURL)
+        for binary in binaries
+        {
+            MachOSignature.stripSignature(ofExecutableAt: binary.url)
+        }
+
+        let info = NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist"))
+        let identifier = (info?["CFBundleIdentifier"] as? String) ?? bundleURL.deletingPathExtension().lastPathComponent
+
+        for binary in binaries
+        {
+            let bindings = binary.bundle.map { self.sealResources(in: $0, executableName: binary.url.lastPathComponent) }
+                ?? (info: nil, resources: nil)
+
+            guard let data = try? Data(contentsOf: binary.url) else { continue }
+
+            let signer = MachOSigner(binaryData: data,
+                                     bundleIdentifier: identifier,
+                                     teamIdentifier: nil,
+                                     entitlementsXML: nil,
+                                     infoPlistData: bindings.info,
+                                     codeResourcesData: bindings.resources,
+                                     cmsSigner: nil,
+                                     // 4096, the size iOS maps library pages at. The signer's own rule picks
+                                     // 16384 on arm64, which is the macOS page size.
+                                     pageSizeShift: 12)
+            do
+            {
+                try signer.sign().write(to: binary.url, options: .atomic)
+            }
+            catch
+            {
+                debugLog("[ContainerInstaller] Ad-hoc signing \(binary.url.lastPathComponent) failed: \(error.localizedDescription)")
+            }
+        }
+
+        let unsigned = binaries.filter { MachOSignature.digest(ofExecutableAt: $0.url) == nil }
+        debugLog("[ContainerInstaller] \(binaries.count) Mach-O files, still without a seal: \(unsigned.map { $0.url.lastPathComponent })")
     }
 }
