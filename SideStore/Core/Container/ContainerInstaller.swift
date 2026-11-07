@@ -10,14 +10,11 @@
 
 import Foundation
 import UIKit
-import SideSign
 
 enum ContainerInstallerError: LocalizedError
 {
     case airBoxNotInstalled
     case airBoxNotAvailable
-    case noCertificate
-    case noProfileForAirBox
     case downloadFailed(String)
     case patcherRejected(String)
 
@@ -27,8 +24,6 @@ enum ContainerInstallerError: LocalizedError
         {
         case .airBoxNotInstalled: return NSLocalizedString("AirBox is not installed. Install it before adding apps to it.", comment: "")
         case .airBoxNotAvailable: return NSLocalizedString("AirBox is not published for this build of AirStore.", comment: "")
-        case .noCertificate: return NSLocalizedString("No signing certificate is available.", comment: "")
-        case .noProfileForAirBox: return NSLocalizedString("AirBox has no provisioning profile. Reinstall it from AirStore, then try again.", comment: "")
         case .downloadFailed(let reason): return String(format: NSLocalizedString("The package could not be downloaded: %@", comment: ""), reason)
         case .patcherRejected(let reason): return String(format: NSLocalizedString("The app cannot run in AirBox: %@", comment: ""), reason)
         }
@@ -286,52 +281,36 @@ final class ContainerInstaller
         return bundleURL.appendingPathComponent(name)
     }
 
-    /// zsign signs the whole bundle the way upstream LiveContainer does: every 64-bit Mach-O, fat slices
-    /// included, with the store's own certificate and no entitlements or embedded profile. Our hand-built
-    /// signatures were refused by the kernel in every shape we tried -- unsigned, ad-hoc, and a full CMS --
-    /// so this links the implementation whose output upstream's guests actually load with.
+    /// Strips every signature and adds none. Measured on device: with CS_DEBUGGED set, ad-hoc, our CMS
+    /// and zsign's CMS were all refused with "code signature invalid (errno=1)" -- dyld rejects a bad
+    /// signature. A process being debugged is the one case where it may accept *no* signature instead,
+    /// which is the cell of the matrix never actually tested: the earlier "unsigned" build left the
+    /// ipa's original (now stale) signature in place, and its one run never had JIT attached.
     private func sign(_ bundleURL: URL) async throws
     {
-        let context = DatabaseManager.shared.persistentContainer.viewContext
+        let finder = FileManager.default
+        var binaries = [URL]()
 
-        // Right after AirBox itself is installed its row may not be visible yet; a guest added in that
-        // same breath would otherwise be told no profile exists.
-        var profile: ALTProvisioningProfile?
-        for attempt in 0..<6
+        let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
+        for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
         {
-            if let airBox = InstalledApp.all(in: context).first(where: { Self.isAirBox($0) }),
-               let found = airBox.customProvisioningProfile
+            switch entry.pathExtension
             {
-                profile = found
+            case "framework":
+                let binary = entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent)
+                if finder.fileExists(atPath: binary.path) { binaries.append(binary) }
+            case "dylib":
+                binaries.append(entry)
+            default:
                 break
             }
-            if attempt < 5 { try await Task.sleep(nanoseconds: 300_000_000) }
         }
-        guard let profile else { throw ContainerInstallerError.noProfileForAirBox }
-        guard let certificate = CertificateManager.shared.activeCertificate else {
-            throw ContainerInstallerError.noCertificate
+        if let executable = self.executableURL(in: bundleURL) { binaries.append(executable) }
+
+        for binary in binaries
+        {
+            MachOSignature.stripSignature(ofExecutableAt: binary)
         }
-
-        try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
-
-        let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
-        let p12 = try certificate.certificate.unencryptedP12Data()
-        let password = certificate.password ?? ""
-
-        debugLog("[ContainerInstaller] zsign in this binary: \(AirBoxZSignPresence()); signing as \(profileIdentifier)")
-
-        // zsign always calls the completion, on success and on every failure path, so one resume is enough.
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            _ = AirBoxZSignBundle(bundleURL.path, profileIdentifier, p12, password) { success, error in
-                if success
-                {
-                    continuation.resume()
-                }
-                else
-                {
-                    continuation.resume(throwing: error ?? ContainerInstallerError.patcherRejected("zsign refused the guest"))
-                }
-            }
-        }
+        debugLog("[ContainerInstaller] Stripped signatures from \(binaries.count) Mach-O files; adding none, JIT is the trust")
     }
 }
