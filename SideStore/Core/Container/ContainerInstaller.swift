@@ -11,7 +11,6 @@
 import Foundation
 import UIKit
 import SideSign
-import CodeSignKit
 
 enum ContainerInstallerError: LocalizedError
 {
@@ -287,66 +286,10 @@ final class ContainerInstaller
         return bundleURL.appendingPathComponent(name)
     }
 
-    /// A binary the guest carries, with the bundle whose Info.plist and resource list its signature has to
-    /// bind. Nested things come first: the .app seals the bytes its frameworks end up with.
-    private struct GuestBinary
-    {
-        let url: URL
-        let bundle: URL?
-    }
-
-    private func guestBinaries(in bundleURL: URL) -> [GuestBinary]
-    {
-        let finder = FileManager.default
-        var binaries = [GuestBinary]()
-
-        let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
-        for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
-        {
-            switch entry.pathExtension
-            {
-            case "framework":
-                let binary = entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent)
-                if finder.fileExists(atPath: binary.path) { binaries.append(GuestBinary(url: binary, bundle: entry)) }
-            case "dylib":
-                binaries.append(GuestBinary(url: entry, bundle: nil))
-            default:
-                break
-            }
-        }
-
-        if let executable = self.executableURL(in: bundleURL)
-        {
-            binaries.append(GuestBinary(url: executable, bundle: bundleURL))
-        }
-        return binaries
-    }
-
-    /// The bundle's own resource list, written where a validator looks for it. Left out, a signature that
-    /// says it has resources is answered with "code has no resources but signature indicates they must be
-    /// present" -- for the file, not just the directory.
-    private func sealResources(in bundleURL: URL, executableName: String) -> (info: Data?, resources: Data?)
-    {
-        let info = try? Data(contentsOf: bundleURL.appendingPathComponent("Info.plist"))
-        do
-        {
-            let resources = try CodeResourcesBuilder(bundleURL: bundleURL, executableName: executableName).build()
-            let directory = bundleURL.appendingPathComponent("_CodeSignature", isDirectory: true)
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            try resources.write(to: directory.appendingPathComponent("CodeResources"), options: .atomic)
-            return (info, resources)
-        }
-        catch
-        {
-            debugLog("[ContainerInstaller] Could not seal \(bundleURL.lastPathComponent): \(error.localizedDescription)")
-            return (info, nil)
-        }
-    }
-
-    /// Signs every Mach-O with AirBox's own profile: same team as the process that dlopens it, no
-    /// entitlements and no embedded profile, because permissions belong to the process -- the box's
-    /// profile already grants the memory limits, the app group and get-task-allow, and a profile-backed
-    /// key on a binary with no profile is what AMFI reports as an invalid signature.
+    /// zsign signs the whole bundle the way upstream LiveContainer does: every 64-bit Mach-O, fat slices
+    /// included, with the store's own certificate and no entitlements or embedded profile. Our hand-built
+    /// signatures were refused by the kernel in every shape we tried -- unsigned, ad-hoc, and a full CMS --
+    /// so this links the implementation whose output upstream's guests actually load with.
     private func sign(_ bundleURL: URL) async throws
     {
         let context = DatabaseManager.shared.persistentContainer.viewContext
@@ -372,44 +315,23 @@ final class ContainerInstaller
         try? FileManager.default.removeItem(at: bundleURL.appendingPathComponent("embedded.mobileprovision"))
 
         let profileIdentifier = (profile.entitlements["application-identifier"] as? String) ?? ""
-        let teamPrefix = String(profileIdentifier.prefix { $0 != "." })
-        let cms = CMSSigner(p12Data: try certificate.certificate.unencryptedP12Data(), password: "")
+        let p12 = try certificate.certificate.unencryptedP12Data()
+        let password = certificate.password ?? ""
 
-        let binaries = self.guestBinaries(in: bundleURL)
-        for binary in binaries
-        {
-            MachOSignature.stripSignature(ofExecutableAt: binary.url)
-        }
+        debugLog("[ContainerInstaller] zsign in this binary: \(AirBoxZSignPresence()); signing as \(profileIdentifier)")
 
-        for binary in binaries
-        {
-            let bindings = binary.bundle.map { self.sealResources(in: $0, executableName: binary.url.lastPathComponent) }
-                ?? (info: nil, resources: nil)
-
-            guard let data = try? Data(contentsOf: binary.url) else { continue }
-
-            let signer = MachOSigner(binaryData: data,
-                                     bundleIdentifier: profileIdentifier,
-                                     teamIdentifier: teamPrefix,
-                                     entitlementsXML: nil,
-                                     infoPlistData: bindings.info,
-                                     codeResourcesData: bindings.resources,
-                                     cmsSigner: cms,
-                                     // 4096, the size iOS is known to map library pages at. The signer's own
-                                     // rule picks 16384 on arm64, which is the macOS page size.
-                                     pageSizeShift: 12)
-            do
-            {
-                try signer.sign().write(to: binary.url, options: .atomic)
-            }
-            catch
-            {
-                debugLog("[ContainerInstaller] Signing \(binary.url.lastPathComponent) failed: \(error.localizedDescription)")
+        // zsign always calls the completion, on success and on every failure path, so one resume is enough.
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            _ = AirBoxZSignBundle(bundleURL.path, profileIdentifier, p12, password) { success, error in
+                if success
+                {
+                    continuation.resume()
+                }
+                else
+                {
+                    continuation.resume(throwing: error ?? ContainerInstallerError.patcherRejected("zsign refused the guest"))
+                }
             }
         }
-
-        let unsigned = binaries.filter { MachOSignature.digest(ofExecutableAt: $0.url) == nil }
-        debugLog("[ContainerInstaller] Signed as \(profileIdentifier): \(binaries.count) Mach-O files, "
-                 + "still without a seal (fat files read as unsigned here): \(unsigned.map { $0.url.lastPathComponent })")
     }
 }
