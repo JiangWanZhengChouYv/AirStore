@@ -7,6 +7,13 @@
   <a href="https://discord.gg/kN9Rm3kkZ"><img src="https://img.shields.io/badge/discord-join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
+> [!CAUTION]
+> **The next stable release changes the signing identifier.** The App IDs list still says **SideStore**
+> because the bundle id is deliberately still `com.SideStore.SideStore` -- that is what lets AirStore
+> install over an existing SideStore. The next stable switches to AirStore's own identifier, and an
+> in-place update will no longer be possible: export your certificate and pairing file first (Settings),
+> uninstall the old build, install the new one, then import them back.
+
 
 **AirStore is a fork of SideStore that does not require an AltServer. It aims to be the better SideStore — the place a user stays, not a temporary fix for one Apple error. It started by resolving the notorious `-80045` authentication error for iOS 26.4 and above, and kept going from there.**
 

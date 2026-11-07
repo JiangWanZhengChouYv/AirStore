@@ -7,6 +7,11 @@
   <a href="https://discord.gg/kN9Rm3kkZ"><img src="https://img.shields.io/badge/discord-join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
+> [!CAUTION]
+> **下次正式版会更换签名标识（Bundle ID）。** 现在 App ID 列表里仍显示 **SideStore**，是因为签名标识故意保留为
+> `com.SideStore.SideStore`——这样才能覆盖安装已有的 SideStore。下次 Stable 起换成 AirStore 自己的标识，
+> **届时不能覆盖更新**：先在设置里导出证书和配对文件，卸载旧版，装新版后再导入。
+
 
 中文说明（与 [README.md](README.md) 同步维护，两份内容有出入时以英文为准）。
 
