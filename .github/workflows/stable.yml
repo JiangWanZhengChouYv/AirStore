@@ -157,8 +157,10 @@ jobs:
           STATUS: ${{ needs.build.result }}
           # For a stable build the tag is the version, so nothing has to cross over from the build job.
           VERSION: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
           RELEASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # published release red.
@@ -171,7 +173,39 @@ jobs:
             cancelled) colour=16763904; word="cancelled / 发布被取消" ;;
             *)         colour=15158332; word="failed / 发布失败" ;;
           esac
-          payload=$(printf '{"embeds":[{"title":"AirStore %s %s","description":"[downloads / 下载页](%s) · [build log / 构建日志](%s)","color":%s}]}' \
-            "$word" "$VERSION" "$RELEASE_URL" "$RUN_URL" "$colour")
+          # What changed since the previous stable, newest first. The previous stable is the newest
+          # published release that is not this tag -- the build job has already published this one, so
+          # "latest" would be the release being announced.
+          PREV=$(gh api "repos/$REPO/releases?per_page=30" --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' 2>/dev/null | grep -v "^${VERSION}$" | head -1 || true)
+          if [ -n "$PREV" ]; then
+            COMMITS=$(gh api "repos/$REPO/compare/$PREV...$VERSION" --jq '[.commits[] | .commit.message | split("\n")[0]] | reverse | .[]' 2>/dev/null || true)
+          else
+            COMMITS=$(gh api "repos/$REPO/commits?sha=$VERSION&per_page=10" --jq '.[].commit.message | split("\n")[0]' 2>/dev/null || true)
+          fi
+          export COMMITS PREV
+          payload=$(python3 - "$word" "$colour" <<'PY'
+          import json, os, sys
+
+          word, colour = sys.argv[1], int(sys.argv[2])
+          version = os.environ.get("VERSION", "")
+          previous = os.environ.get("PREV", "")
+          subjects = [line.strip() for line in (os.environ.get("COMMITS") or "").splitlines() if line.strip()]
+
+          lines = [version]
+          if subjects:
+              lines.append("Changes since %s / 自 %s 以来的改动" % (previous or "the last release", previous or "the last release"))
+              lines.extend("- " + subject.replace("`", "'") for subject in subjects[:10])
+              if len(subjects) > 10:
+                  lines.append("剩余 %d 个提交未展示 / %d more commits not shown" % (len(subjects) - 10, len(subjects) - 10))
+          lines.append("[downloads / 下载页](%s) · [build log / 构建日志](%s)"
+                       % (os.environ.get("RELEASE_URL", ""), os.environ.get("RUN_URL", "")))
+
+          print(json.dumps({"embeds": [{
+              "title": "AirStore %s %s" % (word, version),
+              "description": "\n".join(lines),
+              "color": colour,
+          }]}))
+          PY
+          )
           curl -fsS -m 20 -H 'content-type: application/json' -X POST "$WEBHOOK" -d "$payload" >/dev/null \
             || echo "::warning::the Discord webhook did not answer"
