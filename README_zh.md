@@ -38,7 +38,8 @@
 > 1. 先搜一下已有 Issue，别开重复的。
 > 2. 带上详细日志（Settings > Error Log > Export Log 导出）和复现步骤。没有日志的「登不上」基本没法查。
 >
-> 本项目没有 Discord 之类的聊天群，反馈只走本仓库 Issues。
+> 反馈走两条路：本仓库 Issues（务必带日志），或 Discord：<https://discord.gg/kN9Rm3kkZ>。
+> 日常讨论 Discord 更快，修复有没有被跟进看 Issues。详见下面「反馈与交流」。
 
 ## 为什么要用 AirStore
 
@@ -48,13 +49,13 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 
 ## 现在的验证状态（说清楚，别当成已完工）
 
-- **已验证**：iPhone，iOS 27.2，免费个人 Apple ID。登录走完 2FA 和取 Team，Settings 里能看到账号。
-- **未验证**：登录成功之后，安装和刷新第三方 App 的完整链路。这条验证过了我会把 0.8.0 的发布说明里那句「Not verified」改掉。
-- **单点依赖**：登录要经过第三方服务器 `ani3.stikstore.app`（默认）。它挂了或者换成苹果不认的 ADI，登录会再次坏掉，手机本地那套就是被苹果拒的那套，没有本地替代。设置里可以换服务器，同源候选见下面。
+- **已验证**（真机，免费个人 Apple ID）：登录走完 2FA 和取 Team（iOS 27.2）；第三方 App 的安装与刷新，含增量更新；关掉 Wi-Fi 只走移动数据也能装；本机 JIT。
+- **未验证**：AirBox 容器加载 guest。develop 包里已有入口，签名链路还在验，别当能用。
+- **单点依赖**：登录要经过第三方服务器，默认 `ani3.stikstore.app`（背后是真 Mac ADI，2026-10-19 真机端到端验证过）。它挂了或者换成苹果不认的 ADI，登录会再次坏掉；手机本地那套就是被苹果拒的那套，没有本地替代。设置里可以换服务器，或按下面那节自建一台自己的。
 
 ## 安装
 
-直接用 [0.8.0 pre-release](https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/0.8.0) 里的 `SideStore-0.8.0.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。AirStore 故意保留 SideStore 的 bundle id，所以它是**覆盖**你已有的 SideStore，而不是并排放一个新手屏图标。主屏名字显示为 AirStore。
+直接用[最新正式版](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest)（当前 0.8.2）里的 `AirStore.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。AirStore 故意保留 SideStore 的 bundle id，所以它是**覆盖**你已有的 SideStore，而不是并排放一个新手屏图标。主屏名字显示为 AirStore。想跟开发进度就加下面「更新」里那个 develop 源。
 
 从 SideStore 或旧版 AirStore 升级过的，两个设置必须自己确认（新的默认值只在全新安装时生效，老安装里你存过的值优先）：
 
@@ -90,7 +91,7 @@ docker run -d --restart always --name anisette-v3 -p 6969:6969 \
 
 ## 自己查服务器能不能用
 
-不用凭据就能看个大概，判据是它声明的身份：
+不用凭据就能看个大概，判据是它声明的身份。**下面是 2026-10-19 的探测结果；公共服务器实测会在同一天内变脸，用前自己再探一次，别照抄旧表。**
 
 ```sh
 curl -s https://<服务器地址>/v3/client_info

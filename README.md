@@ -52,13 +52,17 @@ in the develop builds and it does not load guests yet.
 
 ## 🛠️ Installation
 
-The current build is the [0.8.0 pre-release](https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/0.8.0).
-Download `SideStore-0.8.0.ipa` and install it the way you already install SideStore: iloader, or the
+The current stable is [0.8.2](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest).
+Download `AirStore.ipa` and install it the way you already install SideStore: iloader, or the
 in-app remote pairing flow. AirStore keeps SideStore's bundle id on purpose, so installing it
 replaces an existing SideStore rather than sitting beside it. The Home Screen label is AirStore.
+For the development builds, add the develop source described under Updates below.
 
-Read the release notes before installing. Sign-in is the only path that has been re-tested, and
-logins depend on a third-party Anisette server staying online.
+Verified on device with a free personal account: sign-in including 2FA (iOS 27.2), installing and
+refreshing third-party apps including incremental updates, installing over mobile data with Wi-Fi
+off, and on-device JIT. AirBox (running apps inside a container) is in the develop builds but has
+not loaded a guest yet. Logins still depend on a third-party Anisette server staying online -- see
+the self-hosting section if you want that dependency to be yours.
 
 ### Updates
 
