@@ -71,6 +71,23 @@ https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/ai
 
 它只发 AirStore 的版本。已经加了 SideStore 社区的，别的 App 照常用，SideStore 那一行的更新提示忽略掉。
 
+## 自建 Anisette 服务器（最安全）
+
+**默认仍然是公共服务器**，下面这套不是必须的。但公共服务器意味着你的机器身份和 IP 与上面所有人共用，
+而公共服务器实测会在同一天内变脸。自建把这两条都切断：身份和 IP 都是你自己的，在苹果眼里流量和一个普通
+AltServer 用户没有区别。锁号来自连续错密码和滥用模式，不来自"自建"这个动作。
+
+```sh
+docker run -d --restart always --name anisette-v3 -p 6969:6969 \
+  --volume anisette-v3_data:/home/Alcoholic/.config/anisette-v3/lib/ \
+  dadoum/anisette-v3-server
+```
+
+- **volume 一定要留**：它存已注册的机器身份；每次重启新铸一台机器才是最像滥用的行为。镜像有
+  linux/amd64 和 linux/arm64，Mac 或小 VPS 都能跑。
+- AirStore 里：设置 > Anisette Servers，加 `http://<那台机器的地址>:6969` 并选中它。
+- **只给自己用**：开放给别人，你就变回公共服务器，把刚切断的共用身份风险又接回来了。
+
 ## 自己查服务器能不能用
 
 不用凭据就能看个大概，判据是它声明的身份：

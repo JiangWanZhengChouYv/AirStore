@@ -73,6 +73,27 @@ https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/ai
 It carries only AirStore releases. If you have the SideStore source already, leave it for other
 apps and ignore the SideStore update row.
 
+## 🖥️ Self-hosting Anisette (the safest option)
+
+**The default stays the public servers** -- nothing below is required. But a public server means your
+machine identity and IP are shared with everyone else on it, and public servers do change face without
+warning. Running your own removes both: the identity and the IP are yours, and to Apple the traffic looks
+like one ordinary AltServer user. Account locks come from repeated wrong passwords and abuse patterns,
+not from self-hosting.
+
+```sh
+docker run -d --restart always --name anisette-v3 -p 6969:6969 \
+  --volume anisette-v3_data:/home/Alcoholic/.config/anisette-v3/lib/ \
+  dadoum/anisette-v3-server
+```
+
+- **Keep the volume.** It holds the provisioned machine identity; minting a new machine on every restart
+  is the behaviour that looks like abuse. Images exist for linux/amd64 and linux/arm64, so a Mac or a
+  small VPS both work.
+- In AirStore: Settings > Anisette Servers, add `http://<that machine's address>:6969` and select it.
+- **Keep it to yourself.** Opening it to other people turns you back into a public server and reconnects
+  the shared-identity risk you just cut.
+
 ## Building from source
 
 Requires macOS with Xcode 15+. There is no CocoaPods in this project: do not run `pod install`,
