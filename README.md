@@ -47,8 +47,10 @@ Public Anisette servers are largely blocked or unstable. AirStore gets past this
 - **Simplified Chinese interface.**
 - **Lightweight:** Minimal footprint on your device.
 
-In progress: **AirBox**, a container that runs apps without spending one of a free account's three App ID slots. It is
-in the develop builds and it does not load guests yet.
+Experimental: **AirBox**, a container meant to run apps without spending one of a free account's three App ID
+slots. The develop builds carry the entry point, but on the test device's OS it cannot load a guest: unsigned,
+ad-hoc, our own certificate and upstream zsign were all refused by the kernel on device, with JIT confirmed
+attached. The entry point stays as an experiment; do not treat it as working.
 
 ## 🛠️ Installation
 
