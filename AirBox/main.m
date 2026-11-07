@@ -19,6 +19,10 @@
 
 extern int LiveContainerMain(int argc, char *argv[]);
 
+// The SDK declares neither; the engine carries the same two lines in its utils.h.
+extern int csops(pid_t pid, unsigned int ops, void *useraddr, size_t usersize);
+#define AirBoxCSDebugged 0x10000000
+
 /// The file all three AirBox processes write into, which the store forwards into its own console log.
 static NSURL *AirBoxGroupLogFile(void)
 {
@@ -93,6 +97,14 @@ int main(int argc, char *argv[])
     if (selected.length > 0)
     {
         AirBoxLogDirect(@"[AirBox] main: a guest was requested (%@), handing this process to the engine", selected);
+
+        // The one number the whole JIT question turns on, read at the exact moment of takeover. Every
+        // previous log lost it: the engine's own NSLog never reached the exported file, and the debug
+        // socket dies about a second after attach, so "was it debugged when dlopen ran" stayed unknown.
+        int csFlags = 0;
+        csops(getpid(), 0, &csFlags, sizeof(csFlags));
+        AirBoxLogDirect(@"[AirBox] main: csops at takeover = 0x%x (CS_DEBUGGED %@)", csFlags,
+                        (csFlags & AirBoxCSDebugged) ? @"set" : @"clear");
 
         int result = LiveContainerMain(argc, argv);
 
