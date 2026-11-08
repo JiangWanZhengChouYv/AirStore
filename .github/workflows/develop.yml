@@ -75,11 +75,11 @@ jobs:
           # and offer the stable build as an "update" over a newer develop install.
           STAMP=$(python3 -c 'import datetime; print(datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M"))')
           VERSION="${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}"
-          # Release builds PRODUCT_BUNDLE_IDENTIFIER straight from BASE_BUNDLE_ID, which is
-          # $(ORG_IDENTIFIER).SideStore -- so this reproduces what xcodebuild -showBuildSettings
-          # used to answer, without needing Xcode on this runner.
+          # Release builds PRODUCT_BUNDLE_IDENTIFIER from BASE_BUNDLE_ID, which is written as
+          # $(ORG_IDENTIFIER).AirStore -- so expand that here instead of asking for Xcode.
           ORG=$(grep -E '^ORG_IDENTIFIER[[:space:]]*=' Build.xcconfig | sed -e 's/.*=[[:space:]]*//' -e 's/[[:space:]]*$//')
-          BUNDLE_ID="${ORG}.SideStore"
+          BASE=$(grep -E '^BASE_BUNDLE_ID[[:space:]]*=' Build.xcconfig | sed -e 's/.*=[[:space:]]*//' -e 's/[[:space:]]*$//')
+          BUNDLE_ID=$(printf '%s' "$BASE" | sed "s|\$(ORG_IDENTIFIER)|$ORG|")
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "short_commit=${SHORT}" >> $GITHUB_OUTPUT
           echo "bundle_id=${BUNDLE_ID}" >> $GITHUB_OUTPUT

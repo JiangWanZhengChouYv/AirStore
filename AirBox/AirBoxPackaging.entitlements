@@ -8,12 +8,12 @@
 <plist version="1.0">
 <dict>
 	<key>application-identifier</key>
-	<string>XYZ0123456.com.SideStore.SideStore.AirBox</string>
+	<string>XYZ0123456.com.JiangWanZhengChouYv.AirStore.AirBox</string>
 	<key>com.apple.developer.team-identifier</key>
 	<string>XYZ0123456</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.SideStore.SideStore</string>
+		<string>group.com.JiangWanZhengChouYv.AirStore</string>
 	</array>
 	<key>com.apple.developer.kernel.increased-memory-limit</key>
 	<true/>

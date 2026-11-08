@@ -81,8 +81,8 @@
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>sidestore-com.SideStore.SideStore</string>
-		<string>sidestore-com.SideStore.SideStore.Beta</string>
+		<string>sidestore-com.JiangWanZhengChouYv.AirStore</string>
+		<string>sidestore-com.JiangWanZhengChouYv.AirStore.Beta</string>
 		<string>localdevvpn</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
@@ -179,7 +179,7 @@
 	</array>
 	<key>OSLogPreferences</key>
 	<dict>
-		<key>com.SideStore.SideStore</key>
+		<key>com.JiangWanZhengChouYv.AirStore</key>
 		<dict>
 			<key>AltJIT</key>
 			<dict>

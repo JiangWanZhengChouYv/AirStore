@@ -170,6 +170,8 @@ BUNDLE_ID_SUFFIX ?=
 # Which scheme to archive. The develop pipeline builds the store and AirBox on two runners in
 # parallel, so each asks for a scheme that carries only its own app; the default still builds both.
 SCHEME ?= SideStore
+# Optional cap for local builds, which run beside whatever else the machine is doing.
+XCODEBUILD_JOBS ?=
 # Common build settings for xcodebuild
 COMMON_BUILD_SETTINGS = \
 	-project AltStore.xcodeproj \
@@ -180,7 +182,7 @@ COMMON_BUILD_SETTINGS = \
 	AD_HOC_CODE_SIGNING_ALLOWED=YES \
 	CODE_SIGNING_ALLOWED=NO \
 	DEVELOPMENT_TEAM=XYZ0123456 \
-	ORG_IDENTIFIER=com.SideStore \
+	ORG_IDENTIFIER=com.JiangWanZhengChouYv \
 	$(EXTRA_BUILD_SETTINGS)
 
 # Append MARKETING_VERSION if it’s not empty (coz otherwise the blank entry becomes override)
@@ -197,6 +199,7 @@ build:
 	@echo ">>>>>>>>> BUILD_CONFIG is set to '$(BUILD_CONFIG)', Building for $(BUILD_CONFIG) mode! <<<<<<<<<<"
 	@echo ""
 	@xcodebuild archive -archivePath ./SideStore \
+		$(if $(XCODEBUILD_JOBS),-jobs $(XCODEBUILD_JOBS),) \
 		$(COMMON_BUILD_SETTINGS)
 
 # Single-app archives for the parallel develop pipeline. Each reuses `build` but pins a scheme that
