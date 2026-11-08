@@ -18,6 +18,8 @@ struct ContainerSettingsView: View
     @State private var isConfirming = false
     @State private var airBoxInstalled = false
     @State private var isInstallingAirBox = false
+    @State private var installFraction: Double = 0
+    @State private var progressMonitor: Task<Void, Never>? = nil
 
     var body: some View
     {
@@ -111,7 +113,17 @@ private extension ContainerSettingsView
                     }
                     else if self.isInstallingAirBox
                     {
-                        ProgressView()
+                        VStack(alignment: .trailing, spacing: 3)
+                        {
+                            ProgressView(value: self.installFraction)
+                                .progressViewStyle(.linear)
+                                .tint(.white)
+                                .frame(width: 96)
+
+                            Text("\(Int(self.installFraction * 100))%")
+                                .font(.system(size: 11))
+                                .foregroundColor(Color.white.opacity(0.6))
+                        }
                     }
                     else
                     {
@@ -183,8 +195,24 @@ private extension ContainerSettingsView
         guard !self.isInstallingAirBox, !self.airBoxInstalled else { return }
         guard let presentingViewController = UIApplication.shared.topViewController() else { return }
 
+        // The download reports through a Progress, which SwiftUI cannot observe, so a small monitor
+        // copies it into state while the row shows a determinate bar.
+        let progress = Progress(totalUnitCount: 100)
+        self.installFraction = 0
         self.isInstallingAirBox = true
-        AirBoxInstaller.confirmAndInstall(from: presentingViewController) { installed in
+        self.progressMonitor?.cancel()
+        self.progressMonitor = Task { @MainActor in
+            while !Task.isCancelled
+            {
+                self.installFraction = Double(progress.completedUnitCount) / 100.0
+                try? await Task.sleep(nanoseconds: 200_000_000)
+            }
+        }
+
+        AirBoxInstaller.confirmAndInstall(from: presentingViewController, progress: progress) { installed in
+            self.progressMonitor?.cancel()
+            self.progressMonitor = nil
+            self.installFraction = installed ? 1 : 0
             self.isInstallingAirBox = false
             self.airBoxInstalled = installed || AirBoxInstaller.isInstalled
         }
