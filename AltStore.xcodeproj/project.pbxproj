@@ -503,7 +503,6 @@
 				A8EEC3482F4B0D8600F2436D /* Shared */,
 				A8EEC8412F4B146A00F2436D /* AltStore */,
 				A8EECF2A2F4B195000F2436D /* SideStore */,
-				A85A00000000000000000004 /* ZSign */,
 			);
 			name = SideStore;
 			packageProductDependencies = (

@@ -15,6 +15,7 @@ enum ContainerInstallerError: LocalizedError
 {
     case airBoxNotInstalled
     case airBoxNotAvailable
+    case noCertificate
     case downloadFailed(String)
     case patcherRejected(String)
 
@@ -24,6 +25,7 @@ enum ContainerInstallerError: LocalizedError
         {
         case .airBoxNotInstalled: return NSLocalizedString("AirBox is not installed. Install it before adding apps to it.", comment: "")
         case .airBoxNotAvailable: return NSLocalizedString("AirBox is not published for this build of AirStore.", comment: "")
+        case .noCertificate: return NSLocalizedString("No signing certificate is available.", comment: "")
         case .downloadFailed(let reason): return String(format: NSLocalizedString("The package could not be downloaded: %@", comment: ""), reason)
         case .patcherRejected(let reason): return String(format: NSLocalizedString("The app cannot run in AirBox: %@", comment: ""), reason)
         }
@@ -100,80 +102,46 @@ final class ContainerInstaller
 
         guard let inbox = self.sharedContainerInbox else { throw ContainerInstallerError.airBoxNotInstalled }
 
-        guard let bundleURL = try? FileManager.default.unzipAppBundle(at: packageURL, to: workDirectory) else {
-            throw ContainerInstallerError.downloadFailed(NSLocalizedString("the package is not a readable .ipa", comment: ""))
-        }
-        progress?.completedUnitCount = 66
-
-        if let rejection = ABPrepareGuestBundle(appBundlePath: bundleURL.path)
-        {
-            throw ContainerInstallerError.patcherRejected(rejection)
-        }
-        progress?.completedUnitCount = 72
-
-        let name = bundleURL.deletingPathExtension().lastPathComponent
+        // LiveContainer owns patching, signing and launching. The store hands it the untouched package
+        // and its certificate; pre-patching here was the shell's mistake -- LC patches once at install
+        // and again by revision at launch, and a bundle we had already rewritten confused both.
+        let name = packageURL.deletingPathExtension().lastPathComponent
         try FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
-        let destination = inbox.appendingPathComponent(bundleURL.lastPathComponent)
-
-        // The engine refuses to start anything without a data container id, and the id is what gives
-        // each app its own data directory. Re-adding an app keeps the id it had, so its data survives.
-        var dataUUID = UUID().uuidString
-        if let data = try? Data(contentsOf: destination.appendingPathComponent("LCAppInfo.plist")),
-           let propertyList = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
-           let previous = propertyList as? [String: Any],
-           let previousUUID = previous["LCDataUUID"] as? String
-        {
-            dataUUID = previousUUID
-        }
-
-        // AirBox ships no TweakLoader either, so both the injection and the load stay off.
-        let appInfo: [String: Any] = [
-            "dontInjectTweakLoader": true,
-            "dontLoadTweakLoader": true,
-            "LCDataUUID": dataUUID
-        ]
-        let appInfoURL = bundleURL.appendingPathComponent("LCAppInfo.plist")
-        try PropertyListSerialization.data(fromPropertyList: appInfo, format: .xml, options: 0).write(to: appInfoURL)
-        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: bundleURL.path)
-
-        // Signed with the certificate the store already holds, the same team as the process that will
-        // dlopen it. Both other shapes were measured on the device: no signature at all gives "missing code
-        // signature", and an ad-hoc CodeDirectory gives "code signature invalid (errno=1)" -- which reads
-        // like library validation refusing a binary that belongs to no team. Upstream's guests never hit
-        // this because they are installed by the store and therefore already carry the user's certificate.
-        let executableURL = self.executableURL(in: bundleURL)
-        let digestBefore = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        try await self.sign(bundleURL)
-        let digestAfter = executableURL.flatMap { MachOSignature.digest(ofExecutableAt: $0) } ?? "none"
-        debugLog("[ContainerInstaller] Seal \(digestBefore) -> \(digestAfter)")
-
-        // JIT mode is chosen by the engine on one condition: no certificate published. Builds before
-        // this one wrote both keys into the group, so on a device that has ever added a guest they are
-        // still there and the engine would keep taking the JITLess branch. Removing them is what
-        // actually switches the device over.
-        if let groupIdentifier = self.sharedAppGroup, let defaults = UserDefaults(suiteName: groupIdentifier)
-        {
-            let published = defaults.object(forKey: "LCCertificatePassword") != nil
-            defaults.removeObject(forKey: "LCCertificateData")
-            defaults.removeObject(forKey: "LCCertificatePassword")
-            debugLog("[ContainerInstaller] \(groupIdentifier): certificate keys \(published ? "were published, now cleared" : "already absent")")
-        }
-        else
-        {
-            debugLog("[ContainerInstaller] No app group to clear the certificate keys from")
-        }
-        progress?.completedUnitCount = 94
-
+        let destination = inbox.appendingPathComponent(name + ".ipa")
         if FileManager.default.fileExists(atPath: destination.path)
         {
             try FileManager.default.removeItem(at: destination)
         }
-        try FileManager.default.moveItem(at: bundleURL, to: destination)
-        debugLog("[ContainerInstaller] \(destination.lastPathComponent) is in the inbox")
+        try FileManager.default.copyItem(at: packageURL, to: destination)
+        progress?.completedUnitCount = 80
+
+        try self.shareCertificate()
+        progress?.completedUnitCount = 94
+
+        debugLog("[ContainerInstaller] \(destination.lastPathComponent) is in the inbox; asking AirBox to install it")
         progress?.completedUnitCount = 100
 
-        await UIApplication.shared.open(URL(string: "airbox://import")!)
+        let encoded = destination.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        await UIApplication.shared.open(URL(string: "airbox://install?url=\(encoded)")!)
         return name
+    }
+
+    /// LC reads its signing identity from these two group keys (LCUtils.certificateData / password), so
+    /// the user never imports a certificate by hand: the store already holds one.
+    private func shareCertificate() throws
+    {
+        guard let certificate = CertificateManager.shared.activeCertificate else {
+            throw ContainerInstallerError.noCertificate
+        }
+        guard let groupIdentifier = self.sharedAppGroup,
+              let defaults = UserDefaults(suiteName: groupIdentifier) else {
+            throw ContainerInstallerError.airBoxNotInstalled
+        }
+        defaults.set(certificate.p12Data, forKey: "LCCertificateData")
+        defaults.set(certificate.password ?? certificate.serialNumber, forKey: "LCCertificatePassword")
+        // Size and origin only: this log is read back by the user, and neither the certificate nor its
+        // password belongs in it.
+        debugLog("[ContainerInstaller] Published \(certificate.p12Data.count) bytes of certificate into \(groupIdentifier)")
     }
 
     /// Downloads the companion AirBox package into a temporary directory the caller owns. Same route
@@ -272,45 +240,5 @@ final class ContainerInstaller
             _ = monitor
             task.resume()
         }
-    }
-
-    private func executableURL(in bundleURL: URL) -> URL?
-    {
-        guard let info = NSDictionary(contentsOf: bundleURL.appendingPathComponent("Info.plist")),
-              let name = info["CFBundleExecutable"] as? String else { return nil }
-        return bundleURL.appendingPathComponent(name)
-    }
-
-    /// Strips every signature and adds none. Measured on device: with CS_DEBUGGED set, ad-hoc, our CMS
-    /// and zsign's CMS were all refused with "code signature invalid (errno=1)" -- dyld rejects a bad
-    /// signature. A process being debugged is the one case where it may accept *no* signature instead,
-    /// which is the cell of the matrix never actually tested: the earlier "unsigned" build left the
-    /// ipa's original (now stale) signature in place, and its one run never had JIT attached.
-    private func sign(_ bundleURL: URL) async throws
-    {
-        let finder = FileManager.default
-        var binaries = [URL]()
-
-        let frameworks = bundleURL.appendingPathComponent("Frameworks", isDirectory: true)
-        for entry in (try? finder.contentsOfDirectory(at: frameworks, includingPropertiesForKeys: nil)) ?? []
-        {
-            switch entry.pathExtension
-            {
-            case "framework":
-                let binary = entry.appendingPathComponent(entry.deletingPathExtension().lastPathComponent)
-                if finder.fileExists(atPath: binary.path) { binaries.append(binary) }
-            case "dylib":
-                binaries.append(entry)
-            default:
-                break
-            }
-        }
-        if let executable = self.executableURL(in: bundleURL) { binaries.append(executable) }
-
-        for binary in binaries
-        {
-            MachOSignature.stripSignature(ofExecutableAt: binary)
-        }
-        debugLog("[ContainerInstaller] Stripped signatures from \(binaries.count) Mach-O files; adding none, JIT is the trust")
     }
 }

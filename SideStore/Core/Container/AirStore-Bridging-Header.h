@@ -1,8 +1,6 @@
 //
 //  AirStore-Bridging-Header.h
 //
-//  The store target had no ObjC before the container work; this is the single surface it needs.
+//  The store no longer patches or signs guests: LiveContainer does both inside AirBox. Nothing of the
+//  engine is imported here any more.
 //
-
-#import "GuestPatcher.h"
-#import "AirBoxZSign.h"

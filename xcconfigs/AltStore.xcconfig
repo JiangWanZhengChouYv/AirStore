@@ -8,9 +8,7 @@ ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO
 // Container mode: preparing a guest means rewriting its Mach-O, which is two files out of the
 // LiveContainer fork plus the header Apple does not ship. Signing stays in SideSign; nothing else of
 // the engine is compiled into the store.
-HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/SideStore/Core/Container $(SRCROOT)/Dependencies/LiveContainer/LiveContainer $(SRCROOT)/Dependencies/LiveContainer/litehook/src $(SRCROOT)/Dependencies/LiveContainer/Include $(SRCROOT)/Dependencies/LiveContainer/ZSign $(SRCROOT)/Dependencies/LiveContainer/ZSign/include $(SRCROOT)/Dependencies/LiveContainer/OpenSSL/include
-// zsign is C++17; the store target otherwise compiles no C++ at all.
-OTHER_CPLUSPLUSFLAGS = $(inherited) -std=c++17
+HEADER_SEARCH_PATHS = $(inherited) $(SRCROOT)/SideStore/Core/Container $(SRCROOT)/Dependencies/LiveContainer/LiveContainer $(SRCROOT)/Dependencies/LiveContainer/litehook/src $(SRCROOT)/Dependencies/LiveContainer/Include
 SWIFT_OBJC_BRIDGING_HEADER = SideStore/Core/Container/AirStore-Bridging-Header.h
 
 #include? "../local.xcconfig"
