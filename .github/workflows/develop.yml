@@ -55,8 +55,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # No submodules: versioning reads Build.xcconfig and git only.
-          fetch-depth: 0
+          # No submodules: versioning reads Build.xcconfig and git only. One commit is enough, and
+          # fetching the full history was costing a minute on every run.
+          fetch-depth: 1
 
       - name: Version this build
         id: version
@@ -96,7 +97,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          fetch-depth: 1
 
       - run: brew install ldid xcbeautify
 
@@ -165,7 +166,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
+          fetch-depth: 1
 
       - run: brew install ldid xcbeautify
 
@@ -245,8 +246,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Branch work below (pages, develop-source) needs history; the scripts need no submodules.
-          fetch-depth: 0
+          # The mirror below fetches the pages and develop-source tips explicitly, so one commit of
+          # this branch is enough; the scripts need no submodules.
+          fetch-depth: 1
 
       - name: Fetch the AirStore package
         uses: actions/download-artifact@v4

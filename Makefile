@@ -180,7 +180,8 @@ COMMON_BUILD_SETTINGS = \
 	AD_HOC_CODE_SIGNING_ALLOWED=YES \
 	CODE_SIGNING_ALLOWED=NO \
 	DEVELOPMENT_TEAM=XYZ0123456 \
-	ORG_IDENTIFIER=com.SideStore
+	ORG_IDENTIFIER=com.SideStore \
+	$(EXTRA_BUILD_SETTINGS)
 
 # Append MARKETING_VERSION if it’s not empty (coz otherwise the blank entry becomes override)
 ifneq ($(strip $(MARKETING_VERSION)),)
@@ -200,10 +201,17 @@ build:
 
 # Single-app archives for the parallel develop pipeline. Each reuses `build` but pins a scheme that
 # carries only its own app, so the two runners never compile each other's target.
+#
+# Release defaults to whole-module Swift optimisation: one frontend process for the whole target,
+# which can only use one core and was the single largest block of wall time on a CI runner. Batch
+# mode keeps -Osize but compiles in parallel, and develop builds have no use for dSYMs. The plain
+# `build` target keeps both, so stable releases are untouched.
 build-airstore: SCHEME = SideStore - Release
+build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf
 build-airstore: build
 
 build-airbox: SCHEME = AirBox
+build-airbox: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf
 build-airbox: build
 
 build-and-test:
