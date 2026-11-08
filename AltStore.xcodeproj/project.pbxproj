@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A85C00000000000000000002 /* OpenSSL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A85C00000000000000000001 /* OpenSSL.framework */; };
+		A85C00000000000000000003 /* OpenSSL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A85C00000000000000000001 /* OpenSSL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A85B00000000000000000006 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A85B00000000000000000005 /* Localizable.xcstrings */; };
 		A84596F62F7DC4C90000B8CD /* SideStore.conf in Resources */ = {isa = PBXBuildFile; fileRef = A84596F52F7DC4C90000B8CD /* SideStore.conf */; };
 		A87939D3303A89CA004D9227 /* Minimuxer in Frameworks */ = {isa = PBXBuildFile; productRef = A87939D2303A89CA004D9227 /* Minimuxer */; };
 		A8C37029302DA7F30010213A /* MarkdownKit in Frameworks */ = {isa = PBXBuildFile; platformFilter = ios; productRef = A8C37028302DA7F30010213A /* MarkdownKit */; };
@@ -50,6 +53,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		A85C00000000000000000004 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A85C00000000000000000003 /* OpenSSL.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BF088D2B2501A087008082D9 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 12;
@@ -85,6 +99,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A85C00000000000000000001 /* OpenSSL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenSSL.framework; path = Dependencies/LiveContainer/OpenSSL/Frameworks/OpenSSL.xcframework/ios-arm64/OpenSSL.framework; sourceTree = "<group>"; };
+		A85B00000000000000000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Dependencies/LiveContainer/Resources/Localizable.xcstrings; sourceTree = "<group>"; };
 		A84596F12F7DC4C90000B8CD /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		A84596F22F7DC4C90000B8CD /* .gitmodules */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitmodules; sourceTree = "<group>"; };
 		A84596F32F7DC4C90000B8CD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -295,6 +311,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A85B00000000000000000001 /* LiveContainerSwiftUI */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Dependencies/LiveContainer/LiveContainerSwiftUI; sourceTree = "<group>"; };
+		A85B00000000000000000002 /* MultitaskSupport */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Dependencies/LiveContainer/MultitaskSupport; sourceTree = "<group>"; };
+		A85B00000000000000000003 /* ZSign */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Dependencies/LiveContainer/ZSign; sourceTree = "<group>"; };
 		A85A00000000000000000004 /* ZSign */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Dependencies/LiveContainer/ZSign; sourceTree = "<group>"; };
 		A8EEC3482F4B0D8600F2436D /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EEC36B2F4B0D8700F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, A82BE360304AAF490055C3DE /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
 		A8EEC3B92F4B0EFC00F2436D /* AltWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EEC3CA2F4B0EFC00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AltWidget; sourceTree = "<group>"; };
@@ -344,6 +363,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A85C00000000000000000002 /* OpenSSL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -508,6 +528,7 @@
 				A8B0C0000000000000000007 /* Frameworks */,
 				A8B0C0000000000000000008 /* Resources */,
 				A8B0D000000000000000000D /* Embed Foundation Extensions */,
+				A85C00000000000000000004 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -518,6 +539,9 @@
 				A8B0C0000000000000000009 /* AirBox */,
 				A8B0C000000000000000000E /* LiveContainerEngine */,
 				A8B0C000000000000000000F /* LiteHook */,
+				A85B00000000000000000001 /* LiveContainerSwiftUI */,
+				A85B00000000000000000002 /* MultitaskSupport */,
+				A85B00000000000000000003 /* ZSign */,
 			);
 			name = AirBox;
 			packageProductDependencies = (
@@ -644,6 +668,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A85B00000000000000000006 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1141,7 +1166,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1169,7 +1194,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SWIFT_VERSION = 6.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
