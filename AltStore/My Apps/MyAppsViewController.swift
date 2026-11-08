@@ -2252,7 +2252,7 @@ extension MyAppsViewController
         }
 
         let context = DatabaseManager.shared.viewContext
-        guard let airBox = InstalledApp.all(in: context).first(where: { ContainerInstaller.isAirBox($0) }) else
+        guard InstalledApp.all(in: context).contains(where: { ContainerInstaller.isAirBox($0) }) else
         {
             let alert = UIAlertController(title: NSLocalizedString("Unable to Open App", comment: ""),
                                           message: NSLocalizedString("AirBox is not installed. Install it before opening apps in it.", comment: ""),
@@ -2262,7 +2262,10 @@ extension MyAppsViewController
             return
         }
 
-        self.enableJIT(for: airBox)
+        // JIT for AirBox is not wired up yet, and asking for it here only left a debugger script
+        // spinning. The guest request is already staged, so waking the box is all this has to do.
+        guard let url = URL(string: "airbox://") else { return }
+        UIApplication.shared.open(url)
     }
 
     private func containerContextMenu(for app: ContainerApp) -> UIMenu
