@@ -6,7 +6,7 @@
   "apps": [
     {
       "name": "AirStore",
-      "bundleIdentifier": "com.SideStore.SideStore",
+      "bundleIdentifier": "com.JiangWanZhengChouYv.AirStore",
       "developerName": "AirStore团队",
       "subtitle": "Sideload and refresh apps with your own Apple ID",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.8.3-develop-202611080434.154-cf9c7fe",
-          "date": "2026-11-08T04:43:08Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202611080434.154-cf9c7fe.ipa",
-          "size": 30171218,
-          "sha256": "aa057d9c28e1aa6918acf6c469f11804fa4af54ccfcd2d774ed795aa5e432bc9",
-          "localizedDescription": "Development build 0.8.3-develop-202611080434.154-cf9c7fe from commit cf9c7fe."
+          "version": "0.8.3-develop-202611080506.155-f3f7dbc",
+          "date": "2026-11-08T05:15:29Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202611080506.155-f3f7dbc.ipa",
+          "size": 30183412,
+          "sha256": "9f650111bf1fad06ced14a65d9ec6fcb01724d545b2d58c88a63b7d22a3ef217",
+          "localizedDescription": "Development build 0.8.3-develop-202611080506.155-f3f7dbc from commit f3f7dbc."
         },
         {
           "version": "0.8.2",
@@ -56,12 +56,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.3-develop-202611080434.154-cf9c7fe",
-              "date": "2026-11-08T04:43:08Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202611080434.154-cf9c7fe.ipa",
-              "size": 30171218,
-              "sha256": "aa057d9c28e1aa6918acf6c469f11804fa4af54ccfcd2d774ed795aa5e432bc9",
-              "localizedDescription": "Development build 0.8.3-develop-202611080434.154-cf9c7fe from commit cf9c7fe."
+              "version": "0.8.3-develop-202611080506.155-f3f7dbc",
+              "date": "2026-11-08T05:15:29Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.8.3-develop-202611080506.155-f3f7dbc.ipa",
+              "size": 30183412,
+              "sha256": "9f650111bf1fad06ced14a65d9ec6fcb01724d545b2d58c88a63b7d22a3ef217",
+              "localizedDescription": "Development build 0.8.3-develop-202611080506.155-f3f7dbc from commit f3f7dbc."
             }
           ]
         },
@@ -112,24 +112,24 @@
     },
     {
       "name": "AirBox",
-      "bundleIdentifier": "com.SideStore.SideStore.AirBox",
+      "bundleIdentifier": "com.JiangWanZhengChouYv.AirStore.AirBox",
       "developerName": "AirStore团队",
       "subtitle": "Run apps inside AirBox without using App IDs",
       "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID.",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AirBox/Assets.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "8B5CF6",
-      "version": "0.8.3-develop-202611080434.154-cf9c7fe",
-      "date": "2026-11-08T04:43:08Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.8.3-develop-202611080434.154-cf9c7fe.ipa",
-      "size": 3571958,
-      "sha256": "b3e715a699ee084acc831d37a5a98bdc612bc9cf92f48ac679a0b8111087846a",
+      "version": "0.8.3-develop-202611080506.155-f3f7dbc",
+      "date": "2026-11-08T05:15:29Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.8.3-develop-202611080506.155-f3f7dbc.ipa",
+      "size": 3572400,
+      "sha256": "95b94b2898bc2d29f9ea62954d5639e04ef58a64e12a62874a412b3b646e4b6d",
       "versions": [
         {
-          "version": "0.8.3-develop-202611080434.154-cf9c7fe",
-          "date": "2026-11-08T04:43:08Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.8.3-develop-202611080434.154-cf9c7fe.ipa",
-          "size": 3571958,
-          "sha256": "b3e715a699ee084acc831d37a5a98bdc612bc9cf92f48ac679a0b8111087846a",
+          "version": "0.8.3-develop-202611080506.155-f3f7dbc",
+          "date": "2026-11-08T05:15:29Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.8.3-develop-202611080506.155-f3f7dbc.ipa",
+          "size": 3572400,
+          "sha256": "95b94b2898bc2d29f9ea62954d5639e04ef58a64e12a62874a412b3b646e4b6d",
           "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID."
         }
       ],
@@ -138,11 +138,11 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.8.3-develop-202611080434.154-cf9c7fe",
-              "date": "2026-11-08T04:43:08Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.8.3-develop-202611080434.154-cf9c7fe.ipa",
-              "size": 3571958,
-              "sha256": "b3e715a699ee084acc831d37a5a98bdc612bc9cf92f48ac679a0b8111087846a",
+              "version": "0.8.3-develop-202611080506.155-f3f7dbc",
+              "date": "2026-11-08T05:15:29Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.8.3-develop-202611080506.155-f3f7dbc.ipa",
+              "size": 3572400,
+              "sha256": "95b94b2898bc2d29f9ea62954d5639e04ef58a64e12a62874a412b3b646e4b6d",
               "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID."
             }
           ]
@@ -157,7 +157,7 @@
       "title": "Glass that fills up as you download",
       "caption": "On iOS 26 the download card is Liquid Glass, and the theme colour now pours in from the left with the download instead of sitting behind it. Toasts, banners and the buttons follow the same material. Picking a colour in Settings restarts the app so every page shows it at once — and the settings pages finally take their surface from that colour too.",
       "tintColor": "19D3B5",
-      "appID": "com.SideStore.SideStore",
+      "appID": "com.JiangWanZhengChouYv.AirStore",
       "notify": false
     },
     {
@@ -166,7 +166,7 @@
       "title": "Updates that only download what changed",
       "caption": "With incremental updates on in Developer options, an update now fetches a patch instead of the whole 30 MB package. Each build publishes a patch for every recent build, so skipping a version no longer forces a full download: measured between the last few builds, 8 KB to 8 MB per update, and anything that does not fit falls back to the full package by itself.",
       "tintColor": "8B5CF6",
-      "appID": "com.SideStore.SideStore",
+      "appID": "com.JiangWanZhengChouYv.AirStore",
       "notify": false
     },
     {
@@ -175,7 +175,7 @@
       "title": "Why signing in works on iOS 26.4",
       "caption": "AirStore exists for one reason: the -80045 sign-in loop on iOS 26.4 and later. The client identity sent to Apple is made to match the Anisette server that mints the headers, the single-use X-Apple-I-MD value is refreshed at every step, and the default server runs on a real Windows ADI. Apple ID sign-in, installs, refreshes and JIT all work from the phone, with no computer involved.",
       "tintColor": "3B82F6",
-      "appID": "com.SideStore.SideStore",
+      "appID": "com.JiangWanZhengChouYv.AirStore",
       "notify": false
     }
   ]
