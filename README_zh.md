@@ -58,6 +58,10 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 
 直接用[最新正式版](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest)（当前 0.9.0）里的 `AirStore.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。这个版本的 bundle id 是 AirStore 自己的 `com.JiangWanZhengChouYv.AirStore`，所以它是独立 App，**不会覆盖**旧的 AirStore / SideStore。换过来之前：导出证书和配对文件 → 卸载旧版 → 装新版 → 导入回来；旧 App Group 不通用，旧数据不会跟过来。主屏名字显示为 AirStore。想跟开发进度就加下面「更新」里那个 develop 源。
 
+### 配对文件（手动安装）
+
+手动用 iLoader 之类装 ipa 不会给 AirStore 留下配对文件，登录会停在「Pairing Required: No valid pairing file has been loaded」。用 **idevice_pair**（单独的一个 Mac App）生成，并让它把文件写进 AirStore 的 Documents：连上 iPhone、选设备、在手机上同意配对提示；然后在 设置 > 高级 > Pairing File Management 里导入并设为 Preferred。配对文件必须来自 idevice_pair——实测用电脑现成的配对记录导出的文件不行。
+
 ## 更新
 
 SideStore 社区源里 SideStore 自己也是一条可更新条目，但 0.9.0 起 AirStore 是另一个 App，那条更新不会再盖掉 AirStore。AirStore 自己的更新来自这个源（Settings > Sources > Add Source）：

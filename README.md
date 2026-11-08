@@ -67,6 +67,16 @@ off, and on-device JIT for normally installed apps. AirBox now launches guests w
 ceiling; JIT inside the container is not available yet. Logins still depend on a third-party Anisette
 server staying online -- see the self-hosting section if you want that dependency to be yours.
 
+#### Pairing file (manual installs)
+
+A manual ipa install (iLoader and similar tools) does not leave AirStore with a pairing file, so
+sign-in stops at "Pairing Required: No valid pairing file has been loaded". Generate one with
+**idevice_pair**, the separate Mac app, and let it write the file into AirStore's Documents:
+connect the iPhone, pick the device, and approve the pairing prompt on the phone. Then open
+Settings > Advanced > Pairing File Management, import the file, and set it as preferred. The file
+must come from idevice_pair -- a file exported from the computer's existing pairing record did not
+work in testing.
+
 ### Updates
 
 The SideStore community source lists SideStore itself, but since 0.9.0 AirStore is a different app,
