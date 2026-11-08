@@ -20,6 +20,8 @@ install and signing are upstream's; AirStore only hands it the ipa and the certi
 - Launch guests from AirBox's app list; the higher memory limit applies.
 - AirStore's My Apps has an **Apps in AirBox** section to see and manage them.
 - JIT is opt-in per app, with AirStore (shown as StikDebug) as the default enabler.
+- **Multitasking:** AirBox Settings > **Multitask** opens guests in their own windows (Virtual or Native).
+  Each app's banner menu also has its own Multitask / Run switch.
 
 ### Enabling JIT
 
@@ -67,6 +69,7 @@ AirBox 本体是 [LiveContainer](https://github.com/LiveContainer/LiveContainer)
 - 在 AirBox 的 App 列表里启动 guest；高内存权限可用。
 - AirStore →「我的 App」里有 **Apps in AirBox** 分区，可以看到和管理里面的 App。
 - JIT 可选：给某个 App 打开「带JIT启动」，启用器默认是 AirStore（界面里显示为 StikDebug）。
+- **多任务/分屏**：AirBox 设置 → **多任务**，可选虚拟窗口或原生窗口；每个 App 的横幅菜单里也能单独切换多任务/启动。
 
 ### 开 JIT
 

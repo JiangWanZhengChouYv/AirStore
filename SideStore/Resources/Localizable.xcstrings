@@ -16060,6 +16060,39 @@
           }
         }
       }
+    },
+    "Free Account Limits": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费账号名额"
+          }
+        }
+      }
+    },
+    "Active Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活跃 App"
+          }
+        }
+      }
+    },
+    "Apps running inside AirBox do not use App IDs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 AirBox 里运行的 App 不占用 App ID。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

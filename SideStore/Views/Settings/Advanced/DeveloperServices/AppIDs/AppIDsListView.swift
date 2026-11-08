@@ -32,8 +32,31 @@ struct AppIDsListView: View {
         }
     }
 
+    private var activeInstalledApps: [InstalledApp] {
+        InstalledApp.all(in: DatabaseManager.shared.viewContext).filter { $0.isActive }
+    }
+
     var body: some View {
         List {
+            if !viewModel.isPaidAccount {
+                Section(header: Text(NSLocalizedString("Free Account Limits", comment: ""))) {
+                    usageRow(title: NSLocalizedString("App IDs", comment: ""),
+                             count: viewModel.appIDs.count, limit: 10)
+                    usageRow(title: NSLocalizedString("Active Apps", comment: ""),
+                             count: activeInstalledApps.count, limit: 3)
+
+                    if !activeInstalledApps.isEmpty {
+                        Text(activeInstalledApps.map(\.name).joined(separator: " · "))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Text(NSLocalizedString("Apps running inside AirBox do not use App IDs.", comment: ""))
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Section(header: Text("Registered App IDs (\(viewModel.appIDs.count))")) {
                 if filteredAppIDs.isEmpty {
                     if viewModel.isLoading {
@@ -175,6 +198,16 @@ struct AppIDsListView: View {
             )
         }
         .developerServicesToast(viewModel: viewModel)
+    }
+
+    private func usageRow(title: String, count: Int, limit: Int) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text("\(count) / \(limit)")
+                .font(.subheadline.monospacedDigit())
+                .foregroundColor(count >= limit ? .orange : .secondary)
+        }
     }
 
     private var deleteAlertMessage: String {
