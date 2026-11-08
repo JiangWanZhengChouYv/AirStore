@@ -288,14 +288,36 @@ ipa:
 	zip -r AirStore.ipa Payload
 	rm -rf Payload*/
 
+# TweakLoader is LiveContainer's guest hook layer (URL schemes, document picker, notifications),
+# not an optional extra: every guest is installed with a load command that names it. AirBox has no
+# target of its own for it, so the dylib is built from the upstream project and embedded.
+TWEAK_LOADER_DIR := build/tweakloader
+TWEAK_LOADER := $(TWEAK_LOADER_DIR)/TweakLoader.dylib
+
+tweakloader:
+	@mkdir -p $(TWEAK_LOADER_DIR)
+	@xcodebuild -project Dependencies/LiveContainer/LiveContainer.xcodeproj \
+		-target TweakLoader \
+		-sdk iphoneos \
+		-configuration $(BUILD_CONFIG) \
+		CODE_SIGNING_REQUIRED=NO \
+		AD_HOC_CODE_SIGNING_ALLOWED=YES \
+		CODE_SIGNING_ALLOWED=NO \
+		DEVELOPMENT_TEAM=XYZ0123456 \
+		CONFIGURATION_BUILD_DIR=$(CURDIR)/$(TWEAK_LOADER_DIR) \
+		build
+
 # AirBox ships beside the store rather than inside it: its entitlements (the two memory limits) are
 # the reason it has to be installed as its own app, so the fake signature has to carry them the same
 # way SideStore's does. The packaging copy is the build-time file with its build settings expanded --
 # ldid does not know about xcconfig placeholders, and an installer that reads a raw
 # $(APP_GROUP_IDENTIFIER) rejects the app outright.
-fakesign-airbox:
+fakesign-airbox: tweakloader
+	mkdir -p SideStore.xcarchive/Products/Applications/AirBox.app/Frameworks
+	cp -f $(TWEAK_LOADER) SideStore.xcarchive/Products/Applications/AirBox.app/Frameworks/TweakLoader.dylib
 	ldid -SAirBox/AirBoxPackaging.entitlements SideStore.xcarchive/Products/Applications/AirBox.app/AirBox
 	ldid -SLiveProcess/LiveProcessPackaging.entitlements SideStore.xcarchive/Products/Applications/AirBox.app/PlugIns/LiveProcess.appex/LiveProcess
+	ldid -S SideStore.xcarchive/Products/Applications/AirBox.app/Frameworks/TweakLoader.dylib
 
 ipa-airbox: fakesign-airbox
 	@echo ''
