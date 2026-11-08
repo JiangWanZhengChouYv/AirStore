@@ -11,13 +11,21 @@
       "subtitle": "Sideload and refresh apps with your own Apple ID",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "3B82F6",
-      "version": "0.8.2",
-      "date": "2026-10-26T13:02:56Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.2/AirStore.ipa",
-      "size": 30103068,
-      "sha256": "fd141a95563fa372cd269c95e912bdf2912cf6719b10b4fa0f8d02708379332b",
+      "version": "0.9.0",
+      "date": "2026-11-08T06:07:58Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.9.0/AirStore.ipa",
+      "size": 30244721,
+      "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
+        {
+          "version": "0.9.0",
+          "date": "2026-11-08T06:07:58Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.9.0/AirStore.ipa",
+          "size": 30244721,
+          "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
+          "localizedDescription": "0.9.0: AirStore now signs with its own bundle id (com.JiangWanZhengChouYv.AirStore), so this build installs as a separate app: export your certificate and pairing file, uninstall the old build, install this one, then import them back. Onboarding gains a Container Mode step that installs AirBox and runs apps without using an App ID; the Open action now wakes AirBox and launches the staged guest without the debugger spin. JIT, incremental updates and cellular installs are unchanged."
+        },
         {
           "version": "0.8.2",
           "date": "2026-10-26T13:02:56Z",
@@ -48,28 +56,12 @@
           "track": "stable",
           "releases": [
             {
-              "version": "0.8.2",
-              "date": "2026-10-26T13:02:56Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.2/AirStore.ipa",
-              "size": 30103068,
-              "sha256": "fd141a95563fa372cd269c95e912bdf2912cf6719b10b4fa0f8d02708379332b",
-              "localizedDescription": "0.8.2: JIT is built in. StikJIT ships inside AirStore, so enabling JIT fetches the developer disk image through the same mirrors as app downloads, mounts it over Remote Pairing, and restarts the target app suspended so the debugger is attached before the app checks for JIT itself - the step that makes MeloNX accept it. A progress card shows each stage. Downloads now treat a mirror that has not picked up a fresh asset as a dead route and fall back to the origin. Breaking: iOS 17.4 is now the minimum; 0.8.1 is the last build for iOS 15 and 16."
-            },
-            {
-              "version": "0.8.1",
-              "date": "2026-10-25T00:45:14Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
-              "size": 27786255,
-              "sha256": "d51030a6f504f56d5e333eb80a713f971f91102e933a4b1a61a384250e30d00b",
-              "localizedDescription": "0.8.1: download cards now show speed and size and resume dropped transfers; every GitHub download goes through gh-proxy; pairing files sync with the shared folder; the app page lists other channels' builds; Settings shows the exact installed version. JIT still does not work on iOS 26 (TXM); use StikDebug for now."
-            },
-            {
-              "version": "0.8.0",
-              "date": "2026-10-19T10:01:45Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.0/SideStore-0.8.0.ipa",
-              "size": 31158352,
-              "sha256": "33aece754b8784435fa885b178c4c233162ab3c173781b7e90d5b0cb7df6d0ea",
-              "localizedDescription": "Fixes -80045 Apple ID sign-in on iOS 26.4 and above."
+              "version": "0.9.0",
+              "date": "2026-11-08T06:07:58Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.9.0/AirStore.ipa",
+              "size": 30244721,
+              "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
+              "localizedDescription": "0.9.0: AirStore now signs with its own bundle id (com.JiangWanZhengChouYv.AirStore), so this build installs as a separate app: export your certificate and pairing file, uninstall the old build, install this one, then import them back. Onboarding gains a Container Mode step that installs AirBox and runs apps without using an App ID; the Open action now wakes AirBox and launches the staged guest without the debugger spin. JIT, incremental updates and cellular installs are unchanged."
             }
           ]
         }
