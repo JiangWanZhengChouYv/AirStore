@@ -146,9 +146,8 @@ final class ContainerInstaller
 
     /// Downloads the companion AirBox package into a temporary directory the caller owns. Same route
     /// and mirrors as an app package, so a blocked GitHub costs nothing new.
-    func downloadAirBox(progress: Progress?) async throws -> URL
+    func downloadAirBox(from url: URL, progress: Progress?) async throws -> URL
     {
-        guard let url = AirBoxInstaller.packageURL else { throw ContainerInstallerError.airBoxNotAvailable }
 
         let directory = FileManager.default.uniqueTemporaryURL()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)

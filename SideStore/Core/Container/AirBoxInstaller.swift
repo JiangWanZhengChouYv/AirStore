@@ -27,17 +27,36 @@ enum AirBoxInstaller
         return URL(string: AppConstants.URLs.airStoreGitHub.absoluteString + "/releases/download/develop-latest/AirBox-\(version).ipa")
     }
 
+    /// Any build can install AirBox, not only a develop one: a local build or a stable has no
+    /// companion named after its version, so it asks the develop feed, which already lists AirBox
+    /// with a download URL. The version-named package is still preferred when it exists.
+    static func resolvePackageURL() async -> URL?
+    {
+        if let direct = self.packageURL { return direct }
+
+        for feed in [AppConstants.URLs.airStoreDevelopFeed, AppConstants.URLs.airStoreDevelopFeedCDN]
+        {
+            guard let (data, response) = try? await URLSession.shared.data(from: feed),
+                  (response as? HTTPURLResponse)?.statusCode == 200,
+                  let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let apps = root["apps"] as? [[String: Any]] else { continue }
+
+            for app in apps
+            {
+                guard let identifier = app["bundleIdentifier"] as? String, identifier.hasSuffix(".AirBox"),
+                      let rawURL = app["downloadURL"] as? String,
+                      let url = URL(string: rawURL) else { continue }
+                return url
+            }
+        }
+        return nil
+    }
+
     /// Confirms, downloads and installs, then reports whether AirBox is now on the device.
     static func confirmAndInstall(from presentingViewController: UIViewController,
                                   progress: Progress? = nil,
                                   completion: @MainActor @escaping (Bool) -> Void)
     {
-        guard self.packageURL != nil else
-        {
-            self.presentUnavailableAlert(from: presentingViewController, completion: completion)
-            return
-        }
-
         let alert = UIAlertController(
             title: NSLocalizedString("Install AirBox?", comment: ""),
             message: NSLocalizedString("AirBox is installed like any other app, so it takes one App ID and one of the three active app slots. Apps it runs use neither.", comment: ""),
@@ -72,9 +91,15 @@ enum AirBoxInstaller
                         completion: @MainActor @escaping (Bool) -> Void)
     {
         Task { @MainActor in
+            guard let remoteURL = await self.resolvePackageURL() else
+            {
+                self.presentUnavailableAlert(from: presentingViewController, completion: completion)
+                return
+            }
+
             do
             {
-                let packageURL = try await ContainerInstaller.shared.downloadAirBox(progress: progress)
+                let packageURL = try await ContainerInstaller.shared.downloadAirBox(from: remoteURL, progress: progress)
                 progress?.completedUnitCount = 70
                 AppManager.shared.install(.url(packageURL), presentingViewController: presentingViewController) { result in
                     // The pipeline has copied what it needs; the package in the temporary directory is
@@ -114,7 +139,7 @@ enum AirBoxInstaller
     {
         let alert = UIAlertController(
             title: NSLocalizedString("AirBox Not Available", comment: ""),
-            message: NSLocalizedString("AirBox is published with develop builds of AirStore. Update AirStore to a develop build to install it from here.", comment: ""),
+            message: NSLocalizedString("AirBox could not be found. Check your connection and try again, or install it later from Settings > Advanced > Container.", comment: ""),
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { _ in

@@ -15994,6 +15994,72 @@
           }
         }
       }
+    },
+    "Enable and Install AirBox": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启并安装 AirBox"
+          }
+        }
+      }
+    },
+    "AirBox installed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 已安装"
+          }
+        }
+      }
+    },
+    "Installing AirBox…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在安装 AirBox…"
+          }
+        }
+      }
+    },
+    "AirBox is published with develop builds of AirStore. Update to a develop build to install it from here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 随 AirStore 的 develop 版本提供。更新到 develop 版本后即可在这里安装。"
+          }
+        }
+      }
+    },
+    "AirBox could not be installed. You can try again later from Settings > Advanced > Container.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirBox 安装失败。可以稍后在「设置 > 高级 > Container」里重试。"
+          }
+        }
+      }
+    },
+    "AirBox could not be found. Check your connection and try again, or install it later from Settings > Advanced > Container.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 AirBox 安装包。请检查网络后重试，或稍后在「设置 > 高级 > Container」里安装。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

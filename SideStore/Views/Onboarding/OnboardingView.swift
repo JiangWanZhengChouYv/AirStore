@@ -13,7 +13,7 @@ import UniformTypeIdentifiers
 struct OnboardingView: View {
     var onFinish: (() -> Void)? = nil
     @State private var currentStep = 0
-    private let totalSteps = 5
+    private let totalSteps = 6
 
     var body: some View {
         ZStack {
@@ -41,8 +41,11 @@ struct OnboardingView: View {
                     AppleIDStep(onNext: { currentStep += 1 })
                         .tag(3)
 
-                    CompleteStep(onFinish: complete)
+                    ContainerStep(onNext: { currentStep += 1 })
                         .tag(4)
+
+                    CompleteStep(onFinish: complete)
+                        .tag(5)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.25), value: currentStep)
@@ -635,6 +638,145 @@ private struct AppleIDStep: View {
             .frame(maxWidth: 420)
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
+        }
+    }
+}
+
+private struct ContainerStep: View {
+    let onNext: () -> Void
+    @State private var airBoxInstalled = AirBoxInstaller.isInstalled
+    @State private var airBoxAvailable = AirBoxInstaller.packageURL != nil
+    @State private var isInstalling = false
+    @State private var errorMessage: String? = nil
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: airBoxInstalled ? "shippingbox.fill" : "shippingbox")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 80, height: 80)
+                .foregroundColor(airBoxInstalled ? .green : .accentColor)
+                .animation(.easeInOut, value: airBoxInstalled)
+
+            VStack(spacing: 8) {
+                Text(NSLocalizedString("Container Mode", comment: ""))
+                    .font(.system(size: 28, weight: .bold))
+
+                Text(NSLocalizedString("Run apps inside AirBox instead of installing them.", comment: ""))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Label {
+                    Text(NSLocalizedString("AirBox can read the data and keychain items of every app running inside it. Only add apps you trust.", comment: ""))
+                } icon: {
+                    Image(systemName: "exclamationmark.shield")
+                        .foregroundColor(.orange)
+                }
+
+                Label {
+                    Text(NSLocalizedString("These apps do not use App IDs, so the 3-app and 10-App-ID limits do not apply.", comment: ""))
+                } icon: {
+                    Image(systemName: "checkmark.shield")
+                        .foregroundColor(.green)
+                }
+            }
+            .font(.footnote)
+            .foregroundColor(.secondary)
+            .padding(16)
+            .glassSurface(in: RoundedRectangle(cornerRadius: 16))
+            .frame(maxWidth: 420)
+            .padding(.horizontal, 24)
+
+            if isInstalling {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text(NSLocalizedString("Installing AirBox…", comment: ""))
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+            } else if airBoxInstalled {
+                Label(NSLocalizedString("AirBox installed", comment: ""), systemImage: "checkmark.circle.fill")
+                    .font(.footnote)
+                    .foregroundColor(.green)
+            } else if !airBoxAvailable {
+                Text(NSLocalizedString("AirBox could not be found. Check your connection and try again, or install it later from Settings > Advanced > Container.", comment: ""))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.footnote)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+            }
+
+            Spacer()
+
+            VStack(spacing: 12) {
+                SwiftUI.Button(action: enableAndInstall) {
+                    Text(airBoxInstalled
+                        ? NSLocalizedString("Continue", comment: "")
+                        : NSLocalizedString("Enable and Install AirBox", comment: ""))
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(isInstalling || (!airBoxAvailable && !airBoxInstalled) ? Color.gray.opacity(0.4) : Color.accentColor)
+                        .cornerRadius(14)
+                }
+                .disabled(isInstalling || (!airBoxAvailable && !airBoxInstalled))
+
+                SwiftUI.Button(action: onNext) {
+                    Text(NSLocalizedString("Set Up Later", comment: ""))
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                }
+                .disabled(isInstalling)
+            }
+            .frame(maxWidth: 420)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 16)
+        }
+        .task {
+            if !airBoxAvailable {
+                airBoxAvailable = await AirBoxInstaller.resolvePackageURL() != nil
+            }
+        }
+    }
+
+    private func enableAndInstall() {
+        UserDefaults.standard.isContainerModeEnabled = true
+
+        if airBoxInstalled {
+            onNext()
+            return
+        }
+
+        guard airBoxAvailable, let presenter = UIApplication.shared.topViewController() else {
+            onNext()
+            return
+        }
+
+        isInstalling = true
+        errorMessage = nil
+        AirBoxInstaller.install(from: presenter) { installed in
+            isInstalling = false
+            airBoxInstalled = installed || AirBoxInstaller.isInstalled
+            if airBoxInstalled {
+                onNext()
+            } else {
+                errorMessage = NSLocalizedString("AirBox could not be installed. You can try again later from Settings > Advanced > Container.", comment: "")
+            }
         }
     }
 }

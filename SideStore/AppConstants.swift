@@ -170,6 +170,10 @@ public enum AppConstants {
         public static let airStoreGitHub            = URL(string: "https://github.com/JiangWanZhengChouYv/AirStore")!
         public static let airStoreIssues            = URL(string: "https://github.com/JiangWanZhengChouYv/AirStore/issues")!
         public static let airStoreDiscord           = URL(string: "https://discord.gg/kN9Rm3kkZ")!
+        // The develop feed is where AirBox is published as a companion. Local and stable builds have
+        // no version-named companion to derive, so they read the package address from here.
+        public static let airStoreDevelopFeed       = URL(string: "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json")!
+        public static let airStoreDevelopFeedCDN    = URL(string: "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop-source/source/airstore-source.json")!
         public static let supportEmail              = "markzhang946@gmail.com"
     }
 
