@@ -8,9 +8,10 @@
 </p>
 
 > [!CAUTION]
-> **下次正式版会更换签名标识（Bundle ID）。** 现在 App ID 列表里仍显示 **SideStore**，是因为签名标识故意保留为
-> `com.SideStore.SideStore`——这样才能覆盖安装已有的 SideStore。下次 Stable 起换成 AirStore 自己的标识，
-> **届时不能覆盖更新**：先在设置里导出证书和配对文件，卸载旧版，装新版后再导入。
+> **0.9.0 起签名标识已换成 AirStore 自己的。** bundle id 现在是 `com.JiangWanZhengChouYv.AirStore`
+> （原来 `com.SideStore.SideStore`），所以这个版本**不能覆盖安装**旧 AirStore / SideStore，两者是独立 App。
+> 换过来之前：先在设置里导出证书和配对文件，卸载旧版，装这个新版，再导入回来。旧 App Group 也不再通用，
+> 旧数据不会跟过来。
 
 
 中文说明（与 [README.md](README.md) 同步维护，两份内容有出入时以英文为准）。
@@ -28,7 +29,7 @@
 - **简体中文界面。**
 - **轻量**：手机上占用很小。
 
-实验性：**AirBox** 容器 —— 目标是在容器里跑 App、不占免费账号那 3 个活跃 App 名额。develop 包里有入口，但**当前测试机系统上加载不了 guest**：无签名、ad-hoc、自有证书、上游 zsign 四种形态真机全被内核拒绝（JIT 已确认挂上）。入口仅作实验保留，别当能用。
+实验性：**AirBox** 容器 —— 在容器里跑 App、不占免费账号那 3 个活跃 App 名额。真机已经能启动 guest，并带高内存权限；容器里暂时没有 JIT。新手引导里的「容器模式」会连同 AirBox 一起装好。
 
 ## ⚠️ 维护说明
 
@@ -49,28 +50,23 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 
 ## 现在的验证状态（说清楚，别当成已完工）
 
-- **已验证**（真机，免费个人 Apple ID）：登录走完 2FA 和取 Team（iOS 27.2）；第三方 App 的安装与刷新，含增量更新；关掉 Wi-Fi 只走移动数据也能装；本机 JIT。
-- **未验证**：AirBox 容器加载 guest。develop 包里已有入口，签名链路还在验，别当能用。
+- **已验证**（真机，免费个人 Apple ID）：登录走完 2FA 和取 Team（iOS 27.2）；第三方 App 的安装与刷新，含增量更新；关掉 Wi-Fi 只走移动数据也能装；普通 App 的本机 JIT；AirBox 容器启动 guest（高内存，无 JIT）。
+- **未验证**：容器里的 JIT。
 - **单点依赖**：登录要经过第三方服务器，默认 `ani3.stikstore.app`（背后是真 Mac ADI，2026-10-19 真机端到端验证过）。它挂了或者换成苹果不认的 ADI，登录会再次坏掉；手机本地那套就是被苹果拒的那套，没有本地替代。设置里可以换服务器，或按下面那节自建一台自己的。
 
 ## 安装
 
-直接用[最新正式版](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest)（当前 0.8.2）里的 `AirStore.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。AirStore 故意保留 SideStore 的 bundle id，所以它是**覆盖**你已有的 SideStore，而不是并排放一个新手屏图标。主屏名字显示为 AirStore。想跟开发进度就加下面「更新」里那个 develop 源。
-
-从 SideStore 或旧版 AirStore 升级过的，两个设置必须自己确认（新的默认值只在全新安装时生效，老安装里你存过的值优先）：
-
-1. Settings > Advanced > User Customizations：**On-Device Anisette 关掉**。本地那套跑的是苹果不认的安卓 ADI。
-2. Anisette 服务器页：**你钉住的那台服务器优先级高于新默认值**。请选 **StikStore (Mac)**，也就是 `https://ani3.stikstore.app`；**Enable Auto Rotation 保持关闭**。症状区分：服务器不对时报的是苹果 503（App 里显示成 unparseable format），不是 `-80045`。
+直接用[最新正式版](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest)（当前 0.9.0）里的 `AirStore.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。这个版本的 bundle id 是 AirStore 自己的 `com.JiangWanZhengChouYv.AirStore`，所以它是独立 App，**不会覆盖**旧的 AirStore / SideStore。换过来之前：导出证书和配对文件 → 卸载旧版 → 装新版 → 导入回来；旧 App Group 不通用，旧数据不会跟过来。主屏名字显示为 AirStore。想跟开发进度就加下面「更新」里那个 develop 源。
 
 ## 更新
 
-SideStore 社区源里 SideStore 自己也是一条可更新条目，它的 `downloadURL` 指向上游构建。AirStore 沿用同一个 bundle id，所以点那条更新会把上游 SideStore 装回来盖掉 AirStore，`-80045` 的修复当场没了。请改加这个源（Settings > Sources > Add Source）：
+SideStore 社区源里 SideStore 自己也是一条可更新条目，但 0.9.0 起 AirStore 是另一个 App，那条更新不会再盖掉 AirStore。AirStore 自己的更新来自这个源（Settings > Sources > Add Source）：
 
 ```
 https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json
 ```
 
-它只发 AirStore 的版本。已经加了 SideStore 社区的，别的 App 照常用，SideStore 那一行的更新提示忽略掉。
+它只发 AirStore 的版本。旧 AirStore（`com.SideStore.SideStore`）不能原地更新到 0.9.0，按上面「安装」里的迁移步骤走。
 
 ## 自建 Anisette 服务器（最安全）
 
@@ -109,13 +105,14 @@ curl -s https://<服务器地址>/v3/client_info
 git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
 cd AirStore
 make build fakesign ipa        # 产出 AirStore.ipa
+make ipa-airbox                # 产出 AirBox.ipa（用 LiveContainer 工程编）
 ```
 
 `fakesign` 表示产物里不带开发者证书，这正是想要的：App 在首次登录时用你自己的 Apple ID 拿到身份。CI 也是同一套流程，任意提交的 Actions 运行里都能拿到打包产物。
 
 ## 关于名字
 
-主屏名字、权限弹窗、注册到苹果设备列表里的机器名，以及打包产物文件名（`AirStore.ipa`），都已经是 AirStore；但 bundle id（`com.SideStore.SideStore`）和 App Group 故意没动：改这些会换签名标识，牵动 iCloud 容器和能用的描述文件，还会让已有安装变成孤儿。
+主屏名字、权限弹窗、注册到苹果设备列表里的机器名，以及打包产物文件名（`AirStore.ipa`），都是 AirStore；bundle id 从 0.9.0 起也换成了 AirStore 自己的 `com.JiangWanZhengChouYv.AirStore`，App Group 随之变成 `group.com.JiangWanZhengChouYv.AirStore`。这也意味着旧安装不会自动跟过来，换版要按「安装」里的迁移步骤走。
 
 ## 反馈与交流
 

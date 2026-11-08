@@ -55,10 +55,16 @@ jobs:
           echo "MARKETING_VERSION=$MARKETING_VERSION" | tee -a $GITHUB_ENV
           echo "SHORT_COMMIT=$SHORT_COMMIT" | tee -a $GITHUB_ENV
 
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1.6.0
-        with:
-          xcode-version: "26.4"
+      - name: Check the toolchain
+        run: |
+          # A macos-26 runner already boots with the 26.4 toolchain selected; the setup action this
+          # replaced occasionally stalls for minutes on a network lookup.
+          xcodebuild -version
+          major=$(xcodebuild -version | awk 'NR==1 { split($2, v, "."); print v[1] }')
+          if [ "$major" -lt 26 ]; then
+            echo "::error::the runner's default Xcode is $(xcodebuild -version | head -1); this build needs the 26 SDK"
+            exit 1
+          fi
 
       - name: Restore Cache (exact)
         id: xcode-cache-exact

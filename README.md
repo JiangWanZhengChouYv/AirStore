@@ -8,11 +8,11 @@
 </p>
 
 > [!CAUTION]
-> **The next stable release changes the signing identifier.** The App IDs list still says **SideStore**
-> because the bundle id is deliberately still `com.SideStore.SideStore` -- that is what lets AirStore
-> install over an existing SideStore. The next stable switches to AirStore's own identifier, and an
-> in-place update will no longer be possible: export your certificate and pairing file first (Settings),
-> uninstall the old build, install the new one, then import them back.
+> **0.9.0 changes the signing identifier.** The bundle id is now `com.JiangWanZhengChouYv.AirStore`
+> (previously `com.SideStore.SideStore`), so this release cannot be installed over an older AirStore
+> or SideStore -- they are separate apps. Before switching, export your certificate and pairing file
+> (Settings), uninstall the old build, install this one, then import them back. The app group changed
+> too, so the old app data is not carried over either way.
 
 
 **AirStore is a fork of SideStore that does not require an AltServer. It aims to be the better SideStore — the place a user stays, not a temporary fix for one Apple error. It started by resolving the notorious `-80045` authentication error for iOS 26.4 and above, and kept going from there.**
@@ -47,37 +47,38 @@ Public Anisette servers are largely blocked or unstable. AirStore gets past this
 - **Simplified Chinese interface.**
 - **Lightweight:** Minimal footprint on your device.
 
-Experimental: **AirBox**, a container meant to run apps without spending one of a free account's three App ID
-slots. The develop builds carry the entry point, but on the test device's OS it cannot load a guest: unsigned,
-ad-hoc, our own certificate and upstream zsign were all refused by the kernel on device, with JIT confirmed
-attached. The entry point stays as an experiment; do not treat it as working.
+Experimental: **AirBox**, a container that runs apps without spending one of a free account's three App ID
+slots. On device it now launches guests with the higher memory ceiling; JIT is not available inside the
+container yet. Container Mode in onboarding installs AirBox for you.
 
 ## 🛠️ Installation
 
-The current stable is [0.8.2](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest).
+The current stable is [0.9.0](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest).
 Download `AirStore.ipa` and install it the way you already install SideStore: iloader, or the
-in-app remote pairing flow. AirStore keeps SideStore's bundle id on purpose, so installing it
-replaces an existing SideStore rather than sitting beside it. The Home Screen label is AirStore.
+in-app remote pairing flow. This release uses AirStore's own bundle id
+(`com.JiangWanZhengChouYv.AirStore`), so it installs as a separate app and does not replace an older
+AirStore or SideStore. To move over, export your certificate and pairing file first, uninstall the
+old build, install this one, then import them back. The Home Screen label is AirStore.
 For the development builds, add the develop source described under Updates below.
 
 Verified on device with a free personal account: sign-in including 2FA (iOS 27.2), installing and
 refreshing third-party apps including incremental updates, installing over mobile data with Wi-Fi
-off, and on-device JIT. AirBox (running apps inside a container) is in the develop builds but has
-not loaded a guest yet. Logins still depend on a third-party Anisette server staying online -- see
-the self-hosting section if you want that dependency to be yours.
+off, and on-device JIT for normally installed apps. AirBox now launches guests with the higher memory
+ceiling; JIT inside the container is not available yet. Logins still depend on a third-party Anisette
+server staying online -- see the self-hosting section if you want that dependency to be yours.
 
 ### Updates
 
-The SideStore community source lists SideStore itself as an updatable app and points that entry at
-upstream's build. AirStore keeps the same bundle id, so accepting that update installs upstream
-over AirStore and undoes the `-80045` fix. Add this source instead (Settings > Sources > Add Source):
+The SideStore community source lists SideStore itself, but since 0.9.0 AirStore is a different app,
+so that row can no longer overwrite it. AirStore's own updates come from this source
+(Settings > Sources > Add Source):
 
 ```
 https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json
 ```
 
-It carries only AirStore releases. If you have the SideStore source already, leave it for other
-apps and ignore the SideStore update row.
+It carries only AirStore releases. An older AirStore (`com.SideStore.SideStore`) cannot update to
+0.9.0 in place -- follow the migration steps under Installation.
 
 ## 🖥️ Self-hosting Anisette (the safest option)
 
@@ -109,6 +110,7 @@ and there is no `.xcworkspace` to open.
 git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
 cd AirStore
 make build fakesign ipa        # produces AirStore.ipa
+make ipa-airbox                # produces AirBox.ipa (built from the LiveContainer project)
 ```
 
 `fakesign` means the build carries no developer certificate, which is what you want: the app gets
