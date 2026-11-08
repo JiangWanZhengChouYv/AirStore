@@ -75,6 +75,7 @@ release-notes.md
 *.md
 !README.md
 !README_zh.md
+!AIRBOX.md
 !CONTRIBUTING.md
 !CERTIFICATE-OF-ORIGIN.md
 !AGENTS.md

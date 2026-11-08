@@ -48,8 +48,9 @@ Public Anisette servers are largely blocked or unstable. AirStore gets past this
 - **Lightweight:** Minimal footprint on your device.
 
 Experimental: **AirBox**, a container that runs apps without spending one of a free account's three App ID
-slots. On device it now launches guests with the higher memory ceiling; JIT is not available inside the
-container yet. Container Mode in onboarding installs AirBox for you.
+slots. On device it now launches guests with the higher memory ceiling, and JIT is opt-in per app through
+AirStore's own enabler -- see [AIRBOX.md](AIRBOX.md) for the switch and its prerequisites. Container Mode
+in onboarding installs AirBox for you.
 
 ## 🛠️ Installation
 
