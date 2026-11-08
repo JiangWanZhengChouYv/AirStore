@@ -105,6 +105,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // what pulls those lines into this file with [AirBox] in front of each one.
         AirBoxLogRouter.start()
 
+        // AirBox's JIT enabler is AirStore itself, through the stikjit:// link this app already
+        // handles. Seed LiveContainer's choice only when it has never stored one, so a pick made in
+        // its own settings is never overwritten. 1 is JITEnablerType.StikJIT ("StikDebug").
+        if let appGroup = Bundle.main.altstoreAppGroup,
+           let sharedDefaults = UserDefaults(suiteName: appGroup),
+           sharedDefaults.object(forKey: "LCJITEnablerType") == nil
+        {
+            sharedDefaults.set(1, forKey: "LCJITEnablerType")
+            debugLog("[AppDelegate] Seeded AirBox's JIT enabler to StikDebug")
+        }
+
         // register crash handler
         setupCrashHandler()
         
