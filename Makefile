@@ -165,12 +165,15 @@ test:
 
 # Overrides (will inherit from env if set already)
 BUILD_CONFIG ?= Release
-MARKETING_VERSION ?= 
-BUNDLE_ID_SUFFIX ?= 
+MARKETING_VERSION ?=
+BUNDLE_ID_SUFFIX ?=
+# Which scheme to archive. The develop pipeline builds the store and AirBox on two runners in
+# parallel, so each asks for a scheme that carries only its own app; the default still builds both.
+SCHEME ?= SideStore
 # Common build settings for xcodebuild
 COMMON_BUILD_SETTINGS = \
 	-project AltStore.xcodeproj \
-	-scheme SideStore \
+	-scheme "$(SCHEME)" \
 	-sdk iphoneos \
 	-configuration $(BUILD_CONFIG) \
 	CODE_SIGNING_REQUIRED=NO \
@@ -194,6 +197,14 @@ build:
 	@echo ""
 	@xcodebuild archive -archivePath ./SideStore \
 		$(COMMON_BUILD_SETTINGS)
+
+# Single-app archives for the parallel develop pipeline. Each reuses `build` but pins a scheme that
+# carries only its own app, so the two runners never compile each other's target.
+build-airstore: SCHEME = SideStore - Release
+build-airstore: build
+
+build-airbox: SCHEME = AirBox
+build-airbox: build
 
 build-and-test:
 	@rm -rf build/tests/test-results.xcresult

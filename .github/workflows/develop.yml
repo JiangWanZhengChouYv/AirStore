@@ -4,6 +4,11 @@ name: Develop AirStore build
 # itself, so keeping the phone current no longer needs a computer: subscribe to the source, turn
 # on beta updates, pick the develop track, tap update.
 #
+# The pipeline is shaped like a fishbone: one cheap head on Ubuntu works out what this build is,
+# two macOS runners compile the store and AirBox in parallel, and the tail on Ubuntu does everything
+# that does not need Xcode (delta, release, feed, mirror, notice). macOS minutes are the scarce
+# resource, so nothing that can run on Linux is allowed to occupy them.
+#
 # Two things this deliberately does not do:
 #   - It does not touch the checked-in source JSON. The generated one is committed to the
 #     develop-source branch, which is what the app fetches, so a machine never rewrites what a
@@ -35,31 +40,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build and publish the develop channel
-    runs-on: macos-26
-    # The ceiling a hung push used to eat by hand: builds measure 16-18 minutes here, so 45 is room
-    # for a slow one without letting a stalled write bill a macOS runner for six hours.
-    timeout-minutes: 45
-
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # The head of the fishbone. It only needs git and the checked-in xcconfig, so it runs on Ubuntu:
+  # no Xcode, no submodules, seconds instead of minutes.
+  prepare:
+    name: Version the build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     outputs:
       version: ${{ steps.version.outputs.version }}
+      short_commit: ${{ steps.version.outputs.short_commit }}
+      bundle_id: ${{ steps.version.outputs.bundle_id }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          # No submodules: versioning reads Build.xcconfig and git only.
           fetch-depth: 0
-
-      - run: brew install ldid xcbeautify
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1.6.0
-        with:
-          xcode-version: "26.4"
 
       - name: Version this build
         id: version
@@ -76,14 +73,39 @@ jobs:
           # strict parser then rejects the whole version, which used to hide the develop channel
           # and offer the stable build as an "update" over a newer develop install.
           STAMP=$(python3 -c 'import datetime; print(datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d%H%M"))')
-          echo "VERSION=${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}" | tee -a $GITHUB_ENV
-          echo "SHORT_COMMIT=${SHORT}" | tee -a $GITHUB_ENV
-          # The notification runs on a runner of its own, which cannot read this job's environment,
-          # so the version has to leave as an output.
-          echo "version=${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}" >> $GITHUB_OUTPUT
+          VERSION="${BASE}-develop-${STAMP}.${GITHUB_RUN_NUMBER}-${SHORT}"
+          # Release builds PRODUCT_BUNDLE_IDENTIFIER straight from BASE_BUNDLE_ID, which is
+          # $(ORG_IDENTIFIER).SideStore -- so this reproduces what xcodebuild -showBuildSettings
+          # used to answer, without needing Xcode on this runner.
+          ORG=$(grep -E '^ORG_IDENTIFIER[[:space:]]*=' Build.xcconfig | sed -e 's/.*=[[:space:]]*//' -e 's/[[:space:]]*$//')
+          BUNDLE_ID="${ORG}.SideStore"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "short_commit=${SHORT}" >> $GITHUB_OUTPUT
+          echo "bundle_id=${BUNDLE_ID}" >> $GITHUB_OUTPUT
+          echo "Building ${VERSION} (${BUNDLE_ID})"
 
-      - name: Restore the last build's cache
-        id: build-cache
+  # One of the two ribs. Builds only SideStore.app: the "SideStore - Release" scheme carries no
+  # AirBox buildable, so this runner never compiles the container and vice versa.
+  build-airstore:
+    name: Build AirStore
+    needs: prepare
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - run: brew install ldid xcbeautify
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: "26.4"
+
+      - name: Restore the last AirStore build's cache
         uses: actions/cache/restore@v3
         with:
           path: |
@@ -91,16 +113,74 @@ jobs:
             ~/Library/Caches/org.swift.swiftpm
           # A key no run has ever written, so the lookup always falls through to restore-keys and takes
           # the newest cache whoever ran before left behind -- which is the only one that can make this
-          # build incremental. Keying the save on the commit and asking for nothing in return, as this
-          # file used to, meant every run restored nothing and compiled the whole app from scratch.
-          key: xcode-build-cache-develop-${{ github.run_id }}
+          # build incremental. The prefix is per job so the two ribs never restore each other's objects.
+          key: xcode-build-cache-develop-airstore-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            xcode-build-cache-develop-
+            xcode-build-cache-develop-airstore-
 
       - name: Build
         env:
-          MARKETING_VERSION: ${{ env.VERSION }}
-        run: python3 scripts/ci/workflow.py build
+          MARKETING_VERSION: ${{ needs.prepare.outputs.version }}
+        run: python3 scripts/ci/workflow.py build-airstore
+
+      - name: Verify the Chinese resources compiled
+        run: |
+          found=$(find SideStore.xcarchive -type d -name 'zh-Hans.lproj' | head -3)
+          echo "zh-Hans.lproj: ${found:-none}"
+          if [ -z "$found" ]; then
+            echo "::error::zh-Hans.lproj is missing from the built app, so Localizable.xcstrings did not produce a Chinese table"
+            exit 1
+          fi
+
+      - name: Save Cache
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: xcode-build-cache-develop-airstore-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Upload the package
+        uses: actions/upload-artifact@v4
+        with:
+          name: airstore-ipa
+          path: AirStore.ipa
+          if-no-files-found: error
+
+  # The other rib. Builds only AirBox.app (plus the LiveProcess extension it embeds).
+  build-airbox:
+    name: Build AirBox
+    needs: prepare
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - run: brew install ldid xcbeautify
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: "26.4"
+
+      - name: Restore the last AirBox build's cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Caches/org.swift.swiftpm
+          key: xcode-build-cache-develop-airbox-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            xcode-build-cache-develop-airbox-
+
+      - name: Build
+        env:
+          MARKETING_VERSION: ${{ needs.prepare.outputs.version }}
+        run: python3 scripts/ci/workflow.py build-airbox
 
       - name: Check the extension kept its entry point
         run: |
@@ -124,22 +204,56 @@ jobs:
           path: |
             ~/Library/Developer/Xcode/DerivedData
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-${{ github.run_id }}
+          key: xcode-build-cache-develop-airbox-${{ github.run_id }}-${{ github.run_attempt }}
 
-      - name: Verify the Chinese resources compiled
-        run: |
-          found=$(find SideStore.xcarchive -type d -name 'zh-Hans.lproj' | head -3)
-          echo "zh-Hans.lproj: ${found:-none}"
-          if [ -z "$found" ]; then
-            echo "::error::zh-Hans.lproj is missing from the built app, so Localizable.xcstrings did not produce a Chinese table"
-            exit 1
-          fi
+      - name: Upload the package
+        uses: actions/upload-artifact@v4
+        with:
+          name: airbox-ipa
+          path: AirBox.ipa
+          if-no-files-found: error
+
+  # The tail: everything after the packages exist, on Ubuntu. Delta packing is pure Python, and the
+  # release, feed and mirror steps are git + gh + curl, so none of them has any business holding a
+  # macOS runner.
+  publish:
+    name: Publish the develop channel
+    needs: [prepare, build-airstore, build-airbox]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VERSION: ${{ needs.prepare.outputs.version }}
+      SHORT_COMMIT: ${{ needs.prepare.outputs.short_commit }}
+      BUNDLE_ID: ${{ needs.prepare.outputs.bundle_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Branch work below (pages, develop-source) needs history; the scripts need no submodules.
+          fetch-depth: 0
+
+      - name: Fetch the AirStore package
+        uses: actions/download-artifact@v4
+        with:
+          name: airstore-ipa
+          path: .
+
+      - name: Fetch the AirBox package
+        uses: actions/download-artifact@v4
+        with:
+          name: airbox-ipa
+          path: .
 
       # Every package still inside the retention window is a possible base, so a phone that let a few
       # builds go by takes one delta instead of being sent back to the full download. A base has to be
       # the *unsigned* bundle: what lands on a phone gets re-signed (embedding.mobileprovision,
       # LC_CODE_SIGNATURE, _CodeSignature), and the device caches the ASBU of what its own unzip
       # produced, so only bytes packed this way can equal a phone's cached base.
+      #
+      # The target is packed from the ipa itself rather than from an archive: the ipa is what the
+      # device unzips, so this is the same tree by construction, and it no longer needs a macOS runner.
       #
       # Newest by upload order, read off the REST asset id. Do not use `gh release view --json assets`
       # for this: its id is a GraphQL node string (RA_kwDOVM69jc4pC5Wr and friends), so ranking it
@@ -150,8 +264,10 @@ jobs:
           mkdir -p build/previous
           gh api "repos/$GITHUB_REPOSITORY/releases/tags/develop-latest" > build/release.json 2>/dev/null \
             || echo '{"assets":[]}' > build/release.json
+          rm -rf build/target-unzipped
+          unzip -qo AirStore.ipa -d build/target-unzipped
           python3 scripts/ci/make_patch.py pack \
-            --app SideStore.xcarchive/Products/Applications/SideStore.app --out build/target.asbu >/dev/null
+            --app build/target-unzipped/Payload/SideStore.app --out build/target.asbu >/dev/null
           full_size=$(wc -c < AirStore.ipa | tr -d ' ')
           for base_name in $(python3 scripts/ci/delta_assets.py bases --release-json build/release.json --limit 4); do
             if ! gh release download develop-latest --pattern "$base_name" --dir build/previous --clobber; then
@@ -220,12 +336,12 @@ jobs:
           python3 scripts/ci/develop_source.py \
             --source source/airstore-source.json \
             --ipa "$VERSION.ipa" \
-            --bundle-id "$(python3 scripts/ci/workflow.py get-bundle-id)" \
+            --bundle-id "$BUNDLE_ID" \
             --version "$VERSION" \
             --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/$VERSION.ipa" \
             --track develop \
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
-            --companion-bundle-id "$(python3 scripts/ci/workflow.py get-bundle-id).AirBox" \
+            --companion-bundle-id "$BUNDLE_ID.AirBox" \
             --companion-ipa AirBox.ipa \
             --companion-download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirBox-$VERSION.ipa" \
             --companion-description "AirBox runs apps inside itself, so they do not use an App ID." \
@@ -323,15 +439,15 @@ jobs:
       - name: Upload the feed for debugging
         uses: actions/upload-artifact@v4
         with:
-          name: airstore-source-${{ env.SHORT_COMMIT }}.json
+          name: airstore-source-${{ needs.prepare.outputs.short_commit }}.json
           path: build/airstore-source.json
 
-  # Its own job, listed after the build the way Pages' deployment follows a push: the notification
+  # Its own job, listed after the pipeline the way Pages' deployment follows a push: the notification
   # needs a machine of its own for a two-second curl, and a build that got cancelled or died on the
   # Mac runner still has to say so. ubuntu-latest starts in seconds, so the note never delays a build.
   notify:
     name: Tell Discord how this build went
-    needs: build
+    needs: [prepare, build-airstore, build-airbox, publish]
     if: always()
     runs-on: ubuntu-latest
 
@@ -339,8 +455,10 @@ jobs:
       - name: Post the result
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
-          STATUS: ${{ needs.build.result }}
-          VERSION: ${{ needs.build.outputs.version }}
+          AIRSTORE_RESULT: ${{ needs.build-airstore.result }}
+          AIRBOX_RESULT: ${{ needs.build-airbox.result }}
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+          VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
@@ -350,6 +468,15 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          # Publish is the only job that witnesses both ribs succeeding, so its result decides; a
+          # cancelled rib or a skipped publish is reported as cancelled, anything else as failure.
+          if [ "$PUBLISH_RESULT" = "success" ]; then
+            STATUS=success
+          elif [ "$AIRSTORE_RESULT" = "cancelled" ] || [ "$AIRBOX_RESULT" = "cancelled" ] || [ "$PUBLISH_RESULT" = "cancelled" ]; then
+            STATUS=cancelled
+          else
+            STATUS=failure
+          fi
           # Bilingual because the channel is read by people who file issues in either language.
           case "$STATUS" in
             success)   colour=5763719;  word="build succeeded / 构建成功" ;;
@@ -393,7 +520,7 @@ jobs:
           if commit_url:
               footer += " · [full message / 完整说明](%s)" % commit_url
           lines.append(footer + " · [build log / 构建日志](%s)" % run_url)
-          if os.environ.get("STATUS") == "success":
+          if os.environ.get("PUBLISH_RESULT") == "success":
               lines.append("Update on the phone within a minute / 手机上等一分钟就能看到更新")
 
           print(json.dumps({"embeds": [{

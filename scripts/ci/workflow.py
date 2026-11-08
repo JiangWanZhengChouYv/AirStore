@@ -139,12 +139,12 @@ def clean_spm_cache():
 # BUILD
 # ----------------------------------------------------------
 
-def build():
+def _archive(make_target):
     run("mkdir -p build/logs")
     try:
         run(
             "set -o pipefail && "
-            "NSUnbufferedIO=YES make -B build "
+            f"NSUnbufferedIO=YES make -B {make_target} "
             "2>&1 | tee -a build/logs/build.log | xcbeautify --renderer github-actions"
         )
     except subprocess.CalledProcessError:
@@ -156,10 +156,25 @@ def build():
             cwd=ROOT,
         )
         raise
+
+
+def build():
+    _archive("build")
     run("make fakesign | tee -a build/logs/build.log")
     run("make ipa | tee -a build/logs/build.log")
     run("make ipa-airbox | tee -a build/logs/build.log")
     run("zip -r -9 ./AirStore.dSYMs.zip ./SideStore.xcarchive/dSYMs")
+
+
+def build_airstore():
+    _archive("build-airstore")
+    run("make fakesign | tee -a build/logs/build.log")
+    run("make ipa | tee -a build/logs/build.log")
+
+
+def build_airbox():
+    _archive("build-airbox")
+    run("make ipa-airbox | tee -a build/logs/build.log")
 
 # ----------------------------------------------------------
 # TESTS BUILD
