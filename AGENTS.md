@@ -73,6 +73,9 @@ private keys, anisette data, Apple IDs, passwords, or device UDIDs.
 - `Shared/` - Shared utilities, categories, extensions, and error definitions.
 - `Dependencies/` - Vendored submodules (`minimuxer`, `SideSign`) integrated as
   local Swift Packages. Avoid touching these unless explicitly updating dependencies.
+- `Helper/` - macOS desktop companion (Tauri 2: React + Rust). Signs and installs
+  AirStore over USB or Network, and places the pairing file. Not part of the Xcode
+  workspace; the develop pipeline builds it as its own job.
 - `xcconfigs/` - Shared and target-specific build configs.
 - `scripts/` - CI scripts, sideconf tools, and build helpers.
 - `Makefile` - Command-line build and packaging orchestration.

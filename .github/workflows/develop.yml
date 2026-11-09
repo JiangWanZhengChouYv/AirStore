@@ -5,9 +5,10 @@ name: Develop AirStore build
 # on beta updates, pick the develop track, tap update.
 #
 # The pipeline is shaped like a fishbone: one cheap head on Ubuntu works out what this build is,
-# two macOS runners compile the store and AirBox in parallel, and the tail on Ubuntu does everything
-# that does not need Xcode (delta, release, feed, mirror, notice). macOS minutes are the scarce
-# resource, so nothing that can run on Linux is allowed to occupy them.
+# three macOS runners compile the store, AirBox and the desktop Helper in parallel, and the tail on
+# Ubuntu does everything that does not need Xcode or a Mac SDK (delta, release, feed, mirror,
+# notice). macOS minutes are the scarce resource, so nothing that can run on Linux is allowed to
+# occupy them.
 #
 # Two things this deliberately does not do:
 #   - It does not touch the checked-in source JSON. The generated one is committed to the
@@ -85,7 +86,7 @@ jobs:
           echo "bundle_id=${BUNDLE_ID}" >> $GITHUB_OUTPUT
           echo "Building ${VERSION} (${BUNDLE_ID})"
 
-  # One of the two ribs. Builds only SideStore.app: the "SideStore - Release" scheme carries no
+  # One of the three ribs. Builds only SideStore.app: the "SideStore - Release" scheme carries no
   # AirBox buildable, so this runner never compiles the container and vice versa.
   build-airstore:
     name: Build AirStore
@@ -155,7 +156,7 @@ jobs:
           path: AirStore.ipa
           if-no-files-found: error
 
-  # The other rib. Builds only AirBox.app (plus the LiveProcess extension it embeds).
+  # The other Xcode rib. Builds only AirBox.app (plus the LiveProcess extension it embeds).
   build-airbox:
     name: Build AirBox
     needs: prepare
@@ -226,6 +227,74 @@ jobs:
         with:
           name: airbox-ipa
           path: AirBox.ipa
+          if-no-files-found: error
+
+  # The third rib. The Helper is a Tauri app: it needs Node, Rust and the macOS bundler, so it
+  # cannot run on Ubuntu, and it shares none of the Xcode inputs the other two ribs use. It is a
+  # sibling for that reason -- one broken Swift target should not hide a broken Helper, or the
+  # other way round.
+  build-helper:
+    name: Build the Helper
+    needs: prepare
+    runs-on: macos-26
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The Helper is inside this repository and has no submodules of its own.
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Helper/package-lock.json
+
+      - name: Install the Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore the last Helper build's cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          # Keyed separately from every other Rust cache: the dependency tree here is Tauri's,
+          # and restoring another project's target directory only makes cargo redo the work.
+          workspaces: Helper/src-tauri -> target
+          key: airstore-helper
+
+      - name: Build
+        working-directory: Helper
+        env:
+          # No runner keychain holds "AirStore Helper Local", and a certificate generated per run
+          # would still not match the keychain items the app itself created last time. Ad-hoc keeps
+          # the CI artifact honest; the copy that touches the keychain is signed locally with the
+          # stable certificate. -, not empty: an empty value falls back to the config's identity.
+          APPLE_SIGNING_IDENTITY: "-"
+        run: |
+          npm ci
+          # The npm packages are newer than the Rust crates, and the Tauri CLI refuses that by
+          # default. Pinning the npm side is not possible (the matching @tauri-apps/api version was
+          # never published), so build through the mismatch instead of freezing the crate tree.
+          npx tauri build --bundles app --ignore-version-mismatches
+
+      - name: Check the app was bundled and signed
+        run: |
+          app="Helper/src-tauri/target/release/bundle/macos/AirStore Helper.app"
+          if [ ! -d "$app" ]; then
+            echo "::error::$app was not produced"
+            exit 1
+          fi
+          codesign --verify --deep "$app"
+          # Proves the run did not silently fall back to unsigned, which Apple silicon refuses to
+          # launch anyway -- a CI artifact that cannot start is not a build.
+          codesign -dv "$app" 2>&1 | grep -q "Signature=adhoc"
+          ditto -c -k --keepParent "$app" AirStoreHelper.zip
+
+      - name: Upload the Helper
+        uses: actions/upload-artifact@v4
+        with:
+          name: airstore-helper
+          path: AirStoreHelper.zip
           if-no-files-found: error
 
   # The tail: everything after the packages exist, on Ubuntu. Delta packing is pure Python, and the
@@ -463,7 +532,7 @@ jobs:
   # Mac runner still has to say so. ubuntu-latest starts in seconds, so the note never delays a build.
   notify:
     name: Tell Discord how this build went
-    needs: [prepare, build-airstore, build-airbox, publish]
+    needs: [prepare, build-airstore, build-airbox, build-helper, publish]
     if: always()
     runs-on: ubuntu-latest
 
@@ -473,6 +542,7 @@ jobs:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_AIRSTORE }}
           AIRSTORE_RESULT: ${{ needs.build-airstore.result }}
           AIRBOX_RESULT: ${{ needs.build-airbox.result }}
+          HELPER_RESULT: ${{ needs.build-helper.result }}
           PUBLISH_RESULT: ${{ needs.publish.result }}
           VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ github.sha }}
@@ -484,11 +554,12 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
-          # Publish is the only job that witnesses both ribs succeeding, so its result decides; a
-          # cancelled rib or a skipped publish is reported as cancelled, anything else as failure.
-          if [ "$PUBLISH_RESULT" = "success" ]; then
+          # Publish witnesses both phone packages succeeding, but the Helper is a sibling it does
+          # not need, so its result has to be added by hand. A cancelled rib or a skipped publish
+          # is reported as cancelled, anything else as failure.
+          if [ "$PUBLISH_RESULT" = "success" ] && [ "$HELPER_RESULT" = "success" ]; then
             STATUS=success
-          elif [ "$AIRSTORE_RESULT" = "cancelled" ] || [ "$AIRBOX_RESULT" = "cancelled" ] || [ "$PUBLISH_RESULT" = "cancelled" ]; then
+          elif [ "$AIRSTORE_RESULT" = "cancelled" ] || [ "$AIRBOX_RESULT" = "cancelled" ] || [ "$HELPER_RESULT" = "cancelled" ] || [ "$PUBLISH_RESULT" = "cancelled" ]; then
             STATUS=cancelled
           else
             STATUS=failure
