@@ -21,7 +21,6 @@ import { AppIds } from "./pages/AppIds";
 import { Settings } from "./pages/Settings";
 import { Pairing } from "./pages/Pairing";
 import { getVersion } from "@tauri-apps/api/app";
-import { checkForUpdates } from "./update";
 import logo from "./airstore.png";
 import { GlassCard } from "./components/GlassCard";
 import { useTranslation } from "react-i18next";
@@ -65,10 +64,6 @@ function App() {
       setVersion(version);
     };
     fetchVersion();
-  }, []);
-
-  useEffect(() => {
-    checkForUpdates();
   }, []);
 
   const shortcutLabel = useCallback(
