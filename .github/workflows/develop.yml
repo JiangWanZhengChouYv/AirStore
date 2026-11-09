@@ -592,8 +592,15 @@ jobs:
 
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
 
     steps:
+      # gh release runs against "this repository", which it learns from a git remote, so a bare
+      # runner cannot publish even with the token set. One commit is enough.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Fetch the macOS build
         uses: actions/download-artifact@v4
         with:
