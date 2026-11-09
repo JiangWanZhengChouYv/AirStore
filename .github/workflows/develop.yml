@@ -7,8 +7,8 @@ name: Develop AirStore build
 # The pipeline is shaped like a fishbone: one cheap head on Ubuntu works out what this build is,
 # three build runners compile the store, AirBox and the desktop Helper (macOS and Windows) in
 # parallel, and the tail on Ubuntu does everything that does not need Xcode or a Mac SDK (delta,
-# release, feed, mirror, notice). macOS minutes are the scarce resource, so nothing that can run
-# on Linux is allowed to occupy them.
+# release, feed, notice). macOS minutes are the scarce resource, so nothing that can run on Linux
+# is allowed to occupy them.
 #
 # Two things this deliberately does not do:
 #   - It does not touch the checked-in source JSON. The generated one is committed to the
@@ -351,8 +351,8 @@ jobs:
           if-no-files-found: error
 
   # The tail: everything after the packages exist, on Ubuntu. Delta packing is pure Python, and the
-  # release, feed and mirror steps are git + gh + curl, so none of them has any business holding a
-  # macOS runner.
+  # release and feed steps are git + gh + curl, so none of them has any business holding a macOS
+  # runner.
   publish:
     name: Publish the develop channel
     needs: [prepare, build-airstore, build-airbox]
@@ -489,46 +489,11 @@ jobs:
       # proxy, so the package and the patches have to exist there too. Which builds are current is the
       # release's decision, so the mirror is handed the same list the prune step just applied rather
       # than working out its own from file names.
-      - name: Mirror the package onto the Pages branch
-        env:
-          # A push that cannot authenticate asks for a username on stdin, and on a runner with no
-          # terminal that turns into a six-minute silence instead of an error. Fail fast instead.
-          GIT_TERMINAL_PROMPT: 0
-        run: |
-          # Ask before switching branches: the pages tree holds nothing but assets, so once it is
-          # checked out there is no scripts/ci left to ask. The answer lands in build/, which is
-          # untracked and therefore survives the switch.
-          python3 scripts/ci/delta_assets.py kept --release-json build/release.json --keep 5 > build/kept.txt
-
-          git fetch origin pages 2>/dev/null || true
-          if git rev-parse --verify -q origin/pages >/dev/null; then
-            git checkout -b pages origin/pages
-          else
-            git checkout --orphan pages
-            git rm -rf --cached . -q
-          fi
-
-          while read -r name; do
-            if [ -n "$name" ] && [ -e "$name" ]; then
-              git add "$name"
-            fi
-          done < build/kept.txt
-
-          git ls-files | while read -r tracked; do
-            if ! grep -q -x -- "$tracked" build/kept.txt; then
-              echo "dropping $tracked"
-              git rm -q --cached "$tracked"
-              rm -f "$tracked"
-            fi
-          done
-
-          git -c user.name="github-actions[bot]" \
-              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-              commit -q --allow-empty -m "Publish $VERSION"
-          # GIT_TERMINAL_PROMPT=0 is the whole cure: the stall was `git push` waiting on stdin for a
-          # username. `timeout` is not installed on the macOS runner, so bounding each command here
-          # would only make the step red -- timeout-minutes on the job is the real ceiling.
-          git push origin pages
+      # The Pages mirror used to copy the kept packages onto the `pages` branch here. It is parked:
+      # the app already prefers live pass-through proxies, and the replacement is a Cloudflare-hosted
+      # mirror on a neutral domain that does not exist yet. Do not bring this one back in the
+      # meantime -- re-uploading ~150 MB of assets every build was 1m22s of wall time for a fallback
+      # almost nobody reached, and the app's pages URL is already the last resort in URL+Mirror.swift.
 
       - name: Commit the feed to its own branch
         env:
