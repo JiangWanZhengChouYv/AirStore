@@ -52,6 +52,20 @@ slots. On device it now launches guests with the higher memory ceiling, and JIT 
 AirStore's own enabler -- see [AIRBOX.md](AIRBOX.md) for the switch and its prerequisites. Container Mode
 in onboarding installs AirBox for you.
 
+## ⚡ Quick start (with a computer)
+
+The desktop helper is the shortest path: it signs and installs AirStore from a Mac or a Windows PC
+over USB or the local network, and places the pairing file for you.
+
+1. Download `AirStoreHelper-macos.zip` or `AirStoreHelper-windows-x64-setup.exe` from the
+   [AirStore Helper release](https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/helper-latest).
+2. Install it, plug in the iPhone, and pick the device.
+3. Sign in with your Apple ID and press install.
+
+Windows needs iTunes (Apple Mobile Device Support) before the phone shows up. Packages in that
+release are rebuilt from develop and are not notarized; the full steps are in
+[Helper/README.md](Helper/README.md).
+
 ## 🛠️ Installation
 
 The current stable is [0.9.0](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest).

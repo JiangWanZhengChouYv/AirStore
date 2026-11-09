@@ -54,6 +54,16 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 - **未验证**：容器里的 JIT。
 - **单点依赖**：登录要经过第三方服务器，默认 `ani3.stikstore.app`（背后是真 Mac ADI，2026-10-19 真机端到端验证过）。它挂了或者换成苹果不认的 ADI，登录会再次坏掉；手机本地那套就是被苹果拒的那套，没有本地替代。设置里可以换服务器，或按下面那节自建一台自己的。
 
+## 快速开始（有电脑）
+
+桌面助手是最省事的一条路：在 Mac 或 Windows 上把手机连上（USB 或同一局域网），它替你签名、安装 AirStore，并把配对文件放好。
+
+1. 到 [AirStore Helper 预发布](https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/helper-latest) 下载 `AirStoreHelper-macos.zip` 或 `AirStoreHelper-windows-x64-setup.exe`。
+2. 装好，插上 iPhone，选设备。
+3. 登录 Apple ID，点安装。
+
+Windows 需要先装 iTunes（Apple Mobile Device Support）才能发现手机。这个预发布里的包由 develop 自动构建、未公证；完整步骤见 [Helper/README.md](Helper/README.md)。
+
 ## 安装
 
 直接用[最新正式版](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest)（当前 0.9.0）里的 `AirStore.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。这个版本的 bundle id 是 AirStore 自己的 `com.JiangWanZhengChouYv.AirStore`，所以它是独立 App，**不会覆盖**旧的 AirStore / SideStore。换过来之前：导出证书和配对文件 → 卸载旧版 → 装新版 → 导入回来；旧 App Group 不通用，旧数据不会跟过来。主屏名字显示为 AirStore。想跟开发进度就加下面「更新」里那个 develop 源。

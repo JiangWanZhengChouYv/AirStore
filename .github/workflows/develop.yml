@@ -5,10 +5,10 @@ name: Develop AirStore build
 # on beta updates, pick the develop track, tap update.
 #
 # The pipeline is shaped like a fishbone: one cheap head on Ubuntu works out what this build is,
-# three macOS runners compile the store, AirBox and the desktop Helper in parallel, and the tail on
-# Ubuntu does everything that does not need Xcode or a Mac SDK (delta, release, feed, mirror,
-# notice). macOS minutes are the scarce resource, so nothing that can run on Linux is allowed to
-# occupy them.
+# three build runners compile the store, AirBox and the desktop Helper (macOS and Windows) in
+# parallel, and the tail on Ubuntu does everything that does not need Xcode or a Mac SDK (delta,
+# release, feed, mirror, notice). macOS minutes are the scarce resource, so nothing that can run
+# on Linux is allowed to occupy them.
 #
 # Two things this deliberately does not do:
 #   - It does not touch the checked-in source JSON. The generated one is committed to the
@@ -288,13 +288,66 @@ jobs:
           # Proves the run did not silently fall back to unsigned, which Apple silicon refuses to
           # launch anyway -- a CI artifact that cannot start is not a build.
           codesign -dv "$app" 2>&1 | grep -q "Signature=adhoc"
-          ditto -c -k --keepParent "$app" AirStoreHelper.zip
+          ditto -c -k --keepParent "$app" AirStoreHelper-macos.zip
 
       - name: Upload the Helper
         uses: actions/upload-artifact@v4
         with:
-          name: airstore-helper
-          path: AirStoreHelper.zip
+          name: airstore-helper-macos
+          path: AirStoreHelper-macos.zip
+          if-no-files-found: error
+
+  # Same source, different bundler. Everything the Helper talks to has a Windows path -- usbmuxd
+  # comes from Apple Mobile Device Support, the keychain is Credential Manager -- so this is a
+  # build job, not a port.
+  build-helper-windows:
+    name: Build the Helper for Windows
+    needs: prepare
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Helper/package-lock.json
+
+      - name: Install the Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore the last Windows Helper build's cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: Helper/src-tauri -> target
+          key: airstore-helper-windows
+
+      - name: Build
+        working-directory: Helper
+        run: |
+          npm ci
+          npx tauri build --bundles nsis --ignore-version-mismatches
+
+      - name: Locate the installer
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem "Helper/src-tauri/target/release/bundle/nsis/*.exe" |
+            Select-Object -First 1
+          if (-not $installer) {
+            Write-Error "the NSIS installer was not produced"
+            exit 1
+          }
+          Copy-Item $installer.FullName "AirStoreHelper-windows-x64-setup.exe"
+
+      - name: Upload the installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: airstore-helper-windows
+          path: AirStoreHelper-windows-x64-setup.exe
           if-no-files-found: error
 
   # The tail: everything after the packages exist, on Ubuntu. Delta packing is pure Python, and the
@@ -527,12 +580,64 @@ jobs:
           name: airstore-source-${{ needs.prepare.outputs.short_commit }}.json
           path: build/airstore-source.json
 
+  # The Helper's own home. It is a companion to the store rather than part of it, so its packages
+  # do not ride on develop-latest: that release's asset names and pruning rules are built around
+  # store versions, and a file with no .ipa suffix would be swept as stale on the next push. One
+  # rolling prerelease, replaced whenever develop moves, is all it needs.
+  publish-helper:
+    name: Publish the Helper
+    needs: [build-helper, build-helper-windows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Fetch the macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: airstore-helper-macos
+          path: build/helper-macos
+
+      - name: Fetch the Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: airstore-helper-windows
+          path: build/helper-windows
+
+      - name: Publish onto the Helper prerelease
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          notes="$(cat <<EOF
+          The desktop companion for AirStore: signs and installs AirStore from a Mac or a Windows PC
+          over USB or the local network, and places the pairing file for you.
+
+          Quick start - macOS: unzip AirStoreHelper-macos.zip and drag AirStore Helper to Applications.
+          Windows: run AirStoreHelper-windows-x64-setup.exe. Install iTunes (Apple Mobile Device
+          Support) first if the phone is not discovered. Full steps:
+          https://github.com/$REPO/blob/develop/Helper/README.md
+
+          These packages are built from develop and replaced whenever it moves. The Mac app is
+          ad-hoc signed (right-click > Open the first time) and the Windows installer is unsigned,
+          so SmartScreen warns; neither is notarized.
+          EOF
+          )"
+          gh release view helper-latest >/dev/null 2>&1 || \
+            gh release create helper-latest --prerelease --title "AirStore Helper" --notes "$notes"
+          # Rewrite the notes on every run as well: the download names are part of them, and a
+          # release describing files it no longer carries is worse than no notes at all.
+          gh release edit helper-latest --title "AirStore Helper" --notes "$notes"
+          gh release upload helper-latest build/helper-macos/AirStoreHelper-macos.zip --clobber
+          gh release upload helper-latest build/helper-windows/AirStoreHelper-windows-x64-setup.exe --clobber
+
   # Its own job, listed after the pipeline the way Pages' deployment follows a push: the notification
   # needs a machine of its own for a two-second curl, and a build that got cancelled or died on the
   # Mac runner still has to say so. ubuntu-latest starts in seconds, so the note never delays a build.
   notify:
     name: Tell Discord how this build went
-    needs: [prepare, build-airstore, build-airbox, build-helper, publish]
+    needs: [prepare, build-airstore, build-airbox, build-helper, build-helper-windows, publish, publish-helper]
     if: always()
     runs-on: ubuntu-latest
 
@@ -543,6 +648,8 @@ jobs:
           AIRSTORE_RESULT: ${{ needs.build-airstore.result }}
           AIRBOX_RESULT: ${{ needs.build-airbox.result }}
           HELPER_RESULT: ${{ needs.build-helper.result }}
+          HELPER_WINDOWS_RESULT: ${{ needs.build-helper-windows.result }}
+          HELPER_PUBLISH_RESULT: ${{ needs.publish-helper.result }}
           PUBLISH_RESULT: ${{ needs.publish.result }}
           VERSION: ${{ needs.prepare.outputs.version }}
           SHA: ${{ github.sha }}
@@ -554,12 +661,19 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
-          # Publish witnesses both phone packages succeeding, but the Helper is a sibling it does
-          # not need, so its result has to be added by hand. A cancelled rib or a skipped publish
-          # is reported as cancelled, anything else as failure.
-          if [ "$PUBLISH_RESULT" = "success" ] && [ "$HELPER_RESULT" = "success" ]; then
+          # Publish witnesses both phone packages succeeding, but the Helper ribs are siblings it
+          # does not need, so their results have to be added by hand. A cancelled rib or a skipped
+          # publish is reported as cancelled, anything else as failure.
+          if [ "$PUBLISH_RESULT" = "success" ] \
+             && [ "$HELPER_RESULT" = "success" ] \
+             && [ "$HELPER_WINDOWS_RESULT" = "success" ] \
+             && [ "$HELPER_PUBLISH_RESULT" = "success" ]; then
             STATUS=success
-          elif [ "$AIRSTORE_RESULT" = "cancelled" ] || [ "$AIRBOX_RESULT" = "cancelled" ] || [ "$HELPER_RESULT" = "cancelled" ] || [ "$PUBLISH_RESULT" = "cancelled" ]; then
+          elif [ "$AIRSTORE_RESULT" = "cancelled" ] \
+             || [ "$AIRBOX_RESULT" = "cancelled" ] \
+             || [ "$HELPER_RESULT" = "cancelled" ] \
+             || [ "$HELPER_WINDOWS_RESULT" = "cancelled" ] \
+             || [ "$PUBLISH_RESULT" = "cancelled" ]; then
             STATUS=cancelled
           else
             STATUS=failure
