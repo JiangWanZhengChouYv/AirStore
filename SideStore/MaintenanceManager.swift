@@ -272,5 +272,9 @@ private extension MaintenanceManager {
 
         try? fileManager.removeItem(at: legacyURL)
         debugLog("[MaintenanceManager] Removed legacy pairing file '\(legacyURL.path)'.")
+
+        // The write above only moves bytes; without a chosen protocol the app still treats the
+        // file as missing. (Boot already adopts files, this covers a file that arrived mid-session.)
+        PairingFileManager.shared.adoptAvailablePairingFile()
     }
 }

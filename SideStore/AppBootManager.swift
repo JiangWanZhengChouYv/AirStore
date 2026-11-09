@@ -61,6 +61,18 @@ public final class AppBootManager {
     
     @MainActor
     public func promptForPairing(on vc: UIViewController) async {
+        // The file may have arrived after the boot check -- the desktop helper places one while
+        // the app is already running. Try it before asking for a file that is already here.
+        if PairingFileManager.shared.adoptAvailablePairingFile() != nil,
+           let pairingString = PairingFileManager.shared.fetchPairingFile() {
+            do {
+                try await self.startMinimuxer(pairingFile: pairingString)
+                return
+            } catch {
+                debugLog("[AppBootManager] promptForPairing: adopting the placed pairing file failed. \(error)")
+            }
+        }
+
         var isRetry = false
         while true {
             guard let selectedURL = await withCheckedContinuation({ (continuation: CheckedContinuation<URL?, Never>) in
@@ -107,6 +119,10 @@ public final class AppBootManager {
     public nonisolated func performBootSequence() async {
         debugLog("[AppBootManager] performBootSequence() entered")
         defer { debugLog("[AppBootManager] performBootSequence() exited") }
+
+        // A pairing file may already be sitting in Documents with no protocol chosen (the helper
+        // writes one before the first launch). Adopt it before deciding to ask the user for one.
+        PairingFileManager.shared.adoptAvailablePairingFile()
 
         // Before minimuxer reads the pairing file, pick up anything dropped into the shared folder
         // and publish anything that only exists here.

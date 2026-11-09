@@ -299,6 +299,11 @@ private struct PairingFileStep: View {
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
         }
+        .onAppear {
+            // Boot adoption runs off the main thread, so the file may become usable after this
+            // view was created. Re-check when the step actually appears.
+            hasPairingFile = PairingFileManager.shared.hasPairingFile()
+        }
         #if !os(tvOS)
         .fileImporter(
             isPresented: $isShowingFilePicker,

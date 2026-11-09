@@ -80,6 +80,46 @@ final class PairingFileManager: NSObject {
         return false
     }
 
+    /// A pairing file can land in Documents without this app ever asking for one: the desktop
+    /// helper writes it before the first launch. No protocol is chosen in that case, so
+    /// `hasPairingFile()` reports false and the app asks for a file it already has. Adopt it.
+    @discardableResult
+    nonisolated func adoptAvailablePairingFile() -> PairingProtocol? {
+        if let target = preferredProtocol, hasPairingFile(for: target) {
+            return target
+        }
+
+        let fm = FileManager.default
+        // The helper writes one merged plist (lockdown keys plus remote-pairing keys) under every
+        // name, so parse with a preference instead of letting the ambiguity check reject it.
+        let candidates: [(PairingProtocol, String)] = [
+            (.rppairing, AppConstants.Pairing.remotePairingFileName),
+            (.lockdown, AppConstants.Pairing.lockdownPairingFileName),
+            (.rppairing, AppConstants.Pairing.legacyPairingFileName),
+            (.lockdown, AppConstants.Pairing.legacyPairingFileName)
+        ]
+
+        for (mode, name) in candidates {
+            let url = fm.documentsDirectory.appendingPathComponent(name)
+            guard let content = try? String(contentsOf: url), !content.isEmpty,
+                  (try? self.parse(content: content, preferred: mode)) != nil else { continue }
+
+            let canonicalURL = self.pairingFileURL(for: mode)
+            if url != canonicalURL, !fm.fileExists(atPath: canonicalURL.path) {
+                try? content.write(to: canonicalURL, atomically: true, encoding: .utf8)
+            }
+
+            self.preferredProtocol = mode
+            self.persistedActiveProtocol = mode
+            UserDefaults.standard.isPairingReset = false
+            self.exportToSharedDirectory(fileName: canonicalURL.lastPathComponent)
+            debugLog("[PairingFile] Adopted \(name) as \(mode.rawValue) pairing file.")
+            return mode
+        }
+
+        return nil
+    }
+
     nonisolated func metadata(for mode: PairingProtocol) -> PairingFileMetadata {
         let fileURL = pairingFileURL(for: mode)
         let path = fileURL.path
@@ -335,13 +375,26 @@ final class PairingFileManager: NSObject {
         guard let content = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else {
             throw CocoaError(.fileReadInapplicableStringEncoding)
         }
-        let parsed = try parse(content: content, preferred: nil)
+        // Desktop helpers hand over one record carrying both lockdown and remote-pairing keys,
+        // which is ambiguous without a preference. The file name says which half is meant, and
+        // a plain lockdown record still needs the other half tried.
+        let isLockdownName = url.lastPathComponent.localizedCaseInsensitiveContains("Lockdown")
+        let inferred: PairingProtocol = isLockdownName ? .lockdown : .rppairing
+        let fallback: PairingProtocol = inferred == .rppairing ? .lockdown : .rppairing
+        let parsed: any PairingFile
+        if let automatic = try? parse(content: content, preferred: nil) {
+            parsed = automatic
+        } else if let intended = try? parse(content: content, preferred: inferred) {
+            parsed = intended
+        } else {
+            parsed = try parse(content: content, preferred: fallback)
+        }
         return (content, parsed)
     }
 
     func importPairingFile(from url: URL, preferred: PairingProtocol? = nil) throws {
-        let (content, _) = try inspectPairingFile(from: url)
-        let parsed = try savePairingFile(contents: content, preferred: preferred)
+        let (content, inspected) = try inspectPairingFile(from: url)
+        let parsed = try savePairingFile(contents: content, preferred: preferred ?? inspected.mode)
         persistedActiveProtocol = parsed.mode
     }
 
