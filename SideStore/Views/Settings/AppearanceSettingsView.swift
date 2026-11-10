@@ -11,7 +11,7 @@ import SwiftUI
 /// The switch between the current interface and the SwiftUI rebuild. It only stores the choice:
 /// the launch path reads it once, so applying it means a relaunch, same as a theme change.
 struct AppearanceSettingsView: View {
-    @AppStorage(UIStylePreferences.usesNewUIKey) private var usesNewUI = false
+    @AppStorage(UIStylePreferences.usesNewUIKey, store: UIStylePreferences.store) private var usesNewUI = false
     @State private var isShowingRestartAlert = false
 
     var body: some View {

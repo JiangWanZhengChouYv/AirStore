@@ -172,6 +172,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         // Must run before any source is fetched, or this launch paints the stable track first.
+        UIStylePreferences.migrateFromStandardIfNeeded()
         Self.adoptTrackFromRunningBuildIfNeeded()
 
         Task.detached {
@@ -211,20 +212,23 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
                 
                 debugLog("Reconciling any staged drafts started...")
-                await Self.reconcileSelfReinstallationIfNeeded()
-                debugLog("Reconcile any staged drafts completed.")
+                let didSelfReinstall = Self.reconcileSelfReinstallationIfNeeded()
+                debugLog("Reconcile any staged drafts completed. selfReinstall=\(didSelfReinstall)")
 
                 await Self.reconcileSelfVersionIfNeeded()
                 
                 await WidgetDataManager.publishCurrentInstalledAppsIfNeeded(in: DatabaseManager.shared.viewContext)
                 
-                if isFirstLaunch
+                // A self-update gets a fresh container, so `isFirstLaunch` is true even though the
+                // keychain still holds a perfectly good account. Signing out there is what made an
+                // update look like a lost login.
+                if isFirstLaunch && !didSelfReinstall
                 {
                     await AuthManager.shared.signOut()
                 }
 
                 // Perform one-time maintenance tasks after database is started
-                await MaintenanceManager.shared.performMaintenanceIfNeeded()
+                await MaintenanceManager.shared.performMaintenanceIfNeeded(skipDestructivePasses: didSelfReinstall)
                 
                 // Then the recurring one: free the space a hand-tapped button should not have to be
                 // remembered for. Needs the database running, which is why it sits down here.
@@ -725,17 +729,21 @@ private extension AppDelegate {
         }
     }
     
-    static func reconcileSelfReinstallationIfNeeded() {
+    /// Returns true when the running bundle is the result of an in-app self-update. The caller uses
+    /// that to keep the account and settings: a self-update gets a fresh container, so treating it
+    /// as a first launch used to sign the user out and reset the interface switch.
+    @discardableResult
+    nonisolated static func reconcileSelfReinstallationIfNeeded() -> Bool {
         guard let appGroup = Bundle.main.altstoreAppGroup,
               let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup) else {
             debugLog("[AppDelegate] reconcileSelfReinstallation: Failed to get App Group container.")
-            return
+            return false
         }
         
         let jsonURL = containerURL.appendingPathComponent("StagedSelfReinstall.json")
         guard FileManager.default.fileExists(atPath: jsonURL.path) else {
             debugLog("[AppDelegate] reconcileSelfReinstallation: No staged self-reinstall metadata file found at \(jsonURL.path).")
-            return
+            return false
         }
         
         defer {
@@ -745,7 +753,7 @@ private extension AppDelegate {
         guard let jsonData = try? Data(contentsOf: jsonURL),
               let stagedData = (try? JSONSerialization.jsonObject(with: jsonData, options: [])) as? [String: Any] else {
             debugLog("[AppDelegate] reconcileSelfReinstallation: Failed to read StagedSelfReinstall.json.")
-            return
+            return false
         }
         
         let lastBundlePath = stagedData["lastBundlePath"] as? String
@@ -779,8 +787,10 @@ private extension AppDelegate {
                     await WidgetDataManager.publishCurrentInstalledApps(in: context)
                 }
             }
+            return true
         } else {
             debugLog("[AppDelegate] reconcileSelfReinstallation: BundlePath matched pre-installation path. Reinstallation was not completed or failed.")
+            return false
         }
     }
 

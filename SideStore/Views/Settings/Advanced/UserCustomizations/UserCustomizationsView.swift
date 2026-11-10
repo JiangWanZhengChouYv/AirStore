@@ -15,7 +15,7 @@ private extension Color {
 }
 
 struct UserCustomizationsView: View {
-    @AppStorage(UIStylePreferences.usesNewUIKey) private var usesNewUI = false
+    @AppStorage(UIStylePreferences.usesNewUIKey, store: UIStylePreferences.store) private var usesNewUI = false
     @State private var selectedBackend: GatewayBackend = selectedGatewayBackendCache
     @State private var isBackgroundServiceEnabled: Bool = UserDefaults.standard.isBackgroundServiceEnabled
     @State private var selectedBackgroundServiceMode: BackgroundServiceMode = UserDefaults.standard.backgroundServiceMode

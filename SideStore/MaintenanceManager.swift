@@ -51,7 +51,10 @@ public final class MaintenanceManager {
         }
     }
 
-    public func performMaintenanceIfNeeded() async {
+    /// - Parameter skipDestructivePasses: set after an in-app self-update, whose fresh container
+    ///   makes the one-time passes look unrun. Passes 1 and 2 clear the keychain and sign out, which
+    ///   would throw away the account the update was supposed to keep.
+    public func performMaintenanceIfNeeded(skipDestructivePasses: Bool = false) async {
         let current = completedCounter
         guard current < Self.currentMaintenanceCounter else { return }
 
@@ -59,11 +62,19 @@ public final class MaintenanceManager {
             debugLog("[MaintenanceManager] Running maintenance pass \(pass)...")
             switch pass {
             case 1:
-                Keychain.shared.clearAll()
-                await AuthManager.shared.signOut(keepCertificate: false, keepAnisetteData: false)
+                if skipDestructivePasses {
+                    debugLog("[MaintenanceManager] Skipping pass 1 after a self-update.")
+                } else {
+                    Keychain.shared.clearAll()
+                    await AuthManager.shared.signOut(keepCertificate: false, keepAnisetteData: false)
+                }
             case 2:
-                AnisetteDataManager.shared.clearCache()
-                await AuthManager.shared.signOut(keepCertificate: true, keepAnisetteData: false)
+                if skipDestructivePasses {
+                    debugLog("[MaintenanceManager] Skipping pass 2 after a self-update.")
+                } else {
+                    AnisetteDataManager.shared.clearCache()
+                    await AuthManager.shared.signOut(keepCertificate: true, keepAnisetteData: false)
+                }
             case 3:
                 UserDefaults.standard.tunnelOverridePeerIp = nil
             case 4:
