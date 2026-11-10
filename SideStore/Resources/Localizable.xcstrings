@@ -16269,6 +16269,72 @@
           }
         }
       }
+    },
+    "Updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新"
+          }
+        }
+      }
+    },
+    "Inactive Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未激活"
+          }
+        }
+      }
+    },
+    "No Installed Apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有已安装的应用"
+          }
+        }
+      }
+    },
+    "Apps you install from Browse appear here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从浏览安装的应用会出现在这里。"
+          }
+        }
+      }
+    },
+    "No News": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有新闻"
+          }
+        }
+      }
+    },
+    "News from your sources appears here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来自你的源的新闻会出现在这里。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

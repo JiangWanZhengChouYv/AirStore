@@ -46,13 +46,13 @@ struct NewBrowseView: View {
             }
             .navigationTitle(NSLocalizedString("Browse", comment: ""))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     SwiftUI.Button {
                         router.isPresentingSources = true
                     } label: {
-                        Image(systemName: "square.stack.3d.up")
+                        Image(systemName: "plus")
                     }
-                    .accessibilityLabel(NSLocalizedString("Sources", comment: ""))
+                    .accessibilityLabel(NSLocalizedString("Add Source", comment: ""))
                 }
             }
             .sheet(isPresented: $router.isPresentingSources) {

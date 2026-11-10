@@ -89,8 +89,7 @@ struct NewRootView: View {
 
     var body: some View {
         TabView(selection: $router.selectedTab) {
-            NewUIPlaceholderView(title: NSLocalizedString("News", comment: ""),
-                                 systemImage: "newspaper")
+            NewNewsView()
                 .tabItem { Label(NSLocalizedString("News", comment: ""), systemImage: "newspaper") }
                 .tag(NewRootTab.news)
 
@@ -98,8 +97,7 @@ struct NewRootView: View {
                 .tabItem { Label(NSLocalizedString("Browse", comment: ""), systemImage: "square.grid.2x2") }
                 .tag(NewRootTab.browse)
 
-            NewUIPlaceholderView(title: NSLocalizedString("My Apps", comment: ""),
-                                 systemImage: "square.stack.3d.up")
+            NewMyAppsView()
                 .tabItem { Label(NSLocalizedString("My Apps", comment: ""), systemImage: "square.stack.3d.up") }
                 .tag(NewRootTab.myApps)
 
@@ -113,22 +111,6 @@ struct NewRootView: View {
             }
             .tabItem { Label(NSLocalizedString("Settings", comment: ""), systemImage: "gearshape") }
             .tag(NewRootTab.settings)
-        }
-    }
-}
-
-private struct NewUIPlaceholderView: View {
-    let title: String
-    let systemImage: String
-
-    var body: some View {
-        NavigationStack {
-            ContentUnavailableView {
-                Label(title, systemImage: systemImage)
-            } description: {
-                Text(NSLocalizedString("This page is being rebuilt for the new interface.", comment: ""))
-            }
-            .navigationTitle(title)
         }
     }
 }
