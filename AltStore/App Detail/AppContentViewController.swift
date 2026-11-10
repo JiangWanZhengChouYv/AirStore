@@ -310,7 +310,7 @@ private extension AppContentViewController
     }
 }
 
-private struct AppVersionsCard: View
+struct AppVersionsCard: View
 {
     struct Entry: Identifiable
     {

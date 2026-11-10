@@ -18,6 +18,8 @@ enum NewRootTab: Hashable {
 @MainActor
 final class NewRootRouter: ObservableObject {
     @Published var selectedTab: NewRootTab = .browse
+    @Published var isPresentingSources = false
+    @Published var pendingSourceURL: URL?
 }
 
 /// Hosts the SwiftUI shell and gives UIKit call sites (the launch toast, later deep links) a
@@ -50,6 +52,8 @@ final class NewUIRootController: UIViewController {
 
     @objc private func handleAddSource(_ notification: Notification) {
         router.selectedTab = .browse
+        router.pendingSourceURL = notification.userInfo?[AppDelegate.addSourceDeepLinkURLKey] as? URL
+        router.isPresentingSources = true
     }
 
     @objc private func handleOpenErrorLog(_ notification: Notification) {
@@ -76,6 +80,7 @@ final class NewUIRootController: UIViewController {
 
     @objc func presentSources() {
         router.selectedTab = .browse
+        router.isPresentingSources = true
     }
 }
 
@@ -89,8 +94,7 @@ struct NewRootView: View {
                 .tabItem { Label(NSLocalizedString("News", comment: ""), systemImage: "newspaper") }
                 .tag(NewRootTab.news)
 
-            NewUIPlaceholderView(title: NSLocalizedString("Browse", comment: ""),
-                                 systemImage: "square.grid.2x2")
+            NewBrowseView(router: router)
                 .tabItem { Label(NSLocalizedString("Browse", comment: ""), systemImage: "square.grid.2x2") }
                 .tag(NewRootTab.browse)
 
