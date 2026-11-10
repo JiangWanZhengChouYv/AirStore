@@ -84,6 +84,15 @@
   ],
   "news": [
     {
+      "identifier": "ios-27-3-beta-20261110",
+      "date": "2026-11-10T00:00:00Z",
+      "title": "Everything works on the latest iOS 27.3 beta",
+      "caption": "Tested on the newest iOS 27.3 beta build: Apple ID sign-in with 2FA, installing and refreshing apps, incremental updates, on-device JIT and AirBox all work. AirBox still gives guests the higher memory ceiling, and JIT can be turned on per app inside it. If you are running the beta, update to the latest AirStore build as usual.",
+      "tintColor": "19D3B5",
+      "appID": "com.JiangWanZhengChouYv.AirStore",
+      "notify": false
+    },
+    {
       "identifier": "liquid-glass-20261031",
       "date": "2026-10-31T00:00:00Z",
       "title": "Glass that fills up as you download",

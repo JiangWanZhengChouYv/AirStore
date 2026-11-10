@@ -78,8 +78,8 @@ For the development builds, add the develop source described under Updates below
 
 Verified on device with a free personal account: sign-in including 2FA (iOS 27.2), installing and
 refreshing third-party apps including incremental updates, installing over mobile data with Wi-Fi
-off, and on-device JIT for normally installed apps. AirBox now launches guests with the higher memory
-ceiling; JIT inside the container is not available yet. Logins still depend on a third-party Anisette
+off, and on-device JIT for normally installed apps, plus JIT turned on per app inside AirBox. AirBox
+launches guests with the higher memory ceiling. Logins still depend on a third-party Anisette
 server staying online -- see the self-hosting section if you want that dependency to be yours.
 
 #### Pairing file (manual installs)
