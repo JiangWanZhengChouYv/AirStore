@@ -171,6 +171,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         
+        // Must run before any source is fetched, or this launch paints the stable track first.
+        Self.adoptTrackFromRunningBuildIfNeeded()
+
         Task.detached {
             debugLog("[AppDelegate] Boot sequence starting...")
             await AppBootManager.shared.performBootSequence()
@@ -779,6 +782,26 @@ private extension AppDelegate {
         } else {
             debugLog("[AppDelegate] reconcileSelfReinstallation: BundlePath matched pre-installation path. Reinstallation was not completed or failed.")
         }
+    }
+
+    /// A build installed outside AirStore (the desktop Helper's Develop button) never touches the
+    /// beta settings, and the 0.9.0 bundle-id change reset them anyway. Left alone, the app runs a
+    /// develop build while the store tracks stable, so the page reports 0.9.0 as "latest" and no
+    /// update is ever offered. Seed the track once from the running build, without overriding a
+    /// choice the user has already made.
+    nonisolated static func adoptTrackFromRunningBuildIfNeeded()
+    {
+        let defaults = UserDefaults.standard
+        guard !defaults.isBetaUpdatesEnabled,
+              defaults.betaUdpatesTrack == UserDefaults.defaultBetaUpdatesTrack else { return }
+
+        let version = Bundle.Info.activeBundleShortVersion
+        let track = ReleaseTrackType.from(version: version)
+        guard ReleaseTrackType.betaTracks.contains(track) else { return }
+
+        debugLog("[AppDelegate] adoptTrackFromRunningBuild: \(version) -> \(track.rawValue)")
+        defaults.betaUdpatesTrack = track.rawValue
+        defaults.isBetaUpdatesEnabled = true
     }
 
     /// The bundle on disk is what is actually running. An update installed outside AirStore

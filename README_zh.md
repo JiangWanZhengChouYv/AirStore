@@ -73,13 +73,13 @@ Windows 需要先装 iTunes（Apple Mobile Device Support）才能发现手机�
 
 ## 更新
 
-SideStore 社区源里 SideStore 自己也是一条可更新条目，但 0.9.0 起 AirStore 是另一个 App，那条更新不会再盖掉 AirStore。AirStore 自己的更新来自这个源（Settings > Sources > Add Source）：
+SideStore 社区源里 SideStore 自己也是一条可更新条目，但 0.9.0 起 AirStore 是另一个 App，那条更新不会再盖掉 AirStore。AirStore 自己的更新来自内置源；开发版就是同一个源的 `develop` 轨道。如果你把它删掉了，再按「设置 → 源 → 添加源」加回来：
 
 ```
-https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json
+https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json
 ```
 
-它只发 AirStore 的版本。旧 AirStore（`com.SideStore.SideStore`）不能原地更新到 0.9.0，按上面「安装」里的迁移步骤走。
+要看开发版，去「设置 → Beta 测试 → 启用 Beta 更新」，通道选「开发版」（开关在设置里，不在源的页面上）。旧 AirStore（`com.SideStore.SideStore`）不能原地更新到 0.9.0，按上面「安装」里的迁移步骤走。
 
 ## 自建 Anisette 服务器（最安全）
 

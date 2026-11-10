@@ -95,15 +95,18 @@ work in testing.
 ### Updates
 
 The SideStore community source lists SideStore itself, but since 0.9.0 AirStore is a different app,
-so that row can no longer overwrite it. AirStore's own updates come from this source
+so that row can no longer overwrite it. AirStore's own updates come from the built-in source; the
+develop builds are the `develop` track of that same source. If you ever removed it, add
 (Settings > Sources > Add Source):
 
 ```
-https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop/source/airstore-source.json
+https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json
 ```
 
-It carries only AirStore releases. An older AirStore (`com.SideStore.SideStore`) cannot update to
-0.9.0 in place -- follow the migration steps under Installation.
+To see develop builds, turn on Settings > Beta Testing > Enable Beta Updates and choose the Develop
+track. (The switch lives under Settings, not on the Sources page.) An older AirStore
+(`com.SideStore.SideStore`) cannot update to 0.9.0 in place -- follow the migration steps under
+Installation.
 
 ## 🖥️ Self-hosting Anisette (the safest option)
 
