@@ -18,13 +18,19 @@ final class LaunchViewController: UIViewController {
     private var retries = 0
     private var maxRetries = 3
     private var splashViewModel = SplashViewModel()
-    private var destinationViewController: TabBarController?
+    private var destinationViewController: UIViewController?
     private var startTime: Date!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         debugLog("[LaunchViewController] viewDidLoad()")
-        destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
+        // The refreshed shell is opt-in from Settings and read once, at launch, so switching it
+        // cannot leave half the app on the other interface.
+        if UIStylePreferences.usesNewUI {
+            destinationViewController = NewUIRootController()
+        } else {
+            destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
+        }
 
         #if !os(tvOS)
             if !UserDefaults.standard.hasCompletedOnboarding {
@@ -191,8 +197,14 @@ final class LaunchViewController: UIViewController {
             debugLog("Failed to update sources on launch. \(errorDesc)")
             
             let toastView = ToastView(text: NSLocalizedString("Some sources were unable to load", comment: ""), detailText: nil)
-            toastView.addTarget(self.destinationViewController, action: #selector(TabBarController.presentSources), for: .touchUpInside)
-            toastView.show(in: self.destinationViewController!.selectedViewController ?? self.destinationViewController!)
+            if let tabBarController = self.destinationViewController as? TabBarController {
+                toastView.addTarget(tabBarController, action: #selector(TabBarController.presentSources), for: .touchUpInside)
+            } else if let newRootController = self.destinationViewController as? NewUIRootController {
+                toastView.addTarget(newRootController, action: #selector(NewUIRootController.presentSources), for: .touchUpInside)
+            }
+            let presentingViewController = (self.destinationViewController as? UITabBarController)?.selectedViewController
+                ?? self.destinationViewController!
+            toastView.show(in: presentingViewController)
         }
         updateKnownSources()
         splashViewModel.updateStatus(NSLocalizedString("Almost there…", comment: ""))
