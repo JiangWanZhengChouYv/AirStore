@@ -152,7 +152,7 @@ export const Settings = ({
                   <span
                     onClick={() =>
                       openUrl(
-                        "https://github.com/nab138/iloader?tab=readme-ov-file#translating",
+                        "https://github.com/JiangWanZhengChouYv/AirStore/tree/develop/Helper/src/locales",
                       )
                     }
                     role="link"

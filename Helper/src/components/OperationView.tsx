@@ -203,7 +203,7 @@ export default ({
                 components={{
                   discord: (
                     <span
-                      onClick={() => openUrl("https://discord.gg/EA6yVgydBz")}
+                      onClick={() => openUrl("https://discord.gg/kN9Rm3kkZ")}
                       role="link"
                       className="error-link"
                     />
@@ -211,7 +211,7 @@ export default ({
                   github: (
                     <span
                       onClick={() =>
-                        openUrl("https://github.com/nab138/iloader/issues")
+                        openUrl("https://github.com/JiangWanZhengChouYv/AirStore/issues")
                       }
                       role="link"
                       className="error-link"
