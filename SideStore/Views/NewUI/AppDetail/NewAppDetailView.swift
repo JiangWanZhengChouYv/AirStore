@@ -30,6 +30,7 @@ struct NewAppDetailView: View {
         List {
             headerSection
             actionSection
+            airBoxSection
             descriptionSection
             screenshotsSection
             permissionsSection
@@ -98,6 +99,24 @@ struct NewAppDetailView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(tintColor)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var airBoxSection: some View {
+        if let latestVersion, !app.bundleIdentifier.hasSuffix(".AirBox") {
+            Section {
+                SwiftUI.Button {
+                    guard let viewController = UIApplication.shared.topViewController() else { return }
+                    ContainerInstallAction.run(version: latestVersion, appName: app.name, from: viewController)
+                } label: {
+                    Label(NSLocalizedString("Run in AirBox", comment: ""), systemImage: "shippingbox")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            } footer: {
+                Text(NSLocalizedString("AirBox runs the app without installing it on the system, so it uses no App ID.", comment: ""))
             }
         }
     }

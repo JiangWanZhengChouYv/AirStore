@@ -9,6 +9,7 @@
 import SwiftUI
 import CoreData
 import Combine
+import UniformTypeIdentifiers
 
 struct NewMyAppsView: View {
     private enum ActiveAlert: Identifiable {
@@ -38,12 +39,26 @@ struct NewMyAppsView: View {
     @State private var containerApps: [ContainerApp] = []
     @State private var progressTick = 0
     @State private var activeAlert: ActiveAlert?
+    @State private var isShowingFileImporter = false
+    @StateObject private var importProgress = InstallProgressObserver()
 
     private let progressTimer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
     var body: some View {
         NavigationStack {
             List {
+                if importProgress.isActive {
+                    Section {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ProgressView(value: importProgress.fractionCompleted ?? 0)
+                            Text(NSLocalizedString("Installing…", comment: ""))
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+
                 if !updateApps.isEmpty {
                     Section {
                         ForEach(updateApps, id: \.objectID) { app in
@@ -97,11 +112,33 @@ struct NewMyAppsView: View {
             .searchable(text: $searchText, prompt: Text(NSLocalizedString("Search Apps", comment: "")))
             .navigationTitle(NSLocalizedString("My Apps", comment: ""))
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    SwiftUI.Button {
+                        isShowingFileImporter = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel(NSLocalizedString("Install App", comment: ""))
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     SwiftUI.Button(action: refreshAll) {
                         Image(systemName: "arrow.clockwise")
                     }
                     .accessibilityLabel(NSLocalizedString("Refresh All", comment: ""))
+                }
+            }
+            .fileImporter(
+                isPresented: $isShowingFileImporter,
+                allowedContentTypes: [UTType(filenameExtension: "ipa") ?? .data],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let url = urls.first else { return }
+                    importIPA(from: url)
+                case .failure(let error):
+                    NewUIFeedback.present(error)
                 }
             }
             .onAppear(perform: reloadContainerApps)
@@ -179,6 +216,15 @@ struct NewMyAppsView: View {
                     enableJIT(app)
                 } label: {
                     Label(NSLocalizedString("Enable JIT", comment: ""), systemImage: "bolt")
+                }
+
+                if let version = app.storeApp?.latestSupportedVersion,
+                   let viewController = topViewController {
+                    SwiftUI.Button {
+                        ContainerInstallAction.run(version: version, appName: app.name, from: viewController)
+                    } label: {
+                        Label(NSLocalizedString("Run in AirBox", comment: ""), systemImage: "shippingbox")
+                    }
                 }
             } else {
                 SwiftUI.Button(role: .destructive) {
@@ -312,6 +358,43 @@ struct NewMyAppsView: View {
                 }
             }
         }
+    }
+
+    private func importIPA(from url: URL) {
+        let accessed = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessed {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(url.lastPathComponent)
+        do {
+            try? FileManager.default.removeItem(at: destination)
+            try FileManager.default.copyItem(at: url, to: destination)
+        } catch {
+            NewUIFeedback.present(error)
+            return
+        }
+
+        guard let viewController = topViewController else { return }
+        InstallAppDialog.present(ipaURL: destination, from: viewController) { [self] in
+            performImport(destination, presentingViewController: viewController)
+        }
+    }
+
+    private func performImport(_ url: URL, presentingViewController viewController: UIViewController) {
+        let group = AppManager.shared.install(.url(url), presentingViewController: viewController) { result in
+            DispatchQueue.main.async {
+                importProgress.track(nil)
+                try? FileManager.default.removeItem(at: url)
+                if case .failure(let error) = result, !(error is CancellationError) {
+                    NewUIFeedback.present(error)
+                }
+            }
+        }
+
+        importProgress.track(group.progress)
     }
 
     private func reloadContainerApps() {

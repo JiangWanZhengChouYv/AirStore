@@ -9,6 +9,14 @@
 import SwiftUI
 import CoreData
 
+private struct RecommendedSource: Identifiable, Sendable {
+    let url: URL
+    let name: String
+    let iconURL: URL?
+
+    var id: String { url.absoluteString }
+}
+
 struct NewSourcesSheet: View {
     @Environment(\.dismiss) private var dismiss
     @SwiftUI.FetchRequest private var sources: FetchedResults<Source>
@@ -17,6 +25,8 @@ struct NewSourcesSheet: View {
     @State private var isAdding = false
     @State private var errorMessage: String?
     @State private var didHandlePendingSourceURL = false
+    @State private var recommendedSources: [RecommendedSource] = []
+    @State private var isLoadingRecommended = false
 
     let pendingSourceURL: URL?
     let onPendingSourceHandled: () -> Void
@@ -48,6 +58,41 @@ struct NewSourcesSheet: View {
                     }
                 } header: {
                     Text(NSLocalizedString("Sources", comment: ""))
+                }
+
+                if isLoadingRecommended || !recommendedSources.isEmpty {
+                    Section {
+                        if isLoadingRecommended {
+                            ProgressView()
+                        }
+
+                        ForEach(recommendedSources) { source in
+                            HStack(spacing: 10) {
+                                RemoteImage(url: source.iconURL)
+                                    .frame(width: 28, height: 28)
+                                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(source.name)
+                                        .font(.body)
+                                    Text(source.url.absoluteString)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+
+                                Spacer(minLength: 8)
+
+                                SwiftUI.Button(NSLocalizedString("Add", comment: "")) {
+                                    addSource(source.url.absoluteString)
+                                    recommendedSources.removeAll { $0.id == source.id }
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    } header: {
+                        Text(NSLocalizedString("Recommended", comment: ""))
+                    }
                 }
 
                 Section {
@@ -85,7 +130,10 @@ struct NewSourcesSheet: View {
                     }
                 }
             }
-            .onAppear(perform: handlePendingSourceURL)
+            .onAppear {
+                handlePendingSourceURL()
+                loadRecommendedSources()
+            }
         }
     }
 
@@ -127,6 +175,61 @@ struct NewSourcesSheet: View {
                     .foregroundStyle(.orange)
                     .lineLimit(2)
             }
+        }
+    }
+
+    private func loadRecommendedSources() {
+        guard recommendedSources.isEmpty, !isLoadingRecommended else { return }
+
+        isLoadingRecommended = true
+        AppManager.shared.updateKnownSources { result in
+            guard case .success(let (defaults, _)) = result else {
+                DispatchQueue.main.async {
+                    isLoadingRecommended = false
+                }
+                return
+            }
+
+            let urls = defaults.prefix(6).compactMap(\.sourceURL)
+            Task {
+                var loaded: [RecommendedSource] = []
+                await withTaskGroup(of: RecommendedSource?.self) { group in
+                    for url in urls {
+                        group.addTask {
+                            await Self.previewRecommendedSource(url: url)
+                        }
+                    }
+                    for await source in group {
+                        if let source {
+                            loaded.append(source)
+                        }
+                    }
+                }
+
+                let sorted = loaded.sorted {
+                    $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+                }
+                await MainActor.run {
+                    recommendedSources = sorted
+                    isLoadingRecommended = false
+                }
+            }
+        }
+    }
+
+    /// Fetches a source into a throwaway context just to learn its name and icon; nothing is saved
+    /// here, so a preview cannot leave a half-added source behind.
+    private static func previewRecommendedSource(url: URL) async -> RecommendedSource? {
+        let context = DatabaseManager.shared.persistentContainer.newBackgroundContext()
+        guard let source = try? await AppManager.shared.fetchSource(sourceURL: url,
+                                                                     managedObjectContext: context) else {
+            return nil
+        }
+
+        return await context.perform {
+            RecommendedSource(url: source.sourceURL,
+                              name: source.name,
+                              iconURL: source.effectiveIconURL)
         }
     }
 

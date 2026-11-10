@@ -16335,6 +16335,17 @@
           }
         }
       }
+    },
+    "Recommended": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
