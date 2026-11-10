@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.9.1-develop-202611091416.170-2c2b8a6",
-          "date": "2026-11-09T14:25:27Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611091416.170-2c2b8a6.ipa",
-          "size": 30190971,
-          "sha256": "efdee8ef8758faac9b788c4f7bb98d276a3d7c010fac6b6c624760947f662c81",
-          "localizedDescription": "Development build 0.9.1-develop-202611091416.170-2c2b8a6 from commit 2c2b8a6."
+          "version": "0.9.1-develop-202611100941.171-535a1fa",
+          "date": "2026-11-10T09:51:27Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611100941.171-535a1fa.ipa",
+          "size": 30190968,
+          "sha256": "6cfa25d883dba4737a2221e232943569164eba57cf4abe8cd06cec7bc1ba1fc4",
+          "localizedDescription": "Development build 0.9.1-develop-202611100941.171-535a1fa from commit 535a1fa."
         },
         {
           "version": "0.9.0",
@@ -64,12 +64,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.9.1-develop-202611091416.170-2c2b8a6",
-              "date": "2026-11-09T14:25:27Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611091416.170-2c2b8a6.ipa",
-              "size": 30190971,
-              "sha256": "efdee8ef8758faac9b788c4f7bb98d276a3d7c010fac6b6c624760947f662c81",
-              "localizedDescription": "Development build 0.9.1-develop-202611091416.170-2c2b8a6 from commit 2c2b8a6."
+              "version": "0.9.1-develop-202611100941.171-535a1fa",
+              "date": "2026-11-10T09:51:27Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611100941.171-535a1fa.ipa",
+              "size": 30190968,
+              "sha256": "6cfa25d883dba4737a2221e232943569164eba57cf4abe8cd06cec7bc1ba1fc4",
+              "localizedDescription": "Development build 0.9.1-develop-202611100941.171-535a1fa from commit 535a1fa."
             }
           ]
         },
@@ -110,18 +110,18 @@
       "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID.",
       "iconURL": "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AirBox/Assets.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "8B5CF6",
-      "version": "0.9.1-develop-202611091416.170-2c2b8a6",
-      "date": "2026-11-09T14:25:27Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611091416.170-2c2b8a6.ipa",
-      "size": 3576016,
-      "sha256": "16f8fd8af2c4d54d185f7617271fc3635666f80e924d6a794f92ad726934ea6c",
+      "version": "0.9.1-develop-202611100941.171-535a1fa",
+      "date": "2026-11-10T09:51:27Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611100941.171-535a1fa.ipa",
+      "size": 3576017,
+      "sha256": "dcdfb1b79407b0484c66defed997d79588033d2fd8436aa4ac9aaa7902467b77",
       "versions": [
         {
-          "version": "0.9.1-develop-202611091416.170-2c2b8a6",
-          "date": "2026-11-09T14:25:27Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611091416.170-2c2b8a6.ipa",
-          "size": 3576016,
-          "sha256": "16f8fd8af2c4d54d185f7617271fc3635666f80e924d6a794f92ad726934ea6c",
+          "version": "0.9.1-develop-202611100941.171-535a1fa",
+          "date": "2026-11-10T09:51:27Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611100941.171-535a1fa.ipa",
+          "size": 3576017,
+          "sha256": "dcdfb1b79407b0484c66defed997d79588033d2fd8436aa4ac9aaa7902467b77",
           "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID."
         }
       ],
@@ -130,11 +130,11 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.9.1-develop-202611091416.170-2c2b8a6",
-              "date": "2026-11-09T14:25:27Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611091416.170-2c2b8a6.ipa",
-              "size": 3576016,
-              "sha256": "16f8fd8af2c4d54d185f7617271fc3635666f80e924d6a794f92ad726934ea6c",
+              "version": "0.9.1-develop-202611100941.171-535a1fa",
+              "date": "2026-11-10T09:51:27Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611100941.171-535a1fa.ipa",
+              "size": 3576017,
+              "sha256": "dcdfb1b79407b0484c66defed997d79588033d2fd8436aa4ac9aaa7902467b77",
               "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID."
             }
           ]
@@ -143,6 +143,15 @@
     }
   ],
   "news": [
+    {
+      "identifier": "ios-27-3-beta-20261110",
+      "date": "2026-11-10T00:00:00Z",
+      "title": "Everything works on the latest iOS 27.3 beta",
+      "caption": "Tested on the newest iOS 27.3 beta build: Apple ID sign-in with 2FA, installing and refreshing apps, incremental updates, on-device JIT and AirBox all work. AirBox still gives guests the higher memory ceiling, and JIT can be turned on per app inside it. If you are running the beta, update to the latest AirStore build as usual.",
+      "tintColor": "19D3B5",
+      "appID": "com.JiangWanZhengChouYv.AirStore",
+      "notify": false
+    },
     {
       "identifier": "liquid-glass-20261031",
       "date": "2026-10-31T00:00:00Z",
