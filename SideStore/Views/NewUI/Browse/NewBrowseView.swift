@@ -95,7 +95,8 @@ struct NewBrowseView: View {
 
     private func visibleApps(in source: Source) -> [StoreApp] {
         source.apps.filter { app in
-            guard app.bundleIdentifier != StoreApp.altstoreAppID else { return false }
+            // The store's own entry and AirBox live in the built-in source and are just as much
+            // part of it as third-party apps; the old Browse hid them, the new one does not.
             guard !app.isPledgeRequired || !app.isHiddenWithoutPledge || app.isPledged else { return false }
             return matchesSearch(app)
         }

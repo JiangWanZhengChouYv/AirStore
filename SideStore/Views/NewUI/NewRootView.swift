@@ -64,7 +64,11 @@ final class NewUIRootController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
 
-        let hostingController = UIHostingController(rootView: NewRootView(router: router))
+        // Without this the whole new shell reads from an empty default context: every @FetchRequest
+        // (sources, installed apps, news) silently returns nothing while the old UI shows the data.
+        let rootView = NewRootView(router: router)
+            .environment(\.managedObjectContext, DatabaseManager.shared.viewContext)
+        let hostingController = UIHostingController(rootView: rootView)
         addChild(hostingController)
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(hostingController.view)
