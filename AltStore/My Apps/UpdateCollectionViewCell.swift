@@ -123,7 +123,8 @@ private extension UpdateCollectionViewCell
         if #available(iOS 26.0, *)
         {
             let glass = UIGlassEffect()
-            glass.tintColor = tintColor
+            // Colour comes from the fill below, not from the glass tint: a tinted pane plus a fill was
+            // what flattened these cards into one saturated block.
             // The card expands under a tap, so it gets the same lift the download card has.
             glass.isInteractive = true
             self.blurView.effect = glass
@@ -131,7 +132,8 @@ private extension UpdateCollectionViewCell
         }
         else
         {
-            self.blurView.backgroundColor = tintColor
+            // Same treatment on the material the xib ships: a wash of colour instead of a solid paint.
+            self.blurView.contentView.backgroundColor = tintColor?.adjustedForDisplay.withAlphaComponent(AppBannerView.glassFillAlpha)
         }
         
         self.bannerView.button.progressTintColor = tintColor

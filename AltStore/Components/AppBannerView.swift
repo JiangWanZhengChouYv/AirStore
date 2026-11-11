@@ -64,7 +64,7 @@ class AppBannerView: NibView
     /// Kept low on purpose: the glass already carries the colour as its tint, and a heavy fill on top
     /// of that turned the cards into flat saturated blocks with the tinted pill button lost inside
     /// them. This reads as tinted glass and lets the button stand out.
-    static let glassFillAlpha: CGFloat = 0.2
+    static let glassFillAlpha: CGFloat = 0.3
 
     /// The colour left visible *inside* the glass, for rows in a list that are told apart by colour
     /// alone. System glass brings no colour of its own, so a row that sets this reads as a tinted panel
@@ -419,7 +419,9 @@ private extension AppBannerView
         if #available(iOS 26.0, *)
         {
             let glass = UIGlassEffect()
-            glass.tintColor = tintColor
+            // No `tintColor`: the system tint paints the whole pane in the source colour, and with the
+            // fill on top the cards turned into flat saturated slabs. Colour comes from the fill only,
+            // the way the download card does it, so the glass body stays visible.
             // Same as the download card: a card you can tap lifts under the finger, and that lift is most
             // of what reads as glass. Only rows that opted into the tinted treatment ask for it, so the
             // detail page and the store lists keep the glass they were approved with.
@@ -444,9 +446,19 @@ private extension AppBannerView
             
             self.button.style = .pill
             
-            let glassFill = self.glassFillColor.map { $0.adjustedForDisplay.withAlphaComponent(Self.glassFillAlpha) }
-            self.backgroundEffectView.contentView.backgroundColor = onGlass ? glassFill : UIColor(resource: .blurTint)
-            self.backgroundEffectView.backgroundColor = onGlass ? nil : tintColor
+            if let glassFill = self.glassFillColor.map({ $0.adjustedForDisplay.withAlphaComponent(Self.glassFillAlpha) })
+            {
+                // Rows that opted into colour get a wash over whatever the backdrop does -- glass on
+                // iOS 26, the xib's material before it. A solid `backgroundColor` under the wash was
+                // what made these cards read as painted slabs instead of tinted glass.
+                self.backgroundEffectView.contentView.backgroundColor = glassFill
+                self.backgroundEffectView.backgroundColor = nil
+            }
+            else
+            {
+                self.backgroundEffectView.contentView.backgroundColor = onGlass ? nil : UIColor(resource: .blurTint)
+                self.backgroundEffectView.backgroundColor = onGlass ? nil : tintColor
+            }
             
         case .source:
             self.directionalLayoutMargins.trailing = 20
