@@ -367,7 +367,9 @@ private struct LocalDevVPNStep: View {
                         .font(.system(size: 24))
                         .foregroundColor(.green)
                     #if !os(tvOS)
-                        .background(Circle().fill(Color(.systemBackground)))
+                        // Visual-only re-skin: use the shared glass surface instead of a hard-coded
+                        // opaque disc. Step order, detection and the connect action are untouched.
+                        .glassSurface(in: Circle())
                     #else
                         .background(Circle().fill(Color.black))
                     #endif

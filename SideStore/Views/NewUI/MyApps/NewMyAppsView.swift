@@ -11,6 +11,66 @@ import CoreData
 import Combine
 import UniformTypeIdentifiers
 
+/// The "+" button can install from a link as well as from Files. Kept in SwiftUI so the sheet has
+/// no UIKit popover anchor to worry about on iPad; URL validation matches InstallAppDialog.
+private struct InstallFromURLSheet: View {
+    let onInstall: (URL) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var text = ""
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    TextField("https://example.com/app.ipa", text: $text)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                } footer: {
+                    Text(NSLocalizedString("Enter the URL of the .ipa file to install.", comment: ""))
+                }
+
+                if let errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                Section {
+                    SwiftUI.Button(NSLocalizedString("Install", comment: "")) {
+                        guard let url = validatedURL() else {
+                            errorMessage = NSLocalizedString("Please enter a valid HTTP or HTTPS URL.", comment: "")
+                            return
+                        }
+                        dismiss()
+                        onInstall(url)
+                    }
+                }
+            }
+            .navigationTitle(NSLocalizedString("Install from URL", comment: ""))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    SwiftUI.Button(NSLocalizedString("Cancel", comment: "")) {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func validatedURL() -> URL? {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else { return nil }
+        return url
+    }
+}
+
 struct NewMyAppsView: View {
     private enum ActiveAlert: Identifiable {
         case removeApp(InstalledApp)
@@ -40,6 +100,9 @@ struct NewMyAppsView: View {
     @State private var progressTick = 0
     @State private var activeAlert: ActiveAlert?
     @State private var isShowingFileImporter = false
+    @State private var isShowingInstallOptions = false
+    @State private var isShowingURLInstall = false
+    @State private var isCheckingForUpdates = false
     @StateObject private var importProgress = InstallProgressObserver()
 
     private let progressTimer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
@@ -114,7 +177,7 @@ struct NewMyAppsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     SwiftUI.Button {
-                        isShowingFileImporter = true
+                        isShowingInstallOptions = true
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -122,10 +185,35 @@ struct NewMyAppsView: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    SwiftUI.Button(action: refreshAll) {
-                        Image(systemName: "arrow.clockwise")
+                    SwiftUI.Button {
+                        checkForUpdates()
+                    } label: {
+                        if isCheckingForUpdates {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
-                    .accessibilityLabel(NSLocalizedString("Refresh All", comment: ""))
+                    .disabled(isCheckingForUpdates)
+                    .accessibilityLabel(NSLocalizedString("Check for Updates", comment: ""))
+                }
+            }
+            .confirmationDialog(
+                NSLocalizedString("Install App", comment: ""),
+                isPresented: $isShowingInstallOptions,
+                titleVisibility: .visible
+            ) {
+                SwiftUI.Button(NSLocalizedString("Choose from Files", comment: "")) {
+                    isShowingFileImporter = true
+                }
+                SwiftUI.Button(NSLocalizedString("Install from URL", comment: "")) {
+                    isShowingURLInstall = true
+                }
+                SwiftUI.Button(NSLocalizedString("Cancel", comment: ""), role: .cancel) {}
+            }
+            .sheet(isPresented: $isShowingURLInstall) {
+                InstallFromURLSheet { url in
+                    installFromURL(url)
                 }
             }
             .fileImporter(
@@ -313,10 +401,32 @@ struct NewMyAppsView: View {
         _ = AppManager.shared.refresh([app], presentingViewController: viewController)
     }
 
-    private func refreshAll() {
-        let apps = installedApps.filter { $0.isActive }
-        guard !apps.isEmpty, let viewController = topViewController else { return }
-        _ = AppManager.shared.refresh(Array(apps), presentingViewController: viewController)
+    /// The top-right button checks sources for updates, same as the classic UI's Check for Updates.
+    /// It must not refresh every installed app: that is a different (and much heavier) operation.
+    private func checkForUpdates() {
+        guard !isCheckingForUpdates else { return }
+        isCheckingForUpdates = true
+        AppManager.shared.updateAllSources { result in
+            DispatchQueue.main.async {
+                isCheckingForUpdates = false
+                if case .failure(let error) = result, !(error is CancellationError) {
+                    NewUIFeedback.present(error)
+                }
+            }
+        }
+    }
+
+    private func installFromURL(_ url: URL) {
+        guard let viewController = topViewController else { return }
+        let group = AppManager.shared.install(.url(url), presentingViewController: viewController) { result in
+            DispatchQueue.main.async {
+                importProgress.track(nil)
+                if case .failure(let error) = result, !(error is CancellationError) {
+                    NewUIFeedback.present(error)
+                }
+            }
+        }
+        importProgress.track(group.progress)
     }
 
     private func update(_ app: InstalledApp) {

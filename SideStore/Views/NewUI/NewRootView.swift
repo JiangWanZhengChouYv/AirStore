@@ -105,16 +105,9 @@ struct NewRootView: View {
                 .tabItem { Label(NSLocalizedString("My Apps", comment: ""), systemImage: "square.stack.3d.up") }
                 .tag(NewRootTab.myApps)
 
-            NavigationStack {
-                List {
-                    NavigationLink(NSLocalizedString("Appearance", comment: "")) {
-                        AppearanceSettingsView()
-                    }
-                }
-                .navigationTitle(NSLocalizedString("Settings", comment: ""))
-            }
-            .tabItem { Label(NSLocalizedString("Settings", comment: ""), systemImage: "gearshape") }
-            .tag(NewRootTab.settings)
+            NewSettingsView()
+                .tabItem { Label(NSLocalizedString("Settings", comment: ""), systemImage: "gearshape") }
+                .tag(NewRootTab.settings)
         }
     }
 }

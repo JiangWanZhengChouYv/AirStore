@@ -1,6 +1,391 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "AirBox is not installed. Install it before opening apps in it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未安装 AirBox。请先安装再打开其中的应用。"
+          }
+        }
+      }
+    },
+    "AirStore could not reach the shared folder AirBox reads.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 无法访问 AirBox 读取的共享文件夹。"
+          }
+        }
+      }
+    },
+    "The full console log is available in the classic interface under Settings → Techy Things → View Error Log.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完整的控制台日志可在经典界面的「设置 → 技术功能 → 查看错误日志」中查看。"
+          }
+        }
+      }
+    },
+    "Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账号"
+          }
+        }
+      }
+    },
+    "Appearance & Themes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外观与主题"
+          }
+        }
+      }
+    },
+    "Apps & Refreshing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用与刷新"
+          }
+        }
+      }
+    },
+    "Sources & Updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "源与更新"
+          }
+        }
+      }
+    },
+    "Search Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索设置"
+          }
+        }
+      }
+    },
+    "Search Results": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索结果"
+          }
+        }
+      }
+    },
+    "No Settings Found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有找到设置项"
+          }
+        }
+      }
+    },
+    "Theme": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主题"
+          }
+        }
+      }
+    },
+    "SideSign Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SideSign 配置"
+          }
+        }
+      }
+    },
+    "Verbose Operations Logging": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详细操作日志"
+          }
+        }
+      }
+    },
+    "Credits": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "致谢"
+          }
+        }
+      }
+    },
+    "Not signed in": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未登录"
+          }
+        }
+      }
+    },
+    "Signed in.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已登录。"
+          }
+        }
+      }
+    },
+    "Signed out.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已退出登录。"
+          }
+        }
+      }
+    },
+    "Cache cleared.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缓存已清除。"
+          }
+        }
+      }
+    },
+    "App icon reset.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已恢复默认图标。"
+          }
+        }
+      }
+    },
+    "Could not change the app icon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法更改应用图标。"
+          }
+        }
+      }
+    },
+    "Use Default Icon": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用默认图标"
+          }
+        }
+      }
+    },
+    "Open Issues": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 Issue 列表"
+          }
+        }
+      }
+    },
+    "Open Shortcuts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开快捷指令"
+          }
+        }
+      }
+    },
+    "Report a problem or suggest an improvement on GitHub.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 GitHub 上反馈问题或提出建议。"
+          }
+        }
+      }
+    },
+    "Enable Beta Updates to receive builds from this track.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用 Beta 更新后，将从此通道接收构建。"
+          }
+        }
+      }
+    },
+    "You will no longer be able to install or refresh apps once you sign out.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出登录后将无法安装或刷新应用。"
+          }
+        }
+      }
+    },
+    "AirStore signs and refreshes apps on your device with your own Apple ID, using a local loopback VPN instead of a computer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 用你自己的 Apple ID 在设备上签名并刷新应用，通过本地回环 VPN 完成，不需要电脑。"
+          }
+        }
+      }
+    },
+    "Add the refresh-apps shortcut in the Shortcuts app to refresh with Siri.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在「快捷指令」中添加刷新应用的快捷指令，即可用 Siri 刷新。"
+          }
+        }
+      }
+    },
+    "The full refresh attempt history is available in the classic interface under Advanced → View Refresh Attempts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完整的刷新尝试记录可在经典界面的「高级 → 查看刷新尝试」中查看。"
+          }
+        }
+      }
+    },
+    "Sources are managed in Browse → Sources. The apps and news they provide appear everywhere in AirStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "源在「浏览 → 源」中管理，它们提供的应用和新闻会出现在 AirStore 各处。"
+          }
+        }
+      }
+    },
+    "Developers: AirStore Team": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开发：AirStore 团队"
+          }
+        }
+      }
+    },
+    "UI Designer: Fabian (thdev)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "界面设计：Fabian (thdev)"
+          }
+        }
+      }
+    },
+    "Asset Designer: Chris (LitRitt)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "素材设计：Chris (LitRitt)"
+          }
+        }
+      }
+    },
+    "Built on SideStore and AltStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基于 SideStore 与 AltStore 构建。"
+          }
+        }
+      }
+    },
+    "AirStore is open source. The full license and third-party notices ship with the repository.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 是开源项目，完整许可证与第三方声明随仓库一起提供。"
+          }
+        }
+      }
+    },
     "%@ %@": {
       "extractionState": "manual",
       "localizations": {

@@ -71,7 +71,7 @@ struct NewNewsView: View {
 
     private func content(for item: NewsItem) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            RemoteImage(url: item.imageURL)
+            NewsThumbnail(item: item)
                 .frame(width: 56, height: 56)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay {
@@ -138,6 +138,47 @@ struct NewNewsView: View {
     }
 }
 
+/// News in the official source has no imageURL. RemoteImage(nil) renders an empty dashed square,
+/// so fall back to our own app icon instead; the same thumbnail is used by the list and the detail.
+private struct NewsThumbnail: View {
+    let item: NewsItem
+    var contentMode: ContentMode = .fit
+
+    var body: some View {
+        Group {
+            if item.imageURL != nil {
+                RemoteImage(url: item.imageURL, contentMode: contentMode)
+            } else if let icon = Self.appIcon {
+                Image(uiImage: icon)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+            } else {
+                ZStack {
+                    Color(uiColor: item.tintColor).opacity(0.12)
+                    Image(systemName: "app.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(Color(uiColor: item.tintColor))
+                }
+            }
+        }
+        .clipped()
+    }
+
+    /// App icon sets are not always exposed by UIImage(named:), so also try the icon file named
+    /// in Info.plist before giving up. Matches the lookup already used by the splash/onboarding.
+    private static var appIcon: UIImage? {
+        if let icon = UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon60x60") {
+            return icon
+        }
+
+        guard let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+              let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
+              let files = primary["CFBundleIconFiles"] as? [String],
+              let name = files.last else { return nil }
+        return UIImage(named: name)
+    }
+}
+
 private struct NewsDetailView: View {
     @ObservedObject var item: NewsItem
 
@@ -147,12 +188,10 @@ private struct NewsDetailView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    if let imageURL = item.imageURL {
-                        RemoteImage(url: imageURL, contentMode: .fill)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 180)
-                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    }
+                    NewsThumbnail(item: item, contentMode: .fill)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 180)
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
                     Text(item.title)
                         .font(.title2.bold())

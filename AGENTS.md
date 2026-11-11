@@ -176,11 +176,20 @@ the default and must stay fully functional until Phase 6.
   `@FetchRequest` silently returns empty while the old UI shows data.
 - Implemented: Phase 0 (shell + toggle), Phase 1+2 (Browse, source management, app detail),
   Phase 3+4 (My Apps, News), plus manual IPA import, recommended sources, App Store-style shelves,
-  and a "Run in AirBox" action for any app.
-- Pending: **Phase 5** Settings rewrite (clear categories, searchable entries, Liquid Glass rows —
-  all mandatory) and onboarding re-skin; **Phase 6** make new UI the default, keep the old UI for one
-  major version, then delete it. The visual design reference has not been provided yet: do not lock
-  colors/radii/typography before it arrives.
+  and a "Run in AirBox" action for any app. **Phase 5** Settings is rewritten in SwiftUI:
+  `SideStore/Views/NewUI/Settings/` holds one `SettingsCatalog` (six groups, every classic row,
+  EN+ZH search keywords), a value-based `SettingsDestination` shared by sections and search results,
+  and glass rows whose shape/material come from `SettingsRowStyle`. The classic "Advanced → User
+  Customizations → Interface" entry stays; the new shell also puts Appearance at the top level.
+  News rows with no `imageURL` now fall back to the app icon instead of an empty placeholder. The
+  onboarding re-skin only swaps visual surfaces; all six steps and auth/pairing/container logic are
+  unchanged.
+- Pending: **Phase 6** make new UI the default, keep the old UI for one major version, then delete it
+  (only after per-page on-device sign-off). The visual design reference has not been provided yet:
+  do not lock colors/radii/typography before it arrives.
+- Settings invariant: add a setting by adding one `SettingsEntry` (with EN+ZH keywords and a
+  `zh-Hans` string), never a second hand-written list. Rows must read `SettingsRowStyle` rather than
+  hard-coding colours, radii or fonts.
 - Data rule: the new UI must read the **same Core Data objects and managers** as the old UI. No new
   entities, no parallel stores, no migrations for UI work. Switching shells must not change data.
 
