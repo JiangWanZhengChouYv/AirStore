@@ -63,6 +63,8 @@ function App() {
     Partial<Record<"stable" | "develop", ReleaseInfo>>
   >({});
   const [checkingHelperUpdate, setCheckingHelperUpdate] = useState(false);
+  // Bumped after an install so the build shown for the device is read again.
+  const [deviceBuildKey, setDeviceBuildKey] = useState(0);
 
   const refreshDevicesRef = useRef<(() => void) | null>(null);
 
@@ -104,7 +106,7 @@ function App() {
         console.error("Unable to read the installed AirStore build:", e);
         setDeviceAirStore(null);
       });
-  }, [selectedDevice]);
+  }, [selectedDevice, deviceBuildKey]);
 
   useEffect(() => {
     (["stable", "develop"] as const).forEach((track) => {
@@ -219,6 +221,7 @@ function App() {
         try {
           await invoke(operation.id + "_operation", params);
           unlistenFn();
+          setDeviceBuildKey((key) => key + 1);
           resolve();
         } catch (e) {
           unlistenFn();
