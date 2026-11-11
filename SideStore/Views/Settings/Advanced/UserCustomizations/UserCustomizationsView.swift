@@ -15,7 +15,6 @@ private extension Color {
 }
 
 struct UserCustomizationsView: View {
-    @AppStorage(UIStylePreferences.usesNewUIKey, store: UIStylePreferences.store) private var usesNewUI = false
     @State private var selectedBackend: GatewayBackend = selectedGatewayBackendCache
     @State private var isBackgroundServiceEnabled: Bool = UserDefaults.standard.isBackgroundServiceEnabled
     @State private var selectedBackgroundServiceMode: BackgroundServiceMode = UserDefaults.standard.backgroundServiceMode
@@ -188,31 +187,6 @@ struct UserCustomizationsView: View {
                                 Circle()
                                     .fill(Color(uiColor: ThemeManager.shared.primaryColor))
                                     .frame(width: 14, height: 14)
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color.white.opacity(0.4))
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                    }
-                    .background(Color.settingsRowBackground)
-                    .cornerRadius(14)
-
-                    // The switch lives here until the rebuilt Settings page grows its own
-                    // Appearance section; this one is already titled "Appearance & Themes".
-                    NavigationLink(destination: AppearanceSettingsView()) {
-                        HStack {
-                            Text(NSLocalizedString("Interface", comment: ""))
-                                .font(.system(size: 17, weight: .bold))
-                                .foregroundColor(.white)
-                            Spacer()
-                            HStack(spacing: 6) {
-                                Text(usesNewUI
-                                    ? NSLocalizedString("New interface", comment: "")
-                                    : NSLocalizedString("Classic", comment: ""))
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Color.white.opacity(0.5))
                                 Image(systemName: "chevron.right")
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(Color.white.opacity(0.4))

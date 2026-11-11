@@ -69,7 +69,7 @@ Violations may lead to restrictions up to a permanent ban.
 This is a living document, not a one-time summary. Any change that alters behavior, structure,
 state, workflows, or AI-facing rules must update AGENTS.md **in the same commit**:
 
-- new or changed feature/flow → update "Current state", the relevant stream, or "The new UI";
+- new or changed feature/flow → update "Current state" or the relevant stream;
 - new invariant, gotcha, build or CI rule → put it where the next agent will look for it;
 - finished phase or removed workaround → delete the stale sentence instead of keeping history here.
 
@@ -91,9 +91,9 @@ the conflict rather than picking a winner silently.
 
 - `AltStore/` — main app: tab bar, Browse, My Apps, Settings storyboards/controllers, app detail,
   App IDs, install/refresh UI.
-- `SideStore/` — SideStore-specific logic and newer SwiftUI screens: boot flow
-  (`AppBootManager.swift`), maintenance (`MaintenanceManager.swift`), deep links, pairing, Anisette,
-  container integration, and the **new UI** under `SideStore/Views/NewUI/`.
+- `SideStore/` — SideStore-specific logic and SwiftUI screens: boot flow (`AppBootManager.swift`),
+  maintenance (`MaintenanceManager.swift`), deep links, pairing, Anisette, container integration,
+  onboarding, and the SwiftUI subpages pushed from the classic settings list.
 - `AirBox/` — AirBox app target (LiveContainer re-skin), with `LiveProcess/` extension.
 - `SideBackup/` — helper launcher + backup engine used by self-updates.
 - `AltWidget/` — widgets.
@@ -164,43 +164,21 @@ Style:
 - Do not bump `MARKETING_VERSION` on develop to a version lower than the released stable; develop
   versions use `x.y.z-develop-<timestamp>.<run>-<sha>`.
 
-## The new UI (in progress)
+## UI
 
-The app has an **opt-in SwiftUI shell** next to the original UIKit/storyboard UI. The old UI remains
-the default and must stay fully functional until Phase 6.
+The app has **one** interface: the UIKit/storyboard UI under `AltStore/`, with individual SwiftUI
+screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings/**`).
 
-- Toggle: `UIStylePreferences.usesNewUIKey`, stored in the **App Group** `UserDefaults`
-  (`SideStore/Core/Preferences/UIStylePreferences.swift`), default **off**, read once at launch, so a
-  toggle requires a relaunch. Old-UI path: 设置 → 高级 → 用户自定义 → 界面. New shell: Settings →
-  Appearance.
-- Root: `NewUIRootController` / `NewRootView` (`SideStore/Views/NewUI/NewRootView.swift`), four tabs:
-  News, Browse (Sources merged in), My Apps, Settings. Deep-link notifications are observed in init.
-- **Critical**: the hosting controller must inject
-  `.environment(\.managedObjectContext, DatabaseManager.shared.viewContext)`. Without it every
-  `@FetchRequest` silently returns empty while the old UI shows data.
-- Implemented: Phase 0 (shell + toggle), Phase 1+2 (Browse, source management, app detail),
-  Phase 3+4 (My Apps, News), plus manual IPA import, recommended sources, App Store-style shelves,
-  and a "Run in AirBox" action for any app. **Phase 5** Settings is rewritten in SwiftUI:
-  `SideStore/Views/NewUI/Settings/` holds one `SettingsCatalog` (six groups, every classic row,
-  EN+ZH search keywords), a value-based `SettingsDestination` shared by sections and search results,
-  and glass rows whose shape/material come from `SettingsRowStyle`. The classic "Advanced → User
-  Customizations → Interface" entry stays; the new shell also puts Appearance at the top level.
-  News rows with no `imageURL` now fall back to the app icon instead of an empty placeholder. The
-  onboarding re-skin only swaps visual surfaces; all six steps and auth/pairing/container logic are
-  unchanged.
-- **Direction change (maintainer, 2026-11-11):** the new shell should be a **1:1 copy of the classic
-  UI first**, then improved from there -- not a redesign. Phase 5's six-group Settings page is a
-  transitional implementation; bring the new shell in line with the classic structure/screens before
-  adding more. Phase 6 (make new UI the default, then delete the old UI) is **on hold**. Do not keep
-  extending the rewrite in a different direction, and do not lock colors/radii/typography before the
-  visual design reference arrives.
+- A parallel opt-in SwiftUI shell (`SideStore/Views/NewUI/`, `UIStylePreferences`, the "Interface"
+  switch in 高级 → 用户自定义) existed during 2026 and was **removed at the maintainer's request on
+  2026-11-11**. Do not reintroduce it, and do not add a second shell or a UI-style switch.
+- New work goes into the classic UI. Settings rows live in `AltStore/Settings/SettingsViewController`
+  + `Settings.storyboard`, or in the SwiftUI subpages they push.
+- `Shared/Extensions/View+GlassSurface.swift` stays: the onboarding flow uses it.
+- The onboarding flow keeps its six steps and all auth/pairing/container logic; it is SwiftUI and
+  re-skinned in place (`SideStore/Views/Onboarding/OnboardingView.swift`).
 - Next feature priority: Helper ↔ on-device app integration (the Helper must stop being a re-skin),
   including update checking inside the Helper itself.
-- Settings invariant: add a setting by adding one `SettingsEntry` (with EN+ZH keywords and a
-  `zh-Hans` string), never a second hand-written list. Rows must read `SettingsRowStyle` rather than
-  hard-coding colours, radii or fonts.
-- Data rule: the new UI must read the **same Core Data objects and managers** as the old UI. No new
-  entities, no parallel stores, no migrations for UI work. Switching shells must not change data.
 
 ### SwiftUI gotchas in this repo
 
@@ -245,8 +223,7 @@ the default and must stay fully functional until Phase 6.
 | AirBox engine / guests | `Dependencies/LiveContainer`, `AirBox/`, `SideStore/Core/Container/` |
 | Install / refresh / sign | `SideStore/Core/Operations/`, `AltStore/Managing Apps/AppManager.swift` |
 | Pairing | `SideStore/Core/Pairing/PairingFileManager.swift`, `SideStore/MaintenanceManager.swift` |
-| New UI | `SideStore/Views/NewUI/`, switch in `UIStylePreferences.swift` |
-| Deep links | `SideStore/DeepLinks/URLHandler.swift`, `AppDelegate.swift`, `NewRootView.swift` |
+| Deep links | `SideStore/DeepLinks/URLHandler.swift`, `AppDelegate.swift`, `AltStore/TabBarController.swift` |
 | Feed / release | `source/airstore-source.json`, `scripts/ci/`, `.github/workflows/` |
 | Helper | `Helper/` (Tauri 2; `npm ci && npx tauri build --bundles app --ignore-version-mismatches`) |
 

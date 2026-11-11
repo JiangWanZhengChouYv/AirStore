@@ -172,7 +172,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         // Must run before any source is fetched, or this launch paints the stable track first.
-        UIStylePreferences.migrateFromStandardIfNeeded()
         Self.adoptTrackFromRunningBuildIfNeeded()
 
         Task.detached {

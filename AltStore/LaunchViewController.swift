@@ -24,13 +24,7 @@ final class LaunchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         debugLog("[LaunchViewController] viewDidLoad()")
-        // The refreshed shell is opt-in from Settings and read once, at launch, so switching it
-        // cannot leave half the app on the other interface.
-        if UIStylePreferences.usesNewUI {
-            destinationViewController = NewUIRootController()
-        } else {
-            destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
-        }
+        destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
 
         #if !os(tvOS)
             if !UserDefaults.standard.hasCompletedOnboarding {
@@ -199,8 +193,6 @@ final class LaunchViewController: UIViewController {
             let toastView = ToastView(text: NSLocalizedString("Some sources were unable to load", comment: ""), detailText: nil)
             if let tabBarController = self.destinationViewController as? TabBarController {
                 toastView.addTarget(tabBarController, action: #selector(TabBarController.presentSources), for: .touchUpInside)
-            } else if let newRootController = self.destinationViewController as? NewUIRootController {
-                toastView.addTarget(newRootController, action: #selector(NewUIRootController.presentSources), for: .touchUpInside)
             }
             let presentingViewController = (self.destinationViewController as? UITabBarController)?.selectedViewController
                 ?? self.destinationViewController!
