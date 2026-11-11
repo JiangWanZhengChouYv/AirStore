@@ -76,6 +76,17 @@ state, workflows, or AI-facing rules must update AGENTS.md **in the same commit*
 If a change makes a statement in this file false, fixing that statement is part of the change, not a
 follow-up.
 
+## Working alongside other agents
+
+More than one agent may be working in this repository at a time. At the start of a task, check
+whether AGENTS.md changed since you last read it (`git log --oneline -- AGENTS.md`, or its
+modification time). If it did, **re-read the changed sections before touching code**: another agent
+may have added a rule, renamed a path, or recorded a decision that makes your planned edit wrong.
+
+When a file you need has changed underneath you, re-read it instead of writing from memory, and do
+not revert or overwrite work you did not create. If two changes genuinely conflict, stop and surface
+the conflict rather than picking a winner silently.
+
 ## Targets, folders, schemes
 
 - `AltStore/` — main app: tab bar, Browse, My Apps, Settings storyboards/controllers, app detail,
