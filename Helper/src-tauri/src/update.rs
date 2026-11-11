@@ -41,7 +41,10 @@ pub struct AirStoreRelease {
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HelperRelease {
-    pub published_at: String,
+    /// `updated_at`, not `published_at`: `helper-latest` is a rolling tag whose assets are
+    /// re-uploaded with `--clobber`, so `published_at` stays at the day the release was created
+    /// while `updated_at` moves with every build.
+    pub updated_at: String,
     pub release_url: String,
     pub assets: Vec<String>,
 }
@@ -186,8 +189,14 @@ pub async fn check_helper_update() -> Result<HelperRelease, AppError> {
         })
         .unwrap_or_default();
 
+    let updated_at = json["updated_at"]
+        .as_str()
+        .or_else(|| json["published_at"].as_str())
+        .unwrap_or("")
+        .to_string();
+
     Ok(HelperRelease {
-        published_at: json["published_at"].as_str().unwrap_or("").to_string(),
+        updated_at,
         release_url: json["html_url"]
             .as_str()
             .unwrap_or(HELPER_RELEASE_PAGE)

@@ -40,7 +40,9 @@ type ReleaseInfo = {
 };
 
 type HelperReleaseInfo = {
-  publishedAt: string;
+  // Rolling `helper-latest` assets are re-uploaded in place, so this is the release's
+  // `updated_at`; `published_at` never moves after the first build.
+  updatedAt: string;
   releaseUrl: string;
   assets: string[];
 };
@@ -126,11 +128,11 @@ function App() {
       try {
         const release = await invoke<HelperReleaseInfo>("check_helper_update");
         const previous = localStorage.getItem("helper-last-release-date");
-        localStorage.setItem("helper-last-release-date", release.publishedAt);
-        if (previous && previous !== release.publishedAt) {
+        localStorage.setItem("helper-last-release-date", release.updatedAt);
+        if (previous && previous !== release.updatedAt) {
           toast(
             t("update.new_version_available", {
-              version: release.publishedAt.slice(0, 10),
+              version: release.updatedAt.slice(0, 10),
               defaultValue: "A new Helper build is available: {{version}}",
             }),
             {
