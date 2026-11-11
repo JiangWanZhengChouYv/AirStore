@@ -155,8 +155,8 @@ pub async fn latest_airstore_release(track: String) -> Result<AirStoreRelease, A
 }
 
 /// The rolling `helper-latest` prerelease. The Helper's own version is a fixed 0.1.0, so the UI
-/// compares this release's publication timestamp with the last one it saw instead of pretending a
-/// semantic version bump happened. GitHub's API requires a User-Agent.
+/// compares this release's last-updated timestamp with the one it saw previously instead of
+/// pretending a semantic version bump happened. GitHub's API requires a User-Agent.
 #[tauri::command]
 pub async fn check_helper_update() -> Result<HelperRelease, AppError> {
     let client = http_client()?;
