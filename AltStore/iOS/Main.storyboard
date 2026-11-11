@@ -37,7 +37,6 @@
                     </tabBar>
                     <connections>
                         <segue destination="kjR-gi-fgT" kind="relationship" relationship="viewControllers" id="eWy-uk-nwG"/>
-                        <segue destination="HCK-G6-KdY" kind="relationship" relationship="viewControllers" id="X0t-T6-JeA"/>
                         <segue destination="faz-B4-Sub" kind="relationship" relationship="viewControllers" id="OLu-kM-z1J"/>
                         <segue destination="3Ew-ox-i4n" kind="relationship" relationship="viewControllers" id="phQ-Pc-pqw"/>
                         <segue destination="p3d-dP-Swg" kind="relationship" relationship="viewControllers" id="cQE-Az-fdo"/>
@@ -916,16 +915,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3LN-mt-qWn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2730" y="1120"/>
-        </scene>
-        <!--Sources-->
-        <scene sceneID="Vzf-tb-LIH">
-            <objects>
-                <viewControllerPlaceholder storyboardName="Sources" id="HCK-G6-KdY" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="Q7y-bi-ncT"/>
-                </viewControllerPlaceholder>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="VTd-he-VYb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2" y="550"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>

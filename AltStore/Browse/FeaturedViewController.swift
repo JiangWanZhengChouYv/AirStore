@@ -102,9 +102,19 @@ class FeaturedViewController: UICollectionViewController
         self.navigationItem.hidesSearchBarWhenScrolling = true
         
         self.navigationItem.largeTitleDisplayMode = .always
+        
         NotificationCenter.default.addObserver(self, selector: #selector(self.applyThemeColour),
                                                name: ThemeManager.themeDidChangeNotification, object: nil)
         #endif
+        
+        // Sources no longer have a tab of their own, so Browse carries the only entry point besides
+        // the deep link. Kept outside the #if: tvOS loses the tab too.
+        let sourcesButton = UIBarButtonItem(image: UIImage(systemName: "dot.radiowaves.left.and.right"),
+                                            primaryAction: UIAction { [weak self] _ in
+            self?.showSources()
+        })
+        sourcesButton.accessibilityLabel = NSLocalizedString("Sources", comment: "")
+        self.navigationItem.rightBarButtonItem = sourcesButton
     }
     
     override func viewDidAppear(_ animated: Bool) 

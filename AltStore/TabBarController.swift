@@ -13,7 +13,6 @@ extension TabBarController
     private enum Tab: Int, CaseIterable
     {
         case news
-        case sources
         case browse
         case myApps
         case settings
@@ -25,8 +24,6 @@ final class TabBarController: UITabBarController
     private var initialSegue: (identifier: String, sender: Any?)?
     
     private var _viewDidAppear = false
-    
-    private var sourcesViewController: SourcesViewController!
     
     required init?(coder aDecoder: NSCoder)
     {
@@ -45,9 +42,6 @@ final class TabBarController: UITabBarController
         let browseNavigationController = self.viewControllers![Tab.browse.rawValue] as! UINavigationController
         browseNavigationController.tabBarItem.image = UIImage(systemName: "bag")
         
-        let sourcesNavigationController = self.viewControllers![Tab.sources.rawValue] as! UINavigationController
-        self.sourcesViewController = sourcesNavigationController.viewControllers.first as? SourcesViewController
-
         // Tab and navigation titles are storyboard literals, so no catalog lookup happens for them.
         for viewController in self.viewControllers ?? []
         {
@@ -102,12 +96,13 @@ extension TabBarController
             return
         }
                 
-        if let notification = (sender as? Notification), let sourceURL = notification.userInfo?[AppDelegate.addSourceDeepLinkURLKey] as? URL
-        {
-            self.sourcesViewController?.deepLinkSourceURL = sourceURL
-        }
+        let sourceURL = (sender as? Notification)?.userInfo?[AppDelegate.addSourceDeepLinkURLKey] as? URL
         
-        self.selectedIndex = Tab.sources.rawValue
+        // The sources list is no longer a tab of its own; it is pushed inside Browse.
+        self.selectedIndex = Tab.browse.rawValue
+        
+        guard let browseNavigationController = self.viewControllers?[Tab.browse.rawValue] as? UINavigationController else { return }
+        browseNavigationController.showSources(sourceURL: sourceURL)
     }
 }
 

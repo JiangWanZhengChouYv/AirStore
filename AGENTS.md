@@ -177,6 +177,10 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 - `Shared/Extensions/View+GlassSurface.swift` stays: the onboarding flow uses it.
 - The onboarding flow keeps its six steps and all auth/pairing/container logic; it is SwiftUI and
   re-skinned in place (`SideStore/Views/Onboarding/OnboardingView.swift`).
+- **The sources tab is gone** (maintainer, 2026-11-12). Source management is pushed from Browse
+  (`FeaturedViewController` toolbar button → `UIViewController.showSources(sourceURL:)`); the
+  `addSource` deep link goes through the same helper. Tab order is news, browse, my apps, settings —
+  keep `TabBarController.Tab` and both `Main.storyboard` variants (iOS + tvOS) in that order.
 - Next feature priority: Helper ↔ on-device app integration (the Helper must stop being a re-skin),
   including update checking inside the Helper itself.
 

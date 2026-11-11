@@ -49,8 +49,9 @@ final class SourcesViewController: UICollectionViewController
         navigationItem.largeTitleDisplayMode = .automatic
         #endif
 
-        // Set title
-        navigationItem.title = "Sources"
+        // Set title. The tab bar used to localize the tab roots in one loop; this screen is pushed
+        // from Browse now, so it localizes its own title.
+        navigationItem.title = NSLocalizedString("Sources", comment: "")
         navigationController?.navigationBar.layoutMargins.left = 20
         
         let layout = self.makeLayout()
@@ -520,3 +521,41 @@ extension SourcesViewController: NSFetchedResultsControllerDelegate
     }
 }
 
+
+extension UIViewController
+{
+    /// Pushes the sources list onto this controller's navigation stack, creating it the first time.
+    /// The list used to have its own tab; it now lives behind the Browse toolbar button and behind
+    /// the "add source" deep link, so both paths land on the same instance instead of stacking two.
+    @discardableResult
+    func showSources(sourceURL: URL? = nil, animated: Bool = true) -> SourcesViewController?
+    {
+        guard let navigationController = self.navigationController else { return nil }
+        
+        let sourcesViewController: SourcesViewController
+        if let existingViewController = navigationController.viewControllers.compactMap({ $0 as? SourcesViewController }).first
+        {
+            sourcesViewController = existingViewController
+            navigationController.popToViewController(existingViewController, animated: animated)
+        }
+        else
+        {
+            let storyboard = UIStoryboard(name: "Sources", bundle: .main)
+            guard let viewController = storyboard.instantiateViewController(withIdentifier: "sourcesViewController") as? SourcesViewController else { return nil }
+            
+            // A deep link can arrive while a source's app list is open; start from the top so the
+            // pushed list is not buried under an unrelated screen.
+            navigationController.popToRootViewController(animated: false)
+            navigationController.pushViewController(viewController, animated: animated)
+            
+            sourcesViewController = viewController
+        }
+        
+        if let sourceURL = sourceURL
+        {
+            sourcesViewController.deepLinkSourceURL = sourceURL
+        }
+        
+        return sourcesViewController
+    }
+}
