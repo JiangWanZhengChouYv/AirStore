@@ -117,7 +117,7 @@ private extension UpdateCollectionViewCell
         }
         
         // The box was a blur painted over with the app's colour. On iOS 26 it is glass carrying that
-        // colour at half strength, which keeps the row identifiable without the flat fill.
+        // colour as a light tint, which keeps the row identifiable without the flat fill.
         let tintColor: UIColor? = self.originalTintColor ?? self.tintColor
         
         if #available(iOS 26.0, *)

@@ -60,7 +60,11 @@ class AppBannerView: NibView
 
     /// How much of a row's own colour is left through the glass -- translucent, not a paint. The update
     /// cards use the same number so the two kinds of box on one screen match.
-    static let glassFillAlpha: CGFloat = 0.5
+    ///
+    /// Kept low on purpose: the glass already carries the colour as its tint, and a heavy fill on top
+    /// of that turned the cards into flat saturated blocks with the tinted pill button lost inside
+    /// them. This reads as tinted glass and lets the button stand out.
+    static let glassFillAlpha: CGFloat = 0.2
 
     /// The colour left visible *inside* the glass, for rows in a list that are told apart by colour
     /// alone. System glass brings no colour of its own, so a row that sets this reads as a tinted panel

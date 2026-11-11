@@ -445,7 +445,9 @@ private extension MyAppsViewController
             cell.layoutMargins.left = self.view.layoutMargins.left
             cell.layoutMargins.right = self.view.layoutMargins.right
             
-            cell.tintColor = app.tintColor ?? .altPrimary
+            // A very light source colour would paint a light pill with white text on the now-light
+            // glass, so clamp it the way the rest of the app does before using it as the button fill.
+            cell.tintColor = (app.tintColor ?? .altPrimary).adjustedForDisplay
             cell.versionDescriptionTextView.maximumNumberOfLines = 3
             cell.versionDescriptionTextView.text = latestSupportedVersion.localizedDescription ?? "nil"
             
@@ -536,7 +538,7 @@ private extension MyAppsViewController
         let dataSource = FetchedResultsCollectionViewPrefetchingDataSource<InstalledApp, UIImage>(fetchRequest: fetchRequest, managedObjectContext: DatabaseManager.shared.viewContext)
         dataSource.cellIdentifierHandler = { _ in "AppCell" }
         dataSource.cellConfigurationHandler = { (cell, installedApp, indexPath) in
-            let tintColor = installedApp.storeApp?.tintColor ?? .altPrimary
+            let tintColor = (installedApp.storeApp?.tintColor ?? .altPrimary).adjustedForDisplay
             
             let cell = cell as! InstalledAppCollectionViewCell
             cell.layoutMargins.left = self.view.layoutMargins.left
