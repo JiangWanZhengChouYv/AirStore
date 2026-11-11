@@ -5,6 +5,8 @@
 //! commands give the UI that information using the same installation proxy and the same source feed
 //! the app itself reads, so the Helper stops being a re-skin with hard-coded URLs.
 
+use std::time::Duration;
+
 use idevice::{IdeviceService, installation_proxy::InstallationProxyClient};
 use serde::Serialize;
 use tauri::State;
@@ -42,6 +44,15 @@ pub struct HelperRelease {
     pub published_at: String,
     pub release_url: String,
     pub assets: Vec<String>,
+}
+
+/// Both version checks run on app launch, so they get a deadline: a stalled connection must not
+/// leave the UI waiting forever.
+fn http_client() -> Result<reqwest::Client, AppError> {
+    reqwest::Client::builder()
+        .timeout(Duration::from_secs(20))
+        .build()
+        .map_err(|e| AppError::Download(format!("Could not create an HTTP client: {e}")))
 }
 
 /// Which AirStore build is installed on the selected device. `CFBundleShortVersionString` is what
@@ -105,7 +116,10 @@ pub async fn installed_airstore(
 /// Both tracks live in the same generated `develop-source` JSON.
 #[tauri::command]
 pub async fn latest_airstore_release(track: String) -> Result<AirStoreRelease, AppError> {
-    let body = reqwest::get(SOURCE_FEED)
+    let client = http_client()?;
+    let body = client
+        .get(SOURCE_FEED)
+        .send()
         .await
         .map_err(|e| AppError::Download(format!("Could not read the AirStore source: {e}")))?
         .text()
@@ -142,7 +156,7 @@ pub async fn latest_airstore_release(track: String) -> Result<AirStoreRelease, A
 /// semantic version bump happened. GitHub's API requires a User-Agent.
 #[tauri::command]
 pub async fn check_helper_update() -> Result<HelperRelease, AppError> {
-    let client = reqwest::Client::new();
+    let client = http_client()?;
     let response = client
         .get(HELPER_RELEASE_API)
         .header("User-Agent", "AirStore-Helper")
