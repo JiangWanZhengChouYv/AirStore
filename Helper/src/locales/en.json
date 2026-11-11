@@ -46,7 +46,15 @@
     "must_select_device": "You must select a device!",
     "ipa_files": "IPA Files",
     "logo_alt": "AirStore Helper logo",
-    "sidestore_develop": "AirStore (Develop)"
+    "sidestore_develop": "AirStore (Develop)",
+    "check_updates": "Check for updates",
+    "on_device": "On this device",
+    "select_device_for_build": "Select a device to see its AirStore build.",
+    "installed_build": "Installed: {{version}}",
+    "unknown_version": "unknown",
+    "not_installed": "AirStore is not installed on this device.",
+    "latest_builds": "Latest stable: {{stable}} · Latest develop: {{develop}}",
+    "update_to_develop": "Update to the latest develop build"
   },
   "apple_id": {
     "title": "Apple ID",
@@ -287,6 +295,9 @@
     "new_version_available": "A new version is available: {{version}}. Do you want to update?",
     "updating": "Updating...",
     "downloaded_restarting": "Update downloaded! Restarting app...",
-    "failed_download": "Failed to download update: {{error}}"
+    "failed_download": "Failed to download update: {{error}}",
+    "download": "Download",
+    "up_to_date": "You're up to date.",
+    "failed_check": "Could not check for updates."
   }
 }

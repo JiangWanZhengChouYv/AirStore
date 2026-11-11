@@ -45,7 +45,15 @@
     "must_select_device": "您必须选择一台设备！",
     "ipa_files": "IPA 文件",
     "logo_alt": "AirStore Helper 标志",
-    "sidestore_develop": "AirStore（开发版）"
+    "sidestore_develop": "AirStore（开发版）",
+    "check_updates": "检查更新",
+    "on_device": "此设备上",
+    "select_device_for_build": "选择设备以查看其 AirStore 版本。",
+    "installed_build": "已安装：{{version}}",
+    "unknown_version": "未知",
+    "not_installed": "此设备上未安装 AirStore。",
+    "latest_builds": "最新正式版：{{stable}} · 最新开发版：{{develop}}",
+    "update_to_develop": "更新到最新开发版"
   },
   "apple_id": {
     "title": "Apple ID",
@@ -202,6 +210,9 @@
     "new_version_available": "有新版本可用：{{version}}。是否要更新？",
     "updating": "正在更新...",
     "downloaded_restarting": "更新已下载！正在重启应用...",
-    "failed_download": "下载更新失败：{{error}}"
+    "failed_download": "下载更新失败：{{error}}",
+    "download": "下载",
+    "up_to_date": "已是最新版本。",
+    "failed_check": "检查更新失败。"
   }
 }

@@ -101,7 +101,11 @@ the conflict rather than picking a winner silently.
 - `Dependencies/` — submodules/local Swift Packages (`minimuxer`, `SideSign`, `CodeSignKit`,
   `LiveContainer`). Do not modify unless the task is explicitly a dependency update.
 - `Helper/` — Tauri 2 desktop companion (React + Rust). Installs AirStore over USB/Network and places
-  the pairing file. Not in the Xcode workspace; CI builds it separately.
+  the pairing file. Not in the Xcode workspace; CI builds it separately. `src-tauri/src/update.rs`
+  holds the device linkage: `installed_airstore` reads `CFBundleShortVersionString` through the
+  installation proxy, `latest_airstore_release` reads the stable/develop tracks from the same feed the
+  app subscribes to, and `check_helper_update` reads the rolling `helper-latest` prerelease. Keep
+  those three as the only source of version truth in the Helper.
 - `source/airstore-source.json` — the **hand-authored** source feed (stable truth).
 - `scripts/ci/` — versioning, deltas, feed generation, release assets.
 - Schemes: `SideStore` (full), `SideStore - Release` (store only), `AirBox`, `SideBackup`,
@@ -184,9 +188,14 @@ the default and must stay fully functional until Phase 6.
   News rows with no `imageURL` now fall back to the app icon instead of an empty placeholder. The
   onboarding re-skin only swaps visual surfaces; all six steps and auth/pairing/container logic are
   unchanged.
-- Pending: **Phase 6** make new UI the default, keep the old UI for one major version, then delete it
-  (only after per-page on-device sign-off). The visual design reference has not been provided yet:
-  do not lock colors/radii/typography before it arrives.
+- **Direction change (maintainer, 2026-11-11):** the new shell should be a **1:1 copy of the classic
+  UI first**, then improved from there -- not a redesign. Phase 5's six-group Settings page is a
+  transitional implementation; bring the new shell in line with the classic structure/screens before
+  adding more. Phase 6 (make new UI the default, then delete the old UI) is **on hold**. Do not keep
+  extending the rewrite in a different direction, and do not lock colors/radii/typography before the
+  visual design reference arrives.
+- Next feature priority: Helper ↔ on-device app integration (the Helper must stop being a re-skin),
+  including update checking inside the Helper itself.
 - Settings invariant: add a setting by adding one `SettingsEntry` (with EN+ZH keywords and a
   `zh-Hans` string), never a second hand-written list. Rows must read `SettingsRowStyle` rather than
   hard-coding colours, radii or fonts.

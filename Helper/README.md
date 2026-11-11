@@ -60,3 +60,9 @@ this Mac's signing certificate; the copy installed here is signed locally with t
 - Install offers the latest stable AirStore and, through the Develop button, the current develop build.
 - Pairing: the pairing screen generates the file and this app places it in AirStore's Documents.
   AirStore adopts that file on its next launch when no protocol has been chosen yet.
+- Device linkage: selecting a device shows the AirStore build actually installed on it, alongside
+  the latest stable and develop builds from the source feed. When they differ, the installer section
+  offers a one-click update to the current develop build.
+- Check for updates: compares the rolling `helper-latest` release with the last one this Helper saw
+  and offers its download page. It does not install the update -- CI publishes ad-hoc/unsigned
+  builds, and Tauri's updater needs signed artifacts before auto-install can be enabled.

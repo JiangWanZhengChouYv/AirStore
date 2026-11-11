@@ -11,6 +11,7 @@ mod secure_storage;
 mod error;
 mod logging;
 mod operation;
+mod update;
 
 use crate::{
     account::{
@@ -26,6 +27,7 @@ use crate::{
     },
     secure_storage::{force_disable_keyring, keyring_available},
     sideload::{SideloaderMutex, install_sidestore_operation, sideload_operation},
+    update::{check_helper_update, installed_airstore, latest_airstore_release},
 };
 use tauri::Manager;
 use tracing_subscriber::{Layer, Registry, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -125,6 +127,9 @@ pub fn run() {
             force_disable_keyring,
             cancel_pairing,
             has_stored_rppairing,
+            installed_airstore,
+            latest_airstore_release,
+            check_helper_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

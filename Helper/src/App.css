@@ -120,6 +120,24 @@ body {
   white-space: nowrap;
 }
 
+.device-build-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0 0 0.9rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.device-build-status .section-label,
+.device-build-status .section-hint {
+  margin: 0;
+}
+
+.device-build-status button {
+  align-self: flex-start;
+}
+
 .header-actions {
   display: flex;
   gap: 0.5rem;

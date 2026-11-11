@@ -26,6 +26,25 @@ import { GlassCard } from "./components/GlassCard";
 import { useTranslation } from "react-i18next";
 import { usePlatform } from "./PlatformContext";
 
+type InstalledAirStore = {
+  installed: boolean;
+  version: string | null;
+  bundleId: string | null;
+};
+
+type ReleaseInfo = {
+  track: string;
+  version: string;
+  date: string;
+  downloadUrl: string;
+};
+
+type HelperReleaseInfo = {
+  publishedAt: string;
+  releaseUrl: string;
+  assets: string[];
+};
+
 function App() {
   const { t } = useTranslation();
 
@@ -38,6 +57,12 @@ function App() {
     null | "certificates" | "appids" | "pairing"
   >(null);
   const [version, setVersion] = useState<string>("");
+  // The Helper used to install AirStore without ever knowing which build was on the phone.
+  const [deviceAirStore, setDeviceAirStore] = useState<InstalledAirStore | null>(null);
+  const [latestReleases, setLatestReleases] = useState<
+    Partial<Record<"stable" | "develop", ReleaseInfo>>
+  >({});
+  const [checkingHelperUpdate, setCheckingHelperUpdate] = useState(false);
 
   const refreshDevicesRef = useRef<(() => void) | null>(null);
 
@@ -65,6 +90,79 @@ function App() {
     };
     fetchVersion();
   }, []);
+
+  // Link with the phone: read the AirStore build actually installed, and the newest build on each
+  // track from the same feed the app subscribes to.
+  useEffect(() => {
+    if (!selectedDevice) {
+      setDeviceAirStore(null);
+      return;
+    }
+    invoke<InstalledAirStore>("installed_airstore")
+      .then(setDeviceAirStore)
+      .catch((e) => {
+        console.error("Unable to read the installed AirStore build:", e);
+        setDeviceAirStore(null);
+      });
+  }, [selectedDevice]);
+
+  useEffect(() => {
+    (["stable", "develop"] as const).forEach((track) => {
+      invoke<ReleaseInfo>("latest_airstore_release", { track })
+        .then((release) =>
+          setLatestReleases((old) => ({ ...old, [track]: release })),
+        )
+        .catch((e) =>
+          console.error(`Unable to read the ${track} AirStore release:`, e),
+        );
+    });
+  }, []);
+
+  const checkForHelperUpdate = useCallback(
+    async (silent: boolean) => {
+      setCheckingHelperUpdate(true);
+      try {
+        const release = await invoke<HelperReleaseInfo>("check_helper_update");
+        const previous = localStorage.getItem("helper-last-release-date");
+        localStorage.setItem("helper-last-release-date", release.publishedAt);
+        if (previous && previous !== release.publishedAt) {
+          toast(
+            t("update.new_version_available", {
+              version: release.publishedAt.slice(0, 10),
+              defaultValue: "A new Helper build is available: {{version}}",
+            }),
+            {
+              action: {
+                label: t("update.download", { defaultValue: "Download" }),
+                onClick: () => openUrl(release.releaseUrl),
+              },
+            },
+          );
+        } else if (!silent) {
+          toast.success(
+            t("update.up_to_date", { defaultValue: "You're up to date." }),
+          );
+        }
+      } catch (e) {
+        console.error("Helper update check failed:", e);
+        if (!silent) {
+          toast.error(
+            t("update.failed_check", {
+              defaultValue: "Could not check for updates.",
+            }),
+          );
+        }
+      } finally {
+        setCheckingHelperUpdate(false);
+      }
+    },
+    [t],
+  );
+
+  useEffect(() => {
+    // Silent on launch; the header button is the explicit check.
+    checkForHelperUpdate(true);
+  }, [checkForHelperUpdate]);
 
   const shortcutLabel = useCallback(
     (mac: string, windows: string, linux?: string) => {
@@ -190,6 +288,13 @@ function App() {
         <div className="header-actions">
           <button
             className="toolbar-button"
+            disabled={checkingHelperUpdate}
+            onClick={() => checkForHelperUpdate(false)}
+          >
+            {t("app.check_updates", { defaultValue: "Check for updates" })}
+          </button>
+          <button
+            className="toolbar-button"
             onClick={async () => {
               try {
                 await openUrl("https://github.com/JiangWanZhengChouYv/AirStore");
@@ -298,6 +403,53 @@ function App() {
               <span className="section-hint">{t("app.choose_build")}</span>
             </div>
             <GlassCard className="panel">
+              <div className="device-build-status">
+                <p className="section-label">
+                  {t("app.on_device", { defaultValue: "On this device" })}
+                </p>
+                <p className="section-hint">
+                  {deviceAirStore === null
+                    ? t("app.select_device_for_build", {
+                        defaultValue: "Select a device to see its AirStore build.",
+                      })
+                    : deviceAirStore.installed
+                      ? t("app.installed_build", {
+                          version:
+                            deviceAirStore.version ??
+                            t("app.unknown_version", { defaultValue: "unknown" }),
+                          defaultValue: "Installed: {{version}}",
+                        })
+                      : t("app.not_installed", {
+                          defaultValue: "AirStore is not installed on this device.",
+                        })}
+                </p>
+                <p className="section-hint">
+                  {t("app.latest_builds", {
+                    stable: latestReleases.stable?.version ?? "–",
+                    develop: latestReleases.develop?.version ?? "–",
+                    defaultValue:
+                      "Latest stable: {{stable}} · Latest develop: {{develop}}",
+                  })}
+                </p>
+                {deviceAirStore?.installed &&
+                  latestReleases.develop &&
+                  deviceAirStore.version !== latestReleases.develop.version && (
+                    <button
+                      onClick={() => {
+                        if (!ensuredLoggedIn() || !ensureSelectedDevice()) return;
+                        startOperation(installSideStoreOperation, {
+                          nightly: false,
+                          liveContainer: false,
+                          develop: true,
+                        }).catch((e) => console.error(e));
+                      }}
+                    >
+                      {t("app.update_to_develop", {
+                        defaultValue: "Update to the latest develop build",
+                      })}
+                    </button>
+                  )}
+              </div>
               <div className="action-row single-row">
                 <button
                   onClick={() => {
