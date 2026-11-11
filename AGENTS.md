@@ -64,6 +64,18 @@ Violations may lead to restrictions up to a permanent ban.
   user-facing name is `CFBundleDisplayName = AirStore`. `PRODUCT_NAME` in `Build.xcconfig` does not
   win — every target sets `PRODUCT_NAME = "$(TARGET_NAME)"`.
 
+## Keep this file current
+
+This is a living document, not a one-time summary. Any change that alters behavior, structure,
+state, workflows, or AI-facing rules must update AGENTS.md **in the same commit**:
+
+- new or changed feature/flow → update "Current state", the relevant stream, or "The new UI";
+- new invariant, gotcha, build or CI rule → put it where the next agent will look for it;
+- finished phase or removed workaround → delete the stale sentence instead of keeping history here.
+
+If a change makes a statement in this file false, fixing that statement is part of the change, not a
+follow-up.
+
 ## Targets, folders, schemes
 
 - `AltStore/` — main app: tab bar, Browse, My Apps, Settings storyboards/controllers, app detail,
@@ -215,5 +227,6 @@ the default and must stay fully functional until Phase 6.
 2. Type/parse checks pass, the relevant target builds (locally or CI), SwiftLint errors stay at zero.
 3. New strings have `zh-Hans` entries; user-facing docs match reality (no promises, no stale versions).
 4. No secrets, credentials, pairing files, certificates, or build artifacts in the diff.
-5. The human can explain the change without generated text; AI involvement is disclosed in the
+5. AGENTS.md is updated when the change alters anything this file describes.
+6. The human can explain the change without generated text; AI involvement is disclosed in the
    PR/issue text.
