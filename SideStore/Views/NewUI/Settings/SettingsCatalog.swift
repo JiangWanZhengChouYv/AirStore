@@ -131,12 +131,24 @@ enum SettingsCatalog {
         .init(id: "appearance", group: .appearance, title: NSLocalizedString("Appearance", comment: ""), symbol: "paintbrush", keywords: ["外观", "界面", "新界面", "Appearance", "Interface", "New UI"], kind: .navigation(.appearance)),
         .init(id: "appIcon", group: .appearance, title: NSLocalizedString("Change App Icon", comment: ""), symbol: "app.badge", keywords: ["图标", "应用图标", "App Icon", "Icon"], kind: .navigation(.appIcon)),
         .init(id: "theme", group: .appearance, title: NSLocalizedString("Theme", comment: ""), symbol: "swatchpalette", keywords: ["主题", "配色", "颜色", "Theme", "Colour", "Color"], kind: .navigation(.themePicker)),
-        .init(id: "userCustomizations", group: .appearance, title: NSLocalizedString("User Customizations", comment: ""), symbol: "slider.horizontal.3", keywords: ["自定义", "个性化", "Customizations", "Customize"], kind: .navigation(.userCustomizations)),
+        .init(
+            id: "userCustomizations", group: .appearance,
+            title: NSLocalizedString("User Customizations", comment: ""),
+            symbol: "slider.horizontal.3",
+            keywords: ["自定义", "个性化", "Customizations", "Customize"],
+            kind: .navigation(.userCustomizations)
+        ),
 
         // MARK: Apps & Refreshing
         .init(id: "backgroundRefresh", group: .apps, title: NSLocalizedString("Background Refresh", comment: ""), symbol: "arrow.triangle.2.circlepath", keywords: ["后台刷新", "Background Refresh", "Refresh"], kind: .toggle("isBackgroundRefreshEnabled")),
         .init(id: "idleTimeout", group: .apps, title: NSLocalizedString("Disable Idle Timeout", comment: ""), symbol: "timer", keywords: ["空闲超时", "永不休眠", "Idle Timeout"], kind: .toggle("isIdleTimeoutDisableEnabled")),
-        .init(id: "appLimit", group: .apps, title: NSLocalizedString("Disable App Limit", comment: ""), symbol: "square.stack.3d.up.slash", keywords: ["应用数量限制", "三个应用", "App Limit", "Active Apps Limit"], kind: .toggle("isAppLimitDisabled")),
+        .init(
+            id: "appLimit", group: .apps,
+            title: NSLocalizedString("Disable App Limit", comment: ""),
+            symbol: "square.stack.3d.up.slash",
+            keywords: ["应用数量限制", "三个应用", "App Limit", "Active Apps Limit"],
+            kind: .toggle("isAppLimitDisabled")
+        ),
         .init(id: "siriShortcuts", group: .apps, title: NSLocalizedString("Allow Siri To Refresh Apps…", comment: ""), symbol: "mic", keywords: ["Siri", "快捷指令", "语音刷新", "Shortcuts"], kind: .action(.siriShortcuts)),
         .init(id: "refreshAttempts", group: .apps, title: NSLocalizedString("View Refresh Attempts", comment: ""), symbol: "clock.arrow.circlepath", keywords: ["刷新记录", "刷新尝试", "Refresh Attempts", "History"], kind: .action(.refreshAttempts)),
         .init(id: "container", group: .apps, title: NSLocalizedString("Container", comment: ""), symbol: "shippingbox", keywords: ["容器", "AirBox", "Container", "容器模式"], kind: .navigation(.container)),
@@ -145,7 +157,13 @@ enum SettingsCatalog {
         .init(id: "sources", group: .sources, title: NSLocalizedString("Sources", comment: ""), symbol: "square.stack.3d.down", keywords: ["源", "软件源", "添加源", "Sources", "Repos"], kind: .navigation(.sources)),
         .init(id: "betaUpdates", group: .sources, title: NSLocalizedString("Enable Beta Updates", comment: ""), symbol: "testtube.2", keywords: ["测试版", "开发版", "Beta", "Beta Updates"], kind: .toggle("isBetaUpdatesEnabled")),
         .init(id: "betaTrack", group: .sources, title: NSLocalizedString("Beta Updates Track", comment: ""), symbol: "eyedropper", keywords: ["通道", "更新通道", "开发版", "Track", "Channel", "Beta Track"], kind: .action(.betaTrack)),
-        .init(id: "incrementalUpdates", group: .sources, title: NSLocalizedString("Incremental Updates", comment: ""), symbol: "square.and.arrow.down.on.square", keywords: ["增量更新", "补丁", "Incremental", "Delta", "Patch"], kind: .toggle("isIncrementalUpdateEnabled")),
+        .init(
+            id: "incrementalUpdates", group: .sources,
+            title: NSLocalizedString("Incremental Updates", comment: ""),
+            symbol: "square.and.arrow.down.on.square",
+            keywords: ["增量更新", "补丁", "Incremental", "Delta", "Patch"],
+            kind: .toggle("isIncrementalUpdateEnabled")
+        ),
 
         // MARK: Developer
         .init(id: "healthCheck", group: .developer, title: NSLocalizedString("Health Check", comment: ""), symbol: "stethoscope", keywords: ["健康检查", "体检", "Health Check", "Diagnostics"], kind: .navigation(.healthCheck)),
@@ -163,9 +181,21 @@ enum SettingsCatalog {
         .init(id: "backupRestore", group: .developer, title: NSLocalizedString("Backup & Restore", comment: ""), symbol: "externaldrive", keywords: ["备份", "恢复", "Backup", "Restore"], kind: .navigation(.backupRestore)),
         .init(id: "sideJITServer", group: .developer, title: NSLocalizedString("SideJITServer", comment: ""), symbol: "bolt", keywords: ["JIT", "SideJITServer", "调试"], kind: .navigation(.sideJITServer)),
         .init(id: "sideSign", group: .developer, title: NSLocalizedString("SideSign Configuration", comment: ""), symbol: "signature", keywords: ["SideSign", "签名配置", "Signing"], kind: .navigation(.sideSignConfiguration)),
-        .init(id: "verboseLogging", group: .developer, title: NSLocalizedString("Verbose Operations Logging", comment: ""), symbol: "text.alignleft", keywords: ["详细日志", "Verbose Logging", "Operations Log"], kind: .toggle("isVerboseOperationsLoggingEnabled")),
+        .init(
+            id: "verboseLogging", group: .developer,
+            title: NSLocalizedString("Verbose Operations Logging", comment: ""),
+            symbol: "text.alignleft",
+            keywords: ["详细日志", "Verbose Logging", "Operations Log"],
+            kind: .toggle("isVerboseOperationsLoggingEnabled")
+        ),
         .init(id: "developerOptions", group: .developer, title: NSLocalizedString("Developer Options", comment: ""), symbol: "hammer", keywords: ["开发者选项", "Developer Options", "Debug"], kind: .navigation(.developerOptions), requiresDebug: true),
-        .init(id: "experimentalFeatures", group: .developer, title: NSLocalizedString("Experimental Features", comment: ""), symbol: "flask", keywords: ["实验性功能", "Experimental Features", "Beta Features"], kind: .navigation(.experimentalFeatures), requiresDebug: true),
+        .init(
+            id: "experimentalFeatures", group: .developer,
+            title: NSLocalizedString("Experimental Features", comment: ""),
+            symbol: "flask",
+            keywords: ["实验性功能", "Experimental Features", "Beta Features"],
+            kind: .navigation(.experimentalFeatures), requiresDebug: true
+        ),
 
         // MARK: About
         .init(id: "howItWorks", group: .about, title: NSLocalizedString("How it works", comment: ""), symbol: "questionmark.circle", keywords: ["怎么用", "原理", "How it works", "Help"], kind: .action(.howItWorks)),
