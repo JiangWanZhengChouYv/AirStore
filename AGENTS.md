@@ -1,198 +1,219 @@
 # Agent Guidelines for AirStore
 
-A file for [guiding AI coding agents](https://agents.md/).
+A file for [guiding AI coding agents](https://agents.md/). Read this before changing code.
 
-## Project Overview
+## What this project is
 
-AirStore is a fork of SideStore, an iOS app that sideloads and refreshes apps
-on-device with a personal Apple ID, using a local VPN loopback (`em_proxy` and
-`minimuxer`) instead of a computer. SideStore started as an AltStore fork, but
-0.6.4 rewrote the internals to use Swift Concurrency instead of AltStore's old
-GCD-based design. AirStore needs no AltServer, same as SideStore.
+AirStore is a fork of [SideStore](https://github.com/SideStore/SideStore), which is itself a fork of
+AltStore. It sideloads and refreshes iOS apps on-device with a personal Apple ID, using a local VPN
+loopback (`em_proxy` + `minimuxer`) instead of a computer. There is **no AltServer** and no desktop
+component required to refresh apps.
 
-AirStore's goal outgrew its original one: **AirStore aims to be the better
-SideStore** — the fork a user stays on rather than a temporary patch for a
-single Apple error. The work streams, all of them main line:
+The goal is stated as **"be the better SideStore"** — the fork a user stays on, not a temporary patch
+for one Apple error. Work happens in three main streams, all first-class:
 
-- **`-80045`**: resolve the Apple ID authentication error on iOS 26.4 and above.
-  Apple tightened its GrandSlam Anisette restrictions, which left users in a login
-  loop because public Anisette servers are largely blocked or unstable. The approach
-  is to rewrite the Anisette data request logic and spoof the client headers that
-  mimic a legitimate environment. Start in `SideStore/Core/Anisette/`, then follow
-  the flow through `AltStore/Settings/AnisetteManager.swift`,
-  `AltStore/Settings/AnisetteServerList.swift` and `SideStore/Core/Auth/`, which is
-  where the error surfaces.
-- **AirBox**: run guests inside a container, so the number of apps a user can keep
-  is not decided by a free account's App ID slots. Start in
-  `SideStore/Core/Container/` and `AirBox/`, with the vendored engine in
-  `Dependencies/LiveContainer`.
-- **On-device quality**: the high-memory and JIT entitlements, incremental updates
-  that fetch a patch instead of the whole package, import and export of pairing
-  files and certificates, and the zh-Hans localization.
+1. **`-80045` / Anisette** — Apple ID sign-in on iOS 26.4+. Apple tightened GrandSlam Anisette
+   restrictions and public Anisette servers are largely blocked. Start in
+   `SideStore/Core/Anisette/`, then follow `AltStore/Settings/AnisetteManager.swift`,
+   `AltStore/Settings/AnisetteServerList.swift`, and `SideStore/Core/Auth/`, where the error surfaces.
+2. **AirBox** — run apps inside a container so the number of apps a user keeps is not decided by a free
+   account's App ID slots. This is a re-skin of LiveContainer: `AirBox/`,
+   `SideStore/Core/Container/`, vendored engine in `Dependencies/LiveContainer`.
+3. **On-device quality** — high-memory and JIT entitlements, incremental updates (patch instead of full
+   package), pairing/certificate import & export, and Simplified Chinese localization.
 
-Everything else is inherited upstream behavior. A change in any stream above
-should still stay focused on one thing, because one person reads every diff.
+Everything else is inherited upstream behavior. Keep each change focused on one thing; one person
+reads every diff.
 
-AirStore is maintained by **one person, in their spare time**. Review capacity is
-the scarcest resource here, which is why the participation rules below exist and
-why they are enforced.
+## Maintainer and contribution constraints
 
-AirStore is written in pure Swift and built with Xcode. Dependencies
-(`minimuxer`, `SideSign`) are managed as submodules and local Swift Packages
-in `Dependencies/`. `minimuxer` is pure Swift, and `em_proxy` is bundled as an
-XCFramework via SPM. We use Makefiles for CLI build and packaging automation.
-
-The rename from SideStore stops at the identifiers: `PRODUCT_NAME`,
-`ORG_IDENTIFIER` and `BASE_BUNDLE_ID` in `Build.xcconfig` are still `SideStore`
-and `com.SideStore.SideStore`, while the packaged artifact is `AirStore.ipa`.
-Note that `PRODUCT_NAME` in `Build.xcconfig` never took effect anyway — every
-target sets `PRODUCT_NAME = "$(TARGET_NAME)"` in the project file, which wins.
-The user-facing name comes from `CFBundleDisplayName = AirStore` in
-`AltStore/Info.plist`; changing the bundle id or app group is a different,
-breaking job — they change which signed profile the app can use and would
-orphan existing installs.
-
-App installation, certificate signing, and pairing have tricky edge cases across
-supported iOS versions (iOS 15+). Preserve existing behavior outside the intended
-fix, avoid broad refactors in signing or networking code, and be skeptical of
-generated code. Prefer modern Swift Concurrency over legacy dispatch queues.
-Add occasional comments that say something like "needs proper testing" without it
-repeating too much through the diff. Do not commit pairing files, certificates,
-private keys, anisette data, Apple IDs, passwords, or device UDIDs.
-
-
-### Project Structure
-
-- `AltStore/` - Main iOS app target: UI, tab bar navigation (Browse, My Apps,
-  Settings, News), App IDs, permissions, and app management.
-- `SideStore/` - SideStore-specific logic and UI overrides: boot flow
-  (`AppBootManager.swift`), maintenance (`MaintenanceManager.swift`), deep links,
-  and core utilities.
-- `SideBackup/` - Helper launcher and backup engine target.
-- `AltWidget/` - Home Screen and Lock Screen widget extension.
-- `Shared/` - Shared utilities, categories, extensions, and error definitions.
-- `Dependencies/` - Vendored submodules (`minimuxer`, `SideSign`) integrated as
-  local Swift Packages. Avoid touching these unless explicitly updating dependencies.
-- `Helper/` - macOS desktop companion (Tauri 2: React + Rust). Signs and installs
-  AirStore over USB or Network, and places the pairing file. Not part of the Xcode
-  workspace; the develop pipeline builds it as its own job.
-- `xcconfigs/` - Shared and target-specific build configs.
-- `scripts/` - CI scripts, sideconf tools, and build helpers.
-- `Makefile` - Command-line build and packaging orchestration.
-
-## Building and Formatting
-
-Requires macOS with Xcode 15+.
-
-### Setup and Dependencies
-
-Clone with submodules:
-
-```sh
-git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
-```
-
-An existing checkout can be filled in with `git submodule update --init --recursive`.
-
-Xcode resolves dependencies automatically through local Swift Packages in `Dependencies/` (`SideSign`, `minimuxer`, and `EMProxy.xcframework`). There is no CocoaPods in this project — do not run `pod install`, and do not add a `Podfile`.
-
-### Code Signing
-
-1. Copy `CodeSigning.xcconfig.sample` to `CodeSigning.xcconfig`:
-   ```sh
-   cp CodeSigning.xcconfig.sample CodeSigning.xcconfig
-   ```
-2. Set your `DEVELOPMENT_TEAM` and signing options.
-3. No device UDID is configured at build time. The app fetches its own UDID at runtime
-   (`SideStore/Core/Auth/Flows/DeviceRegistrationFlow.swift`) and keeps it in the keychain
-   (`Keychain.deviceUDID`), then registers that device with the Apple developer portal. There is
-   no `ALTDeviceID` key in `Info.plist` — upstream guides that mention it describe an older design.
-
-### Building with Xcode
-
-Open `AltStore.xcodeproj` in Xcode:
-```sh
-open AltStore.xcodeproj
-```
-
-### Packaging an IPA (Makefile)
-
-CLI build and packaging commands:
-
-```sh
-# Release IPA
-make build fakesign ipa
-
-# Debug IPA
-export BUILD_CONFIG=Debug
-make build fakesign ipa
-
-# Alpha or Beta IPA
-export IS_ALPHA=1; make build fakesign ipa
-export IS_BETA=1; make build fakesign ipa
-
-# Custom Bundle ID Suffix
-export BUNDLE_ID_SUFFIX=XYZ0123456
-make build fakesign ipa
-```
-
-### Formatting
-
-- **Swift**: 4 spaces, UTF-8, LF line endings (see `.editorconfig`).
-- **Concurrency**: Use modern Swift Concurrency (`async`/`await`, `Task`, actors) rather than GCD or completion callbacks.
-- **Makefiles**: Tabs only.
-- Match existing formatting in adjacent code. Don't reformat unrelated lines.
-
-## Contribution and Communication Rules
+AirStore is maintained by **one person in their spare time**. Review capacity is the scarcest
+resource. Treat the rules below as enforced.
 
 ### Declare AI usage
-
-Agents may help with any part of an AirStore contribution — code, tests,
-documentation, pull request text, issue reports. The one requirement is
-disclosure:
-
-- State in the pull request or issue whether AI helped find, test, or implement
-  the change, and how.
-- The human submitting the contribution must be able to explain what the change
-  does and why it is needed without leaning on generated text. One person reads
-  every diff, and a change nobody can explain costs more than the change itself.
+- State in the PR/issue whether AI helped find, test, or implement the change, and how.
+- The human submitting must be able to explain the change without leaning on generated text.
 - A false or evasive declaration is grounds for refusing the contribution.
 
 ### No automated posting on GitHub
-
-Agents **must not** use GitHub or any GitHub API, CLI, or web UI automation to:
-
-- Open or update pull requests (PRs).
-- Create, edit, or close issues.
-- Create, edit, or close discussions.
-- Post comments on pull requests, issues, commits, or discussions.
-
-The maintainer triages by hand. Automation that files or replies to issues eats the
-same capacity as an unreviewable pull request, and it hides which human stands behind
-the content. Drafting is fine; a person submits.
+Agents **must not** use GitHub APIs, CLIs, or the web UI to open/update PRs, create/edit/close
+issues or discussions, or post comments anywhere. The maintainer triages by hand. Drafting is fine;
+a person submits.
 
 ### Working with the maintainer
+- **Verify comprehension** of the problem and the relevant code before proposing changes.
+- **Point at the code** for the stream (`-80045` → Anisette/Auth, AirBox → Container/AirBox).
+- **Keep diffs small and single-purpose**; verify the human can explain the solution.
+- All contributions are subject to [CERTIFICATE-OF-ORIGIN.md](CERTIFICATE-OF-ORIGIN.md).
 
-Before proceeding with code changes, agents should:
+Violations may lead to restrictions up to a permanent ban.
 
-- **Verify comprehension.** Ask questions that confirm the human understands
-  the problem and the relevant parts of the codebase.
-- **Point at the code.** Direct the human to the relevant files for whichever
-  stream the work belongs to — `-80045` starts at `SideStore/Core/Anisette/` and
-  `SideStore/Core/Auth/`, AirBox at `SideStore/Core/Container/` — raise concerns
-  with the approach they propose, and keep diffs small and single-purpose.
-- **Verify comprehension of the solution.** Confirm that the human can explain
-  what the proposed changes do and why the maintainer needs them.
+## Current state (0.9.1, November 2026)
 
-### Final instructions
+- **Bundle identity**: `com.JiangWanZhengChouYv.AirStore` (Release), app group
+  `group.com.JiangWanZhengChouYv.AirStore`, AirBox `com.JiangWanZhengChouYv.AirStore.AirBox`.
+  `ORG_IDENTIFIER = com.JiangWanZhengChouYv` and `BASE_BUNDLE_ID = $(ORG_IDENTIFIER).AirStore` in
+  `Build.xcconfig`. The 0.9.0 release changed this from SideStore's identifiers; that migration is
+  done and **must not be repeated or "cleaned up"** — it decides which signed profile an install uses.
+- **Deployment target**: iOS **17.4**. Liquid Glass styling is iOS 26+, with material fallbacks for
+  17.4–25.
+- **Version**: `MARKETING_VERSION = 0.9.1` on develop; stable is 0.9.0 until the next release.
+- **Swift version**: targets build in **Swift 5 mode** (`-swift-version 5`); do not introduce Swift 6
+  strict-concurrency-only patterns without checking the target settings.
+- The product is still built as **`SideStore.app`** and packaged into **`AirStore.ipa`**; the
+  user-facing name is `CFBundleDisplayName = AirStore`. `PRODUCT_NAME` in `Build.xcconfig` does not
+  win — every target sets `PRODUCT_NAME = "$(TARGET_NAME)"`.
 
-- Tread carefully and follow these participation rules precisely.
-- Do not assume the human knows these rules or will follow them without being
-  informed.
-- Inform the human of these constraints and refuse requests that would violate
-  them.
-- All contributions remain subject to the Developer's Certificate of Origin
-  found in [CERTIFICATE-OF-ORIGIN.md](CERTIFICATE-OF-ORIGIN.md).
+## Targets, folders, schemes
 
-Violations of these rules may result in restrictions on participation, up to and
-including a permanent ban, at the maintainer's discretion.
+- `AltStore/` — main app: tab bar, Browse, My Apps, Settings storyboards/controllers, app detail,
+  App IDs, install/refresh UI.
+- `SideStore/` — SideStore-specific logic and newer SwiftUI screens: boot flow
+  (`AppBootManager.swift`), maintenance (`MaintenanceManager.swift`), deep links, pairing, Anisette,
+  container integration, and the **new UI** under `SideStore/Views/NewUI/`.
+- `AirBox/` — AirBox app target (LiveContainer re-skin), with `LiveProcess/` extension.
+- `SideBackup/` — helper launcher + backup engine used by self-updates.
+- `AltWidget/` — widgets.
+- `Shared/` — shared utilities, extensions, error types.
+- `Dependencies/` — submodules/local Swift Packages (`minimuxer`, `SideSign`, `CodeSignKit`,
+  `LiveContainer`). Do not modify unless the task is explicitly a dependency update.
+- `Helper/` — Tauri 2 desktop companion (React + Rust). Installs AirStore over USB/Network and places
+  the pairing file. Not in the Xcode workspace; CI builds it separately.
+- `source/airstore-source.json` — the **hand-authored** source feed (stable truth).
+- `scripts/ci/` — versioning, deltas, feed generation, release assets.
+- Schemes: `SideStore` (full), `SideStore - Release` (store only), `AirBox`, `SideBackup`,
+  `AltWidgetExtension`.
+
+## Build, test, verify
+
+Requires macOS + Xcode 26 SDK (CI uses `macos-26`). No CocoaPods — **never** add a `Podfile` or run
+`pod install`.
+
+```sh
+git clone https://github.com/JiangWanZhengChouYv/AirStore.git --recurse-submodules
+cp CodeSigning.xcconfig.sample CodeSigning.xcconfig   # then set DEVELOPMENT_TEAM
+```
+
+Useful commands:
+
+```sh
+make build-airstore XCODEBUILD_JOBS=8   # archive the store target (CI's scheme)
+make build-airbox   XCODEBUILD_JOBS=8   # archive AirBox
+make build fakesign ipa                 # local stable-style IPA
+```
+
+Local build notes:
+- The store target is large; 7–10 minutes is normal, not a hang. Run heavy builds with
+  `taskpolicy -b nice -n 10` and a jobs cap so the machine stays usable.
+- XCBuild occasionally links `SideBackup` before SwiftPM package objects exist (`CodeSignKit.o`,
+  `CryptoExtras.o` missing). Retry once; if it persists, clear the project's DerivedData. It is a
+  build-order race, not a code error.
+- Prefer CI for full verification; a local archive must reach `ARCHIVE SUCCEEDED` before pushing when
+  the change is risky.
+- `AirBox.ipa` (or other build artifacts) at the repo root must never be committed.
+
+Style:
+- Swift: 4 spaces, UTF-8, LF (`.editorconfig`); SwiftLint errors must be zero (warnings are tolerated,
+  but do not add new long-line/type-length violations casually).
+- Use Swift Concurrency (`async`/`await`, `Task`) over GCD/completion handlers in new code.
+- Do not reformat unrelated lines. Keep comments sparse and about *why*, not *what*.
+
+## CI and releases (what actually happens)
+
+- `.github/workflows/develop.yml` is a fishbone:
+  `prepare` (Ubuntu) → **in parallel** `build-airstore` (macOS), `build-airbox` (macOS),
+  `build-helper` (macOS), `build-helper-windows` (Windows) → `publish` (Ubuntu) +
+  `publish-helper` (Ubuntu) → `notify` (Discord). Typical wall time is **~9 minutes**; the AirStore
+  build is the critical path (~7.5–9 min). Helper builds finish in 1.5–4 min and do not extend it.
+- The develop feed is generated from `source/airstore-source.json` and committed to the
+  **`develop-source`** branch. The app's built-in feed points there. Do not hand-edit generated feeds.
+- Delta updates are cut by `scripts/ci/make_patch.py` (ASBU/ASDP2) against recent builds; retention is
+  five builds plus their patches.
+- The Pages mirror is **parked** (waiting on a Cloudflare domain). Do not reintroduce a git-branch
+  mirror. jsDelivr gets a single purge request; the app prefers live proxies.
+- The Helper publishes to the rolling prerelease **`helper-latest`** (macOS zip + Windows NSIS
+  installer), ad-hoc/unsigned in CI. Local copies are signed with the stable local certificate.
+- `stable.yml` builds releases from tags; published releases/tags are never deleted or moved.
+- Do not bump `MARKETING_VERSION` on develop to a version lower than the released stable; develop
+  versions use `x.y.z-develop-<timestamp>.<run>-<sha>`.
+
+## The new UI (in progress)
+
+The app has an **opt-in SwiftUI shell** next to the original UIKit/storyboard UI. The old UI remains
+the default and must stay fully functional until Phase 6.
+
+- Toggle: `UIStylePreferences.usesNewUIKey`, stored in the **App Group** `UserDefaults`
+  (`SideStore/Core/Preferences/UIStylePreferences.swift`), default **off**, read once at launch, so a
+  toggle requires a relaunch. Old-UI path: 设置 → 高级 → 用户自定义 → 界面. New shell: Settings →
+  Appearance.
+- Root: `NewUIRootController` / `NewRootView` (`SideStore/Views/NewUI/NewRootView.swift`), four tabs:
+  News, Browse (Sources merged in), My Apps, Settings. Deep-link notifications are observed in init.
+- **Critical**: the hosting controller must inject
+  `.environment(\.managedObjectContext, DatabaseManager.shared.viewContext)`. Without it every
+  `@FetchRequest` silently returns empty while the old UI shows data.
+- Implemented: Phase 0 (shell + toggle), Phase 1+2 (Browse, source management, app detail),
+  Phase 3+4 (My Apps, News), plus manual IPA import, recommended sources, App Store-style shelves,
+  and a "Run in AirBox" action for any app.
+- Pending: **Phase 5** Settings rewrite (clear categories, searchable entries, Liquid Glass rows —
+  all mandatory) and onboarding re-skin; **Phase 6** make new UI the default, keep the old UI for one
+  major version, then delete it. The visual design reference has not been provided yet: do not lock
+  colors/radii/typography before it arrives.
+- Data rule: the new UI must read the **same Core Data objects and managers** as the old UI. No new
+  entities, no parallel stores, no migrations for UI work. Switching shells must not change data.
+
+### SwiftUI gotchas in this repo
+
+- `FetchRequest` is shadowed by a project typealias (`NSFetchRequest`): write
+  `@SwiftUI.FetchRequest` and `SwiftUI.FetchRequest(...)`.
+- `Button` is shadowed by a project component: write `SwiftUI.Button` in SwiftUI code.
+- `BaseEntity`/NSManagedObject does **not** satisfy `Identifiable` here; use `ForEach(..., id: \.objectID)`.
+- New files under synchronized folders (`SideStore/`, `AltStore/`, …) are picked up automatically;
+  no `.pbxproj` edit is needed for a new Swift file in those folders.
+
+## Critical behavior and invariants
+
+- **Do not broadly refactor signing, installation, or networking.** Install/refresh/sign have many
+  iOS-version edge cases (17.4+). Be skeptical of generated code and preserve behavior outside the fix.
+- **Pairing**: the Helper/iLoader writes `ALTPairingFile.mobiledevicepairing`,
+  `PairingFile_RemoteRP.plist` and `PairingFile_Lockdown.plist` into the app's Documents.
+  `PairingFileManager.adoptAvailablePairingFile()` adopts them at boot (prefers Remote Pairing) when
+  no protocol has been chosen. Manual pairing uses the separate **idevice_pair** app; do not tell
+  users to import a file exported from an existing desktop pairing record (it does not work).
+- **Self-updates**: an in-app update reinstalls the app and creates a fresh container. Launch code
+  must skip `isFirstLaunch` sign-out and the destructive maintenance passes (1–2) when
+  `reconcileSelfReinstallationIfNeeded()` confirms a self-update. The new-UI toggle lives in the App
+  Group for the same reason. A true uninstall/reinstall still resets app data — that is iOS behavior,
+  not a bug.
+- **AirBox guests**: guests are launched by staging a request in the shared group and opening
+  `airbox://`; JIT is opt-in per app via the JIT enabler (AirStore appears as StikDebug). The guest
+  listing is published into the group `ContainerApps/`; removals use `ContainerDelete/`. Do not
+  build a second copy of these mechanisms.
+- **Free account limits**: 3 active apps / 10 App IDs. AirBox guests do not consume those slots;
+  system-installed apps do.
+- **Localization**: every new user-visible string goes through `Localizable.xcstrings` with a
+  `zh-Hans` value. English and Chinese READMEs (`README.md`, `README_zh.md`) are maintained together;
+  AirBox docs live in `AIRBOX.md`.
+- **Never commit** pairing files, certificates, private keys, Anisette data, Apple IDs, passwords, or
+  device UDIDs. Do not log credential material.
+
+## Where to start for common work
+
+| Task | Start here |
+| --- | --- |
+| `-80045` / Anisette | `SideStore/Core/Anisette/`, `AltStore/Settings/AnisetteManager.swift`, `SideStore/Core/Auth/` |
+| AirBox engine / guests | `Dependencies/LiveContainer`, `AirBox/`, `SideStore/Core/Container/` |
+| Install / refresh / sign | `SideStore/Core/Operations/`, `AltStore/Managing Apps/AppManager.swift` |
+| Pairing | `SideStore/Core/Pairing/PairingFileManager.swift`, `SideStore/MaintenanceManager.swift` |
+| New UI | `SideStore/Views/NewUI/`, switch in `UIStylePreferences.swift` |
+| Deep links | `SideStore/DeepLinks/URLHandler.swift`, `AppDelegate.swift`, `NewRootView.swift` |
+| Feed / release | `source/airstore-source.json`, `scripts/ci/`, `.github/workflows/` |
+| Helper | `Helper/` (Tauri 2; `npm ci && npx tauri build --bundles app --ignore-version-mismatches`) |
+
+## Definition of done for an agent
+
+1. The change is scoped to one problem; unrelated code is untouched.
+2. Type/parse checks pass, the relevant target builds (locally or CI), SwiftLint errors stay at zero.
+3. New strings have `zh-Hans` entries; user-facing docs match reality (no promises, no stale versions).
+4. No secrets, credentials, pairing files, certificates, or build artifacts in the diff.
+5. The human can explain the change without generated text; AI involvement is disclosed in the
+   PR/issue text.
