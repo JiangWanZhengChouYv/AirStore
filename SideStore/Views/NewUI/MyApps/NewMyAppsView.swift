@@ -187,17 +187,18 @@ struct NewMyAppsView: View {
     }
 
     private func installedRow(_ app: InstalledApp) -> some View {
-        NewInstalledAppRow(
-            app: app,
-            progressFraction: progressFraction(for: app),
-            onUpdate: app.hasUpdate ? { update(app) } : nil
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
+        SwiftUI.Button {
             if app.isActive {
                 open(app)
             }
+        } label: {
+            NewInstalledAppRow(
+                app: app,
+                progressFraction: progressFraction(for: app),
+                onUpdate: app.hasUpdate ? { update(app) } : nil
+            )
         }
+        .buttonStyle(.plain)
         .contextMenu {
             if app.isActive {
                 SwiftUI.Button {
@@ -218,14 +219,6 @@ struct NewMyAppsView: View {
                     Label(NSLocalizedString("Enable JIT", comment: ""), systemImage: "bolt")
                 }
 
-                if let version = app.storeApp?.latestSupportedVersion,
-                   let viewController = topViewController {
-                    SwiftUI.Button {
-                        ContainerInstallAction.run(version: version, appName: app.name, from: viewController)
-                    } label: {
-                        Label(NSLocalizedString("Run in AirBox", comment: ""), systemImage: "shippingbox")
-                    }
-                }
             } else {
                 SwiftUI.Button(role: .destructive) {
                     activeAlert = .removeApp(app)
@@ -307,7 +300,9 @@ struct NewMyAppsView: View {
     }
 
     private func open(_ app: InstalledApp) {
-        UIApplication.shared.open(app.openAppURL) { success in
+        let url = app.openAppURL
+        debugLog("[NewMyApps] Opening \(app.bundleIdentifier) via \(url.absoluteString)")
+        UIApplication.shared.open(url) { success in
             guard !success else { return }
             NewUIFeedback.present(OperationError.openAppFailed(name: app.name))
         }
@@ -416,6 +411,15 @@ struct NewMyAppsView: View {
     }
 
     private func act(on app: ContainerApp) {
+        // The same app can be in both places: installed on the system and copied into AirBox. The
+        // user tapping it means "open the app", so prefer the system copy and leave AirBox as an
+        // explicit choice in the context menu.
+        if let bundleIdentifier = app.bundleIdentifier,
+           let installedApp = installedApps.first(where: { $0.bundleIdentifier == bundleIdentifier }) {
+            open(installedApp)
+            return
+        }
+
         if let version = availableUpdate(for: app) {
             guard let viewController = topViewController else { return }
             ContainerInstallAction.run(version: version, appName: app.name, from: viewController)
