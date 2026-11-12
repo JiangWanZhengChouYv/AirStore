@@ -77,11 +77,17 @@ enum AnisetteProvider {
             // -45061 means the ADI identity in the Keychain was minted by a different server, and
             // every server now selected has its own. Dropping it makes the next attempt provision
             // a fresh machine against the current one. Needs proper testing.
-            guard error.localizedDescription.contains("-45061") else { throw error }
-            debugLog("[AnisetteProvider] Stored ADI identity is not valid for this server (-45061), provisioning a fresh one.")
-            AnisetteConfigManager.shared.anisetteAdiBlob = nil
-            AnisetteConfigManager.shared.anisetteIdentifier = nil
-            return try await attempt()
+            if error.localizedDescription.contains("-45061") {
+                debugLog("[AnisetteProvider] Stored ADI identity is not valid for this server (-45061), provisioning a fresh one.")
+                AnisetteConfigManager.shared.anisetteAdiBlob = nil
+                AnisetteConfigManager.shared.anisetteIdentifier = nil
+                return try await attempt()
+            }
+            
+            // Every configured server failed. Say that, instead of handing the caller a bare
+            // NSURLError about whichever server happened to be last.
+            guard !(error is SideSign.AnisetteError) else { throw error }
+            throw OperationError.anisetteUnavailable(reason: error.localizedDescription)
         }
     }
 }

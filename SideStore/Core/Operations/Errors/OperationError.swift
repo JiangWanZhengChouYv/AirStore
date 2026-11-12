@@ -12,6 +12,8 @@ public enum OperationError: LocalizedError, CustomNSError, Sendable, Equatable {
     case noInstalledApps
     case noSources
     case notAuthenticated
+    case twoFactorRequired
+    case anisetteUnavailable(reason: String)
     case timedOut
     case unableToConnectSideJIT
     case unableToRespondSideJITDevice
@@ -54,6 +56,13 @@ public enum OperationError: LocalizedError, CustomNSError, Sendable, Equatable {
             return "There are no SideStore sources."
         case .notAuthenticated:
             return "You are not signed in."
+        case .twoFactorRequired:
+            return "This Apple ID needs a two-factor verification code before it can sign in again. Open Settings and sign in once more."
+        case .anisetteUnavailable(let reason):
+            // The sentence is localized on its own and the raw reason appended afterwards: a key with
+            // an interpolated value can never be looked up in the catalog.
+            let message = NSLocalizedString("No Anisette server responded. Pick a different server in Settings → Advanced → Anisette Servers, or check your network.", comment: "")
+            return "\(message)\n\n\(reason)"
         case .timedOut:
             return "The operation timed out."
         case .unableToConnectSideJIT:

@@ -141,13 +141,37 @@ public final class AuthManager: @unchecked Sendable {
 
         let anisetteData = try await AnisetteProvider.fetch()
         let xcodeVersion = await AnisetteConfigManager.shared.resolvedXcodeVersion()
-        let (_, session) = try await portalProxy.signIn(
-            appleID: appleID,
-            password: password,
-            anisetteData: anisetteData,
-            xcodeVersion: xcodeVersion,
-            verificationHandler: nil
-        )
+        
+        // A background renewal has nobody to type a code, so it still fails fast. In the foreground
+        // the sign-in UI can ask, which is the difference between a dead end and a retry.
+        let twoFactorPrompt: SignInFlowHandler? = await MainActor.run {
+            guard UIApplication.shared.applicationState == .active,
+                  let presenter = UIApplication.shared.topViewController() else { return nil }
+            return SignInFlowHandler(presentingViewController: presenter)
+        }
+        
+        let verificationHandler: DeveloperPortal.VerificationHandler? = twoFactorPrompt.map { prompt in
+            { (request: TwoFactorRequest) in
+                try await prompt.verificationCode(for: request)
+            }
+        }
+        
+        let session: ALTAppleAPISession
+        do {
+            (_, session) = try await portalProxy.signIn(
+                appleID: appleID,
+                password: password,
+                anisetteData: anisetteData,
+                xcodeVersion: xcodeVersion,
+                verificationHandler: verificationHandler
+            )
+        } catch let error as DeveloperPortalError {
+            // "Sign in again" is what the user has to do, and the raw SideSign sentence does not say so.
+            if case .requiresTwoFactorAuthentication = error {
+                throw OperationError.twoFactorRequired
+            }
+            throw error
+        }
 
         self.adsid = session.dsid
         self.xcodeToken = session.authToken

@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "This Apple ID needs a two-factor verification code before it can sign in again. Open Settings and sign in once more.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该 Apple ID 需要双重认证验证码才能重新登录。请到设置里再登录一次。"
+          }
+        }
+      }
+    },
+    "No Anisette server responded. Pick a different server in Settings → Advanced → Anisette Servers, or check your network.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有 Anisette 服务器响应。请在「设置 → 高级 → Anisette 服务器」里换一个服务器，或检查网络。"
+          }
+        }
+      }
+    },
     "AirBox is not installed. Install it before opening apps in it.": {
       "extractionState": "manual",
       "localizations": {
