@@ -36,39 +36,65 @@ enum AnisetteProvider {
             let identifier = await AnisetteConfigManager.shared.resolveDeviceIdentifier()
             let headers = await AnisetteConfigManager.shared.makeRequestHeaders()
 
-            let (anisetteData, newAdiBlob) = try await provider.fetchAnisetteDataWithFailover(
-                servers: UserDefaults.standard.disableAnisetteRotation ? [servers[startIndex]] : servers,
-                startIndex: startIndex,
-                identifier: identifier,
-                existingAdiBlob: existingBlob,
-                headers: headers,
-                onError: { error in
-                    if let anisetteError = error as? SideSign.AnisetteError,
-                       case .outdatedV1Server(let serverURL, _) = anisetteError {
-                        if UserDefaults.standard.defaultServerURL == serverURL.absoluteString {
-                            return true
-                        }
-                        if let handler = handler {
-                            let shouldContinue = try await handler.warnOutdatedAnisetteServer()
-                            if shouldContinue {
-                                UserDefaults.standard.defaultServerURL = serverURL.absoluteString
-                            }
-                            return shouldContinue
-                        }
-                    }
-                    return false
-                },
-                onSuccess: { successfulServer in
-                    UserDefaults.standard.menuAnisetteURL = successfulServer.absoluteString
-                    debugLog("[AnisetteProvider] Successfully fetched Anisette data from \(successfulServer.absoluteString)")
-                }
-            )
+            // The rotation is driven here, not inside SideSign's failover: that helper throws only the
+            // last error, so a run that timed out twice and ended on a 503 reported nothing but the
+            // 503. Walking the list locally keeps every server's own error, and a pinned server
+            // (rotation off) still hands its original error straight back.
+            let orderedServers: [URL] = UserDefaults.standard.disableAnisetteRotation
+                ? [servers[startIndex]]
+                : Array(servers[startIndex...]) + Array(servers[..<startIndex])
 
-            if let freshBlob = newAdiBlob {
-                AnisetteConfigManager.shared.anisetteAdiBlob = freshBlob.base64EncodedString()
+            let onError: @Sendable (Error) async throws -> Bool = { error in
+                if let anisetteError = error as? SideSign.AnisetteError,
+                   case .outdatedV1Server(let serverURL, _) = anisetteError {
+                    if UserDefaults.standard.defaultServerURL == serverURL.absoluteString {
+                        return true
+                    }
+                    if let handler = handler {
+                        let shouldContinue = try await handler.warnOutdatedAnisetteServer()
+                        if shouldContinue {
+                            UserDefaults.standard.defaultServerURL = serverURL.absoluteString
+                        }
+                        return shouldContinue
+                    }
+                }
+                return false
             }
 
-            return anisetteData
+            var failures: [(server: URL, error: Error)] = []
+            for server in orderedServers {
+                debugLog("[Anisette Failover] Attempting server [\(failures.count + 1)/\(orderedServers.count)]: \(server.absoluteString)...")
+                do {
+                    let (anisetteData, newAdiBlob) = try await provider.fetchAnisetteData(
+                        mode: .remote(server: server),
+                        identifier: identifier,
+                        existingAdiBlob: existingBlob,
+                        headers: headers,
+                        onError: onError
+                    )
+
+                    UserDefaults.standard.menuAnisetteURL = server.absoluteString
+                    debugLog("[AnisetteProvider] Successfully fetched Anisette data from \(server.absoluteString)")
+
+                    if let freshBlob = newAdiBlob {
+                        AnisetteConfigManager.shared.anisetteAdiBlob = freshBlob.base64EncodedString()
+                    }
+
+                    return anisetteData
+                } catch {
+                    failures.append((server, error))
+                    debugLog("[Anisette Failover] Server '\(server.absoluteString)' failed: \(error.localizedDescription)")
+                }
+            }
+
+            if failures.count == 1, let failure = failures.first {
+                throw failure.error
+            }
+
+            let details = failures
+                .map { "• \($0.server.absoluteString) — \($0.error.localizedDescription)" }
+                .joined(separator: "\n")
+            throw OperationError.anisetteUnavailable(reason: details)
         }
 
         do {
@@ -84,8 +110,9 @@ enum AnisetteProvider {
                 return try await attempt()
             }
             
-            // Every configured server failed. Say that, instead of handing the caller a bare
-            // NSURLError about whichever server happened to be last.
+            // The rotation above already lists each server's own error; keep it rather than wrapping
+            // it a second time. A bare URLSession failure still gets the friendly Anisette wording.
+            if case OperationError.anisetteUnavailable = error { throw error }
             guard !(error is SideSign.AnisetteError) else { throw error }
             throw OperationError.anisetteUnavailable(reason: error.localizedDescription)
         }
