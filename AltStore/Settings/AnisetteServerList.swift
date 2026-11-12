@@ -237,6 +237,8 @@ final class AnisetteViewModel: ObservableObject {
 struct AnisetteServersView: View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var viewModel = AnisetteViewModel()
+    @StateObject private var probe = AnisetteServerProbe.shared
+    @AppStorage("anisetteAutoProbeEnabled") private var autoProbeEnabled = true
     @State private var selectedServerURL: String = ""
     @State private var showingFileImporter = false
     @State private var showingShareSheet = false
@@ -260,6 +262,28 @@ struct AnisetteServersView: View {
     ) {
         self.selected = selected
         self.onResetAdiPb = onResetAdiPb
+    }
+
+    private func probeColor(for address: String) -> Color {
+        switch probe.status(for: address) {
+        case .reachable: return .green
+        case .unreachable: return .red
+        case .checking: return .orange
+        case .unknown: return .gray
+        }
+    }
+
+    private func probeLabel(for address: String) -> Text {
+        switch probe.status(for: address) {
+        case .reachable: return Text(NSLocalizedString("Server reachable", comment: ""))
+        case .unreachable: return Text(NSLocalizedString("Server unreachable", comment: ""))
+        case .checking: return Text(NSLocalizedString("Checking server", comment: ""))
+        case .unknown: return Text(NSLocalizedString("Server not checked yet", comment: ""))
+        }
+    }
+
+    private func runProbe() async {
+        await probe.probe(addresses: viewModel.items.map(\.address))
     }
 
     var body: some View {
@@ -361,6 +385,13 @@ struct AnisetteServersView: View {
                                 }
 
                                 Spacer()
+
+                                if autoProbeEnabled {
+                                    Circle()
+                                        .fill(probeColor(for: item.address))
+                                        .frame(width: 9, height: 9)
+                                        .accessibilityLabel(probeLabel(for: item.address))
+                                }
 
                                 if selectedServerURL == item.address {
                                     Image(systemName: "checkmark")
@@ -549,10 +580,27 @@ struct AnisetteServersView: View {
                         )) {
                             Label("Enable Auto Rotation", systemImage: "arrow.triangle.2.circlepath")
                         }
+
+                        Toggle(isOn: $autoProbeEnabled) {
+                            Label(NSLocalizedString("Auto Probe Servers", comment: ""), systemImage: "waveform.path.ecg")
+                        }
+
+                        SwiftUI.Button {
+                            Task { await runProbe() }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Label(NSLocalizedString("Re-probe Now", comment: ""), systemImage: "arrow.clockwise")
+                                Spacer()
+                                if probe.isProbing {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                        .disabled(probe.isProbing || viewModel.items.isEmpty)
                     } header: {
                         Text("Customization")
                     } footer: {
-                        Text("Control if AirStore automatically rotates/retries servers upon failure.")
+                        Text(NSLocalizedString("A green dot means the server answers; red means it timed out or returned a server error. Rotation tries red servers last, so signing in does not wait on them first.", comment: ""))
                     }
 
                     // Bottom spacing section
@@ -569,6 +617,23 @@ struct AnisetteServersView: View {
                 #endif
                 .refreshable {
                     await viewModel.fetchServers(forceRemote: true)
+                    if autoProbeEnabled {
+                        await runProbe()
+                    }
+                }
+                // Probe as soon as the catalog loads, and again whenever its contents change.
+                .task(id: viewModel.items.map(\.address).joined(separator: "|")) {
+                    guard autoProbeEnabled, !viewModel.items.isEmpty else { return }
+                    await runProbe()
+                }
+                // Keep the dots fresh while the page stays open; the task is cancelled on leaving.
+                .task(id: autoProbeEnabled) {
+                    guard autoProbeEnabled else { return }
+                    while !Task.isCancelled {
+                        try? await Task.sleep(nanoseconds: 60_000_000_000)
+                        guard !Task.isCancelled else { return }
+                        await runProbe()
+                    }
                 }
         .navigationTitle("Anisette Servers")
         .toolbar {

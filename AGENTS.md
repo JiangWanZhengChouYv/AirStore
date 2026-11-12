@@ -16,6 +16,9 @@ for one Apple error. Work happens in three main streams, all first-class:
    restrictions and public Anisette servers are largely blocked. Start in
    `SideStore/Core/Anisette/`, then follow `AltStore/Settings/AnisetteManager.swift`,
    `AltStore/Settings/AnisetteServerList.swift`, and `SideStore/Core/Auth/`, where the error surfaces.
+   `AnisetteServerProbe.swift` HEAD-checks each server for the green/red dots in the settings list;
+   `AnisetteProvider` uses its cached results to try dead servers last, and reports every server's
+   own error instead of the last one (usually a 503). Rotation is on by default.
 2. **AirBox** — run apps inside a container so the number of apps a user keeps is not decided by a free
    account's App ID slots. This is a re-skin of LiveContainer: `AirBox/`,
    `SideStore/Core/Container/`, vendored engine in `Dependencies/LiveContainer`.

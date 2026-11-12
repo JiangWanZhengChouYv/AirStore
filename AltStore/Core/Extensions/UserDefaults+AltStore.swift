@@ -365,6 +365,10 @@ public extension UserDefaults
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
     }
+    @objc var anisetteAutoProbeEnabled: Bool {
+        get { self.object(forKey: #function) as? Bool ?? true }
+        set { self.set(newValue, forKey: #function) }
+    }
     @objc var useOnDeviceAnisette: Bool {
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
@@ -567,6 +571,9 @@ public extension UserDefaults
             // last -- usually a 503 -- and hid what actually broke. The failover now reports every
             // server's own error, so walking the list is safe and saves a manual server switch.
             #keyPath(UserDefaults.disableAnisetteRotation): false,
+            // A cheap HEAD check per server, so the list can show which ones answer and sign-in can
+            // put the dead ones at the back of the rotation.
+            #keyPath(UserDefaults.anisetteAutoProbeEnabled): true,
             // On-device anisette runs Android's CoreADI, which Apple no longer accepts behind a
             // Mac declaration; start on the remote v3 server instead. Needs proper testing.
             #keyPath(UserDefaults.useOnDeviceAnisette): false,

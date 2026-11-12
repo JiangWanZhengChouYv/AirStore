@@ -1,6 +1,83 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Auto Probe Servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动探测服务器"
+          }
+        }
+      }
+    },
+    "Re-probe Now": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重新探测"
+          }
+        }
+      }
+    },
+    "A green dot means the server answers; red means it timed out or returned a server error. Rotation tries red servers last, so signing in does not wait on them first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "绿点表示服务器可连通，红点表示超时或返回服务器错误。自动轮转会把红点服务器排到最后，登录时不用先等它超时。"
+          }
+        }
+      }
+    },
+    "Server reachable": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器可连通"
+          }
+        }
+      }
+    },
+    "Server unreachable": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器不可达"
+          }
+        }
+      }
+    },
+    "Checking server": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检测服务器"
+          }
+        }
+      }
+    },
+    "Server not checked yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未检测"
+          }
+        }
+      }
+    },
     "This Apple ID needs a two-factor verification code before it can sign in again. Open Settings and sign in once more.": {
       "extractionState": "manual",
       "localizations": {

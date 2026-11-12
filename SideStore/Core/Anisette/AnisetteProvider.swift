@@ -22,7 +22,9 @@ enum AnisetteProvider {
 
     private static func fetchRemote(handler: AnisetteServerHandler? = nil) async throws -> ALTAnisetteData {
         let serverUrlStrings = await AnisetteServersManager.shared.getActiveServerURLs()
-        let servers = serverUrlStrings.compactMap { URL(string: $0) }
+        // Servers whose probe just failed go to the back of the rotation, so a dead one does not
+        // make sign-in wait for another timeout before trying one that answers.
+        let servers = AnisetteServerProbe.prioritized(serverUrlStrings.compactMap { URL(string: $0) })
         guard !servers.isEmpty else {
             throw AnisetteError.noServersConfigured
         }
