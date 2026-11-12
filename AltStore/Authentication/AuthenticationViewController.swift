@@ -35,6 +35,8 @@ final class AuthenticationViewController: UIViewController
         // they only reach the string catalog through the same second lookup the Settings rows use.
         self.view.localizingStoryboardText()
         
+        self.applyThemeSurface()
+        
         // fetch anisette servers asap when loading Auth Screen (if list is empty)
         Task {
             if await AnisetteServersManager.shared.getActiveServerURLs().isEmpty {
@@ -292,4 +294,16 @@ extension AuthenticationViewController
         self.passwordTextField.becomeFirstResponder()
     }
     #endif
+}
+
+extension UIViewController
+{
+    /// The sign-in and how-to screens paint their surfaces with a fixed asset from the storyboard, so
+    /// a picked theme colour could never reach them. Assigning the theme-aware colours in code keeps
+    /// the stock look (those properties fall back to the same assets) and lets the theme through.
+    func applyThemeSurface()
+    {
+        self.view.backgroundColor = .settingsBackground
+        self.navigationController?.navigationBar.barTintColor = .settingsBackground
+    }
 }

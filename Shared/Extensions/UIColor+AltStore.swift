@@ -45,7 +45,13 @@ public extension UIColor
     }
 
     static var settingsHighlighted: UIColor {
+        #if WIDGET_EXTENSION
         return namedColor("SettingsHighlighted")!
+        #else
+        // Same rule as the surface above: the shipped blue until the picker is used, the theme after.
+        guard ThemeManager.shared.isUsingCustomTheme else { return namedColor("SettingsHighlighted")! }
+        return ThemeManager.shared.primaryColor
+        #endif
     }
 
     static let altInvertedPrimary = namedColor("SettingsHighlighted")!

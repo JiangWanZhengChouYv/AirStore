@@ -24,6 +24,8 @@ final class ResignAltStoreViewController: UIViewController
     {
         super.viewDidLoad()
         
+        self.applyThemeSurface()
+        
         self.placeholderView.textLabel.isHidden = true
         
         self.placeholderView.detailTextLabel.textAlignment = .left

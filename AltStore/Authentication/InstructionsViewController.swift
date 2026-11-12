@@ -27,6 +27,8 @@ final class InstructionsViewController: UIViewController
     {
         super.viewDidLoad()
         
+        self.applyThemeSurface()
+        
         if UIScreen.main.isExtraCompactHeight
         {
             self.contentStackView.layoutMargins.top = 0

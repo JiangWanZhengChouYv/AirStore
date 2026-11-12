@@ -22,6 +22,13 @@ final class SelectTeamViewController: UITableViewController
     }
     #endif
     
+    override func viewDidLoad()
+    {
+        super.viewDidLoad()
+        
+        self.applyThemeSurface()
+    }
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
