@@ -44,24 +44,21 @@ jobs:
         with:
           xcode-version: "26.2"
 
-      - name: Restore Cache (exact)
-        id: xcode-cache-exact
-        uses: actions/cache/restore@v3
+      # Same correction as the develop pipeline: restoring a gigabyte of DerivedData never skipped a
+      # compile, because Xcode's incremental state keys off input mtimes and a PR checkout rewrites
+      # them. Only the package checkouts are worth carrying, and a PR runs on top of develop often
+      # enough to reuse the develop cache through the prefix. Nothing is saved here -- a PR is a
+      # one-off and should not spend the repository's 10 GB budget on it.
+      - name: Restore the package checkouts
+        uses: actions/cache/restore@v4
         with:
           path: |
-            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-${{ github.ref_name }}-${{ github.sha }}
-
-      - name: Restore Cache (last)
-        if: steps.xcode-cache-exact.outputs.cache-hit != 'true'
-        id: xcode-cache-fallback
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-${{ github.ref_name }}-
+          key: xcode-pr-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
+          restore-keys: |
+            xcode-develop-airstore-
+            xcode-pr-
 
       - name: Build
         env:
@@ -71,15 +68,6 @@ jobs:
           python3 scripts/ci/workflow.py encrypt-build
           mv AirStore.ipa AirStore-${{ env.MARKETING_VERSION }}.ipa
           exit $STATUS
-
-      - name: Save Cache
-        if: ${{ steps.xcode-cache-fallback.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-${{ github.ref_name }}-${{ github.sha }}
 
       - uses: actions/upload-artifact@v4
         with:

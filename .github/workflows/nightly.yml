@@ -82,27 +82,26 @@ jobs:
         with:
           xcode-version: "26.4"
 
-      - name: Restore Cache (exact)
+      # Same correction as the develop pipeline: the old code restored a gigabyte of DerivedData on
+      # every run and still recompiled all 745 files, because Xcode's incremental state keys off input
+      # mtimes and a fresh checkout rewrites them. Only the resolved package checkouts are kept, and
+      # the develop pipeline's copy is used when this one has nothing of its own.
+      - name: Cache epoch
+        id: epoch
         if: steps.build_gate.outputs.should_skip != 'true'
-        id: xcode-cache-exact
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-${{ github.ref_name }}-${{ github.sha }}
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
 
-      - name: Restore Cache (last)
-        if: >
-          steps.build_gate.outputs.should_skip != 'true' &&
-          steps.xcode-cache-exact.outputs.cache-hit != 'true'
-        id: xcode-cache-fallback
-        uses: actions/cache/restore@v3
+      - name: Restore the package checkouts
+        if: steps.build_gate.outputs.should_skip != 'true'
+        uses: actions/cache@v4
         with:
           path: |
-            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-${{ github.ref_name }}-
+          key: xcode-nightly-${{ steps.epoch.outputs.week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
+          restore-keys: |
+            xcode-develop-airstore-
+            xcode-nightly-
 
       # --------------------------------------------------
       # build and test
@@ -146,17 +145,6 @@ jobs:
           python3 scripts/ci/workflow.py tests-build; STATUS=$?
           python3 scripts/ci/workflow.py encrypt-tests-build
           exit $STATUS
-
-      - name: Save Cache
-        if: >
-          steps.build_gate.outputs.should_skip != 'true' &&
-          steps.xcode-cache-fallback.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-${{ github.ref_name }}-${{ github.sha }}
 
       - name: Tests Run
         if: >
