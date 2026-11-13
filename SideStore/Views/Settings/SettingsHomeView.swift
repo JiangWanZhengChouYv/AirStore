@@ -111,6 +111,16 @@ private struct SettingsRow: Identifiable {
         self.kind = kind
     }
 
+    /// What tapping this row does, if anything. Kept here so a search result can borrow the action of
+    /// the page it lives on.
+    var action: SettingsAction? {
+        switch self.kind {
+        case .link(let action): return action
+        case .value(_, let action): return action
+        default: return nil
+        }
+    }
+
     /// Case- and accent-blind containment, so "wifi" finds "Wi-Fi" and a typed half-word finds the row.
     func matches(_ query: String) -> Bool {
         let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
@@ -216,12 +226,37 @@ struct SettingsHomeView: View {
 
     /// A row matches when the query appears in its title or its subtitle, case- and accent-blind.
     /// Keeping the group around the survivors is what makes the result list read like the real one.
+    ///
+    /// The pages behind the rows are searched too: a hit there is shown under its parent's group with
+    /// the page it lives on as its subtitle, and tapping it opens that page. Without this, everything
+    /// worth finding -- WireGuard, Keychain, SideJITServer -- stayed behind a scroll.
     private var visibleGroups: [SettingsGroup] {
         let query = self.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return self.groups }
 
+        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+
         return self.groups.compactMap { group in
-            let rows = group.rows.filter { $0.matches(query) }
+            var rows: [SettingsRow] = []
+            for row in group.rows {
+                if row.matches(query) {
+                    rows.append(row)
+                }
+
+                guard let action = row.action else { continue }
+                let hits = SettingsSearchCatalog.children[row.id, default: []].filter {
+                    $0.range(of: query, options: options) != nil
+                }
+                for (index, key) in hits.enumerated() {
+                    rows.append(SettingsRow("\(row.id).child.\(index)",
+                                            title: SettingsSearchCatalog.title(for: key),
+                                            subtitle: row.title,
+                                            symbol: row.symbol,
+                                            tint: row.tint,
+                                            kind: .link(action)))
+                }
+            }
+
             guard !rows.isEmpty else { return nil }
             return SettingsGroup(id: group.id, title: group.title, symbol: group.symbol, tint: group.tint, rows: rows)
         }
