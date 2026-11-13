@@ -17,6 +17,9 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from changed_parts import APP_PATHS  # noqa: E402  (same directory, checked out beside this script)
+
 REPO = os.environ.get("GITHUB_REPOSITORY", "")
 WORKFLOW = "develop.yml"
 BUILD_JOB = "Build AirStore"
@@ -52,6 +55,11 @@ def built_version() -> str:
     return ""
 
 
+def dispatch() -> None:
+    """Everything, not just the store: a rescue is not the moment to guess which rib is behind."""
+    gh("workflow", "run", WORKFLOW, "--ref", "develop", "-f", "app_only=false")
+
+
 def main() -> int:
     tip = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     short = tip[:7]
@@ -60,6 +68,22 @@ def main() -> int:
     if version.endswith(f"-{short}"):
         print(f"{short} is already published as {version}; nothing to rescue")
         return 0
+
+    # The store can also be behind without any failed run: a push that only touched workflows or
+    # scripts is gated out of building, and if the last real build never landed, nothing will build
+    # this tree again. Comparing the tree against the published commit catches that.
+    published = version.rsplit("-", 1)[-1] if version else ""
+    if published:
+        subprocess.run(["git", "fetch", "--no-tags", "--depth=1", "origin", published],
+                       check=False, capture_output=True)
+        diff = subprocess.run(["git", "diff", "--name-only", published, "HEAD", "--", *APP_PATHS],
+                              capture_output=True, text=True)
+        if diff.returncode == 0 and diff.stdout.strip():
+            print(f"the store differs from published {published}:")
+            for path in diff.stdout.splitlines()[:10]:
+                print(f"  {path}")
+            dispatch()
+            return 0
 
     runs = gh_json("run", "list", "--workflow", WORKFLOW, "--limit", "20",
                    "--json", "databaseId,headSha,status,conclusion,createdAt,event")
@@ -93,7 +117,7 @@ def main() -> int:
         return 0
 
     print(f"{short}: {BUILD_JOB} was cancelled before its first step -- asking for the build again")
-    gh("workflow", "run", WORKFLOW, "--ref", "develop", "-f", "app_only=false")
+    dispatch()
     return 0
 
 
