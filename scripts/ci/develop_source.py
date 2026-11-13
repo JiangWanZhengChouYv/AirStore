@@ -11,6 +11,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 
@@ -39,6 +40,7 @@ def main() -> None:
     parser.add_argument("--companion-bundle-id", default="", help="second app to carry in the same source")
     parser.add_argument("--companion-ipa", default="", help="the freshly built companion package")
     parser.add_argument("--companion-download-url", default="", help="where the companion will be fetched from")
+    parser.add_argument("--companion-carry-from", default="", help="previous feed to keep the companion's entry from, used when it was not rebuilt")
     parser.add_argument("--companion-name", default="AirBox")
     parser.add_argument("--companion-developer", default="AirStore团队")
     parser.add_argument("--companion-subtitle", default="Run apps inside AirBox without using App IDs")
@@ -88,7 +90,38 @@ def main() -> None:
     else:
         raise SystemExit(f"No app with bundle id {args.bundle_id} in {args.source}")
 
-    if args.companion_bundle_id:
+    if args.companion_bundle_id and not args.companion_ipa:
+        # The companion was not rebuilt in this run. The entry the live feed already carries is the
+        # truth: it points at the package still sitting on the release, and pruning keeps the newest
+        # companion, so that URL stays valid. Copying it verbatim -- version, size, hash -- is what
+        # stops every phone from being told there is an update that is really the same binary.
+        #
+        # An unreadable or companion-less previous feed is not worth failing the whole publish over:
+        # warn and leave the checked-in entry alone, which is the same outcome as today.
+        carried = None
+        try:
+            previous = json.loads(Path(args.companion_carry_from).read_text(encoding="utf-8"))
+            carried = next(
+                (app for app in previous.get("apps", []) if app.get("bundleIdentifier") == args.companion_bundle_id),
+                None,
+            )
+        except Exception as error:
+            print(f"warning: could not read the previous feed ({error}); keeping the checked-in {args.companion_bundle_id}", file=sys.stderr)
+
+        if carried is None:
+            print(f"warning: no {args.companion_bundle_id} in {args.companion_carry_from or 'the previous feed'}; keeping the checked-in entry", file=sys.stderr)
+        else:
+            apps = source.setdefault("apps", [])
+            index = next(
+                (i for i, app in enumerate(apps) if app.get("bundleIdentifier") == args.companion_bundle_id),
+                None,
+            )
+            if index is None:
+                apps.append(carried)
+            else:
+                apps[index] = carried
+
+    elif args.companion_bundle_id:
         companion_ipa = Path(args.companion_ipa)
         if not companion_ipa.is_file():
             raise SystemExit(f"Missing companion ipa: {companion_ipa}")

@@ -52,6 +52,8 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       short_commit: ${{ steps.version.outputs.short_commit }}
       bundle_id: ${{ steps.version.outputs.bundle_id }}
+      airbox: ${{ steps.changed.outputs.airbox }}
+      helper: ${{ steps.changed.outputs.helper }}
 
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +61,13 @@ jobs:
           # No submodules: versioning reads Build.xcconfig and git only. One commit is enough, and
           # fetching the full history was costing a minute on every run.
           fetch-depth: 1
+
+      # AirBox and the Helper are the expensive ribs and they change far less often than the app, so
+      # each one is skipped unless this push touched its inputs. The decision reads the file list the
+      # push event already carries, which costs nothing and needs no second checkout.
+      - name: Work out which parts changed
+        id: changed
+        run: python3 scripts/ci/changed_parts.py >> "$GITHUB_OUTPUT"
 
       - name: Version this build
         id: version
@@ -157,9 +166,12 @@ jobs:
           if-no-files-found: error
 
   # The other Xcode rib. Builds only AirBox.app (plus the LiveProcess extension it embeds).
+  # Skipped when the push touched nothing it compiles: the previous package stays on the release and
+  # the feed keeps pointing at it, so a settings-only change no longer pays for a container build.
   build-airbox:
     name: Build AirBox
     needs: prepare
+    if: needs.prepare.outputs.airbox == 'true'
     runs-on: macos-26
     timeout-minutes: 45
 
@@ -236,6 +248,7 @@ jobs:
   build-helper:
     name: Build the Helper
     needs: prepare
+    if: needs.prepare.outputs.helper == 'true'
     runs-on: macos-26
     timeout-minutes: 45
 
@@ -303,6 +316,7 @@ jobs:
   build-helper-windows:
     name: Build the Helper for Windows
     needs: prepare
+    if: needs.prepare.outputs.helper == 'true'
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -356,6 +370,10 @@ jobs:
   publish:
     name: Publish the develop channel
     needs: [prepare, build-airstore, build-airbox]
+    # A skipped rib is fine: AirBox keeps the package already on the release and the feed carries its
+    # entry forward. A failed one is not -- publishing then would offer an AirStore whose companion
+    # was never rebuilt.
+    if: ${{ !cancelled() && needs.build-airstore.result == 'success' && needs.build-airbox.result != 'failure' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -379,6 +397,7 @@ jobs:
           path: .
 
       - name: Fetch the AirBox package
+        if: needs.build-airbox.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: airbox-ipa
@@ -444,9 +463,14 @@ jobs:
           cp AirStore.ipa "$VERSION.ipa"
           gh release upload develop-latest "$VERSION.ipa" --clobber
           # AirBox rides along as a companion rather than a build: it never takes part in the delta
-          # rotation, and pruning keeps only the newest copy (scripts/ci/delta_assets.py).
-          cp AirBox.ipa "AirBox-$VERSION.ipa"
-          gh release upload develop-latest "AirBox-$VERSION.ipa" --clobber
+          # rotation, and pruning keeps only the newest copy (scripts/ci/delta_assets.py). A push that
+          # did not rebuild it leaves the existing copy as the newest, so nothing has to be uploaded.
+          if [ -f AirBox.ipa ]; then
+            cp AirBox.ipa "AirBox-$VERSION.ipa"
+            gh release upload develop-latest "AirBox-$VERSION.ipa" --clobber
+          else
+            echo "AirBox was not rebuilt; the package already on the release stays in place"
+          fi
           for patch in "$VERSION"-*.patch; do
             [ -e "$patch" ] || continue
             gh release upload develop-latest "$patch" --clobber
@@ -471,6 +495,27 @@ jobs:
 
       - name: Generate the source feed
         run: |
+          # AirBox is optional in a given run. When it was not rebuilt, its live entry is carried over
+          # verbatim -- version, size and hash included -- because that is the package still sitting
+          # on the release; inventing a version for it would tell every phone it has an update.
+          companion_args=()
+          if [ -f AirBox.ipa ]; then
+            companion_args=(
+              --companion-ipa AirBox.ipa
+              --companion-download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirBox-$VERSION.ipa"
+              --companion-description "AirBox runs apps inside itself, so they do not use an App ID."
+            )
+          else
+            mkdir -p build
+            # The AirBox entry only exists in the generated feed, never in the checked-in source, so
+            # this is where it is copied from. The branch is read directly rather than through the
+            # contents API: the same fetch is needed two steps later to commit the new feed anyway.
+            git fetch --depth=1 origin develop-source 2>/dev/null || true
+            git show origin/develop-source:source/airstore-source.json > build/previous-feed.json 2>/dev/null \
+              || echo '{"apps": []}' > build/previous-feed.json
+            companion_args=(--companion-carry-from build/previous-feed.json)
+          fi
+
           python3 scripts/ci/develop_source.py \
             --source source/airstore-source.json \
             --ipa "$VERSION.ipa" \
@@ -480,9 +525,7 @@ jobs:
             --track develop \
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
             --companion-bundle-id "$BUNDLE_ID.AirBox" \
-            --companion-ipa AirBox.ipa \
-            --companion-download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirBox-$VERSION.ipa" \
-            --companion-description "AirBox runs apps inside itself, so they do not use an App ID." \
+            "${companion_args[@]}" \
             --out build/airstore-source.json
 
       # The app asks this repository's Pages site for a release asset before it tries any third-party
@@ -617,13 +660,21 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          # A rib skipped because its inputs did not change did its job: the package it would have
+          # built is still the newest one on the release, so it must not be reported as a failure.
+          ok_or_skipped() { [ "$1" = "success" ] || [ "$1" = "skipped" ]; }
+          SKIPPED=""
+          if [ "$AIRBOX_RESULT" = "skipped" ]; then SKIPPED="AirBox"; fi
+          if [ "$HELPER_RESULT" = "skipped" ]; then SKIPPED="${SKIPPED:+$SKIPPED + }Helper"; fi
+          export SKIPPED
           # Publish witnesses both phone packages succeeding, but the Helper ribs are siblings it
           # does not need, so their results have to be added by hand. A cancelled rib or a skipped
           # publish is reported as cancelled, anything else as failure.
           if [ "$PUBLISH_RESULT" = "success" ] \
-             && [ "$HELPER_RESULT" = "success" ] \
-             && [ "$HELPER_WINDOWS_RESULT" = "success" ] \
-             && [ "$HELPER_PUBLISH_RESULT" = "success" ]; then
+             && ok_or_skipped "$AIRBOX_RESULT" \
+             && ok_or_skipped "$HELPER_RESULT" \
+             && ok_or_skipped "$HELPER_WINDOWS_RESULT" \
+             && ok_or_skipped "$HELPER_PUBLISH_RESULT"; then
             STATUS=success
           elif [ "$AIRSTORE_RESULT" = "cancelled" ] \
              || [ "$AIRBOX_RESULT" = "cancelled" ] \
@@ -653,6 +704,7 @@ jobs:
 
           word, colour = sys.argv[1], int(sys.argv[2])
           version = os.environ.get("VERSION") or "no version yet"
+          skipped = os.environ.get("SKIPPED", "")
           sha = os.environ.get("SHA", "")[:8]
           run_url = os.environ.get("RUN_URL", "")
           commit_url = os.environ.get("COMMIT_URL", "")
@@ -673,6 +725,8 @@ jobs:
               lines.append("**%s**" % subject.replace("*", "\\*").replace("_", "\\_"))
           if body:
               lines.append(body.replace("`", "'"))
+          if skipped:
+              lines.append("未改动，跳过编译 / unchanged, not rebuilt: %s" % skipped)
           footer = "commit %s" % sha
           if commit_url:
               footer += " · [full message / 完整说明](%s)" % commit_url
