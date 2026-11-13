@@ -359,9 +359,18 @@ final class SettingsViewController: UITableViewController
     /// swallow every tap. Call after each reload and on every layout pass.
     private func bringSettingsHomeToFront()
     {
-        guard let hostingView = self.settingsHostingController?.view,
-              self.tableView.subviews.last !== hostingView else { return }
-        self.tableView.bringSubviewToFront(hostingView)
+        guard let hostingView = self.settingsHostingController?.view else { return }
+
+        // Belt and braces: the classic cells are never touched again, so make them transparent to
+        // hit-testing even if UIKit briefly re-orders them above the home.
+        for subview in self.tableView.subviews
+        where subview !== hostingView && (subview is UITableViewCell || subview is UITableViewHeaderFooterView) {
+            subview.isUserInteractionEnabled = false
+        }
+
+        if self.tableView.subviews.last !== hostingView {
+            self.tableView.bringSubviewToFront(hostingView)
+        }
     }
 
     private func reloadClassicTable()
