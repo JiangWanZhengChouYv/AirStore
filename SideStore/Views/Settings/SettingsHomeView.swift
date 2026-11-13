@@ -332,10 +332,6 @@ private struct SettingsGlassGroup: View {
     let group: SettingsGroup
     let router: SettingsRouter
 
-    /// One flag for the whole pane. A tap on any row has to move the sheet itself, the way the tab
-    /// bar moves under a finger -- a highlight on the pressed row reads as solid glass.
-    @State private var isPressed = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
@@ -356,30 +352,20 @@ private struct SettingsGlassGroup: View {
                 if row.id != self.group.rows.first?.id {
                     Divider().overlay(Color.white.opacity(0.12))
                 }
-                SettingsRowView(row: row, router: self.router, panePress: self.$isPressed)
+                SettingsRowView(row: row, router: self.router)
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassSurface(in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-        // The jelly. The sheet sinks fast and comes back on a spring loose enough to overshoot, which
-        // is the whole difference between "pressed" and "moved" -- the same shape a tab bar item
-        // makes under a finger. Anything slower reads as a zoom, anything tighter as a flicker.
-        .scaleEffect(self.isPressed ? 0.955 : 1)
-        .brightness(self.isPressed ? -0.03 : 0)
-        .animation(self.isPressed ? .easeOut(duration: 0.09) : .spring(response: 0.32, dampingFraction: 0.42),
-                   value: self.isPressed)
-        .sensoryFeedback(.impact(weight: .light), trigger: self.isPressed) { _, pressed in
-            pressed
-        }
-        .onDisappear { self.isPressed = false }
+        // Interactive: the system answers the touch itself, with the dip-and-spring it uses on a tab
+        // bar item. Everything hand-rolled here either looked static or fought the scroll view.
+        .glassSurface(in: RoundedRectangle(cornerRadius: 26, style: .continuous), interactive: true)
     }
 }
 
 private struct SettingsRowView: View {
     let row: SettingsRow
     let router: SettingsRouter
-    @Binding var panePress: Bool
 
     /// The whole row is the tap target; only toggles and menus keep their own control.
     private var rowAction: SettingsAction? {
@@ -404,28 +390,12 @@ private struct SettingsRowView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                // Read the finger here rather than from ButtonStyle's isPressed: the style's state is
-                // a rendering detail that does not reliably reach a parent, and a sheet that never
-                // moves is the whole complaint. Simultaneous, so the button still fires and the scroll
-                // view still scrolls; a finger that travels is a scroll, not a press. Kept off the
-                // toggle and menu rows on purpose -- a drag recognizer beside a Menu can stop it
-                // opening, and those controls already show their own state.
-                .simultaneousGesture(self.pressGesture)
             } else {
                 self.content
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .padding(.vertical, 6)
             }
         }
-    }
-
-    private var pressGesture: some Gesture {
-        DragGesture(minimumDistance: 0)
-            .onChanged { value in
-                let travelled = abs(value.translation.height) + abs(value.translation.width)
-                self.panePress = travelled < 12
-            }
-            .onEnded { _ in self.panePress = false }
     }
 
     private var content: some View {
