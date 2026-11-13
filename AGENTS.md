@@ -180,6 +180,12 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 - `Shared/Extensions/View+GlassSurface.swift` stays: the onboarding flow uses it.
 - The onboarding flow keeps its six steps and all auth/pairing/container logic; it is SwiftUI and
   re-skinned in place (`SideStore/Views/Onboarding/OnboardingView.swift`).
+- **Each theme preset has its own app icon** (maintainer, 2026-11-13). The six `Theme*Icon.appiconset`
+  files in `AltStore/Resources/Icons.xcassets/Theme/` are hue-rotated copies of the shipped blue
+  icon; `ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES` registers them automatically, so no
+  Info.plist edit. `ThemePreset.alternateIconName` maps a preset to its icon (`nil` = primary blue),
+  and `ThemeManager.applyThemeAppIcon` switches it after the picker dismisses, before the relaunch.
+  Custom colours that are not presets keep the current icon.
 - **The sources tab is gone** (maintainer, 2026-11-12). Source management is pushed from Browse
   (`FeaturedViewController` toolbar button → `UIViewController.showSources(sourceURL:)`); the
   `addSource` deep link goes through the same helper. Tab order is news, browse, my apps, settings —

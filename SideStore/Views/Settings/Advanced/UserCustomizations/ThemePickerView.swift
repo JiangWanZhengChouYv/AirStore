@@ -154,6 +154,11 @@ struct ThemePickerView: View {
             }
             .background(Color.settingsRowBackground)
             .cornerRadius(14)
+
+            Text(NSLocalizedString("Choosing a preset also switches the app icon to match. Custom colours keep the current icon.", comment: ""))
+                .font(.footnote)
+                .foregroundColor(Color.white.opacity(0.45))
+                .padding(.horizontal, 16)
         }
     }
 

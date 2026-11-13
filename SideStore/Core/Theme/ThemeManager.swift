@@ -17,6 +17,26 @@ public struct ThemePreset: Identifiable, Equatable {
     public var color: UIColor {
         UIColor(hex: hex) ?? .defaultAltPrimary
     }
+
+    /// Each preset has its own tinted app icon. The shipped blue is the primary icon, so it is
+    /// expressed as `nil` (which is what `setAlternateIconName` wants to restore the original).
+    public var alternateIconName: String? {
+        switch self.id {
+        case "sapphireBlue": return nil
+        case "classic": return "ThemeTealIcon"
+        case "neonViolet": return "ThemeVioletIcon"
+        case "sunsetCrimson": return "ThemeCrimsonIcon"
+        case "cyberpunkGold": return "ThemeGoldIcon"
+        case "emeraldMint": return "ThemeEmeraldIcon"
+        case "electricPink": return "ThemePinkIcon"
+        default: return nil
+        }
+    }
+
+    public static func preset(matchingHex hex: String) -> ThemePreset? {
+        let normalized = hex.replacingOccurrences(of: "#", with: "").uppercased()
+        return Self.presets.first { $0.hex.replacingOccurrences(of: "#", with: "").uppercased() == normalized }
+    }
     
     public static let presets: [ThemePreset] = [
         ThemePreset(id: "classic", name: "SideStore Teal", hex: "#19D3B5"),
@@ -49,9 +69,40 @@ public final class ThemeManager: ObservableObject {
                 // new one is to start the app over. Skipped while a download is on screen: those cards
                 // are a running install and killing them would lose more than a stale colour. The
                 // short delay lets the picker finish its own dismissal animation first.
-                guard !DownloadProgressHUD.shared.hasActiveCards else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { exit(0) }
+                // The picker needs a moment to dismiss before iOS will accept an icon change.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    self.applyThemeAppIcon {
+                        guard !DownloadProgressHUD.shared.hasActiveCards else { return }
+                        exit(0)
+                    }
+                }
             }
+        }
+    }
+
+    /// A preset colour also picks the matching app icon. `setAlternateIconName` shows a system
+    /// confirmation and reports back later, so the relaunch that makes the new tint appear waits for
+    /// its completion instead of cutting the switch short.
+    private func applyThemeAppIcon(completion: @escaping () -> Void)
+    {
+        guard UIApplication.shared.supportsAlternateIcons,
+              UIApplication.shared.applicationState == .active,
+              let preset = ThemePreset.preset(matchingHex: self.primaryColor.hexString) else {
+            completion()
+            return
+        }
+
+        let iconName = preset.alternateIconName
+        guard UIApplication.shared.alternateIconName != iconName else {
+            completion()
+            return
+        }
+
+        UIApplication.shared.setAlternateIconName(iconName) { error in
+            if let error = error {
+                debugLog("[ThemeManager] Could not switch the theme app icon: \(error.localizedDescription)")
+            }
+            DispatchQueue.main.async { completion() }
         }
     }
 

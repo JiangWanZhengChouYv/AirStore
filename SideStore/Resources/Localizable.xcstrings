@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Choosing a preset also switches the app icon to match. Custom colours keep the current icon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择预设主题时会同时换成对应的 App 图标；自定义颜色则保留当前图标。"
+          }
+        }
+      }
+    },
     "Auto Probe Servers": {
       "extractionState": "manual",
       "localizations": {
