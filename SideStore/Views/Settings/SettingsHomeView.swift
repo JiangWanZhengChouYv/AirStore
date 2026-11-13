@@ -258,6 +258,10 @@ private struct SettingsGlassGroup: View {
     let group: SettingsGroup
     let router: SettingsRouter
 
+    /// One flag for the whole pane. A tap on any row has to move the sheet itself, the way the tab
+    /// bar moves under a finger -- a highlight on the pressed row reads as solid glass.
+    @State private var isPressed = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
@@ -278,44 +282,35 @@ private struct SettingsGlassGroup: View {
                 if row.id != self.group.rows.first?.id {
                     Divider().overlay(Color.white.opacity(0.12))
                 }
-                SettingsRowView(row: row, router: self.router)
+                SettingsRowView(row: row, router: self.router, panePress: self.$isPressed)
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassSurface(in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        // The dent goes down fast and comes back on a loose spring: that asymmetry is the whole
+        // difference between pressing the glass and a slow zoom. Matches how the tab bar answers.
+        .scaleEffect(self.isPressed ? 0.966 : 1)
+        .brightness(self.isPressed ? -0.025 : 0)
+        .animation(self.isPressed ? .easeOut(duration: 0.12) : .spring(response: 0.36, dampingFraction: 0.5),
+                   value: self.isPressed)
+        .onDisappear { self.isPressed = false }
     }
 }
 
-/// `.plain` drew nothing while a row was held, so every tap read as a miss. A flat grey rectangle
-/// fixes "invisible" but not "solid": the glass has to give under the finger. The row springs
-/// inward, the highlight blooms out from under the text, and a light impact lands with it.
+/// `.plain` drew nothing while a row was held, so every tap read as a miss. The answer is not a tint
+/// on the row -- that is what made the glass look solid -- but telling the pane it is being touched,
+/// so the sheet itself takes the dent. A light impact lands with it.
 private struct SettingsRowButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        let pressed = configuration.isPressed
+    @Binding var panePress: Bool
 
-        return configuration.label
-            .background {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white.opacity(pressed ? 0.15 : 0))
-                    .overlay {
-                        // A faint specular sheen, brightest at the top edge, so the pressed area
-                        // reads as lit glass rather than a grey selection.
-                        LinearGradient(colors: [Color.white.opacity(pressed ? 0.20 : 0), .clear],
-                                       startPoint: .top,
-                                       endPoint: .bottom)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                    .padding(.horizontal, -4)
-                    // Starts slightly smaller than the row and expands into place, which is what
-                    // makes the highlight look like it wells up rather than switch on.
-                    .scaleEffect(pressed ? 1 : 0.9)
-                    .opacity(pressed ? 1 : 0)
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed) { _, pressed in
+                self.panePress = pressed
             }
-            .scaleEffect(pressed ? 0.972 : 1)
-            .animation(.spring(response: 0.3, dampingFraction: 0.62), value: pressed)
-            .sensoryFeedback(.impact(weight: .light), trigger: pressed) { _, isPressed in
-                isPressed
+            .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed) { _, pressed in
+                pressed
             }
     }
 }
@@ -323,6 +318,7 @@ private struct SettingsRowButtonStyle: ButtonStyle {
 private struct SettingsRowView: View {
     let row: SettingsRow
     let router: SettingsRouter
+    @Binding var panePress: Bool
 
     /// The whole row is the tap target; only toggles and menus keep their own control.
     private var rowAction: SettingsAction? {
@@ -346,7 +342,7 @@ private struct SettingsRowView: View {
                         .padding(.vertical, 6)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(SettingsRowButtonStyle())
+                .buttonStyle(SettingsRowButtonStyle(panePress: self.$panePress))
             } else {
                 self.content
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
