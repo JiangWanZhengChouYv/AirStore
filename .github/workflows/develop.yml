@@ -120,7 +120,9 @@ jobs:
   build-airstore:
     name: Build AirStore
     needs: prepare
-    runs-on: macos-26
+    # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
+    # unset, it is the hosted image it always was.
+    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
     timeout-minutes: 45
 
     steps:
@@ -186,7 +188,9 @@ jobs:
     name: Build AirBox
     needs: prepare
     if: needs.prepare.outputs.airbox == 'true'
-    runs-on: macos-26
+    # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
+    # unset, it is the hosted image it always was.
+    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
     timeout-minutes: 45
 
     steps:
@@ -255,7 +259,9 @@ jobs:
     name: Build the Helper
     needs: prepare
     if: needs.prepare.outputs.helper == 'true'
-    runs-on: macos-26
+    # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
+    # unset, it is the hosted image it always was.
+    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
     timeout-minutes: 45
 
     steps:
