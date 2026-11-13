@@ -1,0 +1,42 @@
+name: Rescue a develop build the queue dropped
+
+# The hosted macOS pool is shared. A job that cannot be acquired in about fifteen minutes is cancelled
+# by GitHub before its first step runs, which leaves a commit with no package and no feed entry -- and
+# nothing retries it, because the push already happened.
+#
+# This watches for that one shape and asks again. It runs on every completed develop run (immediate)
+# and on a timer (catch-up, and for the case where the run itself died before the workflow existed).
+
+on:
+  workflow_run:
+    workflows: ["Develop AirStore build"]
+    types: [completed]
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: rescue-develop
+  cancel-in-progress: false
+
+jobs:
+  rescue:
+    name: Retry if the queue swallowed the build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The develop tip, whatever triggered this run.
+          ref: develop
+          fetch-depth: 1
+
+      - name: Ask for the build again if the queue dropped it
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/ci/rescue_build.py
