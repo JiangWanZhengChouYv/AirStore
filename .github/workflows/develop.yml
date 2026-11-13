@@ -144,15 +144,14 @@ jobs:
           fi
 
       # What is cached here changed after measuring what the old cache was worth. Restoring the whole
-      # DerivedData (1 GB, hit every run) recompiled all 745 files every time: Xcode's incremental
-      # state keys off input mtimes, and a fresh checkout gives every source a new one. So this caches
-      # only the parts that do not depend on mtimes -- the content-addressed compilation cache Xcode 26
-      # writes and the resolved package checkouts -- which is a third of the size and can actually hit.
+      # DerivedData (1 GB, hit on every run) recompiled all 745 files every time: Xcode's incremental
+      # state keys off input mtimes, and a fresh checkout gives every source a new one. So this keeps
+      # only the resolved package checkouts, which are the part a fresh clone really has to re-fetch,
+      # and drops the objects that were never reused.
       - name: Restore the compile cache
         uses: actions/cache@v4
         with:
           path: |
-            ~/Library/Developer/Xcode/DerivedData/*/CompilationCache.noindex
             ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
           key: xcode-develop-airstore-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
@@ -214,7 +213,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/Library/Developer/Xcode/DerivedData/*/CompilationCache.noindex
             ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
           key: xcode-develop-airbox-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
