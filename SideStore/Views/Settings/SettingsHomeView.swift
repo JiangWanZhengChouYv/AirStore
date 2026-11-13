@@ -66,6 +66,9 @@ final class SettingsState: ObservableObject {
     @Published var teamName: String?
     @Published var teamType: String?
     @Published var versionText = ""
+    /// Mirrors SettingsViewController.accountStatus so the row can say what is pending instead of
+    /// looking like a dead link when there is nothing to resolve.
+    @Published var accountStatus: AccountVerificationRow.Status = .completed
 
     func refresh() {
         self.isAuthenticated = AuthManager.shared.isAuthenticated
@@ -150,6 +153,19 @@ struct SettingsHomeView: View {
         .onAppear { self.state.refresh() }
     }
 
+    /// "Check for pending account actions" described an action, not a state, so with nothing pending
+    /// the row read as a button that did nothing. Show the real state instead.
+    private var accountStatusSubtitle: String {
+        switch self.state.accountStatus {
+        case .completed:
+            return NSLocalizedString("No pending account actions", comment: "")
+        case .checking:
+            return NSLocalizedString("Checking account status…", comment: "")
+        case .actionRequired:
+            return NSLocalizedString("Some account actions still need your attention", comment: "")
+        }
+    }
+
     private var groups: [SettingsGroup] {
         let accountRows: [SettingsRow]
         if self.state.isAuthenticated {
@@ -157,7 +173,7 @@ struct SettingsHomeView: View {
                 SettingsRow("account.name", title: NSLocalizedString("Name", comment: ""), symbol: "person.crop.circle", kind: .text(self.state.teamName ?? "—")),
                 SettingsRow("account.email", title: NSLocalizedString("Email", comment: ""), symbol: "envelope", kind: .text(self.state.appleID ?? "—")),
                 SettingsRow("account.type", title: NSLocalizedString("Type", comment: ""), symbol: "person.2", kind: .text(self.state.teamType ?? "—")),
-                SettingsRow("account.actions", title: NSLocalizedString("Account Status", comment: ""), subtitle: NSLocalizedString("Check for pending account actions", comment: ""), symbol: "checkmark.shield", tint: .green, kind: .link(.resolveAccount)),
+                SettingsRow("account.actions", title: NSLocalizedString("Account Status", comment: ""), subtitle: self.accountStatusSubtitle, symbol: "checkmark.shield", tint: .green, kind: .link(.resolveAccount)),
                 SettingsRow("account.signout", title: NSLocalizedString("Sign Out", comment: ""), symbol: "rectangle.portrait.and.arrow.right", tint: .red, kind: .link(.signOut))
             ]
         } else {
@@ -271,6 +287,20 @@ private struct SettingsGlassGroup: View {
     }
 }
 
+/// `.plain` draws nothing while a row is held down, so every tap felt like it missed — the screen
+/// only changed once the next page was pushed. This paints a cell-style highlight under the finger.
+private struct SettingsRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.white.opacity(configuration.isPressed ? 0.14 : 0))
+                    .padding(.horizontal, -4)
+            )
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
 private struct SettingsRowView: View {
     let row: SettingsRow
     let router: SettingsRouter
@@ -290,16 +320,20 @@ private struct SettingsRowView: View {
                 SwiftUI.Button {
                     self.router.send(action)
                 } label: {
+                    // The frame lives inside the label so the whole row is both tappable and
+                    // highlighted; with it outside, the padded band around the text was inert.
                     self.content
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .padding(.vertical, 6)
+                        .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SettingsRowButtonStyle())
             } else {
                 self.content
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .padding(.vertical, 6)
             }
         }
-        .frame(minHeight: 44)
-        .padding(.vertical, 6)
-        .contentShape(Rectangle())
     }
 
     private var content: some View {

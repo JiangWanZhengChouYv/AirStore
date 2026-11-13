@@ -1,6 +1,83 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "No pending account actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有待处理的账户操作"
+          }
+        }
+      }
+    },
+    "Checking account status…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查账户状态…"
+          }
+        }
+      }
+    },
+    "Some account actions still need your attention": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还有账户操作需要你处理"
+          }
+        }
+      }
+    },
+    "Sign in with your Apple ID to check your account status.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先用 Apple ID 登录，才能检查账户状态。"
+          }
+        }
+      }
+    },
+    "The account is still being checked. Try again in a moment.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账户仍在检查中，请稍后再试。"
+          }
+        }
+      }
+    },
+    "No pending actions. Your signing certificate and registered device are up to date.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有待处理的操作，签名证书和已注册设备都是最新的。"
+          }
+        }
+      }
+    },
+    "Check Again": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新检查"
+          }
+        }
+      }
+    },
     "About & Support": {
       "extractionState": "manual",
       "localizations": {

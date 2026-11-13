@@ -668,7 +668,7 @@ private extension SettingsViewController
                 self.activeTeam = nil
                 self.accountVerificationTask?.cancel()
                 self.accountVerificationTask = nil
-                self.accountStatus = .completed
+                self.setAccountStatus(.completed)
                 self.updateAccountCardRowStyles()
             }
             self.reloadClassicTable()
@@ -704,13 +704,13 @@ private extension SettingsViewController
         self.accountVerificationTask = Task { @MainActor [weak self] in
             guard let self = self else { return }
             if !UserDefaults.standard.isDeviceRegistered {
-                self.accountStatus = .checking
+                self.setAccountStatus(.checking)
                 self.reloadClassicTable()
                 self.updateAccountCardRowStyles()
             }
             let status = await AccountVerificationRow.verifyStatus(for: team)
             if !Task.isCancelled {
-                self.accountStatus = status
+                self.setAccountStatus(status)
                 self.reloadClassicTable()
                 self.updateAccountCardRowStyles()
             }
@@ -733,12 +733,52 @@ private extension SettingsViewController
     
     private func resolvePendingAccountActions()
     {
-        guard let team = self.activeTeam else { return }
-        Task { @MainActor [weak self] in
-            guard let self = self else { return }
-            await AccountVerificationRow.resolvePendingActions(for: self.accountStatus, team: team, presentingViewController: self)
-            self.startAccountVerification(for: team)
+        guard let team = self.activeTeam else
+        {
+            // Returning silently made the row look broken; without a team there is simply nothing
+            // to check, so say that and offer the sign-in.
+            let alert = UIAlertController(title: NSLocalizedString("Account Status", comment: ""),
+                                          message: NSLocalizedString("Sign in with your Apple ID to check your account status.", comment: ""),
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Sign In", comment: ""), style: .default) { [weak self] _ in
+                self?.signIn()
+            })
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+            self.present(alert, animated: true)
+            return
         }
+
+        if case .actionRequired = self.accountStatus
+        {
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                await AccountVerificationRow.resolvePendingActions(for: self.accountStatus, team: team, presentingViewController: self)
+                self.startAccountVerification(for: team)
+            }
+            return
+        }
+
+        // Nothing pending: report the state and offer a fresh check instead of doing nothing.
+        let message: String
+        if self.accountStatus == .checking {
+            message = NSLocalizedString("The account is still being checked. Try again in a moment.", comment: "")
+        } else {
+            message = NSLocalizedString("No pending actions. Your signing certificate and registered device are up to date.", comment: "")
+        }
+
+        let alert = UIAlertController(title: NSLocalizedString("Account Status", comment: ""), message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Check Again", comment: ""), style: .default) { [weak self] _ in
+            self?.startAccountVerification(for: team)
+        })
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Done", comment: ""), style: .cancel))
+        self.present(alert, animated: true)
+    }
+
+    /// Keeps the SwiftUI row in step with the classic state machine.
+    private func setAccountStatus(_ status: AccountVerificationRow.Status)
+    {
+        self.accountStatus = status
+        self.settingsState.accountStatus = status
     }
     
     private func prepare(_ settingsHeaderFooterView: SettingsHeaderFooterView, for section: Section, isHeader: Bool)
