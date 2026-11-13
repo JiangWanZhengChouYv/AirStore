@@ -110,6 +110,17 @@ private struct SettingsRow: Identifiable {
         self.tint = tint
         self.kind = kind
     }
+
+    /// Case- and accent-blind containment, so "wifi" finds "Wi-Fi" and a typed half-word finds the row.
+    func matches(_ query: String) -> Bool {
+        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+        for haystack in [self.title, self.subtitle].compactMap({ $0 }) {
+            if haystack.range(of: query, options: options) != nil {
+                return true
+            }
+        }
+        return false
+    }
 }
 
 private struct SettingsGroup: Identifiable {
@@ -132,25 +143,88 @@ struct SettingsHomeView: View {
     @AppStorage("isBetaUpdatesEnabled") private var betaUpdates = false
     @AppStorage("betaUdpatesTrack") private var betaTrack = UserDefaults.defaultBetaUpdatesTrack
 
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 22) {
-                ForEach(self.groups) { group in
-                    SettingsGlassGroup(group: group, router: self.router)
-                }
+    @State private var searchText = ""
 
-                Text("AirStore · " + self.state.versionText)
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.45))
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 4)
+    var body: some View {
+        VStack(spacing: 0) {
+            // Pinned rather than scrolled away: this list is as long as the system Settings one, and
+            // the reason to search is not having to scroll through it.
+            self.searchField
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
+
+            ScrollView {
+                VStack(spacing: 22) {
+                    ForEach(self.visibleGroups) { group in
+                        SettingsGlassGroup(group: group, router: self.router)
+                    }
+
+                    if self.visibleGroups.isEmpty {
+                        Text(NSLocalizedString("No settings found", comment: ""))
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.5))
+                            .padding(.top, 40)
+                    }
+
+                    Text("AirStore · " + self.state.versionText)
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.45))
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 4)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 48)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 48)
+            .scrollDismissesKeyboard(.interactively)
         }
         .background(SettingsBackdrop())
         .onAppear { self.state.refresh() }
+    }
+
+    /// The system Settings search: one field, every row in the app that matches it, grouped by where
+    /// it lives so the result says where you would have found it.
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.5))
+
+            TextField(NSLocalizedString("Search settings", comment: ""), text: self.$searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+                .font(.system(size: 16))
+                .foregroundStyle(.white)
+
+            if !self.searchText.isEmpty {
+                SwiftUI.Button {
+                    self.searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.white.opacity(0.45))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Clear search", comment: ""))
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .glassSurface(in: Capsule())
+    }
+
+    /// A row matches when the query appears in its title or its subtitle, case- and accent-blind.
+    /// Keeping the group around the survivors is what makes the result list read like the real one.
+    private var visibleGroups: [SettingsGroup] {
+        let query = self.searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return self.groups }
+
+        return self.groups.compactMap { group in
+            let rows = group.rows.filter { $0.matches(query) }
+            guard !rows.isEmpty else { return nil }
+            return SettingsGroup(id: group.id, title: group.title, symbol: group.symbol, tint: group.tint, rows: rows)
+        }
     }
 
     /// "Check for pending account actions" described an action, not a state, so with nothing pending
@@ -288,30 +362,17 @@ private struct SettingsGlassGroup: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .glassSurface(in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-        // The dent goes down fast and comes back on a loose spring: that asymmetry is the whole
-        // difference between pressing the glass and a slow zoom. Matches how the tab bar answers.
-        .scaleEffect(self.isPressed ? 0.966 : 1)
-        .brightness(self.isPressed ? -0.025 : 0)
-        .animation(self.isPressed ? .easeOut(duration: 0.12) : .spring(response: 0.36, dampingFraction: 0.5),
+        // The jelly. The sheet sinks fast and comes back on a spring loose enough to overshoot, which
+        // is the whole difference between "pressed" and "moved" -- the same shape a tab bar item
+        // makes under a finger. Anything slower reads as a zoom, anything tighter as a flicker.
+        .scaleEffect(self.isPressed ? 0.955 : 1)
+        .brightness(self.isPressed ? -0.03 : 0)
+        .animation(self.isPressed ? .easeOut(duration: 0.09) : .spring(response: 0.32, dampingFraction: 0.42),
                    value: self.isPressed)
+        .sensoryFeedback(.impact(weight: .light), trigger: self.isPressed) { _, pressed in
+            pressed
+        }
         .onDisappear { self.isPressed = false }
-    }
-}
-
-/// `.plain` drew nothing while a row was held, so every tap read as a miss. The answer is not a tint
-/// on the row -- that is what made the glass look solid -- but telling the pane it is being touched,
-/// so the sheet itself takes the dent. A light impact lands with it.
-private struct SettingsRowButtonStyle: ButtonStyle {
-    @Binding var panePress: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .onChange(of: configuration.isPressed) { _, pressed in
-                self.panePress = pressed
-            }
-            .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed) { _, pressed in
-                pressed
-            }
     }
 }
 
@@ -342,13 +403,29 @@ private struct SettingsRowView: View {
                         .padding(.vertical, 6)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(SettingsRowButtonStyle(panePress: self.$panePress))
+                .buttonStyle(.plain)
+                // Read the finger here rather than from ButtonStyle's isPressed: the style's state is
+                // a rendering detail that does not reliably reach a parent, and a sheet that never
+                // moves is the whole complaint. Simultaneous, so the button still fires and the scroll
+                // view still scrolls; a finger that travels is a scroll, not a press. Kept off the
+                // toggle and menu rows on purpose -- a drag recognizer beside a Menu can stop it
+                // opening, and those controls already show their own state.
+                .simultaneousGesture(self.pressGesture)
             } else {
                 self.content
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                     .padding(.vertical, 6)
             }
         }
+    }
+
+    private var pressGesture: some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                let travelled = abs(value.translation.height) + abs(value.translation.width)
+                self.panePress = travelled < 12
+            }
+            .onEnded { _ in self.panePress = false }
     }
 
     private var content: some View {
