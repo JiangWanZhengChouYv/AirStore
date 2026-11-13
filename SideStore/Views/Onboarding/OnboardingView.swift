@@ -107,7 +107,7 @@ private struct WelcomeStep: View {
         VStack(spacing: 24) {
             Spacer()
 
-            Image(uiImage: UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon60x60") ?? UIImage(systemName: "app.fill")!)
+            Image(uiImage: ThemeManager.currentAppIconImage ?? UIImage(systemName: "app.fill")!)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 96, height: 96)

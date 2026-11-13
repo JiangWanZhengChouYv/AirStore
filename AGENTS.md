@@ -17,8 +17,10 @@ for one Apple error. Work happens in three main streams, all first-class:
    `SideStore/Core/Anisette/`, then follow `AltStore/Settings/AnisetteManager.swift`,
    `AltStore/Settings/AnisetteServerList.swift`, and `SideStore/Core/Auth/`, where the error surfaces.
    `AnisetteServerProbe.swift` HEAD-checks each server for the green/red dots in the settings list;
-   `AnisetteProvider` uses its cached results to try dead servers last, and reports every server's
-   own error instead of the last one (usually a 503). Rotation is on by default.
+  `AnisetteProvider` uses its cached results to try dead servers last, and reports every server's
+  own error instead of the last one (usually a 503). Rotation is on by default. Each theme also
+  ships a small `Theme*.imageset` (a runtime-loadable copy of the appiconset, which `UIImage(named:)`
+  cannot load); `ThemeManager.currentAppIconImage` is what SplashView and onboarding must use.
 2. **AirBox** — run apps inside a container so the number of apps a user keeps is not decided by a free
    account's App ID slots. This is a re-skin of LiveContainer: `AirBox/`,
    `SideStore/Core/Container/`, vendored engine in `Dependencies/LiveContainer`.
@@ -181,6 +183,9 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
   many rows. The classic table view stays loaded underneath for its outlets and segues, but is
   covered and non-scrolling — **add a new row in SettingsHomeView, not in Settings.storyboard**.
   `SettingsViewController.performSettingsAction(_:)` is the single entry point for all destinations.
+  The home is a subview of the table view, so **every `tableView.reloadData()` must go through
+  `reloadClassicTable()`** — the reload re-inserts static cells above the home, which keeps it visible
+  (zPosition) but makes every row untappable. `viewDidLayoutSubviews` also re-fronts it.
 - `Shared/Extensions/View+GlassSurface.swift` stays: the onboarding flow uses it.
 - The onboarding flow keeps its six steps and all auth/pairing/container logic; it is SwiftUI and
   re-skinned in place (`SideStore/Views/Onboarding/OnboardingView.swift`).

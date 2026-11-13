@@ -335,17 +335,45 @@ final class SettingsViewController: UITableViewController
 
         self.tableView.isScrollEnabled = false
         self.tableView.separatorStyle = .none
+        self.tableView.allowsSelection = false
 
         // The three-finger debug gesture used to live on the table; the home now takes the touches.
+        // It must not cancel taps meant for SwiftUI buttons, toggles or menus.
         let debugGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(SettingsViewController.handleDebugModeGesture(_:)))
         debugGestureRecognizer.delegate = self
         debugGestureRecognizer.direction = .up
+        debugGestureRecognizer.cancelsTouchesInView = false
+        debugGestureRecognizer.delaysTouchesBegan = false
+        debugGestureRecognizer.delaysTouchesEnded = false
         #if !os(tvOS)
         debugGestureRecognizer.numberOfTouchesRequired = 3
         #endif
         hostingController.view.addGestureRecognizer(debugGestureRecognizer)
 
         self.settingsHostingController = hostingController
+        self.bringSettingsHomeToFront()
+    }
+
+    /// `layer.zPosition` only changes what is drawn on top; hit-testing follows the subview order.
+    /// reloadData() re-inserts the static cells, which otherwise end up above the SwiftUI home and
+    /// swallow every tap. Call after each reload and on every layout pass.
+    private func bringSettingsHomeToFront()
+    {
+        guard let hostingView = self.settingsHostingController?.view,
+              self.tableView.subviews.last !== hostingView else { return }
+        self.tableView.bringSubviewToFront(hostingView)
+    }
+
+    private func reloadClassicTable()
+    {
+        self.tableView.reloadData()
+        self.bringSettingsHomeToFront()
+    }
+
+    override func viewDidLayoutSubviews()
+    {
+        super.viewDidLayoutSubviews()
+        self.bringSettingsHomeToFront()
     }
 
     override func viewWillAppear(_ animated: Bool)
@@ -634,7 +662,7 @@ private extension SettingsViewController
                 self.accountStatus = .completed
                 self.updateAccountCardRowStyles()
             }
-            self.tableView.reloadData()
+            self.reloadClassicTable()
         }
         
         // AppRefreshRow
@@ -657,7 +685,7 @@ private extension SettingsViewController
 
         if self.isViewLoaded
         {
-            self.tableView.reloadData()
+            self.reloadClassicTable()
         }
     }
     
@@ -668,13 +696,13 @@ private extension SettingsViewController
             guard let self = self else { return }
             if !UserDefaults.standard.isDeviceRegistered {
                 self.accountStatus = .checking
-                self.tableView.reloadData()
+                self.reloadClassicTable()
                 self.updateAccountCardRowStyles()
             }
             let status = await AccountVerificationRow.verifyStatus(for: team)
             if !Task.isCancelled {
                 self.accountStatus = status
-                self.tableView.reloadData()
+                self.reloadClassicTable()
                 self.updateAccountCardRowStyles()
             }
         }
@@ -1067,7 +1095,7 @@ private extension SettingsViewController
             self.debugGestureCounter = 0
             
             UserDefaults.standard.isDebugModeEnabled.toggle()
-            self.tableView.reloadData()
+            self.reloadClassicTable()
         }
         else
         {

@@ -33,6 +33,22 @@ public struct ThemePreset: Identifiable, Equatable {
         }
     }
 
+    /// A runtime-loadable copy of the icon. App icon sets are not imagesets, so the splash screen
+    /// cannot ask the system for them by name; each theme ships a small imageset alongside its
+    /// appiconset. The default blue reuses the classic `App` image.
+    public var iconImageName: String {
+        switch self.id {
+        case "sapphireBlue": return "App"
+        case "classic": return "ThemeTeal"
+        case "neonViolet": return "ThemeViolet"
+        case "sunsetCrimson": return "ThemeCrimson"
+        case "cyberpunkGold": return "ThemeGold"
+        case "emeraldMint": return "ThemeEmerald"
+        case "electricPink": return "ThemePink"
+        default: return "App"
+        }
+    }
+
     public static func preset(matchingHex hex: String) -> ThemePreset? {
         let normalized = hex.replacingOccurrences(of: "#", with: "").uppercased()
         return Self.presets.first { $0.hex.replacingOccurrences(of: "#", with: "").uppercased() == normalized }
@@ -51,6 +67,24 @@ public struct ThemePreset: Identifiable, Equatable {
 
 public final class ThemeManager: ObservableObject {
     public static let shared = ThemeManager()
+
+    /// The icon the app is currently showing on the home screen, as a loadable image. Used by the
+    /// splash screen and onboarding, which otherwise drew the same hard-coded blue icon forever.
+    /// Call on the main thread (alternateIconName is a UIKit main-thread property).
+    public static var currentAppIconImage: UIImage? {
+        if let alternate = UIApplication.shared.alternateIconName {
+            if let preset = ThemePreset.presets.first(where: { $0.alternateIconName == alternate }),
+               let image = UIImage(named: preset.iconImageName) {
+                return image
+            }
+            // Manually chosen modern icons ("SnowIcon" has a "Snow" imageset, etc.).
+            let imageName = alternate.replacingOccurrences(of: "Icon", with: "")
+            if let image = UIImage(named: imageName) {
+                return image
+            }
+        }
+        return UIImage(named: "App") ?? UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon60x60")
+    }
     public static let themeDidChangeNotification = Notification.Name("SideStoreThemeDidChangeNotification")
 
     private static let userDefaultsKey = "userCustomThemeHex"

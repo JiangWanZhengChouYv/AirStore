@@ -34,7 +34,7 @@ struct SplashView: View {
             VStack(spacing: 16) {
                 Spacer()
 
-                Image(uiImage: UIImage(named: "AppIcon") ?? UIImage(named: "AppIcon60x60") ?? UIImage(systemName: "app.fill")!)
+                Image(uiImage: ThemeManager.currentAppIconImage ?? UIImage(systemName: "app.fill")!)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 104, height: 104)
