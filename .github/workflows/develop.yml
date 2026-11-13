@@ -52,6 +52,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       short_commit: ${{ steps.version.outputs.short_commit }}
       bundle_id: ${{ steps.version.outputs.bundle_id }}
+      app: ${{ steps.changed.outputs.app }}
       airbox: ${{ steps.changed.outputs.airbox }}
       helper: ${{ steps.changed.outputs.helper }}
       cache_week: ${{ steps.epoch.outputs.week }}
@@ -117,9 +118,13 @@ jobs:
 
   # One of the three ribs. Builds only SideStore.app: the "SideStore - Release" scheme carries no
   # AirBox buildable, so this runner never compiles the container and vice versa.
+  # Skipped when the push touched nothing the app is built from. A workflow tweak or a script edit has
+  # no business holding a macOS runner for six minutes -- and the pool is shared, so that wait lands on
+  # whoever pushes a real change next.
   build-airstore:
     name: Build AirStore
     needs: prepare
+    if: needs.prepare.outputs.app == 'true'
     # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
     # unset, it is the hosted image it always was.
     runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
@@ -672,6 +677,11 @@ jobs:
           # No webhook configured means silent, and a webhook that does not answer must never turn a
           # finished build red: this reports, it does not gate.
           if [ -z "$WEBHOOK" ]; then echo "no DISCORD_WEBHOOK_AIRSTORE secret -- nothing to tell"; exit 0; fi
+          # Nothing was rebuilt, so there is no build to announce: the run is a no-op on purpose.
+          if [ "$AIRSTORE_RESULT" = "skipped" ] && [ "$AIRBOX_RESULT" = "skipped" ] && [ "$HELPER_RESULT" = "skipped" ]; then
+            echo "no build was needed -- posting nothing"
+            exit 0
+          fi
           # A rib skipped because its inputs did not change did its job: the package it would have
           # built is still the newest one on the release, so it must not be reported as a failure.
           ok_or_skipped() { [ "$1" = "success" ] || [ "$1" = "skipped" ]; }

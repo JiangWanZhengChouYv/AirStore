@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Which optional builds a push to develop actually needs.
+"""Which builds a push to develop actually needs.
 
 Two macOS runners and one Windows runner are spent on packages that rarely move: AirBox follows the
 container and the Xcode project, the Helper follows its own Tauri tree. The workflow hands this
@@ -35,6 +35,27 @@ HELPER_PATHS = (
     "Helper/",
 )
 
+# Everything the store app is built from. A push that touches none of it -- a workflow tweak, a script,
+# a Chinese-only edit under scripts/ -- has nothing to publish, and spending a macOS runner (and its
+# queue) to rebuild byte-identical output is what makes the pool look busy all day.
+APP_PATHS = (
+    "SideStore/",
+    "AltStore/",
+    "AltWidget/",
+    "SideBackup/",
+    "LiveProcess/",
+    "Shared/",
+    "AirBox/",
+    "Dependencies/",
+    "AltStore.xcodeproj/",
+    "xcconfigs/",
+    "Build.xcconfig",
+    "CodeSigning.xcconfig",
+    "Makefile",
+    "scripts/ci/workflow.py",
+    ".gitmodules",
+)
+
 
 def read_paths(path):
     """The changed paths, or None when the file is missing or empty."""
@@ -62,7 +83,7 @@ def main():
         preview = " ".join(sorted(files)) if len(files) <= 30 else "%d files" % len(files)
         print("changed_parts: %s" % preview, file=sys.stderr)
 
-    for name, prefixes in (("airbox", AIRBOX_PATHS), ("helper", HELPER_PATHS)):
+    for name, prefixes in (("app", APP_PATHS), ("airbox", AIRBOX_PATHS), ("helper", HELPER_PATHS)):
         print("%s=%s" % (name, "true" if files is None or touches(files, prefixes) else "false"))
 
 

@@ -7,9 +7,12 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
+# Own group, and no cancellation: a daily build that is still queued when the next dispatch arrives
+# must not be dropped on the floor -- it was cancelled twice in a row sitting in the queue, and a
+# nightly that silently never ran is worse than one that ran an hour late.
 concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: false
 
 # Creating the rolling `nightly` release and force-pushing its tag needs write access; the default
 # token is read-only, which is what made this job end with "HTTP 403: Resource not accessible by
