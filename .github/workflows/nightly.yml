@@ -218,6 +218,7 @@ jobs:
         run: |
           python3 scripts/ci/workflow.py dump-project-settings
           BUNDLE_ID=$(python3 scripts/ci/workflow.py read-bundle-id)
+          echo "BUNDLE_ID=$BUNDLE_ID" | tee -a $GITHUB_ENV
           IPA_NAME="AirStore.ipa"
 
           python3 scripts/ci/workflow.py generate-metadata \
@@ -253,3 +254,58 @@ jobs:
             "$GITHUB_SHA" \
             "$GITHUB_REPOSITORY" \
             "$UPSTREAM_CHANNEL"
+
+      # A track is a channel inside one feed, not a feed of its own: every install reads
+      # source/airstore-source.json on develop-source, so nightly has to be merged into the same file
+      # the develop builds write. A separate branch would be a URL no phone ever asks for. The file the
+      # last run left behind is the base, which is what keeps the stable and develop channels intact.
+      - name: Publish the nightly channel
+        if: steps.build_gate.outputs.should_skip != 'true'
+        env:
+          GIT_TERMINAL_PROMPT: 0
+        run: |
+          mkdir -p build
+          # A develop build can land between the fetch and the push, and both prepend to the same
+          # versions array, so losing that race is expected rather than exceptional: regenerate on
+          # top of whatever is on the branch now and try again.
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin develop-source
+            git show origin/develop-source:source/airstore-source.json > build/previous-feed.json
+
+            python3 scripts/ci/develop_source.py \
+              --source build/previous-feed.json \
+              --ipa AirStore.ipa \
+              --bundle-id "$BUNDLE_ID" \
+              --version "$MARKETING_VERSION" \
+              --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/nightly/AirStore.ipa" \
+              --track nightly \
+              --description "Nightly build $MARKETING_VERSION from commit $SHORT_COMMIT." \
+              --out build/nightly-feed.json
+
+            git checkout -B develop-source origin/develop-source
+            cp build/nightly-feed.json source/airstore-source.json
+            git add source/airstore-source.json
+            if git -c user.name="github-actions[bot]" \
+                   -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                   commit --allow-empty -m "Nightly build $MARKETING_VERSION" \
+               && git push origin develop-source; then
+              echo "nightly channel published on attempt $attempt"
+              PUBLISHED=true
+              break
+            fi
+            echo "attempt $attempt lost a race with a develop build; regenerating"
+            sleep 5
+          done
+
+          # A silent miss here means the release exists but no phone can see it, which is worse than
+          # a red run.
+          if [ "${PUBLISHED:-false}" != "true" ]; then
+            echo "::error::the nightly channel could not be published after 3 attempts"
+            exit 1
+          fi
+
+      - name: Purge the CDN copy of the feed
+        if: steps.build_gate.outputs.should_skip != 'true'
+        run: |
+          curl -fsS --max-time 20 "https://purge.jsdelivr.net/gh/$GITHUB_REPOSITORY@develop-source/source/airstore-source.json" >/dev/null \
+            || echo "::warning::the purge request failed; the live proxies carry the feed either way"
