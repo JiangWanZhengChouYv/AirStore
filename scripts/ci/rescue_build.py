@@ -22,9 +22,10 @@ WORKFLOW = "develop.yml"
 BUILD_JOB = "Build AirStore"
 BUNDLE_SUFFIX = ".AirStore"
 
-# A job that dies in the queue takes about fifteen minutes to do so; waiting twenty minutes between
-# attempts therefore looks at a settled result instead of racing the previous rescue.
-SETTLE_MINUTES = 20
+# A job that dies in the queue takes about fifteen minutes to do so. Two minutes is only there to stop
+# the workflow_run trigger and a timer tick from dispatching the same rescue twice in the same moment;
+# the real spacing between attempts is the fifteen minutes a doomed job spends waiting.
+SETTLE_MINUTES = 2
 
 
 def gh(*args: str) -> str:
