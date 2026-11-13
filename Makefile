@@ -210,11 +210,15 @@ build:
 # mode keeps -Osize but compiles in parallel, and develop builds have no use for dSYMs. The plain
 # `build` target keeps both, so stable releases are untouched.
 build-airstore: SCHEME = SideStore - Release
-build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf
+# COMPILATION_CACHE_ENABLE_CACHING is Xcode 26's content-addressed compile cache. It is the only
+# cache that survives a CI checkout: DerivedData keys off file mtimes, and a fresh clone gives every
+# source a new one, so restoring 1 GB of objects still recompiled all 745 files (measured on three
+# consecutive runs). This one keys off the file's contents, so unchanged files come back as hits.
+build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf COMPILATION_CACHE_ENABLE_CACHING=YES
 build-airstore: build
 
 build-airbox: SCHEME = AirBox
-build-airbox: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf
+build-airbox: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf COMPILATION_CACHE_ENABLE_CACHING=YES
 build-airbox: build
 
 build-and-test:

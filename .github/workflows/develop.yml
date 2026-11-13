@@ -54,6 +54,7 @@ jobs:
       bundle_id: ${{ steps.version.outputs.bundle_id }}
       airbox: ${{ steps.changed.outputs.airbox }}
       helper: ${{ steps.changed.outputs.helper }}
+      cache_week: ${{ steps.epoch.outputs.week }}
 
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +81,13 @@ jobs:
           fi
           echo "changed paths:"; cat build-changed.txt
           python3 scripts/ci/changed_parts.py --files build-changed.txt >> "$GITHUB_OUTPUT"
+
+      # Coarse on purpose: within a week every run hits the exact cache key and uploads nothing, and
+      # the first run of each week re-saves one fresh copy. A per-run key uploaded a gigabyte every
+      # push and was evicting the other jobs' caches against the 10 GB budget.
+      - name: Cache epoch
+        id: epoch
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
 
       - name: Version this build
         id: version
@@ -135,18 +143,21 @@ jobs:
             exit 1
           fi
 
-      - name: Restore the last AirStore build's cache
-        uses: actions/cache/restore@v3
+      # What is cached here changed after measuring what the old cache was worth. Restoring the whole
+      # DerivedData (1 GB, hit every run) recompiled all 745 files every time: Xcode's incremental
+      # state keys off input mtimes, and a fresh checkout gives every source a new one. So this caches
+      # only the parts that do not depend on mtimes -- the content-addressed compilation cache Xcode 26
+      # writes and the resolved package checkouts -- which is a third of the size and can actually hit.
+      - name: Restore the compile cache
+        uses: actions/cache@v4
         with:
           path: |
-            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Developer/Xcode/DerivedData/*/CompilationCache.noindex
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          # A key no run has ever written, so the lookup always falls through to restore-keys and takes
-          # the newest cache whoever ran before left behind -- which is the only one that can make this
-          # build incremental. The prefix is per job so the two ribs never restore each other's objects.
-          key: xcode-build-cache-develop-airstore-${{ github.run_id }}-${{ github.run_attempt }}
+          key: xcode-develop-airstore-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
           restore-keys: |
-            xcode-build-cache-develop-airstore-
+            xcode-develop-airstore-
 
       - name: Build
         env:
@@ -161,14 +172,6 @@ jobs:
             echo "::error::zh-Hans.lproj is missing from the built app, so Localizable.xcstrings did not produce a Chinese table"
             exit 1
           fi
-
-      - name: Save Cache
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-airstore-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload the package
         uses: actions/upload-artifact@v4
@@ -207,15 +210,16 @@ jobs:
             exit 1
           fi
 
-      - name: Restore the last AirBox build's cache
-        uses: actions/cache/restore@v3
+      - name: Restore the compile cache
+        uses: actions/cache@v4
         with:
           path: |
-            ~/Library/Developer/Xcode/DerivedData
+            ~/Library/Developer/Xcode/DerivedData/*/CompilationCache.noindex
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-airbox-${{ github.run_id }}-${{ github.run_attempt }}
+          key: xcode-develop-airbox-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
           restore-keys: |
-            xcode-build-cache-develop-airbox-
+            xcode-develop-airbox-
 
       - name: Build
         env:
@@ -237,14 +241,6 @@ jobs:
             exit 1
           fi
           echo "$appex keeps _UIApplicationMain"
-
-      - name: Save Cache
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
-            ~/Library/Caches/org.swift.swiftpm
-          key: xcode-build-cache-develop-airbox-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload the package
         uses: actions/upload-artifact@v4
