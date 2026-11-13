@@ -287,17 +287,36 @@ private struct SettingsGlassGroup: View {
     }
 }
 
-/// `.plain` draws nothing while a row is held down, so every tap felt like it missed — the screen
-/// only changed once the next page was pushed. This paints a cell-style highlight under the finger.
+/// `.plain` drew nothing while a row was held, so every tap read as a miss. A flat grey rectangle
+/// fixes "invisible" but not "solid": the glass has to give under the finger. The row springs
+/// inward, the highlight blooms out from under the text, and a light impact lands with it.
 private struct SettingsRowButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(configuration.isPressed ? 0.14 : 0))
+        let pressed = configuration.isPressed
+
+        return configuration.label
+            .background {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.white.opacity(pressed ? 0.15 : 0))
+                    .overlay {
+                        // A faint specular sheen, brightest at the top edge, so the pressed area
+                        // reads as lit glass rather than a grey selection.
+                        LinearGradient(colors: [Color.white.opacity(pressed ? 0.20 : 0), .clear],
+                                       startPoint: .top,
+                                       endPoint: .bottom)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
                     .padding(.horizontal, -4)
-            )
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+                    // Starts slightly smaller than the row and expands into place, which is what
+                    // makes the highlight look like it wells up rather than switch on.
+                    .scaleEffect(pressed ? 1 : 0.9)
+                    .opacity(pressed ? 1 : 0)
+            }
+            .scaleEffect(pressed ? 0.972 : 1)
+            .animation(.spring(response: 0.3, dampingFraction: 0.62), value: pressed)
+            .sensoryFeedback(.impact(weight: .light), trigger: pressed) { _, isPressed in
+                isPressed
+            }
     }
 }
 
