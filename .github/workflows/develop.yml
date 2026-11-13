@@ -63,11 +63,23 @@ jobs:
           fetch-depth: 1
 
       # AirBox and the Helper are the expensive ribs and they change far less often than the app, so
-      # each one is skipped unless this push touched its inputs. The decision reads the file list the
-      # push event already carries, which costs nothing and needs no second checkout.
+      # each one is skipped unless this push touched its inputs. The list comes from git, not from the
+      # event payload: the payload's per-commit file lists are not guaranteed to be filled in, and an
+      # empty list would quietly rebuild all three.
       - name: Work out which parts changed
         id: changed
-        run: python3 scripts/ci/changed_parts.py >> "$GITHUB_OUTPUT"
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          : > build-changed.txt
+          # An all-zero "before" means a new branch; a force-push can leave a sha the remote no longer
+          # serves. Both leave the list empty, which the script reads as "rebuild everything".
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            git fetch --no-tags --depth=1 origin "$BEFORE" >/dev/null 2>&1 || true
+            git diff --name-only "$BEFORE" HEAD > build-changed.txt 2>/dev/null || : > build-changed.txt
+          fi
+          echo "changed paths:"; cat build-changed.txt
+          python3 scripts/ci/changed_parts.py --files build-changed.txt >> "$GITHUB_OUTPUT"
 
       - name: Version this build
         id: version
