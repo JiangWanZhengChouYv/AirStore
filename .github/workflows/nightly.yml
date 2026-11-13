@@ -11,6 +11,12 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
+# Creating the rolling `nightly` release and force-pushing its tag needs write access; the default
+# token is read-only, which is what made this job end with "HTTP 403: Resource not accessible by
+# integration" on every run that actually built.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-26
@@ -65,11 +71,13 @@ jobs:
           MARKETING_VERSION=$(python3 scripts/ci/workflow.py get-marketing-version)
           SHORT_COMMIT=$(python3 scripts/ci/workflow.py commit-id)
 
-          NORMALIZED_VERSION=$(python3 scripts/ci/workflow.py compute-normalized \
-              "$MARKETING_VERSION" \
-              "$BUILD_NUM" \
-              "$SHORT_COMMIT")
-
+          # The version has to carry the track word: ReleaseTrackType.from(version:) looks for
+          # "nightly" to file an install under the nightly channel, and without it a nightly build
+          # was indistinguishable from a stable one. Same stamp shape as develop, deliberately
+          # without "+": CFBundleShortVersionString has no room for semver build metadata, and the
+          # strict parser rejects the whole version when it is there.
+          STAMP=$(date -u +%Y%m%d%H%M)
+          NORMALIZED_VERSION="${MARKETING_VERSION}-nightly-${STAMP}.${BUILD_NUM}-${SHORT_COMMIT}"
           python3 scripts/ci/workflow.py set-marketing-version "$NORMALIZED_VERSION"
 
           echo "BUILD_NUM=$BUILD_NUM" | tee -a $GITHUB_ENV
