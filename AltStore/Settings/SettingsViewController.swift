@@ -134,6 +134,16 @@ final class SettingsViewController: UITableViewController
 
     private var debugGestureCounter = 0
     private weak var debugGestureTimer: Timer?
+
+    // The SwiftUI home owns the presentation; this controller stays as the host so its storyboard
+    // segues, account state and alert flows keep working. See SettingsHomeView.swift.
+    private let settingsState = SettingsState()
+    private lazy var settingsRouter: SettingsRouter = {
+        let router = SettingsRouter()
+        router.perform = { [weak self] action in self?.performSettingsAction(action) }
+        return router
+    }()
+    private var settingsHostingController: UIHostingController<AnyView>?
     
     @IBOutlet private var accountNameLabel: UILabel!
     @IBOutlet private var accountEmailLabel: UILabel!
@@ -298,8 +308,46 @@ final class SettingsViewController: UITableViewController
         }
         
         configureReleaseChannelButton()
+        self.installSettingsHome()
     }
-    
+
+    /// UITableViewController's `view` *is* the table view, so hiding it would hide the SwiftUI home
+    /// with it. The home is pinned to the table's frame guide instead and the table stops scrolling;
+    /// its static cells stay loaded (and their outlets stay connected) underneath.
+    private func installSettingsHome()
+    {
+        let rootView = SettingsHomeView(router: self.settingsRouter, state: self.settingsState)
+        let hostingController = UIHostingController(rootView: AnyView(rootView))
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        // reloadData() can re-order the table's subviews; keep the home above the static cells.
+        hostingController.view.layer.zPosition = 100
+
+        self.addChild(hostingController)
+        self.tableView.addSubview(hostingController.view)
+        NSLayoutConstraint.activate([
+            hostingController.view.topAnchor.constraint(equalTo: self.tableView.frameLayoutGuide.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: self.tableView.frameLayoutGuide.bottomAnchor),
+            hostingController.view.leadingAnchor.constraint(equalTo: self.tableView.frameLayoutGuide.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: self.tableView.frameLayoutGuide.trailingAnchor)
+        ])
+        hostingController.didMove(toParent: self)
+
+        self.tableView.isScrollEnabled = false
+        self.tableView.separatorStyle = .none
+
+        // The three-finger debug gesture used to live on the table; the home now takes the touches.
+        let debugGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(SettingsViewController.handleDebugModeGesture(_:)))
+        debugGestureRecognizer.delegate = self
+        debugGestureRecognizer.direction = .up
+        #if !os(tvOS)
+        debugGestureRecognizer.numberOfTouchesRequired = 3
+        #endif
+        hostingController.view.addGestureRecognizer(debugGestureRecognizer)
+
+        self.settingsHostingController = hostingController
+    }
+
     override func viewWillAppear(_ animated: Bool)
     {
         super.viewWillAppear(animated)
@@ -307,6 +355,7 @@ final class SettingsViewController: UITableViewController
         // show nav bar if not shown already
         self.navigationController?.setNavigationBarHidden(false, animated: animated)
         
+        self.settingsState.refresh()
         self.update()
     }
     
@@ -316,6 +365,147 @@ final class SettingsViewController: UITableViewController
         self.accountVerificationTask?.cancel()
     }
     
+    /// One entry point for every row in the SwiftUI home. The presentation changed from eleven table
+    /// sections to six glass groups, but the destinations are the same storyboard segues and hosting
+    /// controllers the classic table used.
+    func performSettingsAction(_ action: SettingsAction)
+    {
+        func show<Content: SwiftUI.View>(_ view: Content, title: String? = nil, segueIdentifier: String = "diagnostics")
+        {
+            let viewController = UIHostingController(rootView: view)
+            viewController.view.backgroundColor = .settingsBackground
+            if let title = title { viewController.title = title }
+            self.prepare(for: UIStoryboardSegue(identifier: segueIdentifier, source: self, destination: viewController), sender: nil)
+        }
+
+        switch action
+        {
+        case .signIn:
+            self.signIn()
+            self.settingsState.refresh()
+
+        case .signOut:
+            self.signOut(UIBarButtonItem())
+
+        case .resolveAccount:
+            self.resolvePendingAccountActions()
+
+        case .changeAppIcon:
+            self.performSegue(withIdentifier: "showAppIcons", sender: self)
+
+        case .theme:
+            show(UserCustomizationsView(), title: NSLocalizedString("User Customizations", comment: ""))
+
+        case .howItWorks:
+            self.performSegue(withIdentifier: "showInstructions", sender: self)
+
+        case .licenses:
+            self.performSegue(withIdentifier: "showCredits", sender: self)
+
+        case .patreon:
+            self.performSegue(withIdentifier: "showPatreon", sender: self)
+
+        case .sendFeedback:
+            let alertController = UIAlertController(title: NSLocalizedString("Send Feedback", comment: ""),
+                                                    message: NSLocalizedString("Choose a method to send feedback:", comment: ""),
+                                                    preferredStyle: .actionSheet)
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("Report an Issue on GitHub", comment: ""), style: .default) { _ in
+                UIApplication.shared.open(AppConstants.URLs.airStoreIssues, options: [:])
+            })
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("Give Feedback on Discord", comment: ""), style: .default) { _ in
+                UIApplication.shared.open(AppConstants.URLs.airStoreDiscord, options: [:])
+            })
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+            if UIDevice.current.userInterfaceIdiom == .pad, let popover = alertController.popoverPresentationController {
+                popover.sourceView = self.view
+                popover.sourceRect = self.view.bounds
+            }
+            self.present(alertController, animated: true)
+
+        case .social(let link):
+            switch link {
+            case .github: self.followAltStoreGitHub()
+            case .mastodon: self.followAltStoreMastodon()
+            case .threads: self.followAltStoreThreads()
+            case .twitter: self.followAltStoreTwitter()
+            }
+
+        case .siriShortcut:
+            #if !os(tvOS)
+            self.addRefreshAppsShortcut()
+            #endif
+
+        case .betaTrack(let track):
+            UserDefaults.standard.betaUdpatesTrack = track
+
+        case .healthCheck:
+            show(HealthCheckView())
+
+        case .errorLog:
+            self.performSegue(withIdentifier: "showErrorLog", sender: self)
+
+        case .storageExplorer:
+            StorageExplorerView.clearCache()
+            func makeExplorer(url: URL? = nil) -> UIViewController {
+                let onSelectFolder: (URL) -> Void = { [weak self] targetURL in
+                    guard let self else { return }
+                    self.navigationController?.pushViewController(makeExplorer(url: targetURL), animated: true)
+                }
+                if let url {
+                    return UIHostingController(rootView: DirectoryExplorerView(url: url, onSelectFolder: onSelectFolder))
+                }
+                return UIHostingController(rootView: StorageExplorerView(onSelectFolder: onSelectFolder))
+            }
+            self.navigationController?.pushViewController(makeExplorer(), animated: true)
+
+        case .clearCache:
+            self.clearCache()
+
+        case .refreshAttempts:
+            self.performSegue(withIdentifier: "showRefreshAttempts", sender: self)
+
+        case .developerOptions:
+            show(DeveloperOptionsView(), title: NSLocalizedString("Developer Options", comment: ""))
+
+        case .experimentalFeatures:
+            show(ExperimentalFeaturesView(), title: NSLocalizedString("Experimental Features", comment: ""))
+
+        case .backupAndRestore:
+            show(BackupAndRestoreView(), title: NSLocalizedString("Backup & Restore", comment: ""))
+
+        case .pairingFile:
+            show(PairingFileManagementView())
+
+        case .anisetteServers:
+            let view = AnisetteServersView(selected: UserDefaults.standard.menuAnisetteURL) { [weak self] in
+                guard let self else { return }
+                ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in AirStore.").show(in: self)
+            }
+            show(view, segueIdentifier: "anisetteServers")
+
+        case .connectionConfig:
+            show(ConnectionConfigView())
+
+        case .networkDiscovery:
+            show(BonjourDiscoveryView(), title: NSLocalizedString("Network Discovery", comment: ""))
+
+        case .developerServices:
+            show(DeveloperServicesView(presentingViewController: self), segueIdentifier: "developerServices")
+
+        case .profileManagement:
+            show(ProfileManagementView(presentingViewController: self), segueIdentifier: "profileManagement")
+
+        case .certificates:
+            show(CertificatesView(presentingViewController: self), segueIdentifier: "certificateManagement")
+
+        case .container:
+            show(ContainerSettingsView(), title: NSLocalizedString("Container", comment: ""))
+
+        case .sideJITServer:
+            show(SideJITServerConfigView())
+        }
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "anisetteServers" || segue.identifier == "developerServices" || segue.identifier == "profileManagement" || segue.identifier == "certificateManagement" || segue.identifier == "diagnostics" {
             let controller = segue.destination

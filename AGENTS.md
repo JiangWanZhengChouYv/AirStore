@@ -175,8 +175,12 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 - A parallel opt-in SwiftUI shell (`SideStore/Views/NewUI/`, `UIStylePreferences`, the "Interface"
   switch in 高级 → 用户自定义) existed during 2026 and was **removed at the maintainer's request on
   2026-11-11**. Do not reintroduce it, and do not add a second shell or a UI-style switch.
-- New work goes into the classic UI. Settings rows live in `AltStore/Settings/SettingsViewController`
-  + `Settings.storyboard`, or in the SwiftUI subpages they push.
+- New work goes into the classic UI. The settings home is a SwiftUI surface
+  (`SideStore/Views/Settings/SettingsHomeView.swift`) hosted by `SettingsViewController`: six groups
+  (Account, Appearance, Refresh, Connection, Diagnostics, About), each one large glass pane holding
+  many rows. The classic table view stays loaded underneath for its outlets and segues, but is
+  covered and non-scrolling — **add a new row in SettingsHomeView, not in Settings.storyboard**.
+  `SettingsViewController.performSettingsAction(_:)` is the single entry point for all destinations.
 - `Shared/Extensions/View+GlassSurface.swift` stays: the onboarding flow uses it.
 - The onboarding flow keeps its six steps and all auth/pairing/container logic; it is SwiftUI and
   re-skinned in place (`SideStore/Views/Onboarding/OnboardingView.swift`).

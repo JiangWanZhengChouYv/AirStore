@@ -307,7 +307,7 @@
                                             <userDefinedRuntimeAttribute type="boolean" keyPath="isSelectable" value="YES"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <segue destination="1z3-Yk-n8E" kind="show" identifier="" id="7I2-qT-zAU"/>
+                                            <segue destination="1z3-Yk-n8E" kind="show" identifier="showAppIcons" id="7I2-qT-zAU"/>
                                         </connections>
                                     </tableViewCell>
                                 </cells>

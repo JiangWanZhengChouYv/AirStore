@@ -1,6 +1,171 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "About & Support": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于与支持"
+          }
+        }
+      }
+    },
+    "Accent colour and app icon presets.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主题色与 App 图标预设。"
+          }
+        }
+      }
+    },
+    "Account Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账户状态"
+          }
+        }
+      }
+    },
+    "Appearance & Experience": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外观与体验"
+          }
+        }
+      }
+    },
+    "Check for pending account actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查待处理的账户操作"
+          }
+        }
+      }
+    },
+    "Connection & Signing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接与签名"
+          }
+        }
+      }
+    },
+    "Diagnostics & Storage": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "诊断与存储"
+          }
+        }
+      }
+    },
+    "Keep the device awake during a refresh or install.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新或安装时保持设备不休眠。"
+          }
+        }
+      }
+    },
+    "Mastodon": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mastodon"
+          }
+        }
+      }
+    },
+    "Refresh & Updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新与更新"
+          }
+        }
+      }
+    },
+    "Refresh apps automatically when connected to Wi-Fi.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "连接 Wi-Fi 时自动刷新应用。"
+          }
+        }
+      }
+    },
+    "Sign in to download apps from AirStore.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 Apple ID 才能下载应用。"
+          }
+        }
+      }
+    },
+    "Theme & Customizations": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主题与自定义"
+          }
+        }
+      }
+    },
+    "Threads": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threads"
+          }
+        }
+      }
+    },
+    "Twitter": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twitter"
+          }
+        }
+      }
+    },
     "Choosing a preset also switches the app icon to match. Custom colours keep the current icon.": {
       "extractionState": "manual",
       "localizations": {
