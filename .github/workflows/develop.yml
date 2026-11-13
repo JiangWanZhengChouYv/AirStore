@@ -148,7 +148,7 @@ jobs:
       # state keys off input mtimes, and a fresh checkout gives every source a new one. So this keeps
       # only the resolved package checkouts, which are the part a fresh clone really has to re-fetch,
       # and drops the objects that were never reused.
-      - name: Restore the compile cache
+      - name: Restore the package checkouts
         uses: actions/cache@v4
         with:
           path: |
@@ -209,7 +209,7 @@ jobs:
             exit 1
           fi
 
-      - name: Restore the compile cache
+      - name: Restore the package checkouts
         uses: actions/cache@v4
         with:
           path: |
