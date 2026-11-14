@@ -214,14 +214,21 @@ build-airstore: SCHEME = SideStore - Release
 # checkout that makes ordinary DerivedData incremental state useless. The 2026-11-13 attempt showed
 # no hits at all because the CAS was cached from DerivedData/*/CompilationCache.noindex -- a path that
 # does not exist. Xcode keeps one shared CAS at the DerivedData ROOT, beside the project folders.
-# That is what the workflow caches now, and what these settings point at. With the CAS restored,
+# That is what the workflow caches now, and what these settings point at.
+
+# batchmode groups the whole Swift target into one frontend job, which is why only 2 of 416 SideStore
+# Swift files ever hit the CAS (diagnostic run: 373 hits, 243 of them CCryptoBoringSSL). singlefile
+# gives every file its own cache key, so an unchanged file can be replayed even when a neighbour was
+# edited. It costs cross-file optimisation, so the resulting binary must be smoke-tested on device
+# before this is treated as a win -- and the mode may simply be slower on a Release build.
+ With the CAS restored,
 # Xcode reports 373 replayed hits -- every one of CCryptoBoringSSL's 243 C files and the other
 # C-family targets -- but only 2 of the 416 SideStore Swift files. Batchmode compiles the Swift
 # target as a batch, so one changed file appears to invalidate the whole batch's key.
 COMPILATION_CACHE_FLAGS = COMPILATION_CACHE_ENABLE_CACHING=YES \
 	COMPILATION_CACHE_CAS_PATH=$(HOME)/Library/Developer/Xcode/DerivedData/CompilationCache.noindex \
 	MODULE_CACHE_DIR=$(HOME)/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf $(COMPILATION_CACHE_FLAGS)
+build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=singlefile DEBUG_INFORMATION_FORMAT=dwarf $(COMPILATION_CACHE_FLAGS)
 build-airstore: build
 
 build-airbox: SCHEME = AirBox
