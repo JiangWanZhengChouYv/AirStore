@@ -8,6 +8,7 @@
 
 @preconcurrency import UIKit
 import SwiftUI
+import CoreData
 #if !os(tvOS)
 import MessageUI
 #endif
@@ -939,8 +940,7 @@ private extension SettingsViewController
     {
         let context = DatabaseManager.shared.viewContext
         let request = Account.fetchRequest() as NSFetchRequest<Account>
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Account.appleID, ascending: true)]
-        let accounts = (try? context.fetch(request)) ?? []
+        let accounts = ((try? context.fetch(request)) ?? []).sorted { $0.appleID < $1.appleID }
         let usable = Set(Keychain.shared.accountsWithCredentials(from: accounts.map(\.identifier)))
         let activeIdentifier = DatabaseManager.shared.activeAccount(in: context)?.identifier
 
