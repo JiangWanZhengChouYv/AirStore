@@ -48,17 +48,45 @@ public class Keychain
                                             .accessibility(.afterFirstUnlock)
                                             .synchronizable(true)
     
-    @KeychainItem(key: "appleIDEmailAddress")
-    public var appleIDEmailAddress: String?
-    
-    @KeychainItem(key: "appleIDPassword")
-    public var appleIDPassword: String?
-    
-    @KeychainItem(key: "appleIDAdsid")
-    public var appleIDAdsid: String?
-    
-    @KeychainItem(key: "appleIDXcodeToken")
-    public var appleIDXcodeToken: String?
+    /// Which account the four Apple ID slots below belong to, persisted so a relaunch reads the same
+    /// namespace. nil means the original unscoped keys -- what a fresh install uses, what an upgrading
+    /// install has, and what a sign-in writes before it knows who it is signing in as.
+    public var accountScope: String?
+    {
+        get { UserDefaults.standard.string(forKey: Self.accountScopeKey) }
+        set {
+            if let newValue, !newValue.isEmpty {
+                UserDefaults.standard.set(newValue, forKey: Self.accountScopeKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: Self.accountScopeKey)
+            }
+        }
+    }
+
+    private static let accountScopeKey = "AirStoreActiveAccountScope"
+
+    // Account-scoped, with the unscoped slot as a fallback. The fallback is what makes this invisible
+    // to every install that already has credentials: nothing has to be migrated before it is read,
+    // and a sign-in that has not learned its account identifier yet still lands somewhere useful.
+    public var appleIDEmailAddress: String? {
+        get { self.credential(for: "appleIDEmailAddress") }
+        set { self.setCredential(newValue, for: "appleIDEmailAddress") }
+    }
+
+    public var appleIDPassword: String? {
+        get { self.credential(for: "appleIDPassword") }
+        set { self.setCredential(newValue, for: "appleIDPassword") }
+    }
+
+    public var appleIDAdsid: String? {
+        get { self.credential(for: "appleIDAdsid") }
+        set { self.setCredential(newValue, for: "appleIDAdsid") }
+    }
+
+    public var appleIDXcodeToken: String? {
+        get { self.credential(for: "appleIDXcodeToken") }
+        set { self.setCredential(newValue, for: "appleIDXcodeToken") }
+    }
     
     @KeychainItem(key: "signingCertificate")
     public var signingCertificate: Data?
@@ -148,6 +176,50 @@ public class Keychain
         debugLog("[Keychain] Cleared signing certificate & private key from Keychain.")
     }
     
+    /// Copy the credentials that were just written to the unscoped slots into the namespace of the
+    /// account that turned out to own them, and move the scope there.
+    ///
+    /// The unscoped copies are deliberately left in place. They are what a build without this change
+    /// reads, so keeping them means an install can go back to an older package and still be signed in
+    /// -- and `setCredential(nil)` clears both, so signing out still signs all the way out.
+    public func adoptCredentials(for accountIdentifier: String)
+    {
+        guard !accountIdentifier.isEmpty else { return }
+
+        let keys = ["appleIDEmailAddress", "appleIDPassword", "appleIDAdsid", "appleIDXcodeToken"]
+        for key in keys
+        {
+            guard let value = try? self.keychain.getString(key), !value.isEmpty else { continue }
+            try? self.keychain.set(value, key: "\(key).\(accountIdentifier)")
+        }
+
+        self.accountScope = accountIdentifier
+        debugLog("[Keychain] Adopted sign-in credentials for account \(accountIdentifier).")
+    }
+
+    private func credential(for key: String) -> String?
+    {
+        if let scope = self.accountScope, let scoped = try? self.keychain.getString("\(key).\(scope)")
+        {
+            return scoped
+        }
+        return try? self.keychain.getString(key)
+    }
+
+    private func setCredential(_ value: String?, for key: String)
+    {
+        let target = self.accountScope.map { "\(key).\($0)" } ?? key
+        if let value {
+            try? self.keychain.set(value, key: target)
+        } else {
+            try? self.keychain.remove(target)
+            // Signing out has to actually sign out: an account-scoped slot still sits beside the
+            // unscoped copy an upgrade left behind, and clearing only one of them leaves
+            // isAuthenticated true with a password nobody can see.
+            try? self.keychain.remove(key)
+        }
+    }
+
     public func clearSignInInfo(keepAnisetteData: Bool = true)
     {
         debugLog("[Keychain] Clearing sign-in info from Keychain (keepAnisetteData: \(keepAnisetteData))...")
@@ -156,6 +228,7 @@ public class Keychain
         self.appleIDPassword = nil
         self.appleIDAdsid = nil
         self.appleIDXcodeToken = nil
+        self.accountScope = nil
         debugLog("[Keychain] Cleared Apple ID credentials & tokens (email, password, adsid, xcodeToken).")
 
         if !keepAnisetteData {

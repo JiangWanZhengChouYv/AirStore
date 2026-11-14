@@ -307,6 +307,12 @@ private extension SignInOperation {
                     otherTeam.isActiveTeam = false
                 }
 
+                // The credentials were written before Apple said who this is, so they are sitting in
+                // the unscoped keychain slots. Hand them to this account now: that is what stops the
+                // next account's sign-in from overwriting them, and it is the only migration an
+                // existing install needs.
+                Keychain.shared.adoptCredentials(for: account.identifier)
+
                 let isSparseRestorePatched   = ProcessInfo().sparseRestorePatched
                 let isAppLimitDisabled       = UserDefaults.standard.isAppLimitDisabled
 
