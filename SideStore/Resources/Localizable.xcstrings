@@ -1,6 +1,83 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Switch Apple ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换 Apple ID"
+          }
+        }
+      }
+    },
+    "Use another saved account for new installs.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用另一个已保存的账号安装应用"
+          }
+        }
+      }
+    },
+    "Apple ID Accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple ID 账号"
+          }
+        }
+      }
+    },
+    "Switching changes the account used for new installs and refreshes. Apps installed by another account stay on the device -- switch back before refreshing them.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换后，新安装和刷新将使用所选账号。用其他账号安装的应用仍留在设备上，刷新前请先切回原账号。"
+          }
+        }
+      }
+    },
+    "Add Another Apple ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加另一个 Apple ID"
+          }
+        }
+      }
+    },
+    "That Apple ID is no longer available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该 Apple ID 已不可用"
+          }
+        }
+      }
+    },
+    "That Apple ID needs to be signed in again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该 Apple ID 需要重新登录"
+          }
+        }
+      }
+    },
     "Toggle Sensitive Information": {
       "extractionState": "manual",
       "localizations": {

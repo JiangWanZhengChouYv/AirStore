@@ -102,6 +102,24 @@ public final class AuthManager: @unchecked Sendable {
         AnisetteDataManager.shared.clearCache()
     }
     
+    /// Make another saved Apple ID the active one. Only the three places that say "who am I" change:
+    /// the Core Data active account/team flags, the keychain scope, and the in-memory team/session.
+    /// Nothing is signed out, nothing is re-signed, and no credentials are deleted -- the portal
+    /// session is rebuilt from the newly scoped token on its next use, which is what it already does
+    /// on every call.
+    public func switchAccount(to identifier: String) async throws
+    {
+        guard Keychain.shared.accountsWithCredentials(from: [identifier]).contains(identifier) else {
+            throw AccountSwitchError.missingCredentials
+        }
+
+        try await DatabaseManager.shared.activateAccount(identifier: identifier)
+        Keychain.shared.accountScope = identifier
+        self.session = nil
+        self.team = nil
+        debugLog("[AuthManager] Switched the active Apple ID to \(identifier).")
+    }
+
     @discardableResult
     public func getAuthenticatedSession() async throws -> ALTAppleAPISession {
         return try await TaskChainCoalescer.shared.coalesce(key: "apple_auth_session") {

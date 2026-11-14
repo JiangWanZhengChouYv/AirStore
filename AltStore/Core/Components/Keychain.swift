@@ -176,6 +176,26 @@ public class Keychain
         debugLog("[Keychain] Cleared signing certificate & private key from Keychain.")
     }
     
+    /// The accounts that can actually be switched to. An Account row survives sign-out in Core Data,
+    /// so the database alone cannot say which ones still have a password or token to use.
+    public func accountsWithCredentials(from identifiers: [String]) -> [String]
+    {
+        return identifiers.filter { identifier in
+            let email = try? self.keychain.getString("appleIDEmailAddress.\(identifier)")
+            let password = try? self.keychain.getString("appleIDPassword.\(identifier)")
+            let token = try? self.keychain.getString("appleIDXcodeToken.\(identifier)")
+            return email != nil && (password != nil || token != nil)
+        }
+    }
+
+    /// Signing in to a second account writes the new credentials before Apple says who they belong to.
+    /// Drop the scope first so those writes land in the unscoped slots instead of overwriting the
+    /// account that is currently active; `adoptCredentials(for:)` moves them afterwards.
+    public func beginSignIn()
+    {
+        self.accountScope = nil
+    }
+
     /// Copy the credentials that were just written to the unscoped slots into the namespace of the
     /// account that turned out to own them, and move the scope there.
     ///

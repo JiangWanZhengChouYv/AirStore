@@ -16,6 +16,7 @@ import UIKit
 enum SettingsAction {
     case signIn
     case signOut
+    case switchAccount
     case resolveAccount
     case changeAppIcon
     case theme
@@ -283,11 +284,15 @@ struct SettingsHomeView: View {
                 SettingsRow("account.email", title: NSLocalizedString("Email", comment: ""), symbol: "envelope", kind: .text(self.state.appleID ?? "—")),
                 SettingsRow("account.type", title: NSLocalizedString("Type", comment: ""), symbol: "person.2", kind: .text(self.state.teamType ?? "—")),
                 SettingsRow("account.actions", title: NSLocalizedString("Account Status", comment: ""), subtitle: self.accountStatusSubtitle, symbol: "checkmark.shield", tint: .green, kind: .link(.resolveAccount)),
+                SettingsRow("account.switch", title: NSLocalizedString("Switch Apple ID", comment: ""), subtitle: NSLocalizedString("Use another saved account for new installs.", comment: ""), symbol: "person.2.circle", tint: .blue, kind: .link(.switchAccount)),
                 SettingsRow("account.signout", title: NSLocalizedString("Sign Out", comment: ""), symbol: "rectangle.portrait.and.arrow.right", tint: .red, kind: .link(.signOut))
             ]
         } else {
             accountRows = [
-                SettingsRow("account.signin", title: NSLocalizedString("Sign in with Apple ID", comment: ""), subtitle: NSLocalizedString("Sign in to download apps from AirStore.", comment: ""), symbol: "person.crop.circle.badge.plus", kind: .link(.signIn))
+                SettingsRow("account.signin", title: NSLocalizedString("Sign in with Apple ID", comment: ""), subtitle: NSLocalizedString("Sign in to download apps from AirStore.", comment: ""), symbol: "person.crop.circle.badge.plus", kind: .link(.signIn)),
+                // Signing out keeps the other saved accounts, so the way back has to stay visible
+                // when this one is not signed in.
+                SettingsRow("account.switch", title: NSLocalizedString("Switch Apple ID", comment: ""), subtitle: NSLocalizedString("Use another saved account for new installs.", comment: ""), symbol: "person.2.circle", tint: .blue, kind: .link(.switchAccount))
             ]
         }
 

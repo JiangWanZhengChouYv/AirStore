@@ -424,6 +424,9 @@ final class SettingsViewController: UITableViewController
         case .signOut:
             self.signOut(UIBarButtonItem())
 
+        case .switchAccount:
+            self.presentAccountSwitcher()
+
         case .resolveAccount:
             self.resolvePendingAccountActions()
 
@@ -929,6 +932,61 @@ private extension SettingsViewController
 
 private extension SettingsViewController
 {
+    /// The account list is deliberately an action sheet rather than a new screen: it is a short list
+    /// and the warning has to be read at the moment of switching, while Step 3's per-app ownership
+    /// check does not exist yet.
+    private func presentAccountSwitcher()
+    {
+        let context = DatabaseManager.shared.viewContext
+        let request = Account.fetchRequest() as NSFetchRequest<Account>
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \Account.appleID, ascending: true)]
+        let accounts = (try? context.fetch(request)) ?? []
+        let usable = Set(Keychain.shared.accountsWithCredentials(from: accounts.map(\.identifier)))
+        let activeIdentifier = DatabaseManager.shared.activeAccount(in: context)?.identifier
+
+        let sheet = UIAlertController(
+            title: NSLocalizedString("Apple ID Accounts", comment: ""),
+            message: NSLocalizedString("Switching changes the account used for new installs and refreshes. Apps installed by another account stay on the device -- switch back before refreshing them.", comment: ""),
+            preferredStyle: .actionSheet
+        )
+
+        for account in accounts where usable.contains(account.identifier) {
+            let isActive = account.identifier == activeIdentifier
+            let title = (isActive ? "✓ " : "") + account.appleID
+            sheet.addAction(UIAlertAction(title: title, style: .default) { [weak self] _ in
+                guard !isActive else { return }
+                self?.switchToAccount(account.identifier)
+            })
+        }
+
+        sheet.addAction(UIAlertAction(title: NSLocalizedString("Add Another Apple ID", comment: ""), style: .default) { [weak self] _ in
+            // The sign-in writes credentials before it knows the new account's identifier, so it has
+            // to start outside the current account's keychain namespace.
+            Keychain.shared.beginSignIn()
+            self?.signIn()
+        })
+        sheet.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel))
+
+        sheet.popoverPresentationController?.sourceView = self.view
+        sheet.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+        sheet.popoverPresentationController?.permittedArrowDirections = []
+        self.present(sheet, animated: true)
+    }
+
+    private func switchToAccount(_ identifier: String)
+    {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                try await AuthManager.shared.switchAccount(to: identifier)
+                self.update()
+                self.settingsState.refresh()
+            } catch {
+                ToastView(error: error).show(in: self.view)
+            }
+        }
+    }
+
     func signIn()
     {
         debugLog("[SettingsVC] signIn() invoked by user action")
@@ -947,6 +1005,7 @@ private extension SettingsViewController
             
             debugLog("[SettingsVC] signIn() calling update()...")
             self.update()
+            self.settingsState.refresh()
         }
     }
     

@@ -23,6 +23,23 @@ private let willMigrateDatabaseObserver: @convention(c) (CFNotificationCenter?,
     DatabaseManager.shared.receivedWillMigrateDatabaseNotification()
 }
 
+/// Switching between saved Apple IDs fails loudly instead of leaving the app half signed in.
+/// Kept beside the database API that throws it so every target compiling that API also sees the type.
+public enum AccountSwitchError: LocalizedError
+{
+    case unknownAccount
+    case missingCredentials
+
+    public var errorDescription: String? {
+        switch self {
+        case .unknownAccount:
+            return NSLocalizedString("That Apple ID is no longer available.", comment: "")
+        case .missingCredentials:
+            return NSLocalizedString("That Apple ID needs to be signed in again.", comment: "")
+        }
+    }
+}
+
 public class DatabaseManager: @unchecked Sendable
 {
     public static private(set) var shared = DatabaseManager()
@@ -206,6 +223,34 @@ public class DatabaseManager: @unchecked Sendable
         
         let activeTeam = Team.first(satisfying: predicate, in: context)
         return activeTeam
+    }
+
+    /// Make one stored account (and its team) the active pair. Sign-out only clears the flags, it does
+    /// not delete the rows, which is what lets an account be switched back to later.
+    public func activateAccount(identifier: String) async throws
+    {
+        let context = self.persistentContainer.newBackgroundContext()
+        try await context.perform {
+            let request = Account.fetchRequest() as NSFetchRequest<Account>
+            let accounts = try context.fetch(request)
+            guard let target = accounts.first(where: { $0.identifier == identifier }) else {
+                throw AccountSwitchError.unknownAccount
+            }
+
+            for account in accounts {
+                account.isActiveAccount = (account === target)
+                for team in account.teams {
+                    team.isActiveTeam = (account === target)
+                }
+            }
+
+            try context.save()
+        }
+
+        await self.viewContext.perform {
+            self.viewContext.processPendingChanges()
+            self.viewContext.refreshAllObjects()
+        }
     }
 
     private func prepareDatabase() async throws
