@@ -173,9 +173,18 @@ SCHEME ?= SideStore
 # Optional cap for local builds, which run beside whatever else the machine is doing.
 XCODEBUILD_JOBS ?=
 # Common build settings for xcodebuild
+# A warm SourcePackages cache means the package graph has already been resolved, so asking xcodebuild
+# to resolve it again is thirty-odd seconds of network and graph work for an answer we already have.
+# Only when the cache actually restored: on a miss, resolution is what fills SourcePackages in the
+# first place, and disabling it there would fail the build.
+ifeq ($(CACHE_HIT),true)
+PACKAGE_FLAGS = -disableAutomaticPackageResolution
+endif
+
 COMMON_BUILD_SETTINGS = \
 	-project AltStore.xcodeproj \
 	-scheme "$(SCHEME)" \
+	$(PACKAGE_FLAGS) \
 	-sdk iphoneos \
 	-configuration $(BUILD_CONFIG) \
 	CODE_SIGNING_REQUIRED=NO \

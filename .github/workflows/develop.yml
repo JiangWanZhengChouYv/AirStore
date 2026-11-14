@@ -169,6 +169,7 @@ jobs:
       # next to the project folders, not inside one. The first attempt looked for
       # DerivedData/*/CompilationCache.noindex, cached nothing, and measured a slowdown.
       - name: Restore the compile cache
+        id: compile-cache
         uses: actions/cache@v4
         with:
           path: |
@@ -185,6 +186,8 @@ jobs:
         # task's environment in its signature, and a version string that changes on every push made
         # every compile task's key different -- which is one reason a content-addressed cache can
         # report zero hits. A build setting read from a file is not part of that environment.
+        env:
+          CACHE_HIT: ${{ steps.compile-cache.outputs.cache-hit }}
         run: |
           python3 scripts/ci/workflow.py set-marketing-version "${{ needs.prepare.outputs.version }}"
           python3 scripts/ci/workflow.py build-airstore
@@ -238,6 +241,7 @@ jobs:
           fi
 
       - name: Restore the compile cache
+        id: compile-cache
         uses: actions/cache@v4
         with:
           path: |
@@ -250,6 +254,8 @@ jobs:
             xcode-v3-develop-airbox-
 
       - name: Build
+        env:
+          CACHE_HIT: ${{ steps.compile-cache.outputs.cache-hit }}
         run: |
           python3 scripts/ci/workflow.py set-marketing-version "${{ needs.prepare.outputs.version }}"
           python3 scripts/ci/workflow.py build-airbox
