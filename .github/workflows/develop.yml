@@ -163,20 +163,22 @@ jobs:
             exit 1
           fi
 
-      # What is cached here changed after measuring what the old cache was worth. Restoring the whole
-      # DerivedData (1 GB, hit on every run) recompiled all 745 files every time: Xcode's incremental
-      # state keys off input mtimes, and a fresh checkout gives every source a new one. So this keeps
-      # only the resolved package checkouts, which are the part a fresh clone really has to re-fetch,
-      # and drops the objects that were never reused.
-      - name: Restore the package checkouts
+      # Ordinary DerivedData is useless here: its incremental state keys off input mtimes and a fresh
+      # checkout rewrites all of them, so restoring 1 GB still recompiled every file. What does survive
+      # a checkout is the content-addressed compilation cache -- but it lives at the DerivedData ROOT,
+      # next to the project folders, not inside one. The first attempt looked for
+      # DerivedData/*/CompilationCache.noindex, cached nothing, and measured a slowdown.
+      - name: Restore the compile cache
         uses: actions/cache@v4
         with:
           path: |
+            ~/Library/Developer/Xcode/DerivedData/CompilationCache.noindex
+            ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
             ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-develop-airstore-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
+          key: xcode-v2-develop-airstore-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
           restore-keys: |
-            xcode-develop-airstore-
+            xcode-v2-develop-airstore-
 
       - name: Build
         env:
@@ -231,15 +233,17 @@ jobs:
             exit 1
           fi
 
-      - name: Restore the package checkouts
+      - name: Restore the compile cache
         uses: actions/cache@v4
         with:
           path: |
+            ~/Library/Developer/Xcode/DerivedData/CompilationCache.noindex
+            ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
             ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-develop-airbox-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
+          key: xcode-v2-develop-airbox-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
           restore-keys: |
-            xcode-develop-airbox-
+            xcode-v2-develop-airbox-
 
       - name: Build
         env:

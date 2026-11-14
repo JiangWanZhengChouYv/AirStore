@@ -210,14 +210,19 @@ build:
 # mode keeps -Osize but compiles in parallel, and develop builds have no use for dSYMs. The plain
 # `build` target keeps both, so stable releases are untouched.
 build-airstore: SCHEME = SideStore - Release
-# Tried COMPILATION_CACHE_ENABLE_CACHING here (Xcode 26's content-addressed cache) on 2026-11-13 and
-# reverted: with the 547 MB cache restored it still compiled all 745 files and the step took 437 s
-# against 360 s without it, so the lookups cost more than they saved on this project.
-build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf
+# Xcode 26's compilation cache keys compiled results on source content, so it survives the fresh
+# checkout that makes ordinary DerivedData incremental state useless. The 2026-11-13 attempt showed
+# no hits at all because the CAS was cached from DerivedData/*/CompilationCache.noindex -- a path that
+# does not exist. Xcode keeps one shared CAS at the DerivedData ROOT, beside the project folders.
+# That is what the workflow caches now, and what these settings point at.
+COMPILATION_CACHE_FLAGS = COMPILATION_CACHE_ENABLE_CACHING=YES \
+	COMPILATION_CACHE_CAS_PATH=$(HOME)/Library/Developer/Xcode/DerivedData/CompilationCache.noindex \
+	MODULE_CACHE_DIR=$(HOME)/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf $(COMPILATION_CACHE_FLAGS)
 build-airstore: build
 
 build-airbox: SCHEME = AirBox
-build-airbox: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf
+build-airbox: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf $(COMPILATION_CACHE_FLAGS)
 build-airbox: build
 
 build-and-test:
