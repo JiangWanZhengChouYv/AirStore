@@ -1,6 +1,61 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Set Up Automatic Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置自动刷新"
+          }
+        }
+      }
+    },
+    "AirStore no longer keeps itself awake in the background, so your battery lasts longer. Use a Shortcuts automation to refresh your apps every 5–6 days instead — a free account's signing certificate lasts 7 days.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirStore 不再在后台保持常驻，更省电。建议用「快捷指令」自动化每 5–6 天刷新一次应用——免费账号的签名证书有效期是 7 天。"
+          }
+        }
+      }
+    },
+    "In Shortcuts, go to Automation → Create Personal Automation → Time of Day.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开「快捷指令」→ 自动化 → 创建个人自动化 → 特定时间。"
+          }
+        }
+      }
+    },
+    "Pick two days a week, for example Monday and Thursday, and turn off Ask Before Running.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每周选两天，例如周一和周四，并关闭「运行前询问」。"
+          }
+        }
+      }
+    },
+    "Add the Refresh All Apps action and save. AirStore gets refreshed without ever staying awake.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加「刷新所有应用」操作并保存。AirStore 无需常驻后台也能自动刷新。"
+          }
+        }
+      }
+    },
     "Switch Apple ID": {
       "extractionState": "manual",
       "localizations": {
@@ -2989,17 +3044,6 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "后台刷新"
-          }
-        }
-      }
-    },
-    "Background Service Disabled": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "背景服务已禁用"
           }
         }
       }
@@ -6212,17 +6256,6 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "启用自动旋转"
-          }
-        }
-      }
-    },
-    "Enable Background Keepalive": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "启用后台保活"
           }
         }
       }
@@ -13905,17 +13938,6 @@
         }
       }
     },
-    "Start Background Service": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "启动背景服务"
-          }
-        }
-      }
-    },
     "Start Backup?": {
       "extractionState": "manual",
       "localizations": {
@@ -13945,17 +13967,6 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "开始配对服务器"
-          }
-        }
-      }
-    },
-    "Started Background Service": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "启动后台服务"
           }
         }
       }
@@ -14004,17 +14015,6 @@
         }
       }
     },
-    "Stop Background Service": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "停止后台服务"
-          }
-        }
-      }
-    },
     "Stop EMProxy": {
       "extractionState": "manual",
       "localizations": {
@@ -14033,17 +14033,6 @@
           "stringUnit": {
             "state": "needs-review",
             "value": "停止配对服务器"
-          }
-        }
-      }
-    },
-    "Stopped Background Service": {
-      "extractionState": "manual",
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "needs-review",
-            "value": "停止后台服务"
           }
         }
       }

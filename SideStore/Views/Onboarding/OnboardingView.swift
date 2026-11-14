@@ -9,11 +9,14 @@
 import Minimuxer
 import SwiftUI
 import UniformTypeIdentifiers
+#if !os(tvOS)
+import Intents
+#endif
 
 struct OnboardingView: View {
     var onFinish: (() -> Void)? = nil
     @State private var currentStep = 0
-    private let totalSteps = 6
+    private let totalSteps = 7
 
     var body: some View {
         ZStack {
@@ -44,8 +47,11 @@ struct OnboardingView: View {
                     ContainerStep(onNext: { currentStep += 1 })
                         .tag(4)
 
-                    CompleteStep(onFinish: complete)
+                    AutoRefreshStep(onNext: { currentStep += 1 })
                         .tag(5)
+
+                    CompleteStep(onFinish: complete)
+                        .tag(6)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.25), value: currentStep)
@@ -786,6 +792,106 @@ private struct ContainerStep: View {
             }
         }
     }
+}
+
+
+/// AirStore no longer keeps itself awake in the background. A Shortcuts personal automation is the
+/// system-level replacement: the system wakes the app only when there is actually something to
+/// refresh, instead of the app paying for a keepalive every second of every day.
+private struct AutoRefreshStep: View {
+    let onNext: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "clock.arrow.circlepath")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 80, height: 80)
+                .foregroundColor(.accentColor)
+
+            VStack(spacing: 8) {
+                Text(NSLocalizedString("Set Up Automatic Refresh", comment: ""))
+                    .font(.system(size: 28, weight: .bold))
+
+                Text(NSLocalizedString("AirStore no longer keeps itself awake in the background, so your battery lasts longer. Use a Shortcuts automation to refresh your apps every 5–6 days instead — a free account's signing certificate lasts 7 days.", comment: ""))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Label {
+                    Text(NSLocalizedString("In Shortcuts, go to Automation → Create Personal Automation → Time of Day.", comment: ""))
+                } icon: {
+                    Image(systemName: "1.circle.fill")
+                        .foregroundColor(.accentColor)
+                }
+
+                Label {
+                    Text(NSLocalizedString("Pick two days a week, for example Monday and Thursday, and turn off Ask Before Running.", comment: ""))
+                } icon: {
+                    Image(systemName: "2.circle.fill")
+                        .foregroundColor(.accentColor)
+                }
+
+                Label {
+                    Text(NSLocalizedString("Add the Refresh All Apps action and save. AirStore gets refreshed without ever staying awake.", comment: ""))
+                } icon: {
+                    Image(systemName: "3.circle.fill")
+                        .foregroundColor(.accentColor)
+                }
+            }
+            .font(.footnote)
+            .foregroundColor(.secondary)
+            .padding(16)
+            .glassSurface(in: RoundedRectangle(cornerRadius: 16))
+            .frame(maxWidth: 420)
+            .padding(.horizontal, 24)
+
+            Spacer()
+
+            VStack(spacing: 12) {
+                #if !os(tvOS)
+                SwiftUI.Button(action: self.openShortcuts) {
+                    Text(NSLocalizedString("Open Shortcuts", comment: ""))
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.accentColor)
+                        .cornerRadius(14)
+                }
+                #endif
+
+                SwiftUI.Button(action: self.onNext) {
+                    Text(NSLocalizedString("Skip", comment: ""))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 24)
+        }
+        #if !os(tvOS)
+        .onAppear { self.donateRefreshShortcut() }
+        #endif
+    }
+
+    #if !os(tvOS)
+    /// Donating puts the very same "Refresh All Apps" intent that Settings offers to Siri into the
+    /// Shortcuts action list, so the automation this step describes can actually find the action.
+    private func donateRefreshShortcut() {
+        INInteraction.refreshAllApps().donate(completion: nil)
+    }
+
+    private func openShortcuts() {
+        guard let url = URL(string: "shortcuts://") else { return }
+        UIApplication.shared.open(url)
+    }
+    #endif
 }
 
 private struct CompleteStep: View {

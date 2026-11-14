@@ -140,7 +140,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Register default settings before doing anything else.
         UserDefaults.registerDefaults()
-        BackgroundServiceManager.ensureBackgroundServicesStarted()
         syncMinimuxerBackendFromUserDefaults()
 
         SideStoreLogging.setLogging(UserDefaults.standard.isSideStoreVerboseLoggingEnabled)
@@ -255,7 +254,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationDidEnterBackground(_ application: UIApplication)
     {
-        BackgroundServiceManager.ensureBackgroundServicesStarted()
         // Make sure to update SceneDelegate.sceneDidEnterBackground() as well.
         guard let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) else { return }
         
@@ -275,7 +273,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(_ application: UIApplication)
     {
-        BackgroundServiceManager.ensureBackgroundServicesStarted()
         Task.detached {
             await AppManager.shared.reconcileInstalledApps()
         }
@@ -475,7 +472,6 @@ extension AppDelegate
     
     func application(_ application: UIApplication, performFetchWithCompletionHandler backgroundFetchCompletionHandler: @escaping (UIBackgroundFetchResult) -> Void)
     {
-        BackgroundServiceManager.ensureBackgroundServicesStarted()
         #if !os(tvOS)
         if UserDefaults.standard.isBackgroundRefreshEnabled && !UserDefaults.standard.presentedLaunchReminderNotification
         {

@@ -101,23 +101,6 @@ public extension UserDefaults
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
     }
-    @objc var isBackgroundServiceEnabled: Bool {
-        get { self.bool(forKey: #function) }
-        set { self.set(newValue, forKey: #function) }
-    }
-    var backgroundServiceMode: BackgroundServiceMode {
-        get {
-            let mode = _backgroundServiceMode.flatMap { BackgroundServiceMode(rawValue: $0) } ?? .audio
-            return mode
-        }
-        set {
-            _backgroundServiceMode = newValue.rawValue
-        }
-    }
-    @objc(backgroundServiceMode) private var _backgroundServiceMode: String? {
-        get { self.string(forKey: "backgroundServiceMode") }
-        set { self.set(newValue, forKey: "backgroundServiceMode") }
-    }
     @objc var enableEMPforWireguard: Bool {
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
@@ -553,13 +536,6 @@ public extension UserDefaults
             #keyPath(UserDefaults.keepAnisetteHeadersAfterLogout): true,
             #keyPath(UserDefaults.keepSideSignHeadersAfterLogout): true,
             #keyPath(UserDefaults.isBackgroundRefreshEnabled): true,
-            // A silent-audio (or location) keepalive runs the whole time the app is alive: AppDelegate
-            // starts it at launch, on entering the background, and on returning to the foreground.
-            // That means the minimuxer heartbeat, interface scans and Anisette requests never stop,
-            // which is a warm phone and a few percent of battery for an app just sitting in the
-            // background. System background refresh is a separate switch above and still works.
-            // Users who need the keepalive can turn it on in User Customizations -> Background Service.
-            #keyPath(UserDefaults.isBackgroundServiceEnabled): false,
             #keyPath(UserDefaults.isBetaUpdatesEnabled): false,
             #keyPath(UserDefaults.permissionCheckingDisabled): true,
             #keyPath(UserDefaults.isBundleIDVerificationEnabled): true,

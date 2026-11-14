@@ -84,6 +84,7 @@
 		<string>sidestore-com.JiangWanZhengChouYv.AirStore</string>
 		<string>sidestore-com.JiangWanZhengChouYv.AirStore.Beta</string>
 		<string>localdevvpn</string>
+		<string>shortcuts</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
@@ -238,7 +239,6 @@
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
-		<string>location</string>
 		<string>remote-notification</string>
 		<string>processing</string>
 	</array>

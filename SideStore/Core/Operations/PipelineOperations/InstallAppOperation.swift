@@ -390,9 +390,6 @@ final class InstallAppOperation: BasePipelineOperation<InstallAppOperationContex
     }
 
     private func handleSelfReinstallation(for installedApp: InstalledApp) {
-        // Stop keepalive background services unconditionally so the process can suspend cleanly
-        BackgroundServiceManager.stop()
-
         // Reinstalling ourself will hang until we leave the app, so we need to exit it without force closing
         Task.detached {
             let bgTaskID = await MainActor.run {

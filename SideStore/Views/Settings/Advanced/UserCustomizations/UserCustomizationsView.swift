@@ -16,8 +16,6 @@ private extension Color {
 
 struct UserCustomizationsView: View {
     @State private var selectedBackend: GatewayBackend = selectedGatewayBackendCache
-    @State private var isBackgroundServiceEnabled: Bool = UserDefaults.standard.isBackgroundServiceEnabled
-    @State private var selectedBackgroundServiceMode: BackgroundServiceMode = UserDefaults.standard.backgroundServiceMode
     @State private var useOnDeviceAnisette: Bool = UserDefaults.standard.useOnDeviceAnisette
     @State private var showAnisetteRestartConfirmation: Bool = false
     @State private var appLanguage: AppLanguage = AppLanguage.current
@@ -499,58 +497,6 @@ struct UserCustomizationsView: View {
                     .cornerRadius(14)
                 }
 
-                // Section 6: BACKGROUND SERVICE
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("BACKGROUND SERVICE")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .padding(.horizontal, 16)
-                    
-                    VStack(spacing: 0) {
-                        toggleRow(title: "Enable Background Keepalive", isOn: Binding(
-                            get: { isBackgroundServiceEnabled },
-                            set: { newValue in
-                                isBackgroundServiceEnabled = newValue
-                                BackgroundServiceManager.setEnabled(newValue)
-                            }
-                        ))
-                        
-                        divider
-                        
-                        ForEach(BackgroundServiceMode.allCases, id: \.self) { mode in
-                            SwiftUI.Button(action: {
-                                selectedBackgroundServiceMode = mode
-                                BackgroundServiceManager.switchTo(mode: mode)
-                            }) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(mode.displayName)
-                                            .font(.system(size: 17, weight: .bold))
-                                            .foregroundColor(isBackgroundServiceEnabled ? .white : Color.white.opacity(0.4))
-                                        Text(mode.subtitle)
-                                            .font(.system(size: 13))
-                                            .foregroundColor(Color.white.opacity(isBackgroundServiceEnabled ? 0.6 : 0.3))
-                                    }
-                                    Spacer()
-                                    if selectedBackgroundServiceMode == mode {
-                                        Image(systemName: "checkmark")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundColor(isBackgroundServiceEnabled ? Color(uiColor: ThemeManager.shared.primaryColor) : Color.white.opacity(0.3))
-                                    }
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                            }
-                            .disabled(!isBackgroundServiceEnabled)
-                            
-                            if mode != BackgroundServiceMode.allCases.last {
-                                divider
-                            }
-                        }
-                    }
-                    .background(Color.settingsRowBackground)
-                    .cornerRadius(14)
-                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 16)

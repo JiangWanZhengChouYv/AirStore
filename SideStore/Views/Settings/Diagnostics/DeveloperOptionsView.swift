@@ -378,46 +378,6 @@ struct DeveloperOptionsView: View {
                     .cornerRadius(14)
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("BACKGROUND SERVICE")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color.white.opacity(0.6))
-                        .padding(.horizontal, 16)
-                    
-                    VStack(spacing: 0) {
-                        SwiftUI.Button(action: { triggerStartBackgroundService() }) {
-                            HStack(spacing: 12) {
-                                Image(systemName: "play.circle")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                                Text("Start Background Service")
-                                    .font(.system(size: 17, weight: .bold))
-                                    .foregroundColor(.white)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 16)
-                            .frame(height: 50)
-                        }
-                        
-                        divider
-                        
-                        SwiftUI.Button(action: { triggerStopBackgroundService() }) {
-                            HStack(spacing: 12) {
-                                Image(systemName: "stop.circle")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                                Text("Stop Background Service")
-                                    .font(.system(size: 17, weight: .bold))
-                                    .foregroundColor(.white)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 16)
-                            .frame(height: 50)
-                        }
-                    }
-                    .background(Color.settingsRowBackground)
-                    .cornerRadius(14)
-                }
                 
                 // Section: Device (TCP) Probe Timeout
                 VStack(alignment: .leading, spacing: 8) {
@@ -894,26 +854,6 @@ struct DeveloperOptionsView: View {
         }
     }
 
-    private func triggerStartBackgroundService() {
-        guard let top = UIApplication.shared.topViewController() else { return }
-        let started = BackgroundServiceManager.ensureBackgroundServicesStarted()
-        let modeName = UserDefaults.standard.backgroundServiceMode.displayName
-        if started {
-            let toastView = ToastView(text: NSLocalizedString("Started Background Service", comment: ""), detailText: "\(modeName) keepalive is running.")
-            toastView.show(in: top)
-        } else {
-            let toastView = ToastView(text: NSLocalizedString("Background Service Disabled", comment: ""), detailText: "Enable background service in User Customizations.")
-            toastView.show(in: top)
-        }
-    }
-
-    private func triggerStopBackgroundService() {
-        guard let top = UIApplication.shared.topViewController() else { return }
-        BackgroundServiceManager.stop()
-        let toastView = ToastView(text: NSLocalizedString("Stopped Background Service", comment: ""), detailText: "Background keepalive service stopped.")
-        toastView.show(in: top)
-    }
-    
     private func triggerReloadAllWidgets() {
         #if !os(tvOS)
         WidgetCenter.shared.reloadAllTimelines()

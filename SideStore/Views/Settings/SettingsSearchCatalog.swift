@@ -82,8 +82,6 @@ enum SettingsSearchCatalog
             "Clear Keychain Items",
             "Start EMProxy",
             "Stop EMProxy",
-            "Start Background Service",
-            "Stop Background Service",
             "Timeout (ms)",
             "Import Account JSON",
             "Export Account JSON",
