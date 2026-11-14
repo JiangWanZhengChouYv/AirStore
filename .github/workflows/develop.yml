@@ -176,9 +176,9 @@ jobs:
             ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
             ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-v2-develop-airstore-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
+          key: xcode-v3-develop-airstore-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
           restore-keys: |
-            xcode-v2-develop-airstore-
+            xcode-v3-develop-airstore-
 
       - name: Build
         # Stamp the version into Build.xcconfig instead of exporting it. Swift Build includes a
@@ -245,9 +245,9 @@ jobs:
             ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
             ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: xcode-v2-develop-airbox-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
+          key: xcode-v3-develop-airbox-${{ needs.prepare.outputs.cache_week }}-${{ hashFiles('**/Package.resolved', 'Build.xcconfig') }}
           restore-keys: |
-            xcode-v2-develop-airbox-
+            xcode-v3-develop-airbox-
 
       - name: Build
         run: |
