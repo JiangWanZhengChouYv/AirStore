@@ -69,9 +69,20 @@ def main() -> int:
         print(f"{short} is already published as {version}; nothing to rescue")
         return 0
 
-    # The store can also be behind without any failed run: a push that only touched workflows or
-    # scripts is gated out of building, and if the last real build never landed, nothing will build
-    # this tree again. Comparing the tree against the published commit catches that.
+    # Is something already trying? This comes before any judgement about the tree: while a run at this
+    # tip is queued or building, the right move is always to wait, whatever the reason it started.
+    runs = gh_json("run", "list", "--workflow", WORKFLOW, "--limit", "20",
+                   "--json", "databaseId,headSha,status,conclusion,createdAt,event")
+    mine = [run for run in runs if run["headSha"] == tip]
+    latest = max(mine, key=lambda run: run["databaseId"]) if mine else None
+    if latest and latest["status"] in ("queued", "in_progress"):
+        print(f"run {latest['databaseId']} for {short} is still {latest['status']}; waiting")
+        return 0
+
+    # The store can be behind without any failed run. A push that only touches workflows or scripts is
+    # gated out of building, so if the last real build never landed, nothing will ever build this tree
+    # again. Comparing the tree against the published commit catches that, and it does not depend on
+    # when the last run happened -- which is why it is checked before the settle timer.
     published = version.rsplit("-", 1)[-1] if version else ""
     if published:
         subprocess.run(["git", "fetch", "--no-tags", "--depth=1", "origin", published],
@@ -82,21 +93,14 @@ def main() -> int:
             print(f"the store differs from published {published}:")
             for path in diff.stdout.splitlines()[:10]:
                 print(f"  {path}")
+            print("asking for a build of this tree")
             dispatch()
             return 0
 
-    runs = gh_json("run", "list", "--workflow", WORKFLOW, "--limit", "20",
-                   "--json", "databaseId,headSha,status,conclusion,createdAt,event")
-    mine = [run for run in runs if run["headSha"] == tip]
-    if not mine:
-        # A paths-ignored push (docs, workflows) deliberately produces no run. There is nothing to
-        # rebuild and nothing to rescue.
-        print(f"no run at all for {short}; treating it as a push that needed no build")
-        return 0
-
-    latest = max(mine, key=lambda run: run["databaseId"])
-    if latest["status"] in ("queued", "in_progress"):
-        print(f"run {latest['databaseId']} for {short} is still {latest['status']}; waiting")
+    if latest is None:
+        # A paths-ignored push (docs, workflows) deliberately produces no run, and the tree matches
+        # what is published. Nothing to rebuild.
+        print(f"no run at all for {short} and nothing behind it; done")
         return 0
 
     created = datetime.datetime.fromisoformat(latest["createdAt"].replace("Z", "+00:00"))
