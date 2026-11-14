@@ -181,9 +181,13 @@ jobs:
             xcode-v2-develop-airstore-
 
       - name: Build
-        env:
-          MARKETING_VERSION: ${{ needs.prepare.outputs.version }}
-        run: python3 scripts/ci/workflow.py build-airstore
+        # Stamp the version into Build.xcconfig instead of exporting it. Swift Build includes a
+        # task's environment in its signature, and a version string that changes on every push made
+        # every compile task's key different -- which is one reason a content-addressed cache can
+        # report zero hits. A build setting read from a file is not part of that environment.
+        run: |
+          python3 scripts/ci/workflow.py set-marketing-version "${{ needs.prepare.outputs.version }}"
+          python3 scripts/ci/workflow.py build-airstore
 
       - name: Verify the Chinese resources compiled
         run: |
@@ -246,9 +250,9 @@ jobs:
             xcode-v2-develop-airbox-
 
       - name: Build
-        env:
-          MARKETING_VERSION: ${{ needs.prepare.outputs.version }}
-        run: python3 scripts/ci/workflow.py build-airbox
+        run: |
+          python3 scripts/ci/workflow.py set-marketing-version "${{ needs.prepare.outputs.version }}"
+          python3 scripts/ci/workflow.py build-airbox
 
       - name: Check the extension kept its entry point
         run: |
