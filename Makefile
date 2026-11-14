@@ -214,9 +214,11 @@ build-airstore: SCHEME = SideStore - Release
 # checkout that makes ordinary DerivedData incremental state useless. The 2026-11-13 attempt showed
 # no hits at all because the CAS was cached from DerivedData/*/CompilationCache.noindex -- a path that
 # does not exist. Xcode keeps one shared CAS at the DerivedData ROOT, beside the project folders.
-# That is what the workflow caches now, and what these settings point at.
+# That is what the workflow caches now, and what these settings point at. With the CAS restored,
+# Xcode reports 373 replayed hits -- every one of CCryptoBoringSSL's 243 C files and the other
+# C-family targets -- but only 2 of the 416 SideStore Swift files. Batchmode compiles the Swift
+# target as a batch, so one changed file appears to invalidate the whole batch's key.
 COMPILATION_CACHE_FLAGS = COMPILATION_CACHE_ENABLE_CACHING=YES \
-	COMPILATION_CACHE_ENABLE_DIAGNOSTIC_REMARKS=YES \
 	COMPILATION_CACHE_CAS_PATH=$(HOME)/Library/Developer/Xcode/DerivedData/CompilationCache.noindex \
 	MODULE_CACHE_DIR=$(HOME)/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
 build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf $(COMPILATION_CACHE_FLAGS)
