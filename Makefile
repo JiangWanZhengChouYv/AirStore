@@ -216,6 +216,7 @@ build-airstore: SCHEME = SideStore - Release
 # does not exist. Xcode keeps one shared CAS at the DerivedData ROOT, beside the project folders.
 # That is what the workflow caches now, and what these settings point at.
 COMPILATION_CACHE_FLAGS = COMPILATION_CACHE_ENABLE_CACHING=YES \
+	COMPILATION_CACHE_ENABLE_DIAGNOSTIC_REMARKS=YES \
 	COMPILATION_CACHE_CAS_PATH=$(HOME)/Library/Developer/Xcode/DerivedData/CompilationCache.noindex \
 	MODULE_CACHE_DIR=$(HOME)/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
 build-airstore: EXTRA_BUILD_SETTINGS = SWIFT_COMPILATION_MODE=batchmode DEBUG_INFORMATION_FORMAT=dwarf $(COMPILATION_CACHE_FLAGS)
