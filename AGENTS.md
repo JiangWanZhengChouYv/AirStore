@@ -202,6 +202,10 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
 - The three macOS jobs take `runs-on` from the `prepare` job's `runner` output: a manual `runner`
   input wins, then the `MACOS_RUNNER` repository variable, then `macos-26`. Register a self-hosted
   runner and set `MACOS_RUNNER=self-hosted` to use it.
+- On a self-hosted runner the cache steps are skipped (`if: runner.environment != 'self-hosted'`).
+  That machine keeps `DerivedData` (CAS included), `SourcePackages`, `~/.cargo` and
+  `Helper/src-tauri/target` on disk between runs, so a cache restore only costs download time -- and
+  the 10 GB Actions cache budget is better spent on hosted runs, which start from nothing.
 - A queued job on a self-hosted runner never times out (there is no pool to give up on it), so
   `scripts/ci/rescue_build.py` cancels it after 12 minutes and re-dispatches with `runner=macos-26`.
   A sleeping Mac therefore costs one build's delay instead of blocking the queue for the evening.

@@ -189,8 +189,12 @@ jobs:
       # a checkout is the content-addressed compilation cache -- but it lives at the DerivedData ROOT,
       # next to the project folders, not inside one. The first attempt looked for
       # DerivedData/*/CompilationCache.noindex, cached nothing, and measured a slowdown.
+      # A self-hosted runner keeps this cache on its own disk between runs, so restoring a tarball
+      # of it is pure download time -- and the 10 GB Actions cache budget is better spent on the
+      # hosted image, which starts from nothing every time.
       - name: Restore the compile cache
         id: compile-cache
+        if: runner.environment != 'self-hosted'
         uses: actions/cache@v4
         with:
           path: |
@@ -263,6 +267,7 @@ jobs:
 
       - name: Restore the compile cache
         id: compile-cache
+        if: runner.environment != 'self-hosted'
         uses: actions/cache@v4
         with:
           path: |
@@ -333,6 +338,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Restore the last Helper build's cache
+        if: runner.environment != 'self-hosted'
         uses: Swatinem/rust-cache@v2
         with:
           # Keyed separately from every other Rust cache: the dependency tree here is Tauri's,
