@@ -220,6 +220,11 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 - A parallel opt-in SwiftUI shell (`SideStore/Views/NewUI/`, `UIStylePreferences`, the "Interface"
   switch in 高级 → 用户自定义) existed during 2026 and was **removed at the maintainer's request on
   2026-11-11**. Do not reintroduce it, and do not add a second shell or a UI-style switch.
+  A Phase 5/6 handoff brief from October still mentions `SideStore/Views/NewUI/NewRootView.swift`,
+  `SideStore/Core/Preferences/UIStylePreferences.swift` and
+  `SideStore/Views/Settings/AppearanceSettingsView.swift` — **none of those files exist**; treat that
+  brief as history, not a task list. The settings search / glass rows / theme icons it describes were
+  later built into the classic UI (see below).
 - New work goes into the classic UI. The settings home is a SwiftUI surface
   (`SideStore/Views/Settings/SettingsHomeView.swift`) hosted by `SettingsViewController`: six groups
   (Account, Appearance, Refresh, Connection, Diagnostics, About), each one large glass pane holding
@@ -267,6 +272,24 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 
 ## Critical behavior and invariants
 
+- **Boot order — never touch Core Data from `didFinishLaunching`.** The store is opened in a detached
+  task in `AltStore/AppDelegate.swift:189-196`: `MaintenanceManager.performDatabaseMigrationIfNeeded()`
+  first, then `DatabaseManager.start()`. Reading `persistentContainer.viewContext` (or calling
+  `newBackgroundContext()`) **opens the store synchronously at the call site**, before that migration
+  has run. The result is the 2026-10-20 crash, seen again on 2026-11-18: the app paints one frame —
+  the floating glass tab bar on iOS 26, or the onboarding buttons before it — and dies a moment later,
+  often before the console log has a line.
+  - Put launch-time database work **inside that detached task, after
+    `debugLog("Started DatabaseManager.")`**, on a background context. Where ordering cannot be
+    controlled, gate on `DatabaseManager.shared.isStarted` (`SceneDelegate` and `ProfileManager`
+    already do).
+  - `LaunchViewController` only swaps in the tab bar after `start()` returns, so a crash *after* the
+    tab bar is visible is usually a different bug. Check the log before "fixing" the boot order.
+  - Getting the stack: read the app's own `Documents/ConsoleLogs/console_*.log` **first**.
+    `setupCrashHandler()` writes the exception name, reason and full call stack (and
+    SIGABRT/SEGV/BUS/ILL/FPE/TRAP) through `debugLog`, which the console logger captures; export it
+    from 设置 → 诊断 → 错误日志. Only then compare against a CI build of the same commit — a past
+    investigation wrongly blamed the SDK.
 - **Do not broadly refactor signing, installation, or networking.** Install/refresh/sign have many
   iOS-version edge cases (17.4+). Be skeptical of generated code and preserve behavior outside the fix.
 - **Pairing**: the Helper/iLoader writes `ALTPairingFile.mobiledevicepairing`,
