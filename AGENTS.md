@@ -276,9 +276,10 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
   task in `AltStore/AppDelegate.swift:189-196`: `MaintenanceManager.performDatabaseMigrationIfNeeded()`
   first, then `DatabaseManager.start()`. Reading `persistentContainer.viewContext` (or calling
   `newBackgroundContext()`) **opens the store synchronously at the call site**, before that migration
-  has run. The result is the 2026-10-20 crash, seen again on 2026-11-18: the app paints one frame —
-  the floating glass tab bar on iOS 26, or the onboarding buttons before it — and dies a moment later,
-  often before the console log has a line.
+  has run. The result is the 2026-10-20 crash: the app paints one frame — the floating glass tab bar
+  on iOS 26, or the onboarding buttons before it — and dies a moment later, often before the console
+  log has a line. (The same symptom on 2026-11-18 turned out to be EBADEXEC, see the next bullet —
+  match the symptom to the cause instead of assuming boot order.)
   - Put launch-time database work **inside that detached task, after
     `debugLog("Started DatabaseManager.")`**, on a background context. Where ordering cannot be
     controlled, gate on `DatabaseManager.shared.isStarted` (`SceneDelegate` and `ProfileManager`
@@ -290,6 +291,15 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
     SIGABRT/SEGV/BUS/ILL/FPE/TRAP) through `debugLog`, which the console logger captures; export it
     from 设置 → 诊断 → 错误日志. Only then compare against a CI build of the same commit — a past
     investigation wrongly blamed the SDK.
+- **No crash report, no log, snapshot flashes — suspect the install, not the code.** On 2026-11-18 the
+  app died this way; `xcrun devicectl device process launch --device <UDID> <bundle-id>` answered
+  `Launchd job spawn failed (NSPOSIXErrorDomain error 85)`, and errno 85 on Darwin is **EBADEXEC**:
+  the binary never ran, so there is nothing for `setupCrashHandler()` or the analytics store to
+  record. A control launch of AirBox (same team suffix, same certificate) worked, which ruled out an
+  expired profile; an **overwrite install** through the Helper fixed it without touching code.
+  Recipe: `devicectl list devices` → `device info apps` (the sideloaded bundle id carries the team
+  suffix, e.g. `…AirStore.LJF4F9N5NG`) → `device process launch`, and pull device reports with
+  `device copy from --domain-type systemCrashLogs --source .`.
 - **Do not broadly refactor signing, installation, or networking.** Install/refresh/sign have many
   iOS-version edge cases (17.4+). Be skeptical of generated code and preserve behavior outside the fix.
 - **Pairing**: the Helper/iLoader writes `ALTPairingFile.mobiledevicepairing`,
