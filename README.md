@@ -100,7 +100,7 @@ develop builds are the `develop` track of that same source. If you ever removed 
 (Settings > Sources > Add Source):
 
 ```
-https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json
+https://as.mz0520.de5.net/source/airstore-source.json
 ```
 
 To see develop builds, turn on Settings > Beta Testing > Enable Beta Updates and choose the Develop

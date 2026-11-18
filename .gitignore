@@ -112,3 +112,6 @@ scratch*.sh
 !scripts/ci/requeue.sh
 # Python bytecode from the tooling in scripts/
 __pycache__/
+
+# Local wrangler state (Worker deploys are manual)
+.wrangler/

@@ -39,6 +39,102 @@ public extension URL
         return self
     }
 
+    /// The same file through AirStore's own Cloudflare Worker.
+    ///
+    /// This is the first route for everything the app fetches from GitHub: it answers `no-store`, so
+    /// the feed is never older than the branch, and it is a domain the project controls rather than a
+    /// third-party proxy somebody else can throttle or take down. `release assets` map to `/dl/...`
+    /// and raw files to `/gh/...`; the Worker only proxies this repository, so anything else stays on
+    /// the ordinary path.
+    var airstoreMirrorURL: URL?
+    {
+        guard let host = self.host?.lowercased() else { return nil }
+
+        // /OWNER/REPO/releases/download/TAG/FILE  ->  /dl/OWNER/REPO/TAG/FILE
+        if host == "github.com", self.path.contains("/releases/download/")
+        {
+            let components = self.pathComponents.filter { $0 != "/" }
+            guard components.count >= 6, components[2] == "releases", components[3] == "download" else { return nil }
+            return Self.mirrorURL(path: "/dl/\(components[0])/\(components[1])/\(components[4])/" + components[5...].joined(separator: "/"))
+        }
+
+        // /OWNER/REPO/REF/PATH...  ->  /gh/OWNER/REPO@REF/PATH...
+        if host == "raw.githubusercontent.com"
+        {
+            let components = self.pathComponents.filter { $0 != "/" }
+            guard components.count >= 4 else { return nil }
+            return Self.mirrorURL(path: "/gh/\(components[0])/\(components[1])@\(components[2])/" + components[3...].joined(separator: "/"))
+        }
+
+        // /OWNER/REPO/raw/REF/PATH...  ->  /gh/OWNER/REPO@REF/PATH...
+        if host == "github.com"
+        {
+            let components = self.pathComponents.filter { $0 != "/" }
+            guard components.count >= 5, components[2].lowercased() == "raw" else { return nil }
+            return Self.mirrorURL(path: "/gh/\(components[0])/\(components[1])@\(components[3])/" + components[4...].joined(separator: "/"))
+        }
+
+        return nil
+    }
+
+    private static func mirrorURL(path: String) -> URL?
+    {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "as.mz0520.de5.net"
+        components.path = path
+        return components.url
+    }
+
+    /// The GitHub URL a Worker URL was built from. Nil for anything that is not one of ours.
+    ///
+    /// The Worker is the preferred route, not the only one: a bad deploy or a blocked domain must not
+    /// leave the app unable to read its own feed. Turning the mirror URL back into the origin URL is
+    /// what lets `downloadCandidates` fall through to GitHub and the public proxies.
+    var mirroredOriginURL: URL?
+    {
+        guard self.host?.lowercased() == "as.mz0520.de5.net" else { return nil }
+
+        let components = self.pathComponents.filter { $0 != "/" }
+
+        if self.path == "/source/airstore-source.json" || self.path == "/airstore-source.json"
+        {
+            return URL(string: "https://raw.githubusercontent.com/\(Self.mirroredRepository)/develop-source/source/airstore-source.json")
+        }
+
+        // /gh/OWNER/REPO@REF/PATH...
+        if components.count >= 4, components[0] == "gh"
+        {
+            let owner = components[1]
+            let repoAndRef = components[2].split(separator: "@", maxSplits: 1, omittingEmptySubsequences: false)
+            guard repoAndRef.count == 2 else { return nil }
+            return Self.url(host: "raw.githubusercontent.com",
+                            path: "/\(owner)/\(repoAndRef[0])/\(repoAndRef[1])/" + components[3...].joined(separator: "/"))
+        }
+
+        // /dl/OWNER/REPO/TAG/FILE...
+        if components.count >= 5, components[0] == "dl"
+        {
+            return Self.url(host: "github.com",
+                            path: "/\(components[1])/\(components[2])/releases/download/\(components[3])/" + components[4...].joined(separator: "/"))
+        }
+
+        return nil
+    }
+
+    /// The repository the Worker is allowed to proxy. Kept here so the reverse mapping and the feed
+    /// URL cannot drift apart.
+    private static let mirroredRepository = "JiangWanZhengChouYv/AirStore"
+
+    private static func url(host: String, path: String) -> URL?
+    {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = host
+        components.path = path
+        return components.url
+    }
+
     /// gh-proxy.com's wrapper for any GitHub file.
     var githubProxyURL: URL?
     {
@@ -91,13 +187,20 @@ public extension URL
 
     /// Every route worth trying for a downloadable GitHub file, best first.
     ///
-    /// Release assets go through the measured proxies, then the origin, then the leftovers. Raw files
-    /// use jsDelivr first because it is the fast route for the small files sources normally point at;
-    /// IPAs skip it because it refuses anything over 20 MB. Archives and other github.com downloads
-    /// go straight through gh-proxy, then the origin.
+    /// AirStore's own Worker goes first everywhere it can: it is the only route that is neither
+    /// GitHub's origin nor somebody else's proxy, and it never serves a cached feed. The public
+    /// GitHub proxies stay behind it because the Worker itself is a single point of failure, and the
+    /// Pages copy stays at the end for the day every proxy is down.
     var downloadCandidates: [URL]
     {
         guard let host = self.host?.lowercased() else { return [self] }
+
+        if host == "as.mz0520.de5.net", let origin = self.mirroredOriginURL
+        {
+            // Worker first, then whatever the origin URL would have tried on its own. The Worker
+            // appears again inside that list and `distinct` drops it, so the order stays self-first.
+            return Self.distinct([self] + origin.downloadCandidates)
+        }
 
         if host == "github.com", self.path.contains("/releases/download/")
         {
@@ -107,28 +210,28 @@ public extension URL
             // maintainer's line -- slower than the origin's 40 KB/s, and nowhere near what the same
             // file does through a proxy (3 MB/s). It stays at the end as another fallback rather
             // than as a speed play: when every proxy is down, the site still has the file.
-            return Self.distinct(primary + [self] + lastResort + [self.pagesURL])
+            return Self.distinct([self.airstoreMirrorURL] + primary + [self] + lastResort + [self.pagesURL])
         }
 
         if host == "raw.githubusercontent.com" || (host == "github.com" && self.path.contains("/raw/"))
         {
-            let cdn = self.mirroredThroughCDN
+            let mirror = self.airstoreMirrorURL
             let proxy = self.githubProxyURL
+            let cdn = self.mirroredThroughCDN
             let ghfast = URL(string: "https://ghfast.top/" + self.absoluteString)
             if self.pathExtension.lowercased() == "json" {
                 // A source's JSON is the control plane, so it has to be correct before it is fast.
-                // Measured 2026-10-29: jsDelivr still served a feed two builds old more than fifteen
-                // minutes after a purge that answered "finished", and it ignores cache-busting query
-                // strings, while both live pass-through proxies returned the current file. So for
-                // JSON the proxies go first and jsDelivr drops to the fallback it is still good at --
-                // a line that cannot reach them. Icons and screenshots keep jsDelivr first: a stale
-                // picture costs nothing, a stale feed makes the app swear there is no update.
-                return Self.distinct([proxy, ghfast, cdn, self])
+                // The Worker and the live pass-through proxies answer with the current file; jsDelivr
+                // drops to a fallback because it was measured serving a feed two builds old more than
+                // fifteen minutes after a purge that answered "finished", and it ignores cache-busting
+                // query strings. Icons and screenshots keep it further up: a stale picture costs
+                // nothing, a stale feed makes the app swear there is no update.
+                return Self.distinct([mirror, proxy, ghfast, cdn, self])
             }
             if self.pathExtension.lowercased() == "ipa" {
-                return Self.distinct([proxy, cdn, self])
+                return Self.distinct([mirror, proxy, cdn, self])
             }
-            return Self.distinct([cdn, proxy, self])
+            return Self.distinct([mirror, cdn, proxy, self])
         }
 
         if host == "codeload.github.com" || (host == "github.com" && self.path.contains("/archive/"))

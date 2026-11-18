@@ -45,7 +45,7 @@ def main() -> None:
     parser.add_argument("--companion-developer", default="AirStore团队")
     parser.add_argument("--companion-subtitle", default="Run apps inside AirBox without using App IDs")
     parser.add_argument("--companion-tint", default="8B5CF6")
-    parser.add_argument("--companion-icon-url", default="https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AirBox/Assets.xcassets/AppIcon.appiconset/1024.png")
+    parser.add_argument("--companion-icon-url", default="https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/AirBox/Assets.xcassets/AppIcon.appiconset/1024.png")
     parser.add_argument("--companion-description", default="")
     args = parser.parse_args()
 

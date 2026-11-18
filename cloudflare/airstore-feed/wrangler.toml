@@ -1,0 +1,10 @@
+name = "airstore-feed"
+main = "src/index.js"
+compatibility_date = "2026-11-14"
+workers_dev = false
+
+# as.mz0520.de5.net is the address the app's built-in source points at. `custom_domain = true` makes
+# Cloudflare create the DNS record and the certificate for it; no separate route or CNAME is needed.
+routes = [
+  { pattern = "as.mz0520.de5.net", custom_domain = true }
+]

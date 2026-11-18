@@ -68,6 +68,20 @@ Violations may lead to restrictions up to a permanent ban.
 - The product is still built as **`SideStore.app`** and packaged into **`AirStore.ipa`**; the
   user-facing name is `CFBundleDisplayName = AirStore`. `PRODUCT_NAME` in `Build.xcconfig` does not
   win — every target sets `PRODUCT_NAME = "$(TARGET_NAME)"`.
+- **Per-account credentials, step 1 only** (2026-11-14): the four Apple ID slots in `Keychain`
+  (`appleIDEmailAddress` / `Password` / `Adsid` / `XcodeToken`) read from `<key>.<accountIdentifier>`
+  when `UserDefaults["AirStoreActiveAccountScope"]` is set and fall back to the unscoped key
+  otherwise; a write goes to the scoped slot, and clearing removes both. `adoptCredentials(for:)`
+  copies a fresh sign-in into that account's namespace and moves the scope; the unscoped copies stay
+  on purpose so an older build still finds them. Nothing switches accounts yet: `AuthManager.session`
+  is still one global object, and install/refresh still use the active account rather than
+  `InstalledApp.appID → Team.account`.
+- **Guide re-verified against the tree at `ce5d69ab`** (2026-11-14): bundle id, iOS 17.4, Swift 5
+  mode, `PRODUCT_NAME = "$(TARGET_NAME)"`, four tabs in both `AltStore/iOS/Main.storyboard` and
+  `AltStore/tvOS/Main.storyboard`, the six settings group ids (`account`, `appearance`, `refresh`,
+  `connection`, `diagnostics`, `about`), `rescue.yml`, and the compilation-cache keys below all match
+  the code. The stale "the new-UI toggle lives in the App Group" sentence was removed — no such
+  toggle exists any more.
 
 ## Keep this file current
 
@@ -157,17 +171,46 @@ Style:
   `build-helper` (macOS), `build-helper-windows` (Windows) → `publish` (Ubuntu) +
   `publish-helper` (Ubuntu) → `notify` (Discord). Typical wall time is **~9 minutes**; the AirStore
   build is the critical path (~7.5–9 min). Helper builds finish in 1.5–4 min and do not extend it.
-- The develop feed is generated from `source/airstore-source.json` and committed to the
-  **`develop-source`** branch. The app's built-in feed points there. Do not hand-edit generated feeds.
+- The develop feed is written to the **`develop-source`** branch and served to the app through
+  **`https://as.mz0520.de5.net/source/airstore-source.json`** — a Cloudflare Worker deployed from
+  `cloudflare/airstore-feed/`. The Worker fetches the branch at request time and answers `no-store`,
+  so there is no CDN copy to go stale and no purge step. It also proxies this repository's raw files
+  (`/gh/OWNER/REPO@REF/PATH`) and release assets (`/dl/OWNER/REPO/TAG/FILE`) for the app's mirrors.
+  Keep the `/source/airstore-source.json` path: `Source.isAirStoreOfficial` uses that suffix to
+  migrate rows that still carry the old host. Do not hand-edit generated feeds.
+- Redeploying the Worker needs a Cloudflare login: `cd cloudflare/airstore-feed && npx wrangler
+  deploy` (the `routes` entry attaches `as.mz0520.de5.net` and creates its DNS record and
+  certificate). The Pages mirror remains **parked** — do not reintroduce a git-branch mirror, and do
+  not add a CDN purge back. jsDelivr is only a last-resort fallback in `URL+Mirror.swift`.
 - Delta updates are cut by `scripts/ci/make_patch.py` (ASBU/ASDP2) against recent builds; retention is
   five builds plus their patches.
-- The Pages mirror is **parked** (waiting on a Cloudflare domain). Do not reintroduce a git-branch
-  mirror. jsDelivr gets a single purge request; the app prefers live proxies.
 - The Helper publishes to the rolling prerelease **`helper-latest`** (macOS zip + Windows NSIS
   installer), ad-hoc/unsigned in CI. Local copies are signed with the stable local certificate.
 - `stable.yml` builds releases from tags; published releases/tags are never deleted or moved.
 - Do not bump `MARKETING_VERSION` on develop to a version lower than the released stable; develop
   versions use `x.y.z-develop-<timestamp>.<run>-<sha>`.
+
+Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
+`scripts/ci/changed_parts.py`):
+
+- `prepare` compares the pushed tree against `github.event.before` with
+  `git diff --name-only` and runs `changed_parts.py`; its `app` / `airbox` / `helper` outputs gate
+  `build-airstore`, `build-airbox`, `build-helper` and `build-helper-windows`. An app-only push spends
+  one macOS runner instead of four. An empty or failed file list means "build everything" — ambiguity
+  must never leave a stale package on the release.
+- A manual run defaults to `app_only: true`, so `workflow_dispatch` rebuilds the store alone.
+- Every macOS job uses `runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}`; set the repository variable
+  to move them to a self-hosted Mac, leave it unset for hosted.
+- `publish` runs when `build-airstore` succeeded and `build-airbox` did not fail; a skipped AirBox
+  carries its last feed entry forward via `develop_source.py --companion-carry-from`.
+- `rescue.yml` (`*/20` cron + `workflow_run` on completed develop runs) runs
+  `scripts/ci/rescue_build.py`: it waits if a run for the tip is queued/building, rebuilds when the
+  published feed's commit differs from the tree, and re-dispatches only when `Build AirStore` was
+  cancelled before its first step. A red build is never retried.
+- `build-airstore` / `build-airbox` now enable Xcode 26's compilation cache through `Makefile`
+  (`COMPILATION_CACHE_*`, `MODULE_CACHE_DIR`); the cache lives at the DerivedData **root**
+  (`DerivedData/CompilationCache.noindex`), not `DerivedData/*/`, and `develop.yml` restores that path
+  plus `SourcePackages` and `~/Library/Caches/org.swift.swiftpm` under key `xcode-v2-develop-airstore-`.
 
 ## UI
 
@@ -186,6 +229,17 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
   The home is a subview of the table view, so **every `tableView.reloadData()` must go through
   `reloadClassicTable()`** — the reload re-inserts static cells above the home, which keeps it visible
   (zPosition) but makes every row untappable. `viewDidLayoutSubviews` also re-fronts it.
+- **Settings search** (2026-11-13): a pinned glass `TextField` filters rows by title/subtitle
+  (case- and diacritic-insensitive) and keeps the matching group as context. The pages behind the
+  rows are searched too, through `SideStore/Views/Settings/SettingsSearchCatalog.swift` — a static
+  map from a home row id to the string keys inside that page. It does **not** deep-link to a single
+  switch: a second-level hit opens the page. When you add a row to one of those pages, add its title
+  there or search cannot find it.
+- **Row press feedback** is the system's own: the group pane uses
+  `glassSurface(in:interactive: true)` (iOS 26 `Glass.regular.interactive()`). Do not re-add
+  `scaleEffect` / `brightness` / `simultaneousGesture` press hacks — they either never fired (a
+  `ButtonStyle` cannot reach the pane) or stole the scroll gesture. iOS 17.4–25 has no press
+  response, which is accepted.
 - `Shared/Extensions/View+GlassSurface.swift` stays: the onboarding flow uses it.
 - The onboarding flow keeps its six steps and all auth/pairing/container logic; it is SwiftUI and
   re-skinned in place (`SideStore/Views/Onboarding/OnboardingView.swift`).
@@ -222,9 +276,8 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
   users to import a file exported from an existing desktop pairing record (it does not work).
 - **Self-updates**: an in-app update reinstalls the app and creates a fresh container. Launch code
   must skip `isFirstLaunch` sign-out and the destructive maintenance passes (1–2) when
-  `reconcileSelfReinstallationIfNeeded()` confirms a self-update. The new-UI toggle lives in the App
-  Group for the same reason. A true uninstall/reinstall still resets app data — that is iOS behavior,
-  not a bug.
+  `reconcileSelfReinstallationIfNeeded()` confirms a self-update. A true uninstall/reinstall still
+  resets app data — that is iOS behavior, not a bug.
 - **AirBox guests**: guests are launched by staging a request in the shared group and opening
   `airbox://`; JIT is opt-in per app via the JIT enabler (AirStore appears as StikDebug). The guest
   listing is published into the group `ContainerApps/`; removals use `ContainerDelete/`. Do not
@@ -247,6 +300,7 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 | Pairing | `SideStore/Core/Pairing/PairingFileManager.swift`, `SideStore/MaintenanceManager.swift` |
 | Deep links | `SideStore/DeepLinks/URLHandler.swift`, `AppDelegate.swift`, `AltStore/TabBarController.swift` |
 | Feed / release | `source/airstore-source.json`, `scripts/ci/`, `.github/workflows/` |
+| Feed mirror (Cloudflare) | `cloudflare/airstore-feed/` (`as.mz0520.de5.net`, `npx wrangler deploy`) |
 | Helper | `Helper/` (Tauri 2; `npm ci && npx tauri build --bundles app --ignore-version-mismatches`) |
 
 ## Definition of done for an agent

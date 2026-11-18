@@ -307,8 +307,4 @@ jobs:
             exit 1
           fi
 
-      - name: Purge the CDN copy of the feed
-        if: steps.build_gate.outputs.should_skip != 'true'
-        run: |
-          curl -fsS --max-time 20 "https://purge.jsdelivr.net/gh/$GITHUB_REPOSITORY@develop-source/source/airstore-source.json" >/dev/null \
-            || echo "::warning::the purge request failed; the live proxies carry the feed either way"
+      # No CDN purge: as.mz0520.de5.net serves the feed with `no-store` straight from the branch.

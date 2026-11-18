@@ -39,10 +39,16 @@ public enum AppConstants {
         public static let fetchTimeout: TimeInterval  = 3.0
         public static let defaultSourcesURL           = URL(string: "https://sidestore.io/default-sources")!
 
-        /// AirStore's own feed, written onto its own branch by the develop workflow. This is the
-        /// built-in official source, so the app ships knowing where its updates come from.
-        public static let airStoreFeedURL             = URL(string: "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json")!
-        public static let airStoreIconURL             = URL(string: "https://cdn.jsdelivr.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png")!
+        /// AirStore's own feed, written onto its own branch by the develop workflow and served from a
+        /// Cloudflare Worker on a domain this repository controls. raw.githubusercontent.com is
+        /// blocked or crawling on a lot of the networks the app is used on, and jsDelivr could serve a
+        /// feed two builds old long after a purge answered "finished". The Worker fetches the file at
+        /// request time and says `no-store`, so what a phone reads is what the branch holds.
+        ///
+        /// The path stays `/source/airstore-source.json` on purpose: `Source.isAirStoreOfficial` uses
+        /// that suffix to migrate rows that still carry the old host.
+        public static let airStoreFeedURL             = URL(string: "https://as.mz0520.de5.net/source/airstore-source.json")!
+        public static let airStoreIconURL             = URL(string: "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png")!
 
         /// What the built-in slot used to point at. It lists upstream SideStore as an update for our
         /// bundle id, so installing it replaces AirStore and the sign-in fix goes with it.
