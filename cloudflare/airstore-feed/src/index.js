@@ -71,11 +71,16 @@ async function mirror(request, upstream, fallbackType) {
   headers.delete("content-length");
   headers.delete("cdn-cache-control");
   headers.delete("cloudflare-cdn-cache-control");
+  // Fastly's bookkeeping from GitHub's own edge; it reads as if this Worker cached the file.
+  for (const noisy of ["x-cache", "x-cache-hits", "x-served-by", "x-timer", "x-fastly-request-id"]) {
+    headers.delete(noisy);
+  }
   for (const [key, value] of Object.entries(CORS)) headers.set(key, value);
   for (const [key, value] of Object.entries(NO_CACHE)) headers.set(key, value);
   headers.set("x-airstore-mirror", "1");
 
-  if (!headers.has("content-type") && fallbackType) headers.set("content-type", fallbackType);
+  // The feed has to arrive as JSON even though GitHub labels a raw .json as text/plain.
+  if (fallbackType) headers.set("content-type", fallbackType);
 
   return new Response(request.method === "HEAD" ? null : response.body, {
     status: response.status,
