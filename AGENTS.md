@@ -237,9 +237,11 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
 - **Settings search** (2026-11-13): a pinned glass `TextField` filters rows by title/subtitle
   (case- and diacritic-insensitive) and keeps the matching group as context. The pages behind the
   rows are searched too, through `SideStore/Views/Settings/SettingsSearchCatalog.swift` — a static
-  map from a home row id to the string keys inside that page. It does **not** deep-link to a single
-  switch: a second-level hit opens the page. When you add a row to one of those pages, add its title
-  there or search cannot find it.
+  map from a home row id to the string keys inside that page. Match against **both** the English key
+  and `SettingsSearchCatalog.title(for:)` — the catalog stores English keys, so comparing only those
+  made every second-level entry unfindable in Chinese (fixed 2026-11-18). It does **not** deep-link
+  to a single switch: a second-level hit opens the page. When you add a row to one of those pages,
+  add its title there or search cannot find it.
 - **Row press feedback** is the system's own: the group pane uses
   `glassSurface(in:interactive: true)` (iOS 26 `Glass.regular.interactive()`). Do not re-add
   `scaleEffect` / `brightness` / `simultaneousGesture` press hacks — they either never fired (a

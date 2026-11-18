@@ -245,8 +245,14 @@ struct SettingsHomeView: View {
                 }
 
                 guard let action = row.action else { continue }
-                let hits = SettingsSearchCatalog.children[row.id, default: []].filter {
-                    $0.range(of: query, options: options) != nil
+                // The catalog holds the English keys the pages use, so matching the key alone made
+                // every second-level entry unfindable in Chinese: the user types 中文 while the key
+                // says "Import Pairing File". Match the localized title as well -- that is the text
+                // the result row actually shows.
+                let hits = SettingsSearchCatalog.children[row.id, default: []].filter { key in
+                    let title = SettingsSearchCatalog.title(for: key)
+                    return key.range(of: query, options: options) != nil
+                        || title.range(of: query, options: options) != nil
                 }
                 for (index, key) in hits.enumerated() {
                     rows.append(SettingsRow("\(row.id).child.\(index)",
