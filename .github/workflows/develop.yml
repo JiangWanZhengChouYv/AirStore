@@ -37,6 +37,10 @@ on:
         description: "Rebuild only the store app (AirBox and the Helper keep their published packages)"
         type: boolean
         default: true
+      runner:
+        description: "Runner label override (empty = the MACOS_RUNNER variable, else macos-26)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -61,6 +65,10 @@ jobs:
       airbox: ${{ steps.changed.outputs.airbox }}
       helper: ${{ steps.changed.outputs.helper }}
       cache_week: ${{ steps.epoch.outputs.week }}
+      # A push has no inputs, so this is the repository variable when it is set and macos-26 when it is
+      # not. A manual run can force one side, which is what the rescue watchdog does when no
+      # self-hosted runner is online.
+      runner: ${{ steps.runner.outputs.runner }}
 
     steps:
       - uses: actions/checkout@v4
@@ -99,6 +107,19 @@ jobs:
       # Coarse on purpose: within a week every run hits the exact cache key and uploads nothing, and
       # the first run of each week re-saves one fresh copy. A per-run key uploaded a gigabyte every
       # push and was evicting the other jobs' caches against the 10 GB budget.
+      # The three macOS ribs read this. Kept as a step rather than an expression in `outputs:` so the
+      # precedence is visible: a manual override wins over the repository variable, which wins over
+      # the hosted image.
+      - name: Choose the runner
+        id: runner
+        env:
+          OVERRIDE: ${{ inputs.runner }}
+          REPOSITORY_RUNNER: ${{ vars.MACOS_RUNNER }}
+        run: |
+          RUNNER="${OVERRIDE:-${REPOSITORY_RUNNER:-macos-26}}"
+          echo "runner=$RUNNER"
+          echo "runner=$RUNNER" >> "$GITHUB_OUTPUT"
+
       - name: Cache epoch
         id: epoch
         run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
@@ -140,7 +161,7 @@ jobs:
     if: needs.prepare.outputs.app == 'true'
     # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
     # unset, it is the hosted image it always was.
-    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
+    runs-on: ${{ needs.prepare.outputs.runner }}
     timeout-minutes: 45
 
     steps:
@@ -217,7 +238,7 @@ jobs:
     if: needs.prepare.outputs.airbox == 'true'
     # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
     # unset, it is the hosted image it always was.
-    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
+    runs-on: ${{ needs.prepare.outputs.runner }}
     timeout-minutes: 45
 
     steps:
@@ -293,7 +314,7 @@ jobs:
     if: needs.prepare.outputs.helper == 'true'
     # A repository variable can point these at a self-hosted Mac when the hosted pool is backed up;
     # unset, it is the hosted image it always was.
-    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
+    runs-on: ${{ needs.prepare.outputs.runner }}
     timeout-minutes: 45
 
     steps:

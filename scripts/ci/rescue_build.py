@@ -5,10 +5,12 @@ Hosted macOS runners are shared, and a job that cannot be acquired within about 
 cancelled by GitHub without a single step having run. The commit then has no package and no feed
 entry, and nothing notices: the push already happened and its workflow will not run again.
 
-This looks for exactly that shape -- a run at the current tip whose build job was cancelled before its
-first step -- and asks for the build again. Every other failure is left alone on purpose: a red build
-is a code problem, and re-dispatching it every twenty minutes would spend the same scarce runners on
-it forever.
+It also covers the opposite problem: a job queued for a self-hosted runner waits forever, because
+there is no pool to give up on it. When such a job has waited QUEUE_MINUTES, this cancels it and asks
+again with `runner=macos-26`, so a Mac that is asleep costs one build's delay instead of a dead queue.
+
+Every other failure is left alone on purpose: a red build is a code problem, and re-dispatching it
+every twenty minutes would spend the same scarce runners on it forever.
 """
 
 import datetime
@@ -29,6 +31,11 @@ BUNDLE_SUFFIX = ".AirStore"
 # the workflow_run trigger and a timer tick from dispatching the same rescue twice in the same moment;
 # the real spacing between attempts is the fifteen minutes a doomed job spends waiting.
 SETTLE_MINUTES = 2
+
+# A self-hosted runner that is off does not fail the job -- the job sits queued until somebody cancels
+# it. Twelve minutes is long enough for a sleeping machine to be woken by a human and short enough that
+# a push is never stuck for the evening.
+QUEUE_MINUTES = 12
 
 
 def gh(*args: str) -> str:
@@ -55,9 +62,39 @@ def built_version() -> str:
     return ""
 
 
-def dispatch() -> None:
+def dispatch(runner: str = "") -> None:
     """Everything, not just the store: a rescue is not the moment to guess which rib is behind."""
-    gh("workflow", "run", WORKFLOW, "--ref", "develop", "-f", "app_only=false")
+    args = ["workflow", "run", WORKFLOW, "--ref", "develop", "-f", "app_only=false"]
+    if runner:
+        args += ["-f", f"runner={runner}"]
+    gh(*args)
+
+
+def build_job_for(run_id):
+    jobs = gh_json("api", f"repos/{REPO}/actions/runs/{run_id}/jobs")
+    return next((job for job in jobs.get("jobs", []) if job["name"] == BUILD_JOB), None)
+
+
+def queued_minutes(run) -> float:
+    created = datetime.datetime.fromisoformat(run["createdAt"].replace("Z", "+00:00"))
+    return (datetime.datetime.now(datetime.timezone.utc) - created).total_seconds() / 60
+
+
+def fall_back_to_hosted(run, short) -> bool:
+    """True when the queued job was cancelled and re-dispatched onto the hosted image."""
+    job = build_job_for(run["databaseId"])
+    if job is None or "self-hosted" not in (job.get("labels") or []):
+        return False
+
+    age = queued_minutes(run)
+    if age < QUEUE_MINUTES:
+        return False
+
+    print(f"run {run['databaseId']} for {short} waited {age:.0f} min for a self-hosted runner; "
+          f"falling back to macos-26")
+    subprocess.run(["gh", "run", "cancel", str(run["databaseId"])], check=False, capture_output=True)
+    dispatch(runner="macos-26")
+    return True
 
 
 def main() -> int:
@@ -76,6 +113,8 @@ def main() -> int:
     mine = [run for run in runs if run["headSha"] == tip]
     latest = max(mine, key=lambda run: run["databaseId"]) if mine else None
     if latest and latest["status"] in ("queued", "in_progress"):
+        if latest["status"] == "queued" and fall_back_to_hosted(latest, short):
+            return 0
         print(f"run {latest['databaseId']} for {short} is still {latest['status']}; waiting")
         return 0
 

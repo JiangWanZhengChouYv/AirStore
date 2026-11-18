@@ -199,8 +199,14 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
   one macOS runner instead of four. An empty or failed file list means "build everything" — ambiguity
   must never leave a stale package on the release.
 - A manual run defaults to `app_only: true`, so `workflow_dispatch` rebuilds the store alone.
-- Every macOS job uses `runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}`; set the repository variable
-  to move them to a self-hosted Mac, leave it unset for hosted.
+- The three macOS jobs take `runs-on` from the `prepare` job's `runner` output: a manual `runner`
+  input wins, then the `MACOS_RUNNER` repository variable, then `macos-26`. Register a self-hosted
+  runner and set `MACOS_RUNNER=self-hosted` to use it.
+- A queued job on a self-hosted runner never times out (there is no pool to give up on it), so
+  `scripts/ci/rescue_build.py` cancels it after 12 minutes and re-dispatches with `runner=macos-26`.
+  A sleeping Mac therefore costs one build's delay instead of blocking the queue for the evening.
+  Only `develop.yml` honours the variable: PR, nightly, stable and ci stay on the hosted image on
+  purpose, so untrusted PR code never runs on a personal machine.
 - `publish` runs when `build-airstore` succeeded and `build-airbox` did not fail; a skipped AirBox
   carries its last feed entry forward via `develop_source.py --companion-carry-from`.
 - `rescue.yml` (`*/20` cron + `workflow_run` on completed develop runs) runs
