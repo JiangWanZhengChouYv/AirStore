@@ -220,7 +220,7 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
 - `build-airstore` / `build-airbox` now enable Xcode 26's compilation cache through `Makefile`
   (`COMPILATION_CACHE_*`, `MODULE_CACHE_DIR`); the cache lives at the DerivedData **root**
   (`DerivedData/CompilationCache.noindex`), not `DerivedData/*/`, and `develop.yml` restores that path
-  plus `SourcePackages` and `~/Library/Caches/org.swift.swiftpm` under key `xcode-v2-develop-airstore-`.
+  plus `SourcePackages` and `~/Library/Caches/org.swift.swiftpm` under key `xcode-v3-develop-airstore-`.
 
 ## UI
 
