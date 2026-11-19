@@ -211,11 +211,14 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
   That machine keeps `DerivedData` (CAS included), `SourcePackages`, `~/.cargo` and
   `Helper/src-tauri/target` on disk between runs, so a cache restore only costs download time -- and
   the 10 GB Actions cache budget is better spent on hosted runs, which start from nothing.
+- `nightly.yml` reads the same `MACOS_RUNNER` variable (it has no `prepare` job, so there is no
+  per-run override), skips its package cache and the `setup-xcode` download there, and asserts the
+  installed Xcode instead. `brew install` falls back to "already present" for the same reason.
 - A queued job on a self-hosted runner never times out (there is no pool to give up on it), so
   `scripts/ci/rescue_build.py` cancels it after 12 minutes and re-dispatches with `runner=macos-26`.
   A sleeping Mac therefore costs one build's delay instead of blocking the queue for the evening.
-  Only `develop.yml` honours the variable: PR, nightly, stable and ci stay on the hosted image on
-  purpose, so untrusted PR code never runs on a personal machine.
+  Only `develop.yml` and `nightly.yml` honour the variable: PR, stable and ci stay on the hosted
+  image on purpose, so untrusted PR code never runs on a personal machine.
 - `publish` runs when `build-airstore` succeeded and `build-airbox` did not fail; a skipped AirBox
   carries its last feed entry forward via `develop_source.py --companion-carry-from`.
 - `rescue.yml` (`*/20` cron + `workflow_run` on completed develop runs) runs

@@ -22,7 +22,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-26
+    # Same switch as develop.yml, minus the manual override: this is a single job, so there is no
+    # `prepare` step to compute a label from inputs. A nightly is a full release-shaped build, so
+    # running it on the maintainer's Mac is the difference between ten minutes and a long queue.
+    runs-on: ${{ vars.MACOS_RUNNER || 'macos-26' }}
     env:
       DEPLOY_KEY: ${{ secrets.CROSS_REPO_PUSH_KEY }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,8 +64,14 @@ jobs:
           )
           echo "should_skip=$SHOULD_SKIP" >> $GITHUB_OUTPUT
 
-      - run: brew install ldid xcbeautify
+      # Idempotent enough on the hosted image; on a self-hosted Mac these are already installed and
+      # `brew` is not on launchd's PATH unless env.sh puts it there.
+      - name: Install the build tools
         if: steps.build_gate.outputs.should_skip != 'true'
+        run: |
+          brew install ldid xcbeautify || {
+            command -v ldid && command -v xcbeautify && echo "already installed; brew was not reachable"
+          }
 
       # --------------------------------------------------
       # runtime env setup
@@ -87,11 +96,24 @@ jobs:
           echo "SHORT_COMMIT=$SHORT_COMMIT" | tee -a $GITHUB_ENV
           echo "MARKETING_VERSION=$NORMALIZED_VERSION" | tee -a $GITHUB_ENV
 
+      # On the hosted image this action selects the toolchain. On a self-hosted Mac it would try to
+      # download one, which is minutes of network for nothing: assert the installed Xcode instead, the
+      # same way develop.yml does.
       - name: Setup Xcode
-        if: steps.build_gate.outputs.should_skip != 'true'
+        if: steps.build_gate.outputs.should_skip != 'true' && runner.environment != 'self-hosted'
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
           xcode-version: "26.4"
+
+      - name: Check the toolchain
+        if: steps.build_gate.outputs.should_skip != 'true' && runner.environment == 'self-hosted'
+        run: |
+          xcodebuild -version
+          major=$(xcodebuild -version | awk 'NR==1 { split($2, v, "."); print v[1] }')
+          if [ "$major" -lt 26 ]; then
+            echo "::error::the runner's default Xcode is $(xcodebuild -version | head -1); this build needs the 26 SDK"
+            exit 1
+          fi
 
       # Same correction as the develop pipeline: the old code restored a gigabyte of DerivedData on
       # every run and still recompiled all 745 files, because Xcode's incremental state keys off input
@@ -102,8 +124,10 @@ jobs:
         if: steps.build_gate.outputs.should_skip != 'true'
         run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
 
+      # A self-hosted machine keeps DerivedData and the package checkouts on disk, so restoring a
+      # tarball of them is download time for nothing (see develop.yml for the full reasoning).
       - name: Restore the package checkouts
-        if: steps.build_gate.outputs.should_skip != 'true'
+        if: steps.build_gate.outputs.should_skip != 'true' && runner.environment != 'self-hosted'
         uses: actions/cache@v4
         with:
           path: |

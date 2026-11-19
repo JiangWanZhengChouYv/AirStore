@@ -170,7 +170,14 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
-      - run: brew install ldid xcbeautify
+      - name: Install the build tools
+        run: |
+          # Already there on a self-hosted Mac, and `brew` is not on launchd's PATH unless env.sh
+          # exports it -- so falling back to "they are present" is what keeps the service install
+          # working, not a masked failure.
+          brew install ldid xcbeautify || {
+            command -v ldid && command -v xcbeautify && echo "already installed; brew was not reachable"
+          }
 
       - name: Check the toolchain
         run: |
@@ -251,7 +258,14 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
-      - run: brew install ldid xcbeautify
+      - name: Install the build tools
+        run: |
+          # Already there on a self-hosted Mac, and `brew` is not on launchd's PATH unless env.sh
+          # exports it -- so falling back to "they are present" is what keeps the service install
+          # working, not a masked failure.
+          brew install ldid xcbeautify || {
+            command -v ldid && command -v xcbeautify && echo "already installed; brew was not reachable"
+          }
 
       - name: Check the toolchain
         run: |
