@@ -118,6 +118,16 @@ export default {
       return mirror(request, FEED_URL, "application/json; charset=utf-8");
     }
 
+    // The recommended-source list, which used to come from sidestore.io. Served from this repository's
+    // develop branch so the list is ours to curate, and so it moves with the same deploy as the feed.
+    if (path === "/source/default-sources.json" || path === "/default-sources.json") {
+      return mirror(
+        request,
+        `https://raw.githubusercontent.com/${OWNER}/${REPO}/develop/source/default-sources.json`,
+        "application/json; charset=utf-8",
+      );
+    }
+
     // /gh/OWNER/REPO@REF/PATH... -- the shape jsDelivr used, so a jsDelivr URL can be rewritten by
     // swapping the host and keeping everything after it.
     const gh = path.match(/^\/gh\/([^/]+)\/([^/@]+)@([^/]+)\/(.+)$/);

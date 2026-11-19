@@ -187,6 +187,13 @@ Style:
   (`/gh/OWNER/REPO@REF/PATH`) and release assets (`/dl/OWNER/REPO/TAG/FILE`) for the app's mirrors.
   Keep the `/source/airstore-source.json` path: `Source.isAirStoreOfficial` uses that suffix to
   migrate rows that still carry the old host. Do not hand-edit generated feeds.
+- **Recommended sources are curated here too** (maintainer, 2026-11-19). `source/default-sources.json`
+  replaces `sidestore.io/default-sources`, which listed 19 entries — several dead (PokeMMO, UTM's old
+  path) or unparseable strict JSON (Countdown, ThatStella, Mona), plus LiveContainer, which duplicates
+  AirBox and was removed on request. The remaining twelve are ordered by popularity (GitHub stars:
+  UTM 37k > Provenance 6.4k > StikDebug 3.2k, then active-but-closed-source), with staleness as the
+  tiebreaker. Served at `/source/default-sources.json` on the Worker; `UpdateKnownSourcesOperation`
+  reads it and `VerifyAppOperation` treats a listed source as trusted for undeclared permissions.
 - Redeploying the Worker needs a Cloudflare login: `cd cloudflare/airstore-feed && npx wrangler
   deploy` (the `routes` entry attaches `as.mz0520.de5.net` and creates its DNS record and
   certificate). The Pages mirror remains **parked** — do not reintroduce a git-branch mirror, and do

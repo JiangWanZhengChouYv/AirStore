@@ -102,6 +102,11 @@ public extension URL
             return URL(string: "https://raw.githubusercontent.com/\(Self.mirroredRepository)/develop-source/source/airstore-source.json")
         }
 
+        if self.path == "/source/default-sources.json" || self.path == "/default-sources.json"
+        {
+            return URL(string: "https://raw.githubusercontent.com/\(Self.mirroredRepository)/develop/source/default-sources.json")
+        }
+
         // /gh/OWNER/REPO@REF/PATH...
         if components.count >= 4, components[0] == "gh"
         {

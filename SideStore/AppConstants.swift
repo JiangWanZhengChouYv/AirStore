@@ -37,7 +37,9 @@ public enum AppConstants {
     
     public enum Sources {
         public static let fetchTimeout: TimeInterval  = 3.0
-        public static let defaultSourcesURL           = URL(string: "https://sidestore.io/default-sources")!
+        /// The curated recommended-source list. Was sidestore.io's; now this repository's own file,
+        /// served by the same Worker as the feed so the list is ours to curate and deploy together.
+        public static let defaultSourcesURL           = URL(string: "https://as.mz0520.de5.net/source/default-sources.json")!
 
         /// AirStore's own feed, written onto its own branch by the develop workflow and served from a
         /// Cloudflare Worker on a domain this repository controls. raw.githubusercontent.com is
