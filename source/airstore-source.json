@@ -19,6 +19,14 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
+          "version": "0.9.1-nightly-202611191103.41-65673a7e",
+          "date": "2026-11-19T11:05:46Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/nightly/AirStore.ipa",
+          "size": 37019273,
+          "sha256": "e9206c2aec16320bd07b012784ce7a3ca363f83dae5bba23b0888de83c858f53",
+          "localizedDescription": "Nightly build 0.9.1-nightly-202611191103.41-65673a7e from commit 65673a7e."
+        },
+        {
           "version": "0.9.1-develop-202611191047.249-64b49ea",
           "date": "2026-11-19T10:49:45Z",
           "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611191047.249-64b49ea.ipa",
@@ -60,6 +68,19 @@
         }
       ],
       "releaseChannels": [
+        {
+          "track": "nightly",
+          "releases": [
+            {
+              "version": "0.9.1-nightly-202611191103.41-65673a7e",
+              "date": "2026-11-19T11:05:46Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/nightly/AirStore.ipa",
+              "size": 37019273,
+              "sha256": "e9206c2aec16320bd07b012784ce7a3ca363f83dae5bba23b0888de83c858f53",
+              "localizedDescription": "Nightly build 0.9.1-nightly-202611191103.41-65673a7e from commit 65673a7e."
+            }
+          ]
+        },
         {
           "track": "develop",
           "releases": [
