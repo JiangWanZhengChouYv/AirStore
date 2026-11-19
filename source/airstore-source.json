@@ -19,20 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.9.1-nightly-202611191032.40-83d61077",
-          "date": "2026-11-19T10:35:16Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/nightly/AirStore.ipa",
-          "size": 37019270,
-          "sha256": "91a5acb7fc6bdd36712cd07cd113e65908e6ac4b9a09dbc83711a709c2040d0f",
-          "localizedDescription": "Nightly build 0.9.1-nightly-202611191032.40-83d61077 from commit 83d61077."
-        },
-        {
-          "version": "0.9.1-develop-202611181254.247-0502e27",
-          "date": "2026-11-18T12:58:41Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611181254.247-0502e27.ipa",
-          "size": 37120451,
-          "sha256": "747e8b8f26c5c1351f06b312178e509e145adec1c2c10641e83d10517dd1ba54",
-          "localizedDescription": "Development build 0.9.1-develop-202611181254.247-0502e27 from commit 0502e27."
+          "version": "0.9.1-develop-202611191042.248-f9dd7e2",
+          "date": "2026-11-19T10:46:03Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611191042.248-f9dd7e2.ipa",
+          "size": 37120435,
+          "sha256": "bd65b8005380ed02e79ef0df6822b2c5b4c2057c3830ae1fde6ccfd77e9e9138",
+          "localizedDescription": "Development build 0.9.1-develop-202611191042.248-f9dd7e2 from commit f9dd7e2."
         },
         {
           "version": "0.9.0",
@@ -69,28 +61,15 @@
       ],
       "releaseChannels": [
         {
-          "track": "nightly",
-          "releases": [
-            {
-              "version": "0.9.1-nightly-202611191032.40-83d61077",
-              "date": "2026-11-19T10:35:16Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/nightly/AirStore.ipa",
-              "size": 37019270,
-              "sha256": "91a5acb7fc6bdd36712cd07cd113e65908e6ac4b9a09dbc83711a709c2040d0f",
-              "localizedDescription": "Nightly build 0.9.1-nightly-202611191032.40-83d61077 from commit 83d61077."
-            }
-          ]
-        },
-        {
           "track": "develop",
           "releases": [
             {
-              "version": "0.9.1-develop-202611181254.247-0502e27",
-              "date": "2026-11-18T12:58:41Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611181254.247-0502e27.ipa",
-              "size": 37120451,
-              "sha256": "747e8b8f26c5c1351f06b312178e509e145adec1c2c10641e83d10517dd1ba54",
-              "localizedDescription": "Development build 0.9.1-develop-202611181254.247-0502e27 from commit 0502e27."
+              "version": "0.9.1-develop-202611191042.248-f9dd7e2",
+              "date": "2026-11-19T10:46:03Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611191042.248-f9dd7e2.ipa",
+              "size": 37120435,
+              "sha256": "bd65b8005380ed02e79ef0df6822b2c5b4c2057c3830ae1fde6ccfd77e9e9138",
+              "localizedDescription": "Development build 0.9.1-develop-202611191042.248-f9dd7e2 from commit f9dd7e2."
             }
           ]
         },
@@ -131,18 +110,18 @@
       "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID.",
       "iconURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/AirBox/Assets.xcassets/AppIcon.appiconset/1024.png",
       "tintColor": "8B5CF6",
-      "version": "0.9.1-develop-202611181120.241-2eaf689",
-      "date": "2026-11-18T11:30:56Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611181120.241-2eaf689.ipa",
-      "size": 3576001,
-      "sha256": "dc976e62fa1297d7e7c91355f009a782613d5916001495018dabf05bb8422038",
+      "version": "0.9.1-develop-202611191042.248-f9dd7e2",
+      "date": "2026-11-19T10:46:03Z",
+      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611191042.248-f9dd7e2.ipa",
+      "size": 3592364,
+      "sha256": "d560256b9493ceb22ac10fe94895c877db8fea50acd00a1e859706afb2461733",
       "versions": [
         {
-          "version": "0.9.1-develop-202611181120.241-2eaf689",
-          "date": "2026-11-18T11:30:56Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611181120.241-2eaf689.ipa",
-          "size": 3576001,
-          "sha256": "dc976e62fa1297d7e7c91355f009a782613d5916001495018dabf05bb8422038",
+          "version": "0.9.1-develop-202611191042.248-f9dd7e2",
+          "date": "2026-11-19T10:46:03Z",
+          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611191042.248-f9dd7e2.ipa",
+          "size": 3592364,
+          "sha256": "d560256b9493ceb22ac10fe94895c877db8fea50acd00a1e859706afb2461733",
           "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID."
         }
       ],
@@ -151,11 +130,11 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.9.1-develop-202611181120.241-2eaf689",
-              "date": "2026-11-18T11:30:56Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611181120.241-2eaf689.ipa",
-              "size": 3576001,
-              "sha256": "dc976e62fa1297d7e7c91355f009a782613d5916001495018dabf05bb8422038",
+              "version": "0.9.1-develop-202611191042.248-f9dd7e2",
+              "date": "2026-11-19T10:46:03Z",
+              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/AirBox-0.9.1-develop-202611191042.248-f9dd7e2.ipa",
+              "size": 3592364,
+              "sha256": "d560256b9493ceb22ac10fe94895c877db8fea50acd00a1e859706afb2461733",
               "localizedDescription": "AirBox runs apps inside itself, so they do not use an App ID."
             }
           ]
