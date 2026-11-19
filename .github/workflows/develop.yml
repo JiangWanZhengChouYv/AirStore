@@ -76,6 +76,9 @@ jobs:
           # No submodules: versioning reads Build.xcconfig and git only. One commit is enough, and
           # fetching the full history was costing a minute on every run.
           fetch-depth: 1
+          # Self-hosted keeps the work tree from the previous run, so this is an incremental fetch
+          # instead of a re-clone. A hosted runner starts empty either way and must be cleaned.
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       # AirBox and the Helper are the expensive ribs and they change far less often than the app, so
       # each one is skipped unless this push touched its inputs. The list comes from git, not from the
@@ -169,6 +172,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 1
+          # Reuse the clone on the maintainer's Mac: the submodules are already checked out there, and
+          # re-cloning them is most of the setup time. Hosted images start empty.
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       - name: Install the build tools
         run: |
@@ -257,6 +263,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 1
+          # Reuse the clone on the maintainer's Mac: the submodules are already checked out there, and
+          # re-cloning them is most of the setup time. Hosted images start empty.
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       - name: Install the build tools
         run: |
@@ -341,6 +350,7 @@ jobs:
         with:
           # The Helper is inside this repository and has no submodules of its own.
           fetch-depth: 1
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       - uses: actions/setup-node@v4
         with:
@@ -409,6 +419,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       - uses: actions/setup-node@v4
         with:
@@ -673,6 +684,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       - name: Fetch the macOS build
         uses: actions/download-artifact@v4

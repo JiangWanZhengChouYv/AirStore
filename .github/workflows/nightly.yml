@@ -34,10 +34,17 @@ jobs:
       UPSTREAM_CHANNEL: ""
 
     steps:
+      # A hosted image clones from scratch every time and there is nothing to reuse, so it keeps the
+      # plain checkout. The maintainer's Mac already holds this repository from the previous run, and
+      # re-fetching full history plus every submodule into it measured 4m38s against 3s for a shallow
+      # clone. `clean: false` is what stops the action deleting that work tree first, which turns the
+      # whole thing into an incremental fetch. `fetch-depth: 0` stays because the schedule gate reads
+      # the `nightly` tag and counts commits since it.
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
+          clean: ${{ runner.environment != 'self-hosted' }}
 
       - name: Find Last Successful commit
         run: |
