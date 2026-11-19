@@ -173,7 +173,9 @@ private extension FeaturedViewController
                 
             case .categories:
                 let itemWidth = (layoutEnvironment.container.effectiveContentSize.width - spacing) / 2
-                let itemHeight = 90.0
+                // Taller than the old 90 so the glyph can hang off the bottom-right corner without
+                // crowding the name, which is where the App Store puts both.
+                let itemHeight = 104.0
                 let itemSize = NSCollectionLayoutSize(widthDimension: .absolute(itemWidth), heightDimension: .absolute(itemHeight))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
@@ -341,8 +343,10 @@ private extension FeaturedViewController
             cell.imageView.image = UIImage(systemName: category.symbolName)
             
             var background = UIBackgroundConfiguration.clear()
-            background.backgroundColor = category.tintColor
-            background.cornerRadius = 16
+            // Not the raw tint: App Store tiles are a flat, slightly muted block, and the saturated
+            // version put white text on a colour that looked like a button.
+            background.backgroundColor = category.tintColor.adjustedForDisplay
+            background.cornerRadius = 20
             cell.backgroundConfiguration = background
         }
         
@@ -641,9 +645,15 @@ extension FeaturedViewController
             case .featuredHeader: content.text = NSLocalizedString("Featured", comment: "")
             default: break
             }
-            
+
+            // App Store section titles are large and bold -- the shelf underneath is what carries the
+            // hierarchy, so the header does not need to shout with letter-spacing or a bigger gap.
+            content.textProperties.font = .systemFont(ofSize: 22, weight: .bold)
+            content.textProperties.numberOfLines = 1
             content.directionalLayoutMargins.leading = .zero
             content.directionalLayoutMargins.trailing = .zero
+            content.directionalLayoutMargins.top = 0
+            content.directionalLayoutMargins.bottom = 8
             
             headerView.contentConfiguration = content
             return headerView

@@ -267,6 +267,11 @@ screens pushed from it (`SideStore/Views/Onboarding/`, `SideStore/Views/Settings
   `SideStore/Views/Settings/AppearanceSettingsView.swift` — **none of those files exist**; treat that
   brief as history, not a task list. The settings search / glass rows / theme icons it describes were
   later built into the classic UI (see below).
+- **Browse is laid out like the App Store** (maintainer, 2026-11-19): a horizontally paged shelf of
+  large cards, then two-across category tiles, then per-source shelves of app cards. Section titles
+  are 22pt bold, category tiles are 104pt tall with the name top-left and the glyph hanging off the
+  bottom-right on a muted `adjustedForDisplay` block, and card corners are continuous 20/22.
+  `FeaturedViewController.makeLayout()` owns the geometry; `FeaturedComponents.swift` owns the tiles.
 - New work goes into the classic UI. The settings home is a SwiftUI surface
   (`SideStore/Views/Settings/SettingsHomeView.swift`) hosted by `SettingsViewController`: six groups
   (Account, Appearance, Refresh, Connection, Diagnostics, About), each one large glass pane holding

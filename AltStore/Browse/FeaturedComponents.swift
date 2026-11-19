@@ -8,6 +8,9 @@
 
 @preconcurrency import UIKit
 
+/// A category tile. The App Store's are a coloured rectangle with the name in the top-left and the
+/// glyph bleeding off the bottom-right corner; ours used to centre an 80pt glyph and put the name at
+/// the bottom, which read as a button rather than a shelf.
 class LargeIconCollectionViewCell: UICollectionViewCell
 {
     let textLabel = UILabel(frame: .zero)
@@ -18,29 +21,37 @@ class LargeIconCollectionViewCell: UICollectionViewCell
         self.textLabel.translatesAutoresizingMaskIntoConstraints = false
         self.textLabel.textColor = .white
         self.textLabel.font = .preferredFont(forTextStyle: .headline)
+        self.textLabel.adjustsFontForContentSizeCategory = true
+        self.textLabel.numberOfLines = 2
         
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
-        self.imageView.contentMode = .center
+        self.imageView.contentMode = .scaleAspectFit
         self.imageView.tintColor = .white
-        self.imageView.alpha = 0.4
-        self.imageView.preferredSymbolConfiguration = .init(pointSize: 80)
+        self.imageView.alpha = 0.32
+        self.imageView.preferredSymbolConfiguration = .init(pointSize: 64, weight: .semibold)
         
         super.init(frame: frame)
         
         self.contentView.clipsToBounds = true
-        self.contentView.layer.cornerRadius = 16
+        self.contentView.layer.cornerRadius = 20
         self.contentView.layer.cornerCurve = .continuous
         
         self.contentView.addSubview(self.textLabel)
         self.contentView.addSubview(self.imageView)
         
+        self.imageView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        self.textLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
         NSLayoutConstraint.activate([
-            self.textLabel.leadingAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.leadingAnchor, constant: 4),
-            self.textLabel.bottomAnchor.constraint(equalTo: self.contentView.layoutMarginsGuide.bottomAnchor, constant: -4),
-            
-            self.imageView.centerXAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -30),
-            self.imageView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor, constant: 0),
-            self.imageView.heightAnchor.constraint(equalTo: self.contentView.heightAnchor, constant: 0),
+            // Name in the top-left corner, glyph hanging off the bottom-right: the App Store's
+            // arrangement, and the reason the tile reads as a category rather than a button.
+            self.textLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 12),
+            self.textLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 14),
+            self.textLabel.trailingAnchor.constraint(lessThanOrEqualTo: self.contentView.trailingAnchor, constant: -14),
+
+            self.imageView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: 14),
+            self.imageView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: 10),
+            self.imageView.heightAnchor.constraint(equalToConstant: 64),
             self.imageView.widthAnchor.constraint(equalTo: self.imageView.heightAnchor)
         ])
     }
