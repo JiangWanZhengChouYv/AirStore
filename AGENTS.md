@@ -186,6 +186,11 @@ Style:
   five builds plus their patches.
 - The Helper publishes to the rolling prerelease **`helper-latest`** (macOS zip + Windows NSIS
   installer), ad-hoc/unsigned in CI. Local copies are signed with the stable local certificate.
+- `nightly.yml` merges its build into the **same** feed on `develop-source` as a `nightly` track, on
+  top of the copy the branch already carries. Its `Setup Env` stamps `MARKETING_VERSION` into
+  `Build.xcconfig`, so that step has to `git checkout -- Build.xcconfig` before switching branches —
+  a dirty tree makes `git checkout -B develop-source` abort *after* the IPA has been uploaded, which
+  leaves a release nobody can see (2026-11-19).
 - `stable.yml` builds releases from tags; published releases/tags are never deleted or moved.
 - Do not bump `MARKETING_VERSION` on develop to a version lower than the released stable; develop
   versions use `x.y.z-develop-<timestamp>.<run>-<sha>`.

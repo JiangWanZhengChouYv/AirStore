@@ -268,6 +268,10 @@ jobs:
           GIT_TERMINAL_PROMPT: 0
         run: |
           mkdir -p build
+          # Setup Env stamped the version into Build.xcconfig, so the tree is dirty, and `git checkout
+          # -B` refuses to run over that -- which failed this step on 2026-11-19 after the package had
+          # already been uploaded. The stamp has done its job by now; the branch switch needs it gone.
+          git checkout -- Build.xcconfig
           # A develop build can land between the fetch and the push, and both prepend to the same
           # versions array, so losing that race is expected rather than exceptional: regenerate on
           # top of whatever is on the branch now and try again.
