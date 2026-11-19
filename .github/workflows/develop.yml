@@ -642,6 +642,13 @@ jobs:
           # AirBox is optional in a given run. When it was not rebuilt, its live entry is carried over
           # verbatim -- version, size and hash included -- because that is the package still sitting
           # on the release; inventing a version for it would tell every phone it has an update.
+          # Read the live feed first: it is both where AirBox's entry comes from and the only place the
+          # `nightly` channel exists, which publishing from the checked-in file would otherwise delete.
+          mkdir -p build
+          git fetch --depth=1 origin develop-source 2>/dev/null || true
+          git show origin/develop-source:source/airstore-source.json > build/previous-feed.json 2>/dev/null \
+            || echo '{"apps": []}' > build/previous-feed.json
+
           companion_args=()
           if [ -f AirBox.ipa ]; then
             companion_args=(
@@ -650,13 +657,8 @@ jobs:
               --companion-description "AirBox runs apps inside itself, so they do not use an App ID."
             )
           else
-            mkdir -p build
             # The AirBox entry only exists in the generated feed, never in the checked-in source, so
-            # this is where it is copied from. The branch is read directly rather than through the
-            # contents API: the same fetch is needed two steps later to commit the new feed anyway.
-            git fetch --depth=1 origin develop-source 2>/dev/null || true
-            git show origin/develop-source:source/airstore-source.json > build/previous-feed.json 2>/dev/null \
-              || echo '{"apps": []}' > build/previous-feed.json
+            # this is where it is copied from.
             companion_args=(--companion-carry-from build/previous-feed.json)
           fi
 
@@ -669,6 +671,7 @@ jobs:
             --track develop \
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
             --companion-bundle-id "$BUNDLE_ID.AirBox" \
+            --carry-tracks-from build/previous-feed.json \
             "${companion_args[@]}" \
             --out build/airstore-source.json
 

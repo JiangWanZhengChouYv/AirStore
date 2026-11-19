@@ -31,6 +31,13 @@ def main() -> None:
     parser.add_argument("--version", required=True, help="version string baked into the ipa")
     parser.add_argument("--download-url", required=True, help="where the app will fetch this ipa from")
     parser.add_argument("--track", default="develop", help="release channel to write")
+
+    # The checked-in source only ever lists stable (and the develop track this run writes), so a
+    # channel another workflow maintains -- `nightly`, on the same branch -- is not in it. Publishing
+    # from the checked-in file alone therefore deleted that channel on every develop build; the
+    # nightly release stayed downloadable but no phone could see it (2026-11-19). Tracks found in this
+    # previous feed that the new feed lacks are carried over verbatim.
+    parser.add_argument("--carry-tracks-from", default="", help="previous feed whose extra channels are kept")
     parser.add_argument("--description", default="", help="what the update card says")
     parser.add_argument("--out", required=True, help="where to write the merged JSON")
 
@@ -89,6 +96,33 @@ def main() -> None:
         break
     else:
         raise SystemExit(f"No app with bundle id {args.bundle_id} in {args.source}")
+
+    if args.carry_tracks_from:
+        # Only channels the new feed does not already have. Whatever the checked-in source says about
+        # `stable` wins, so a hand-written release note is never replaced by an older copy.
+        try:
+            previous = json.loads(Path(args.carry_tracks_from).read_text(encoding="utf-8"))
+        except Exception as error:
+            print(f"warning: could not read {args.carry_tracks_from} ({error}); not carrying any channel", file=sys.stderr)
+            previous = None
+
+        if previous:
+            for app in source.get("apps", []):
+                if app.get("bundleIdentifier") != args.bundle_id:
+                    continue
+                old_app = next(
+                    (item for item in previous.get("apps", []) if item.get("bundleIdentifier") == args.bundle_id),
+                    None,
+                )
+                if old_app is None:
+                    break
+                present = {channel.get("track") for channel in app.get("releaseChannels", [])}
+                for channel in old_app.get("releaseChannels", []):
+                    if channel.get("track") in present or channel.get("track") == args.track:
+                        continue
+                    print(f"Carrying the {channel.get('track')} channel forward unchanged.", file=sys.stderr)
+                    app.setdefault("releaseChannels", []).append(channel)
+                break
 
     if args.companion_bundle_id and not args.companion_ipa:
         # The companion was not rebuilt in this run. The entry the live feed already carries is the

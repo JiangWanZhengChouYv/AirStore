@@ -195,6 +195,13 @@ Style:
   five builds plus their patches.
 - The Helper publishes to the rolling prerelease **`helper-latest`** (macOS zip + Windows NSIS
   installer), ad-hoc/unsigned in CI. Local copies are signed with the stable local certificate.
+- **Every publisher carries the channels it does not own.** `develop.yml` publishes from the
+  checked-in `source/airstore-source.json`, which only lists `stable`, so a develop build used to
+  delete the `nightly` channel `nightly.yml` had written (2026-11-19: the nightly release stayed
+  downloadable but "Other Versions" showed only stable, because the page lists one row per
+  `releaseTracks` entry). `develop_source.py --carry-tracks-from` copies any channel the new feed
+  lacks, verbatim; the reverse direction already existed as `--companion-carry-from`. Add a channel
+  and you must add it to both sides.
 - `nightly.yml` merges its build into the **same** feed on `develop-source` as a `nightly` track, on
   top of the copy the branch already carries. Its `Setup Env` stamps `MARKETING_VERSION` into
   `Build.xcconfig`, so that step has to `git checkout -- Build.xcconfig` before switching branches —
