@@ -223,10 +223,14 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
 - `nightly.yml` reads the same `MACOS_RUNNER` variable (it has no `prepare` job, so there is no
   per-run override), skips its package cache and the `setup-xcode` download there, and asserts the
   installed Xcode instead. `brew install` falls back to "already present" for the same reason.
-- Every `actions/checkout` passes `clean: runner.environment != 'self-hosted'`. On the maintainer's
-  Mac the work tree and its submodules are reused, turning setup into an incremental fetch; a hosted
-  runner starts empty and still needs the clean. Re-cloning measured **4m38s** against **3s** for the
-  incremental case on the nightly, whose `fetch-depth: 0` is the worst offender.
+- On a self-hosted runner `actions/checkout` is **skipped entirely** in the two Xcode jobs; a
+  `Refresh the existing checkout` step does `git fetch --depth=1 $GITHUB_SHA` + `git reset --hard` +
+  `git submodule update` in the work tree the previous run left behind (3s measured, against 4m38s
+  for a fresh clone of full history plus four submodules). It clones once if `.git` is missing, and
+  falls back to the branch tip if the server refuses a fetch by sha. `reset --hard`, not `checkout`:
+  the previous run stamped `Build.xcconfig` and left fakesigned copies behind. Everything else keeps
+  `clean: runner.environment != 'self-hosted'`; nightly still uses the action because its
+  `fetch-depth: 0` reads the `nightly` tag.
 - A queued job on a self-hosted runner never times out (there is no pool to give up on it), so
   `scripts/ci/rescue_build.py` cancels it after 12 minutes and re-dispatches with `runner=macos-26`.
   A sleeping Mac therefore costs one build's delay instead of blocking the queue for the evening.
