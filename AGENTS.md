@@ -158,6 +158,15 @@ Local build notes:
   the change is risky.
 - `AirBox.ipa` (or other build artifacts) at the repo root must never be committed.
 
+Build target rule (maintainer, 2026-11-19): **speed is for `develop` only.**
+- `make build-airstore` / `make build-airbox` are the fast path: `SWIFT_COMPILATION_MODE=singlefile`,
+  the compilation CAS, and `DEBUG_INFORMATION_FORMAT=dwarf` (no dSYMs). Only `develop.yml` calls
+  them, so only testers wait minutes instead of longer.
+- Everything a user installs as a release -- `nightly.yml`, `stable.yml`, `alpha.yml`, plus `pr.yml`
+  and `ci.yml` -- goes through plain `make build`: Release whole-module optimisation and dSYMs
+  included. **Do not point another workflow at the fast targets**; the comment above them in
+  `Makefile` says the same thing at the site.
+
 Style:
 - Swift: 4 spaces, UTF-8, LF (`.editorconfig`); SwiftLint errors must be zero (warnings are tolerated,
   but do not add new long-line/type-length violations casually).

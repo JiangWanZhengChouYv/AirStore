@@ -214,6 +214,12 @@ build:
 # Single-app archives for the parallel develop pipeline. Each reuses `build` but pins a scheme that
 # carries only its own app, so the two runners never compile each other's target.
 #
+# THE RULE (maintainer, 2026-11-19): speed is for `develop` only. Everything users install as a
+# release -- stable, nightly, alpha -- goes through the plain `build` target, which keeps Release's
+# whole-module optimisation and emits dSYMs. A faster develop build exists to put an install in a
+# tester's hands within minutes; a "fast" nightly or stable would ship a differently optimised binary
+# that nobody asked for. Do not point another workflow at `build-airstore`/`build-airbox`.
+#
 # Release defaults to whole-module Swift optimisation: one frontend process for the whole target,
 # which can only use one core and was the single largest block of wall time on a CI runner. Batch
 # mode keeps -Osize but compiles in parallel, and develop builds have no use for dSYMs. The plain
