@@ -897,9 +897,44 @@ extension AppManager: PipelineProgress, PipelineExecutionContext, PipelineErrorL
             case .removeApp, .removeDeactivatedApp: localizedTitle = String(format: NSLocalizedString("Failed to Remove %@", comment: ""), appName)
         }
         
+        // With several Apple IDs signed in, "Failed to Refresh X" does not say whose account to look
+        // at. Name the owner, and say so in the failure reason rather than the title so the toast
+        // stays one line.
         let nsError = error as NSError
-        let mappedError = nsError.withLocalizedTitle(localizedTitle)
+        let accountLine = self.owningAccountDescription(for: operation)
+        let mappedError = accountLine.isEmpty
+            ? nsError.withLocalizedTitle(localizedTitle)
+            : nsError.withLocalizedTitle(localizedTitle).appendingToLocalizedFailure(accountLine)
         return mappedError
+    }
+
+    /// "Using Apple ID a@b.com" for the account this operation runs as, or "" when there is only one
+    /// account and the sentence would be noise.
+    private func owningAccountDescription(for operation: AppOperation) -> String {
+        let context = DatabaseManager.shared.viewContext
+        let accountCount = (try? context.count(for: Account.fetchRequest())) ?? 0
+        guard accountCount > 1 else { return "" }
+
+        var owner: (appleID: String, team: String)?
+        if let installedApp = operation.app as? InstalledApp,
+           let team = installedApp.team,
+           let account = team.account {
+            owner = (account.appleID, team.name)
+        } else if let identifier = Keychain.shared.accountScope,
+                  let account = DatabaseManager.shared.activeAccount(in: context),
+                  account.identifier == identifier {
+            owner = (account.appleID, self.activeTeamName(in: context) ?? "")
+        } else if let account = DatabaseManager.shared.activeAccount(in: context) {
+            owner = (account.appleID, self.activeTeamName(in: context) ?? "")
+        }
+
+        guard let owner else { return "" }
+        return String(format: NSLocalizedString("Using Apple ID: %@", comment: ""), owner.appleID)
+    }
+
+    private func activeTeamName(in context: NSManagedObjectContext) -> String? {
+        guard let team = DatabaseManager.shared.activeTeam(in: context) else { return nil }
+        return team.name
     }
     
     func log(_ error: Error, operation: LoggedError.Operation, app: AppProtocol)

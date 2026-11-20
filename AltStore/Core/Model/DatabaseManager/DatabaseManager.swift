@@ -245,6 +245,11 @@ public class DatabaseManager: @unchecked Sendable
             }
 
             try context.save()
+
+            // `isDeviceRegistered` answers for the active account, so the answer has to move with the
+            // switch. Without this, device registration read as pending (or done) for the wrong team.
+            let activeTeam = target.teams.first(where: { $0.isActiveTeam }) ?? target.teams.first
+            UserDefaults.standard.activeTeamIdentifier = activeTeam?.identifier
         }
 
         await self.viewContext.perform {

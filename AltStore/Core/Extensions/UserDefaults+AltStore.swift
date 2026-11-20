@@ -327,9 +327,61 @@ public extension UserDefaults
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
     }
+    /// Whether the **active** account's device registration is done.
+    ///
+    /// Registration is per team, not global: with several Apple IDs signed in, "this device is
+    /// registered" for one says nothing about the others, and a single flag made every account after
+    /// the first report "nothing pending" without ever asking Apple. Callers that have a team in
+    /// hand should ask `isDeviceRegistered(forTeam:)`.
     @objc var isDeviceRegistered: Bool {
-        get { self.bool(forKey: #function) }
+        get {
+            guard let team = self.activeTeamIdentifier else { return false }
+            return self.registeredDeviceTeamIdentifiers.contains(team)
+        }
+        set {
+            // Writing through this property targets the active team, which is what the sign-in flow
+            // and Settings mean when they assign it.
+            guard let team = self.activeTeamIdentifier else { return }
+            self.setDeviceRegistered(newValue, forTeam: team)
+        }
+    }
+
+    /// The team of the account currently signed in as, cached whenever the active account changes.
+    /// Without it `isDeviceRegistered` had nothing to answer for and reported false forever, which
+    /// silently skipped the post-sign-in resign.
+    @objc var activeTeamIdentifier: String? {
+        get { self.string(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
+    }
+
+    @objc var registeredDeviceTeamIdentifiers: Set<String> {
+        get { Set(self.stringArray(forKey: #function) ?? []) }
+        set { self.set(Array(newValue), forKey: #function) }
+    }
+
+    /// Same question, asked about a specific team -- what a multi-account status check needs.
+    func isDeviceRegistered(forTeam identifier: String) -> Bool {
+        self.registeredDeviceTeamIdentifiers.contains(identifier)
+    }
+
+    func setDeviceRegistered(_ registered: Bool, forTeam identifier: String) {
+        var teams = self.registeredDeviceTeamIdentifiers
+        if registered { teams.insert(identifier) } else { teams.remove(identifier) }
+        self.registeredDeviceTeamIdentifiers = teams
+    }
+
+    /// An install that upgraded from a single-account build has one plain `isDeviceRegistered` flag
+    /// and no per-team record. Whoever the active account is, that flag was about it -- adopting it
+    /// keeps the account from being asked to register a device Apple already has.
+    func migrateDeviceRegistrationIfNeeded() {
+        guard self.registeredDeviceTeamIdentifiers.isEmpty else { return }
+        guard let team = self.activeTeamIdentifier else { return }
+
+        let legacyKey = "isDeviceRegistered"
+        guard self.bool(forKey: legacyKey) else { return }
+
+        self.setDeviceRegistered(true, forTeam: team)
+        debugLog("[UserDefaults] Adopted the legacy device-registration flag for team \(team).")
     }
     @objc var keepAnisetteHeadersAfterLogout: Bool {
         get { self.bool(forKey: #function) }
@@ -593,7 +645,9 @@ public extension UserDefaults
             #keyPath(UserDefaults.turnOnDataShortcutName): "TurnOnData",
             #keyPath(UserDefaults.isPairingReset): true,
             #keyPath(UserDefaults.isDebugModeEnabled): false,
-            #keyPath(UserDefaults.isDeviceRegistered): false,
+            // The legacy single-account flag is deliberately *not* registered here: an explicit
+            // `false` default would look like a user setting. `migrateDeviceRegistrationIfNeeded`
+            // reads the raw key, and `isDeviceRegistered` answers from the per-team record.
 
         ] as [String: Any]
 

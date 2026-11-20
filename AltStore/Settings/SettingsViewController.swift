@@ -125,6 +125,8 @@ final class SettingsViewController: UITableViewController
 {
     private var activeTeam: ALTTeam?
     private var accountStatus: AccountVerificationRow.Status = .completed
+    /// Per-account results of the last check, so a pending action can name whose it is.
+    private var accountReports: [AccountVerificationRow.AccountReport] = []
     private var accountVerificationTask: Task<Void, Never>?
     
     private var prototypeHeaderFooterView: SettingsHeaderFooterView!
@@ -702,22 +704,27 @@ private extension SettingsViewController
         }
     }
     
+    /// Checks **every** signed-in account, not just the active one.
+    ///
+    /// Each Apple ID has its own team, its own device registration and its own certificate, so an
+    /// account that was never checked used to inherit another account's green tick. The row keeps the
+    /// combined answer; `accountReports` keeps the per-account detail the "Account Status" alert and
+    /// the error messages name the right account from.
     private func startAccountVerification(for team: ALTTeam)
     {
         self.accountVerificationTask?.cancel()
         self.accountVerificationTask = Task { @MainActor [weak self] in
             guard let self = self else { return }
-            if !UserDefaults.standard.isDeviceRegistered {
-                self.setAccountStatus(.checking)
-                self.reloadClassicTable()
-                self.updateAccountCardRowStyles()
-            }
-            let status = await AccountVerificationRow.verifyStatus(for: team)
-            if !Task.isCancelled {
-                self.setAccountStatus(status)
-                self.reloadClassicTable()
-                self.updateAccountCardRowStyles()
-            }
+            self.setAccountStatus(.checking)
+            self.reloadClassicTable()
+            self.updateAccountCardRowStyles()
+
+            let reports = await AccountVerificationRow.verifyAllAccounts()
+            guard !Task.isCancelled else { return }
+            self.accountReports = reports
+            self.setAccountStatus(AccountVerificationRow.combinedStatus(of: reports))
+            self.reloadClassicTable()
+            self.updateAccountCardRowStyles()
         }
     }
     
@@ -752,13 +759,62 @@ private extension SettingsViewController
             return
         }
 
-        if case .actionRequired = self.accountStatus
+        // Name every account and what it needs. With one account this reads as a plain summary; with
+        // several it is the only thing that says *which* Apple ID is the one with a pending action.
+        let pending = self.accountReports.filter { !$0.isSatisfied }
+
+        if !pending.isEmpty
         {
-            Task { @MainActor [weak self] in
-                guard let self = self else { return }
-                await AccountVerificationRow.resolvePendingActions(for: self.accountStatus, team: team, presentingViewController: self)
-                self.startAccountVerification(for: team)
+            let lines = pending.map { report -> String in
+                switch report.status
+                {
+                case .actionRequired(let certMissing, let deviceUnregistered):
+                    var needs: [String] = []
+                    if deviceUnregistered { needs.append(NSLocalizedString("register this device", comment: "")) }
+                    if certMissing { needs.append(NSLocalizedString("provision a signing certificate", comment: "")) }
+                    return "• \(report.appleID) — " + needs.joined(separator: NSLocalizedString(", ", comment: ""))
+                case .checking:
+                    return "• \(report.appleID) — " + NSLocalizedString("still being checked", comment: "")
+                case .completed:
+                    return "• \(report.appleID)"
+                }
             }
+            let message = NSLocalizedString("These Apple ID accounts need attention:", comment: "") + "\n\n" + lines.joined(separator: "\n")
+
+            let alert = UIAlertController(
+                title: NSLocalizedString("Account Status", comment: ""),
+                message: message,
+                preferredStyle: .alert
+            )
+
+            // Fix the first account that needs it. One at a time: each may need its own 2FA code, and
+            // stacking those flows would leave the user with several spinners at once.
+            if let first = pending.first,
+               case .actionRequired = first.status,
+               let dbTeam = self.team(for: first.teamIdentifier)
+            {
+                alert.addAction(UIAlertAction(
+                    title: String(format: NSLocalizedString("Fix %@", comment: ""), first.appleID),
+                    style: .default
+                ) { [weak self] _ in
+                    Task { @MainActor in
+                        guard let self else { return }
+                        await AccountVerificationRow.resolvePendingActions(
+                            for: first.status,
+                            team: dbTeam,
+                            accountIdentifier: first.accountIdentifier,
+                            presentingViewController: self
+                        )
+                        self.startAccountVerification(for: team)
+                    }
+                })
+            }
+
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Check Again", comment: ""), style: .default) { [weak self] _ in
+                self?.startAccountVerification(for: team)
+            })
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Done", comment: ""), style: .cancel))
+            self.present(alert, animated: true)
             return
         }
 
@@ -766,6 +822,9 @@ private extension SettingsViewController
         let message: String
         if self.accountStatus == .checking {
             message = NSLocalizedString("The account is still being checked. Try again in a moment.", comment: "")
+        } else if self.accountReports.count > 1 {
+            let names = self.accountReports.map(\.appleID).joined(separator: "\n• ")
+            message = NSLocalizedString("No pending actions for any signed-in account:", comment: "") + "\n\n• " + names
         } else {
             message = NSLocalizedString("No pending actions. Your signing certificate and registered device are up to date.", comment: "")
         }
@@ -776,6 +835,16 @@ private extension SettingsViewController
         })
         alert.addAction(UIAlertAction(title: NSLocalizedString("Done", comment: ""), style: .cancel))
         self.present(alert, animated: true)
+    }
+
+    /// The Core Data team record, so a pending action can be run for an account that is not active.
+    private func team(for identifier: String) -> ALTTeam? {
+        let context = DatabaseManager.shared.viewContext
+        let request = Team.fetchRequest() as NSFetchRequest<Team>
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(Team.identifier), identifier)
+        request.fetchLimit = 1
+        guard let dbTeam = try? context.fetch(request).first else { return nil }
+        return ALTTeam(identifier: dbTeam.identifier, name: dbTeam.name, type: dbTeam.type)
     }
 
     /// Keeps the SwiftUI row in step with the classic state machine.

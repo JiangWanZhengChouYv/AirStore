@@ -111,8 +111,25 @@ Violations may lead to restrictions up to a permanent ban.
       different account anyway.
     - `AppManager.install(..., account:)` passes the choice to `performSingleOperation`, which sets
       `RefreshGroup.accountScope`.
-  - **Still to do:** checking **every** signed-in account in the Account Status row instead of only
-    the active one, and naming the owning account in a refresh failure.
+  - **Device registration is per team** (2026-11-21). `UserDefaults.registeredDeviceTeamIdentifiers`
+    holds a set; `isDeviceRegistered(forTeam:)` / `setDeviceRegistered(_:forTeam:)` are the real API,
+    and the plain `isDeviceRegistered` property is now only "the **active** team's state"
+    (`activeTeamIdentifier`, kept up to date by `activateAccount` and `SignInOperation`). The old
+    single flag made every account after the first report "nothing pending" without ever asking
+    Apple, and a failed portal check used to be recorded as *registered* — it now reports the action
+    as pending, because a check that could not run is not a green tick.
+    `UserDefaults.migrateDeviceRegistrationIfNeeded()` (called after `DatabaseManager.start()`)
+    adopts the legacy flag for the active team.
+  - **Account Status checks every account** (2026-11-21). `AccountVerificationRow.verifyAllAccounts()`
+    walks the accounts that have credentials, running each check inside
+    `AuthAccountContext.$scope.withValue` so the portal call and the certificate lookup use that
+    account's own identity and keychain slot. `AccountReport` keeps the per-account answer; the
+    settings row shows `combinedStatus(of:)`, and the "Account Status" alert lists each pending
+    account by Apple ID with a "Fix <apple id>" action that scopes
+    `resolvePendingActions(..., accountIdentifier:)` to it.
+  - **Failures name the account.** `AppManager.owningAccountDescription(for:)` appends
+    "Using Apple ID: …" through `NSError.appendingToLocalizedFailure(_:)` — only when more than one
+    account exists, so single-account installs keep the plain message.
 - **Guide re-verified against the tree at `ce5d69ab`** (2026-11-14): bundle id, iOS 17.4, Swift 5
   mode, `PRODUCT_NAME = "$(TARGET_NAME)"`, four tabs in both `AltStore/iOS/Main.storyboard` and
   `AltStore/tvOS/Main.storyboard`, the six settings group ids (`account`, `appearance`, `refresh`,

@@ -54,6 +54,15 @@ public extension NSError
         }
     }
 
+    /// Appends a line to whatever the error already says, instead of replacing it. Used to add
+    /// context the user needs ("which Apple ID this ran as") without losing Apple's own message.
+    func appendingToLocalizedFailure(_ suffix: String) -> NSError
+    {
+        guard !suffix.isEmpty else { return self }
+        let existing = self.localizedFailure ?? self.localizedFailureReason ?? self.localizedDescription
+        return self.withLocalizedFailure(existing.isEmpty ? suffix : "\(existing)\n\n\(suffix)")
+    }
+
     func withLocalizedTitle(_ title: String) -> NSError
     {
         switch self

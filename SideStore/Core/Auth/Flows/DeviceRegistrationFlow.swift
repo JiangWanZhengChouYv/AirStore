@@ -73,15 +73,15 @@ final class DeviceRegistrationFlow: @unchecked Sendable {
         
         let devices = try await DeveloperPortalProxy.shared.fetchDevices(for: team, types: .all)
         if let device = devices.first(where: { $0.identifier.caseInsensitiveCompare(udid) == .orderedSame }) {
-            debugLog("[DeviceRegistrationFlow] Device '\(device.name)' (UDID: \(udid)) is registered on team.")
-            UserDefaults.standard.isDeviceRegistered = true
+            debugLog("[DeviceRegistrationFlow] Device '\(device.name)' (UDID: \(udid)) is registered on team \(team.identifier).")
+            UserDefaults.standard.setDeviceRegistered(true, forTeam: team.identifier)
             return device
         } else {
             let deviceName = await MainActor.run { UIDevice.current.name }
             debugLog("[DeviceRegistrationFlow] Registering new device '\(deviceName)' (UDID: \(udid))...")
             let device = try await DeveloperPortalProxy.shared.registerDevice(name: deviceName, identifier: udid, type: DeveloperPortalProxy.currentDeviceType, team: team)
-            debugLog("[DeviceRegistrationFlow] Device '\(device.name)' (UDID: \(udid)) successfully registered.")
-            UserDefaults.standard.isDeviceRegistered = true
+            debugLog("[DeviceRegistrationFlow] Device '\(device.name)' (UDID: \(udid)) successfully registered on team \(team.identifier).")
+            UserDefaults.standard.setDeviceRegistered(true, forTeam: team.identifier)
             return device
         }
     }

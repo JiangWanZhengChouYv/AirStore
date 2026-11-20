@@ -313,6 +313,10 @@ private extension SignInOperation {
                 // existing install needs.
                 Keychain.shared.adoptCredentials(for: account.identifier)
 
+                // The registration flag answers per team, and the sign-in flow reads it as "the
+                // account I just signed in as". Record which one that is before anything asks.
+                UserDefaults.standard.activeTeamIdentifier = team.identifier
+
                 let isSparseRestorePatched   = ProcessInfo().sparseRestorePatched
                 let isAppLimitDisabled       = UserDefaults.standard.isAppLimitDisabled
 

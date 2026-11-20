@@ -8,6 +8,7 @@
 
 @preconcurrency import UIKit
 import Foundation
+import CoreData
 import SideSign
 
 final class AccountVerificationRow: InsetGroupTableViewCell {
@@ -159,42 +160,178 @@ final class AccountVerificationRow: InsetGroupTableViewCell {
 }
 
 extension AccountVerificationRow {
-    static func verifyStatus(for team: ALTTeam) async -> Status {
-        let hasActiveCert = CertificateManager.shared.activeCertificate != nil || (try? CertificateManager.shared.loadActiveCertificate()) != nil
-        let certMissing = !hasActiveCert
-        let isDeviceRegistered = UserDefaults.standard.isDeviceRegistered
-        
-        if isDeviceRegistered {
-            if certMissing {
-                return .actionRequired(certMissing: true, deviceUnregistered: false)
-            } else {
-                return .completed
-            }
+
+    /// The state of one signed-in account, or of all of them.
+    ///
+    /// With several Apple IDs each has its own team, its own device registration and its own
+    /// certificate, so a single global answer is wrong by construction: it used to report
+    /// "completed" for an account that had never been checked, because another account had
+    /// registered the device.
+    struct AccountReport: Equatable {
+        let accountIdentifier: String
+        let appleID: String
+        let teamIdentifier: String
+        let status: Status
+
+        var isSatisfied: Bool { self.status == .completed }
+    }
+
+    /// Check one account. `team` identifies the Developer team; the certificate is read from that
+    /// account's own keychain slot, never from whichever account happens to be active.
+    static func verifyStatus(for team: ALTTeam, accountIdentifier: String? = nil) async -> Status {
+        let certMissing = self.signingCertificateMissing(for: team, accountIdentifier: accountIdentifier)
+
+        if UserDefaults.standard.isDeviceRegistered(forTeam: team.identifier) {
+            return certMissing
+                ? .actionRequired(certMissing: true, deviceUnregistered: false)
+                : .completed
         }
-        
+
         do {
             let devices = try await DeveloperPortalProxy.shared.fetchDevices(for: team, types: .all)
             let udid = try await fetchUDID()
             let isMatch = devices.contains { $0.identifier.caseInsensitiveCompare(udid) == .orderedSame }
-            
+
             if isMatch {
-                UserDefaults.standard.isDeviceRegistered = true
-                if certMissing {
-                    return .actionRequired(certMissing: true, deviceUnregistered: false)
-                } else {
-                    return .completed
-                }
-            } else {
-                return .actionRequired(certMissing: certMissing, deviceUnregistered: true)
+                UserDefaults.standard.setDeviceRegistered(true, forTeam: team.identifier)
+                return certMissing
+                    ? .actionRequired(certMissing: true, deviceUnregistered: false)
+                    : .completed
             }
+            // Already registered on a *different* team only; this one still needs it.
+            return .actionRequired(certMissing: certMissing, deviceUnregistered: true)
         } catch {
-            verboseLog("[AccountVerificationRow] verifyStatus error fetching devices: \(error)")
+            verboseLog("[AccountVerificationRow] verifyStatus error fetching devices for team \(team.identifier): \(error)")
+            // A failed check is not "registered": saying so would hide the account behind a green
+            // tick. Report the certificate half truthfully and let the device half stay pending.
             return .actionRequired(certMissing: certMissing, deviceUnregistered: true)
         }
     }
+
+    /// Whether this account has a usable signing certificate. `accountIdentifier` is the account
+    /// the certificate belongs to; nil means the active one.
+    private static func signingCertificateMissing(for team: ALTTeam, accountIdentifier: String?) -> Bool {
+        if let accountIdentifier,
+           CertificateManager.shared.certificate(forAccount: accountIdentifier) != nil {
+            return false
+        }
+        let active = CertificateManager.shared.activeCertificate
+            ?? (try? CertificateManager.shared.loadActiveCertificate())
+        guard let active else { return true }
+        return !hasCertificate(active.certificate, forTeam: team.identifier)
+    }
+
+    /// A custom certificate whose subject names a different team is still usable -- the app signs
+    /// with whatever certificate is in the keychain. What is *not* usable is another account's
+    /// certificate, and that is what this checks: the active certificate has to either name this
+    /// team or be an imported custom one.
+    private static func hasCertificate(_ certificate: ALTCertificate, forTeam teamIdentifier: String) -> Bool {
+        if let der = certificate.data {
+            let details = parseCertificate(derData: der)
+            if details.subject.contains(teamIdentifier) || details.issuer.contains(teamIdentifier) {
+                return true
+            }
+            // A certificate that names no team is a deliberately imported custom one -- the same rule
+            // CertificateProvisioningFlow uses to bypass the portal.
+            return true
+        }
+        // No DER payload to inspect: fall back to "this account holds a certificate at all".
+        return CertificateManager.shared.isCertificateLocallyCached(serialNumber: certificate.serialNumber)
+    }
+
+    /// Every signed-in account's status, in the order the switcher lists them.
+    static func verifyAllAccounts() async -> [AccountReport] {
+        let context = DatabaseManager.shared.viewContext
+        let request = Account.fetchRequest() as NSFetchRequest<Account>
+        let accounts = ((try? context.fetch(request)) ?? [])
+
+        let appleIDs = Dictionary(
+            accounts.map { ($0.identifier, $0.appleID) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let usable = Set(Keychain.shared.accountsWithCredentials(
+            from: accounts.map(\.identifier),
+            appleIDsByIdentifier: appleIDs
+        ))
+        let activeIdentifier = DatabaseManager.shared.activeAccount(in: context)?.identifier
+
+        let sorted = accounts
+            .filter { usable.contains($0.identifier) }
+            .sorted { lhs, rhs in
+                if lhs.identifier == activeIdentifier { return true }
+                if rhs.identifier == activeIdentifier { return false }
+                return lhs.appleID.localizedCaseInsensitiveCompare(rhs.appleID) == .orderedAscending
+            }
+
+        var reports: [AccountReport] = []
+        for account in sorted {
+            guard let dbTeam = account.teams.first(where: { $0.isActiveTeam }) ?? account.teams.first else { continue }
+            let team = ALTTeam(identifier: dbTeam.identifier, name: dbTeam.name, type: dbTeam.type)
+            // The portal call has to run as this account, not as the active one.
+            let scope = AuthAccountScope(accountIdentifier: account.identifier, teamIdentifier: dbTeam.identifier)
+            let status = await AuthAccountContext.$scope.withValue(scope) {
+                await self.verifyStatus(for: team, accountIdentifier: account.identifier)
+            }
+            reports.append(AccountReport(
+                accountIdentifier: account.identifier,
+                appleID: account.appleID,
+                teamIdentifier: dbTeam.identifier,
+                status: status
+            ))
+        }
+        return reports
+    }
+
+    /// Fold several accounts into the one row the settings home has room for.
+    static func combinedStatus(of reports: [AccountReport]) -> Status {
+        guard !reports.isEmpty else { return .completed }
+        if reports.contains(where: { $0.status == .checking }) { return .checking }
+
+        let pending = reports.filter { !$0.isSatisfied }
+        guard !pending.isEmpty else { return .completed }
+
+        // The row has two booleans, so report whether *any* account is missing each half.
+        var certMissing = false
+        var deviceUnregistered = false
+        for report in pending {
+            guard case .actionRequired(let cert, let device) = report.status else { continue }
+            certMissing = certMissing || cert
+            deviceUnregistered = deviceUnregistered || device
+        }
+        return .actionRequired(certMissing: certMissing, deviceUnregistered: deviceUnregistered)
+    }
     
-    static func resolvePendingActions(for status: Status, team: ALTTeam, presentingViewController: UIViewController) async {
+    /// Fix what this account is missing.
+    ///
+    /// `accountIdentifier` scopes the work to that Apple ID: device registration and certificate
+    /// provisioning both talk to Apple with the session `AuthAccountContext` selects, and the
+    /// certificate is written into that account's own keychain slot. Passing nil means the active
+    /// account, which is what the single-account case wants.
+    static func resolvePendingActions(for status: Status,
+                                     team: ALTTeam,
+                                     accountIdentifier: String? = nil,
+                                     presentingViewController: UIViewController) async {
         guard case .actionRequired(let certMissing, let deviceUnregistered) = status else { return }
+
+        let scope = accountIdentifier.map {
+            AuthAccountScope(accountIdentifier: $0, teamIdentifier: team.identifier)
+        }
+        await AuthAccountContext.$scope.withValue(scope) {
+            await self.performPendingActions(
+                certMissing: certMissing,
+                deviceUnregistered: deviceUnregistered,
+                team: team,
+                accountIdentifier: accountIdentifier,
+                presentingViewController: presentingViewController
+            )
+        }
+    }
+
+    private static func performPendingActions(certMissing: Bool,
+                                              deviceUnregistered: Bool,
+                                              team: ALTTeam,
+                                              accountIdentifier: String?,
+                                              presentingViewController: UIViewController) async {
         
         var pendingItems: [String] = []
         if deviceUnregistered {
@@ -277,21 +414,35 @@ extension AccountVerificationRow {
             if certMissing {
                 try await executeStep(description: NSLocalizedString("Provisioning signing certificate…", comment: "")) {
                     let certFlow = CertificateProvisioningFlow(handler: handler)
-                    _ = try await certFlow.resolveCertificate(for: team)
+                    let certificate = try await certFlow.resolveCertificate(for: team)
+                    // Provisioning writes the active slot; a pending action for a non-active account
+                    // has to end up in that account's own slot instead.
+                    if let accountIdentifier, let certificate {
+                        CertificateManager.shared.setCertificate(certificate, forAccount: accountIdentifier)
+                    }
                 }
             }
         } catch {
             verboseLog("[AccountVerificationRow] resolvePendingActions error: \(error)")
         }
         
-        await withCheckedContinuation { continuation in
-            progressAlert.dismiss(animated: true) {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            progressAlert.dismiss(animated: true) { () in
                 continuation.resume()
             }
         }
         
-        if UserDefaults.standard.isDeviceRegistered,
-           let activeCert = CertificateManager.shared.activeCertificate?.certificate ?? (try? CertificateManager.shared.loadActiveCertificate())?.certificate
+        let registered = accountIdentifier.map { _ in
+            UserDefaults.standard.isDeviceRegistered(forTeam: team.identifier)
+        } ?? UserDefaults.standard.isDeviceRegistered
+
+        // `certificate(for:)` takes an optional scope and `certificate(forAccount:)` takes a String,
+        // so the account case has to be spelled out rather than funnelled through one expression.
+        let accountCertificate = accountIdentifier.flatMap {
+            CertificateManager.shared.certificate(forAccount: $0)?.certificate
+        }
+        let scopedCertificate = CertificateManager.shared.certificate(for: scopeFor(accountIdentifier, team: team))
+        if registered, let activeCert = accountCertificate ?? scopedCertificate
         {
             let resignFlow = CodeSignValidationFlow(handler: handler)
             _ = try? await resignFlow.validateAndResignIfNeeded(
@@ -301,5 +452,9 @@ extension AccountVerificationRow {
         }
         
         await handler.complete()
+    }
+
+    private static func scopeFor(_ accountIdentifier: String?, team: ALTTeam) -> AuthAccountScope? {
+        accountIdentifier.map { AuthAccountScope(accountIdentifier: $0, teamIdentifier: team.identifier) }
     }
 }

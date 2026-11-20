@@ -17270,6 +17270,94 @@
           }
         }
       }
+    },
+    "These Apple ID accounts need attention:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下 Apple ID 账号需要处理："
+          }
+        }
+      }
+    },
+    "No pending actions for any signed-in account:": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有已登录账号都没有待处理事项："
+          }
+        }
+      }
+    },
+    "register this device": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要注册此设备"
+          }
+        }
+      }
+    },
+    "provision a signing certificate": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要申请签名证书"
+          }
+        }
+      }
+    },
+    "still being checked": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仍在检查"
+          }
+        }
+      }
+    },
+    "Fix %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修复 %@"
+          }
+        }
+      }
+    },
+    "Using Apple ID: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用的 Apple ID：%@"
+          }
+        }
+      }
+    },
+    ", ": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "、"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

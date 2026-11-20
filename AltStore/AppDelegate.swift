@@ -194,6 +194,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 debugLog("Starting DatabaseManager...")
                 try await DatabaseManager.shared.start()
                 debugLog("Started DatabaseManager.")
+
+                // Per-team device registration replaced a single global flag; an install that
+                // upgraded has only the old one, and the active account is the team it was about.
+                UserDefaults.standard.migrateDeviceRegistrationIfNeeded()
                 
                 // The built-in feed is created with nothing behind it, and nothing else fetches it at
                 // launch (the only automatic fetch is iOS background refresh). Left alone it shows up
