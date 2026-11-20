@@ -653,9 +653,9 @@ extension AppViewController
 
     private func installToSystem()
     {
-        InstallAppDialog.present(storeApp: self.app, from: self) { [weak self] in
+        InstallAppDialog.present(storeApp: self.app, from: self) { [weak self] account in
             guard let self else { return }
-            let group = AppManager.shared.install(.app(self.app), presentingViewController: self) { (result) in
+            let group = AppManager.shared.install(.app(self.app), presentingViewController: self, account: account) { (result) in
                 debugLog("AppViewController: install completion handler invoked with result: \(result)")
                 do
                 {
@@ -699,22 +699,24 @@ extension AppViewController
             return
         }
 
-        // The version list normally installs without a confirmation; container mode still has to be
-        // able to offer itself there, so that one case asks.
-        if UserDefaults.standard.isContainerModeEnabled
+        // The version list normally installs without a confirmation. It still asks when container
+        // mode has something to offer, or when more than one Apple ID could sign the build -- the
+        // account is a real decision and must not be silently taken from whoever is active.
+        let hasAccountChoice = InstallAccountChoices.available(in: DatabaseManager.shared.viewContext).count > 1
+        if UserDefaults.standard.isContainerModeEnabled || hasAccountChoice
         {
-            InstallAppDialog.present(storeApp: self.app, version: version, from: self) { [weak self] in
-                self?.installToSystem(version)
+            InstallAppDialog.present(storeApp: self.app, version: version, from: self) { [weak self] account in
+                self?.installToSystem(version, account: account)
             }
             return
         }
 
-        self.installToSystem(version)
+        self.installToSystem(version, account: nil)
     }
 
-    private func installToSystem(_ version: AppVersion)
+    private func installToSystem(_ version: AppVersion, account: InstallAccountChoice?)
     {
-        let group = AppManager.shared.install(.app(version), presentingViewController: self) { [weak self] (result) in
+        let group = AppManager.shared.install(.app(version), presentingViewController: self, account: account) { [weak self] (result) in
             DispatchQueue.main.async {
                 guard let self else { return }
                 switch result

@@ -1039,7 +1039,12 @@ private extension MyAppsViewController
                 #endif
             },
             onConfirm: { [weak self] url in
-                self?.sideloadApp(at: url) { _ in }
+                guard let self else { return }
+                // Still goes through the dialog: an install from a URL has to ask which Apple ID
+                // signs it, exactly like one from a source.
+                InstallAppDialog.present(ipaURL: url, from: self) { [weak self] account in
+                    self?.sideloadApp(at: url, account: account) { _ in }
+                }
             }
         )
     }
@@ -1062,8 +1067,8 @@ private extension MyAppsViewController
             presentingVC: self
         ) { [weak self] fileURL in
             guard let fileURL = fileURL, let self else { return }
-            InstallAppDialog.present(ipaURL: fileURL, from: self) { [weak self] in
-                self?.sideloadApp(at: fileURL) { result in
+            InstallAppDialog.present(ipaURL: fileURL, from: self) { [weak self] account in
+                self?.sideloadApp(at: fileURL, account: account) { result in
                     debugLog("Sideloaded app at \(fileURL) with result: \(result)")
                 }
             }
@@ -1071,12 +1076,14 @@ private extension MyAppsViewController
     }
     #endif
     
-    func sideloadApp(at url: URL, completion: @escaping (Result<Void, Error>) -> Void)
+    func sideloadApp(at url: URL,
+                     account: InstallAccountChoice? = nil,
+                     completion: @escaping (Result<Void, Error>) -> Void)
     {
         self.pendingImportURL = nil
         self.navigationItem.leftBarButtonItem?.isIndicatingActivity = true
         
-        let group = AppManager.shared.install(.url(url), presentingViewController: self) { [weak self] result in
+        let group = AppManager.shared.install(.url(url), presentingViewController: self, account: account) { [weak self] result in
             Task { @MainActor in
                 self?.navigationItem.leftBarButtonItem?.isIndicatingActivity = false
                 self?.sideloadingProgressView.observedProgress = nil
@@ -1310,9 +1317,27 @@ private extension MyAppsViewController
         }
     }
     
+    /// The account (and team) that installed this app, if it is on the device. Reinstalling and
+    /// updating have to keep it -- only a first install gets to choose.
+    private func installedAccount(for storeApp: StoreApp) -> InstallAccountChoice? {
+        guard let installedApp = storeApp.installedApp else { return nil }
+        return installAccountChoice(for: installedApp)
+    }
+
+    private func installAccountChoice(for installedApp: InstalledApp) -> InstallAccountChoice? {
+        guard let team = installedApp.team,
+              let identifier = team.account?.identifier
+        else { return nil }
+        return InstallAccountChoice(
+            scope: AuthAccountScope(accountIdentifier: identifier, teamIdentifier: team.identifier),
+            appleID: team.account?.appleID ?? identifier,
+            teamName: team.name
+        )
+    }
+
     func reinstallFromSource(_ storeApp: StoreApp)
     {
-        InstallAppDialog.present(storeApp: storeApp, from: self) { [weak self] in
+        InstallAppDialog.present(storeApp: storeApp, from: self) { [weak self] account in
             guard let self else { return }
             Task { @MainActor in
                 let previousProgress = AppManager.shared.installationProgress(for: storeApp)
@@ -1321,7 +1346,10 @@ private extension MyAppsViewController
                     return
                 }
                 
-                _ = AppManager.shared.install(.app(storeApp), presentingViewController: self) { [weak self] (result) in
+                // Reinstalling an app that is already on the device keeps the Apple ID that installed
+                // it: its App ID and profile are that team's. The picker only supplied a default.
+                let account = self.installedAccount(for: storeApp) ?? account
+                _ = AppManager.shared.install(.app(storeApp), presentingViewController: self, account: account) { [weak self] (result) in
                     Task { @MainActor in
                         switch result
                         {
@@ -1898,8 +1926,8 @@ private extension MyAppsViewController
         InstallAppDialog.present(
             ipaURL: url,
             from: self,
-            onConfirm: { [weak self] in
-                self?.sideloadApp(at: url) { _ in }
+            onConfirm: { [weak self] account in
+                self?.sideloadApp(at: url, account: account) { _ in }
             },
             onCancel: {}
         )
@@ -3080,8 +3108,8 @@ extension MyAppsViewController: UIDocumentPickerDelegate
     {
         guard let fileURL = urls.first else { return }
         
-        InstallAppDialog.present(ipaURL: fileURL, from: self) { [weak self] in
-            self?.sideloadApp(at: fileURL) { (result) in
+        InstallAppDialog.present(ipaURL: fileURL, from: self) { [weak self] account in
+            self?.sideloadApp(at: fileURL, account: account) { (result) in
                 debugLog("Sideloaded app at \(fileURL) with result: \(result)")
             }
         }

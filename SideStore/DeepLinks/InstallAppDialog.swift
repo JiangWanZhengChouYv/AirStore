@@ -115,7 +115,10 @@ public enum InstallAppDialog {
                 return
             }
             
-            self.present(ipaURL: url, from: presentingVC) {
+            // The URL is only a source here; the dialog still asks how to install it, so the
+            // account choice is discarded at this stage and asked again by the caller that
+            // actually installs.
+            self.present(ipaURL: url, from: presentingVC) { _ in
                 onConfirm(url)
             }
         })
@@ -126,96 +129,195 @@ public enum InstallAppDialog {
     public static func present(
         ipaURL: URL,
         from presentingViewController: UIViewController? = nil,
-        onConfirm: @escaping () -> Void,
+        onConfirm: @escaping (InstallAccountChoice?) -> Void,
         onCancel: @escaping () -> Void = {}
     ) {
+        let presenter = presentingViewController ?? UIApplication.shared.topViewController()
+        let appName = ipaURL.isFileURL
+            ? ipaURL.deletingPathExtension().lastPathComponent
+            : (ipaURL.deletingPathExtension().lastPathComponent.isEmpty
+                ? ipaURL.absoluteString
+                : ipaURL.deletingPathExtension().lastPathComponent)
+        let accounts = InstallAccountChoices.available(in: DatabaseManager.shared.viewContext)
+
         // An imported .ipa is the other way apps get installed here, and it gets the same choice:
-        // run it inside AirBox, or install it on the system.
-        if UserDefaults.standard.isContainerModeEnabled,
-           let presenter = presentingViewController ?? UIApplication.shared.topViewController()
+        // run it inside AirBox, or install it on the system -- plus which Apple ID signs it.
+        if UserDefaults.standard.isContainerModeEnabled, let presenter
         {
-            self.presentContainerChoice(from: presenter, onInstall: onConfirm, onRunInAirBox: {
-                ContainerInstallAction.run(ipaAt: ipaURL, from: presenter)
-            }, onCancel: onCancel)
+            self.presentInstallSheet(
+                appName: appName,
+                accounts: accounts,
+                airBox: (title: NSLocalizedString("Run in AirBox", comment: ""),
+                         detail: NSLocalizedString("Runs without installing on the system, so it uses no App ID.", comment: ""),
+                         action: {
+                             ContainerInstallAction.run(ipaAt: ipaURL, from: presenter)
+                         }),
+                from: presenter,
+                onInstall: onConfirm,
+                onCancel: onCancel
+            )
             return
         }
 
-        let message: String
-        if ipaURL.isFileURL {
-            let appName = ipaURL.deletingPathExtension().lastPathComponent
-            message = String(format: NSLocalizedString("Do you want to continue? This will install \"%@\".", comment: ""), appName)
-        } else {
-            message = String(format: NSLocalizedString("Do you want to continue? This will download and install from:\n%@", comment: ""), ipaURL.absoluteString)
-        }
-        
-        self.presentConfirmation(
-            message: message,
-            from: presentingViewController,
-            onConfirm: onConfirm,
+        self.presentInstallSheet(
+            appName: appName,
+            accounts: accounts,
+            airBox: nil,
+            from: presenter,
+            onInstall: onConfirm,
             onCancel: onCancel
         )
     }
     
+    /// Asks how to install a store app, and returns the Apple ID to sign it with.
+    ///
+    /// Both answers come from **one** sheet. "Install" and "Run in AirBox" are answers to "how am I
+    /// installing this", and with more than one signed-in account the Apple ID is part of the same
+    /// answer -- asking in sequence made the second alert arrive while the first was still
+    /// dismissing, and iOS drops that without a word.
+    ///
+    /// `onConfirm` receives `nil` for the Apple ID when there was nothing to choose (zero or one
+    /// usable account), which the pipeline reads as "the active account".
     public static func present(
         storeApp: StoreApp,
         version: AppVersion? = nil,
         from presentingViewController: UIViewController? = nil,
-        onConfirm: @escaping () -> Void,
+        onConfirm: @escaping (InstallAccountChoice?) -> Void,
         onCancel: @escaping () -> Void = {}
     ) {
-        // Container mode changes what installing means, so the choice replaces the plain confirmation
-        // here -- this is the one place every install entry point (browse, featured, source detail,
-        // app page) goes through before it starts anything.
+        let presenter = presentingViewController ?? UIApplication.shared.topViewController()
+        let chosenVersion = version ?? storeApp.latestAvailableVersion
+        let accounts = InstallAccountChoices.available(in: DatabaseManager.shared.viewContext)
+
+        // Container mode changes what installing means, so its question leads. The Apple ID is still
+        // asked in the same sheet when it is a real choice.
         if UserDefaults.standard.isContainerModeEnabled,
-           let chosenVersion = version ?? storeApp.latestAvailableVersion,
-           let presenter = presentingViewController ?? UIApplication.shared.topViewController()
+           let chosenVersion,
+           let presenter
         {
-            self.presentContainerChoice(from: presenter, onInstall: onConfirm, onRunInAirBox: {
-                ContainerInstallAction.run(version: chosenVersion, appName: storeApp.name, from: presenter)
-            }, onCancel: onCancel)
+            self.presentInstallSheet(
+                appName: storeApp.name,
+                accounts: accounts,
+                airBox: (title: NSLocalizedString("Run in AirBox", comment: ""),
+                         detail: NSLocalizedString("Runs without installing on the system, so it uses no App ID.", comment: ""),
+                         action: {
+                             ContainerInstallAction.run(version: chosenVersion, appName: storeApp.name, from: presenter)
+                         }),
+                from: presenter,
+                onInstall: onConfirm,
+                onCancel: onCancel
+            )
             return
         }
 
-        let message = String(format: NSLocalizedString("Do you want to continue? This will install \"%@\".", comment: ""), storeApp.name)
-        self.presentConfirmation(
-            message: message,
-            from: presentingViewController,
-            onConfirm: onConfirm,
+        self.presentInstallSheet(
+            appName: storeApp.name,
+            accounts: accounts,
+            airBox: nil,
+            from: presenter,
+            onInstall: onConfirm,
             onCancel: onCancel
         )
     }
 
-    private static func presentContainerChoice(
-        from presentingViewController: UIViewController,
-        onInstall: @escaping () -> Void,
-        onRunInAirBox: @escaping () -> Void,
+    /// The one sheet every install starts from.
+    ///
+    /// Its buttons are the Apple IDs when there is more than one, and a single plain "Install" when
+    /// there is not -- the account is the decision, so it belongs in the button the user presses,
+    /// not in a second question after it.
+    private static func presentInstallSheet(
+        appName: String,
+        accounts: [InstallAccountChoice],
+        airBox: (title: String, detail: String, action: () -> Void)?,
+        from presentingViewController: UIViewController?,
+        onInstall: @escaping (InstallAccountChoice?) -> Void,
         onCancel: @escaping () -> Void
     ) {
+        let rootVC = presentingViewController ?? UIApplication.shared.topViewController()
+        guard let presentingVC = rootVC else {
+            onCancel()
+            return
+        }
+
+        // Nothing to decide: honour "ask before installing" and start. A sheet with one button is a
+        // speed bump, and the same is true when confirmations are switched off.
+        if accounts.count <= 1 && airBox == nil
+        {
+            guard UserDefaults.standard.isInstallConfirmationEnabled else {
+                onInstall(accounts.first)
+                return
+            }
+
+            let alert = UIAlertController(
+                title: NSLocalizedString("Install App", comment: ""),
+                message: String(format: NSLocalizedString("Do you want to continue? This will install \"%@\".", comment: ""), appName),
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { _ in
+                onInstall(accounts.first)
+            })
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+                onCancel()
+            })
+            presentingVC.present(alert, animated: true)
+            return
+        }
+
+        let message: String
+        if accounts.count > 1
+        {
+            message = NSLocalizedString("Each Apple ID keeps its own apps, App IDs and certificate. Only the account you pick can refresh this app later.", comment: "")
+        }
+        else
+        {
+            message = String(format: NSLocalizedString("This will install \"%@\".", comment: ""), appName)
+        }
+
         let alertController = UIAlertController(
-            title: NSLocalizedString("Install App", comment: ""),
-            message: NSLocalizedString("AirBox runs the app without installing it on the system, so it uses no App ID.", comment: ""),
+            title: accounts.count > 1
+                ? String(format: NSLocalizedString("Install \"%@\" with which Apple ID?", comment: ""), appName)
+                : NSLocalizedString("Install App", comment: ""),
+            message: message,
             preferredStyle: .actionSheet
         )
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { _ in
-            onInstall()
-        })
-        alertController.addAction(UIAlertAction(title: NSLocalizedString("Run in AirBox", comment: ""), style: .default) { _ in
-            // The next step may be another alert (installing AirBox first), and presenting one while
-            // this sheet is still dismissing gets it dropped without a word.
-            DispatchQueue.main.async {
-                onRunInAirBox()
+
+        if accounts.count > 1
+        {
+            for account in accounts
+            {
+                alertController.addAction(UIAlertAction(title: account.displayName, style: .default) { _ in
+                    onInstall(account)
+                })
             }
-        })
+        }
+        else
+        {
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("Install", comment: ""), style: .default) { _ in
+                onInstall(accounts.first)
+            })
+        }
+
+        if let airBox
+        {
+            alertController.addAction(UIAlertAction(title: airBox.title, style: .default) { _ in
+                // The next step is often another alert (installing AirBox first), and presenting one
+                // while this sheet is still dismissing gets it dropped without a word.
+                DispatchQueue.main.async {
+                    airBox.action()
+                }
+            })
+        }
+
         alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
             onCancel()
         })
 
         if let popoverController = alertController.popoverPresentationController
         {
-            popoverController.sourceView = presentingViewController.view
-            popoverController.sourceRect = presentingViewController.view.bounds
+            popoverController.sourceView = presentingVC.view
+            popoverController.sourceRect = presentingVC.view.bounds
         }
-        presentingViewController.present(alertController, animated: true)
+        presentingVC.present(alertController, animated: true)
     }
 
     public static func present(

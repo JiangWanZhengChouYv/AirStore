@@ -17237,6 +17237,39 @@
           }
         }
       }
+    },
+    "Each Apple ID keeps its own apps, App IDs and certificate. Only the account you pick can refresh this app later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个 Apple ID 有自己的应用、App ID 和证书。之后只有你选择的那个账号能刷新这个应用。"
+          }
+        }
+      }
+    },
+    "Install \"%@\" with which Apple ID?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用哪个 Apple ID 安装「%@」？"
+          }
+        }
+      }
+    },
+    "This will install \"%@\".": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将安装「%@」。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

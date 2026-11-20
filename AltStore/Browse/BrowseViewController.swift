@@ -557,7 +557,7 @@ private extension BrowseViewController
     
     func install(_ app: StoreApp, at indexPath: IndexPath, progressUpdateHandler: @escaping (Progress) -> Void)
     {
-        InstallAppDialog.present(storeApp: app, from: self) { [weak self] in
+        InstallAppDialog.present(storeApp: app, from: self) { [weak self] account in
             guard let self else { return }
             let previousProgress = AppManager.shared.installationProgress(for: app)
             guard previousProgress == nil else {
@@ -573,7 +573,7 @@ private extension BrowseViewController
             }
             else
             {
-                let group = AppManager.shared.install(.app(app), presentingViewController: self, completionHandler: finish(_:))
+                let group = AppManager.shared.install(.app(app), presentingViewController: self, account: account, completionHandler: finish(_:))
                 progressUpdateHandler(group.progress)
             }
             

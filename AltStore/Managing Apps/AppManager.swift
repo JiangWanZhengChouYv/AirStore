@@ -488,9 +488,10 @@ final class AppManager: ObservableObject, @unchecked Sendable
                  presentingViewController: UIViewController? = nil,
                  dbBackgroundContext: NSManagedObjectContext? = nil,
                  context: StandaloneOperationContext? = nil,
+                 account: InstallAccountChoice? = nil,
                  completionHandler: @escaping (Result<InstalledApp, Error>) -> Void) -> RefreshGroup
     {
-        debugLog("[AppManager] install() called for target: \(target)")
+        debugLog("[AppManager] install() called for target: \(target), account: \(account?.appleID ?? "active")")
         let pipelineHandler = self.makePipelineHandler(presentingViewController: presentingViewController)
         let dbContext = self.getValidDbContext(dbBackgroundContext ?? context?.dbBackgroundContext)
 
@@ -499,6 +500,7 @@ final class AppManager: ObservableObject, @unchecked Sendable
             .install(app),
             handler: pipelineHandler,
             dbContext: dbContext,
+            accountScope: account?.scope,
             completionHandler: { result in
                 if case .success(let installedApp) = result,
                    UserDefaults.standard.isAutoLaunchAppAfterInstallEnabled,

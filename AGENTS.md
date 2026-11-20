@@ -99,10 +99,20 @@ Violations may lead to restrictions up to a permanent ban.
     That last rule is not a preference: an installed app's App ID and provisioning profile belong to
     the team that made them, so another account could only fail or silently re-sign the app with the
     wrong certificate.
-  - **Still to do:** the install-time Apple ID picker (and folding it into the existing
-    `InstallAppDialog` sheet next to "Run in AirBox", not a second alert), and checking **every**
-    signed-in account in the Account Status row instead of only the active one. Beware: presenting a
-    second alert while the first is still dismissing makes iOS drop it silently.
+  - **Installing asks which Apple ID** (2026-11-20). `InstallAppDialog.present(...)` takes an
+    `onConfirm: (InstallAccountChoice?) -> Void`; `InstallAccountChoices.available(in:)` lists the
+    accounts that actually have credentials, active one first. The sheet's **buttons are the Apple
+    IDs** when there is more than one, with "Run in AirBox" in the same sheet -- the account is the
+    decision, so it belongs in the button pressed, not in a second question after it. Presenting a
+    second alert while the first is still dismissing makes iOS drop it silently; that is why AirBox
+    and the account live in one sheet.
+    - Only a **first** install asks. Reinstalling an app that is already on the device keeps its
+      owner (`MyAppsViewController.installedAccount(for:)`), and the pipeline would refuse a
+      different account anyway.
+    - `AppManager.install(..., account:)` passes the choice to `performSingleOperation`, which sets
+      `RefreshGroup.accountScope`.
+  - **Still to do:** checking **every** signed-in account in the Account Status row instead of only
+    the active one, and naming the owning account in a refresh failure.
 - **Guide re-verified against the tree at `ce5d69ab`** (2026-11-14): bundle id, iOS 17.4, Swift 5
   mode, `PRODUCT_NAME = "$(TARGET_NAME)"`, four tabs in both `AltStore/iOS/Main.storyboard` and
   `AltStore/tvOS/Main.storyboard`, the six settings group ids (`account`, `appearance`, `refresh`,

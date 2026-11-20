@@ -327,7 +327,7 @@ private extension NewsViewController
     
     func install(_ storeApp: StoreApp, at indexPath: IndexPath, progressUpdateHandler: @escaping (Progress) -> Void)
     {
-        InstallAppDialog.present(storeApp: storeApp, from: self) { [weak self] in
+        InstallAppDialog.present(storeApp: storeApp, from: self) { [weak self] account in
             guard let self else { return }
             let previousProgress = AppManager.shared.installationProgress(for: storeApp)
             guard previousProgress == nil else {
@@ -345,6 +345,7 @@ private extension NewsViewController
                 let group = AppManager.shared.install(
                     .app(storeApp),
                     presentingViewController: self,
+                    account: account,
                     completionHandler: finish(_:)
                 )
                 progressUpdateHandler(group.progress)

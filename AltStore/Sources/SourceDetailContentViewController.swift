@@ -387,14 +387,20 @@ private extension SourceDetailContentViewController
     @MainActor
     func downloadApp(_ storeApp: StoreApp, sender: PillButton) async
     {
-        let confirmed = await withCheckedContinuation { continuation in
-            InstallAppDialog.present(storeApp: storeApp, from: self) {
-                continuation.resume(returning: true)
+        // Cancelling and "there was no account to choose from" both carry a nil choice, so the
+        // continuation has to say which of the two happened.
+        enum Decision {
+            case proceed(InstallAccountChoice?)
+            case cancelled
+        }
+        let decision = await withCheckedContinuation { continuation in
+            InstallAppDialog.present(storeApp: storeApp, from: self) { choice in
+                continuation.resume(returning: Decision.proceed(choice))
             } onCancel: {
-                continuation.resume(returning: false)
+                continuation.resume(returning: Decision.cancelled)
             }
         }
-        guard confirmed else { return }
+        guard case .proceed(let account) = decision else { return }
         
         do
         {
@@ -410,7 +416,7 @@ private extension SourceDetailContentViewController
                 }
                 else
                 {
-                    let group = AppManager.shared.install(.app(storeApp), presentingViewController: self) { result in
+                    let group = AppManager.shared.install(.app(storeApp), presentingViewController: self, account: account) { result in
                         continuation.resume(with: result.map { _ in () })
                     }
                     
