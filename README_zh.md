@@ -5,6 +5,14 @@
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/latest"><img src="https://img.shields.io/github/v/release/JiangWanZhengChouYv/AirStore?label=release&color=blue" alt="Latest release"></a>
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/actions/workflows/swiftlint.yml"><img src="https://img.shields.io/github/actions/workflow/status/JiangWanZhengChouYv/AirStore/swiftlint.yml?label=swiftlint&branch=develop" alt="SwiftLint"></a>
   <a href="https://discord.gg/kN9Rm3kkZ"><img src="https://img.shields.io/badge/discord-join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://as.mz0520.de5.net/"><img src="https://img.shields.io/badge/官网-as.mz0520.de5.net-3b82f6" alt="官网"></a>
+</p>
+
+<p align="center">
+  <a href="https://as.mz0520.de5.net/"><b>官网 / 下载</b></a> ·
+  <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/latest"><b>正式版</b></a> ·
+  <a href="#安装"><b>安装说明</b></a> ·
+  <a href="https://as.mz0520.de5.net/source/airstore-source.json"><b>源 JSON</b></a>
 </p>
 
 > [!CAUTION]
@@ -15,6 +23,10 @@
 
 
 中文说明（与 [README.md](README.md) 同步维护，两份内容有出入时以英文为准）。
+
+**一句话：** AirStore 在你自己的 iPhone 上签名和安装 App，用免费的 Apple ID 就行，并在证书过期前自动续签。整个过程没有电脑参与 —— 引导里配一次对，之后安装、续签、JIT 全在手机上。这个 fork 在 SideStore 之上加了 `-80045` 修复、增量补丁、本机 JIT 和 AirBox 容器。
+
+版本、大小、更新日志都在官网实时列着，它读的就是 App 订阅的那个源，不会出现「页面写着有、实际下不到」：**<https://as.mz0520.de5.net/>**
 
 **AirStore 是 SideStore 的 fork，不需要 AltServer。目标是做一个更好用的 SideStore —— 让人愿意一直用下去的分支，而不是只给一个苹果报错打的临时补丁。起点是解决 iOS 26.4 及以上那个 `-80045` 登录错误，然后一路做到了它前面。**
 
@@ -64,6 +76,8 @@ AirStore 的修法是：先读 v3 服务器自己的 `/v3/client_info`，用**�
 Windows 需要先装 iTunes（Apple Mobile Device Support）才能发现手机。这个预发布里的包由 develop 自动构建、未公证；完整步骤见 [Helper/README.md](Helper/README.md)。
 
 ## 安装
+
+**官网 <https://as.mz0520.de5.net/> 上按通道列好了每个构建**（正式版 / Nightly / 开发版，带大小和下载按钮），它读的是 App 订阅的同一个源，所以不会出现「页面上有、实际下不到」。
 
 直接用[最新正式版](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest)（当前 0.9.0）里的 `AirStore.ipa`，装法和平时装 SideStore 一样（iloader，或 App 内的 Remote Pairing 流程）。这个版本的 bundle id 是 AirStore 自己的 `com.JiangWanZhengChouYv.AirStore`，所以它是独立 App，**不会覆盖**旧的 AirStore / SideStore。换过来之前：导出证书和配对文件 → 卸载旧版 → 装新版 → 导入回来；旧 App Group 不通用，旧数据不会跟过来。主屏名字显示为 AirStore。想跟开发进度就加下面「更新」里那个 develop 源。
 

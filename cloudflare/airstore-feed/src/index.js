@@ -17,6 +17,8 @@
 // Only JiangWanZhengChouYv/AirStore is proxied. An open proxy would be abused within a day, and the
 // app never asks this host for anything else.
 
+import { homeHTML } from "./home.js";
+
 const OWNER = "JiangWanZhengChouYv";
 const REPO = "AirStore";
 const BRANCH = "develop-source";
@@ -102,11 +104,14 @@ export default {
     const path = decodeURIComponent(url.pathname);
 
     if (path === "/" || path === "") {
-      return json({
-        name: "AirStore feed mirror",
-        feed: `${url.origin}/source/airstore-source.json`,
-        upstream: FEED_URL,
-        cache: "none",
+      // A real page rather than a JSON blob: this host is what a user types when they want the
+      // source, and the page reads the feed itself so it can never advertise a stale build.
+      return new Response(homeHTML, {
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          ...CORS,
+          ...NO_CACHE,
+        },
       });
     }
 

@@ -187,6 +187,12 @@ Style:
   (`/gh/OWNER/REPO@REF/PATH`) and release assets (`/dl/OWNER/REPO/TAG/FILE`) for the app's mirrors.
   Keep the `/source/airstore-source.json` path: `Source.isAirStoreOfficial` uses that suffix to
   migrate rows that still carry the old host. Do not hand-edit generated feeds.
+- **The site is the front door.** `https://as.mz0520.de5.net/` serves a landing page from
+  `cloudflare/airstore-feed/src/home.js` (a template string, deployed with the Worker): hero, live
+  channel list with download links, screenshots, install steps, changelog and news — all read from
+  `/source/airstore-source.json` at load time so it cannot advertise a build the feed no longer
+  serves. It is the homepage URL on the GitHub repo; both READMEs link it and the install sections
+  point at it. Keep the page and `AppConstants.Sources.airStoreFeedURL` on the same host.
 - **Recommended sources are curated here too** (maintainer, 2026-11-19). `source/default-sources.json`
   replaces `sidestore.io/default-sources`, which listed 19 entries — several dead (PokeMMO, UTM's old
   path) or unparseable strict JSON (Countdown, ThatStella, Mona), plus LiveContainer, which duplicates

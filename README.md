@@ -5,6 +5,14 @@
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/latest"><img src="https://img.shields.io/github/v/release/JiangWanZhengChouYv/AirStore?label=release&color=blue" alt="Latest release"></a>
   <a href="https://github.com/JiangWanZhengChouYv/AirStore/actions/workflows/swiftlint.yml"><img src="https://img.shields.io/github/actions/workflow/status/JiangWanZhengChouYv/AirStore/swiftlint.yml?label=swiftlint&branch=develop" alt="SwiftLint"></a>
   <a href="https://discord.gg/kN9Rm3kkZ"><img src="https://img.shields.io/badge/discord-join-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://as.mz0520.de5.net/"><img src="https://img.shields.io/badge/website-as.mz0520.de5.net-3b82f6" alt="Website"></a>
+</p>
+
+<p align="center">
+  <a href="https://as.mz0520.de5.net/"><b>Website</b></a> ·
+  <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/latest"><b>Download</b></a> ·
+  <a href="#-installation"><b>Install guide</b></a> ·
+  <a href="https://as.mz0520.de5.net/source/airstore-source.json"><b>Source JSON</b></a>
 </p>
 
 > [!CAUTION]
@@ -18,6 +26,13 @@
 **AirStore is a fork of SideStore that does not require an AltServer. It aims to be the better SideStore — the place a user stays, not a temporary fix for one Apple error. It started by resolving the notorious `-80045` authentication error for iOS 26.4 and above, and kept going from there.**
 
 中文说明见 [README_zh.md](README_zh.md)。
+
+**What it does, in one paragraph.** AirStore signs and installs IPAs on the phone itself with a free
+personal Apple ID, and keeps them alive by refreshing the signature before it lapses. There is no
+desktop server in the loop: onboarding pairs the device once, then installs, refreshes and JIT all
+happen on-device. The `-80045` fix, incremental patches, on-device JIT and the AirBox container are
+what this fork adds on top of SideStore. The website reads the same feed the app does, so its version
+list is never out of date: **<https://as.mz0520.de5.net/>**.
 
 ## ⚠️ Maintenance Notice & Disclaimer
 
@@ -67,6 +82,10 @@ release are rebuilt from develop and are not notarized; the full steps are in
 [Helper/README.md](Helper/README.md).
 
 ## 🛠️ Installation
+
+Every channel is listed, with its size and its own download button, on
+**<https://as.mz0520.de5.net/>** — the page reads the same feed the app subscribes to, so it cannot
+show a build that is no longer served.
 
 The current stable is [0.9.0](https://github.com/JiangWanZhengChouYv/AirStore/releases/latest).
 Download `AirStore.ipa` and install it the way you already install SideStore: iloader, or the
