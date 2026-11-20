@@ -13,31 +13,23 @@
       "tintColor": "3B82F6",
       "version": "0.9.0",
       "date": "2026-11-08T06:07:58Z",
-      "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.9.0/AirStore.ipa",
+      "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/0.9.0/AirStore.ipa",
       "size": 30244721,
       "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.9.1-nightly-202611200604.42-fe39abcb",
-          "date": "2026-11-20T06:07:16Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/nightly/AirStore.ipa",
-          "size": 37021651,
-          "sha256": "c899cea2070ce7df0a4cdf8993cf2656e29e3917c5c5aa798faeef76d57d135f",
-          "localizedDescription": "Nightly build 0.9.1-nightly-202611200604.42-fe39abcb from commit fe39abcb."
-        },
-        {
-          "version": "0.9.1-develop-202611191231.252-fe39abc",
-          "date": "2026-11-19T12:34:41Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611191231.252-fe39abc.ipa",
-          "size": 37122663,
-          "sha256": "21ad5072a1edc8d5c69a1d358022d1c743a88f52007924f9e2a06c2f881e85a8",
-          "localizedDescription": "Development build 0.9.1-develop-202611191231.252-fe39abc from commit fe39abc."
+          "version": "0.9.1-develop-202611201002.255-b27a7f0",
+          "date": "2026-11-20T10:08:19Z",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611201002.255-b27a7f0.ipa",
+          "size": 37123355,
+          "sha256": "6a653d1f9c33ee357dbaa51fcadf7c8967da2a6c6756088f36bc2e6614bcb876",
+          "localizedDescription": "Development build 0.9.1-develop-202611201002.255-b27a7f0 from commit b27a7f0."
         },
         {
           "version": "0.9.0",
           "date": "2026-11-08T06:07:58Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.9.0/AirStore.ipa",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/0.9.0/AirStore.ipa",
           "size": 30244721,
           "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
           "localizedDescription": "0.9.0: AirStore now signs with its own bundle id (com.JiangWanZhengChouYv.AirStore), so this build installs as a separate app: export your certificate and pairing file, uninstall the old build, install this one, then import them back. Onboarding gains a Container Mode step that installs AirBox and runs apps without using an App ID; the Open action now wakes AirBox and launches the staged guest without the debugger spin. JIT, incremental updates and cellular installs are unchanged."
@@ -45,7 +37,7 @@
         {
           "version": "0.8.2",
           "date": "2026-10-26T13:02:56Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.2/AirStore.ipa",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/0.8.2/AirStore.ipa",
           "size": 30103068,
           "sha256": "fd141a95563fa372cd269c95e912bdf2912cf6719b10b4fa0f8d02708379332b",
           "localizedDescription": "0.8.2: JIT is built in. StikJIT ships inside AirStore, so enabling JIT fetches the developer disk image through the same mirrors as app downloads, mounts it over Remote Pairing, and restarts the target app suspended so the debugger is attached before the app checks for JIT itself - the step that makes MeloNX accept it. A progress card shows each stage. Downloads now treat a mirror that has not picked up a fresh asset as a dead route and fall back to the origin. Breaking: iOS 17.4 is now the minimum; 0.8.1 is the last build for iOS 15 and 16."
@@ -53,7 +45,7 @@
         {
           "version": "0.8.1",
           "date": "2026-10-25T00:45:14Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.1/AirStore.ipa",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/0.8.1/AirStore.ipa",
           "size": 27786255,
           "sha256": "d51030a6f504f56d5e333eb80a713f971f91102e933a4b1a61a384250e30d00b",
           "localizedDescription": "0.8.1: download cards now show speed and size and resume dropped transfers; every GitHub download goes through gh-proxy; pairing files sync with the shared folder; the app page lists other channels' builds; Settings shows the exact installed version. JIT still does not work on iOS 26 (TXM); use StikDebug for now."
@@ -61,13 +53,39 @@
         {
           "version": "0.8.0",
           "date": "2026-10-19T10:01:45Z",
-          "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.8.0/SideStore-0.8.0.ipa",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/0.8.0/SideStore-0.8.0.ipa",
           "size": 31158352,
           "sha256": "33aece754b8784435fa885b178c4c233162ab3c173781b7e90d5b0cb7df6d0ea",
           "localizedDescription": "Fixes -80045 Apple ID sign-in on iOS 26.4 and above. See the 0.8.0 release notes for what is verified and what is not."
         }
       ],
       "releaseChannels": [
+        {
+          "track": "develop",
+          "releases": [
+            {
+              "version": "0.9.1-develop-202611201002.255-b27a7f0",
+              "date": "2026-11-20T10:08:19Z",
+              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611201002.255-b27a7f0.ipa",
+              "size": 37123355,
+              "sha256": "6a653d1f9c33ee357dbaa51fcadf7c8967da2a6c6756088f36bc2e6614bcb876",
+              "localizedDescription": "Development build 0.9.1-develop-202611201002.255-b27a7f0 from commit b27a7f0."
+            }
+          ]
+        },
+        {
+          "track": "stable",
+          "releases": [
+            {
+              "version": "0.9.0",
+              "date": "2026-11-08T06:07:58Z",
+              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/0.9.0/AirStore.ipa",
+              "size": 30244721,
+              "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
+              "localizedDescription": "0.9.0: AirStore now signs with its own bundle id (com.JiangWanZhengChouYv.AirStore), so this build installs as a separate app: export your certificate and pairing file, uninstall the old build, install this one, then import them back. Onboarding gains a Container Mode step that installs AirBox and runs apps without using an App ID; the Open action now wakes AirBox and launches the staged guest without the debugger spin. JIT, incremental updates and cellular installs are unchanged."
+            }
+          ]
+        },
         {
           "track": "nightly",
           "releases": [
@@ -80,44 +98,38 @@
               "localizedDescription": "Nightly build 0.9.1-nightly-202611200604.42-fe39abcb from commit fe39abcb."
             }
           ]
-        },
-        {
-          "track": "develop",
-          "releases": [
-            {
-              "version": "0.9.1-develop-202611191231.252-fe39abc",
-              "date": "2026-11-19T12:34:41Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/develop-latest/0.9.1-develop-202611191231.252-fe39abc.ipa",
-              "size": 37122663,
-              "sha256": "21ad5072a1edc8d5c69a1d358022d1c743a88f52007924f9e2a06c2f881e85a8",
-              "localizedDescription": "Development build 0.9.1-develop-202611191231.252-fe39abc from commit fe39abc."
-            }
-          ]
-        },
-        {
-          "track": "stable",
-          "releases": [
-            {
-              "version": "0.9.0",
-              "date": "2026-11-08T06:07:58Z",
-              "downloadURL": "https://github.com/JiangWanZhengChouYv/AirStore/releases/download/0.9.0/AirStore.ipa",
-              "size": 30244721,
-              "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
-              "localizedDescription": "0.9.0: AirStore now signs with its own bundle id (com.JiangWanZhengChouYv.AirStore), so this build installs as a separate app: export your certificate and pairing file, uninstall the old build, install this one, then import them back. Onboarding gains a Container Mode step that installs AirBox and runs apps without using an App ID; the Open action now wakes AirBox and launches the staged guest without the debugger spin. JIT, incremental updates and cellular installs are unchanged."
-            }
-          ]
         }
       ],
       "screenshots": {
         "iphone": [
           {
-            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg",
-            "width": 1008,
-            "height": 2048
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-appdetail.jpeg",
+            "width": 1000,
+            "height": 2172
           },
           {
             "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-browse.jpeg",
             "width": 1020,
+            "height": 2048
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-myapps.jpeg",
+            "width": 1000,
+            "height": 2172
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-settings.jpeg",
+            "width": 1000,
+            "height": 2172
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-news.jpeg",
+            "width": 1000,
+            "height": 2172
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg",
+            "width": 1008,
             "height": 2048
           }
         ]
