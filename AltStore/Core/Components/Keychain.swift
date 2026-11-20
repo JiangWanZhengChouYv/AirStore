@@ -40,6 +40,16 @@ public struct KeychainItem<Value>
     }
 }
 
+/// The four Apple ID slots, named so a caller can address one account's namespace without
+/// touching `accountScope` (and therefore without switching the active Apple ID).
+public enum AppleIDCredentialKey: String, Sendable
+{
+    case emailAddress = "appleIDEmailAddress"
+    case password = "appleIDPassword"
+    case adsid = "appleIDAdsid"
+    case xcodeToken = "appleIDXcodeToken"
+}
+
 public class Keychain
 {
     public static let shared = Keychain()
@@ -88,11 +98,91 @@ public class Keychain
         set { self.setCredential(newValue, for: "appleIDXcodeToken") }
     }
     
-    @KeychainItem(key: "signingCertificate")
-    public var signingCertificate: Data?
-    
-    @KeychainItem(key: "signingCertificatePassword")
-    public var signingCertificatePassword: String?
+    /// The signing certificate belongs to one Apple ID, exactly like the credentials above: two
+    /// accounts issue two certificates, and refreshing account B's app has to sign with B's. These
+    /// keep the same "scoped slot, unscoped fallback" shape as the credentials so an upgrading
+    /// install keeps working without a migration step.
+    private func certificateCredential(for key: String) -> Data?
+    {
+        if let scope = self.accountScope, let scoped = try? self.keychain.getData("\(key).\(scope)")
+        {
+            return scoped
+        }
+        return try? self.keychain.getData(key)
+    }
+
+    private func setCertificateCredential(_ value: Data?, for key: String)
+    {
+        let target = self.accountScope.map { "\(key).\($0)" } ?? key
+        if let value {
+            try? self.keychain.set(value, key: target)
+        } else {
+            try? self.keychain.remove(target)
+            try? self.keychain.remove(key)
+        }
+    }
+
+    public var signingCertificate: Data? {
+        get { self.certificateCredential(for: "signingCertificate") }
+        set { self.setCertificateCredential(newValue, for: "signingCertificate") }
+    }
+
+    public var signingCertificatePassword: String? {
+        get {
+            let key = "signingCertificatePassword"
+            if let scope = self.accountScope, let scoped = try? self.keychain.getString("\(key).\(scope)")
+            {
+                return scoped
+            }
+            return try? self.keychain.getString(key)
+        }
+        set {
+            let key = "signingCertificatePassword"
+            let target = self.accountScope.map { "\(key).\($0)" } ?? key
+            if let newValue {
+                try? self.keychain.set(newValue, key: target)
+            } else {
+                try? self.keychain.remove(target)
+                try? self.keychain.remove(key)
+            }
+        }
+    }
+
+    /// One account's certificate, read without consulting or moving `accountScope`. Signing an app
+    /// that belongs to a non-active account needs this, or it signs with the wrong team's certificate.
+    public func signingCertificate(forAccount identifier: String) -> (data: Data, password: String?)?
+    {
+        guard !identifier.isEmpty else { return nil }
+        if let data = try? self.keychain.getData("signingCertificate.\(identifier)")
+        {
+            return (data, try? self.keychain.getString("signingCertificatePassword.\(identifier)"))
+        }
+        // Not yet adopted from the unscoped slot: only safe to read while nothing else is scoped.
+        if self.accountScope == nil, let data = try? self.keychain.getData("signingCertificate")
+        {
+            return (data, try? self.keychain.getString("signingCertificatePassword"))
+        }
+        return nil
+    }
+
+    /// Write one account's certificate without moving the active scope.
+    public func setSigningCertificate(_ data: Data?, password: String?, forAccount identifier: String)
+    {
+        guard !identifier.isEmpty else { return }
+        if let data
+        {
+            try? self.keychain.set(data, key: "signingCertificate.\(identifier)")
+            if let password
+            {
+                try? self.keychain.set(password, key: "signingCertificatePassword.\(identifier)")
+            }
+        }
+        else
+        {
+            try? self.keychain.remove("signingCertificate.\(identifier)")
+            try? self.keychain.remove("signingCertificatePassword.\(identifier)")
+        }
+    }
     
     // TODO: mahee96: remove legacy keys in later versions after 0.6.4 coz by now our migrations should be effectively moved all
     // Legacy
@@ -178,14 +268,58 @@ public class Keychain
     
     /// The accounts that can actually be switched to. An Account row survives sign-out in Core Data,
     /// so the database alone cannot say which ones still have a password or token to use.
-    public func accountsWithCredentials(from identifiers: [String]) -> [String]
+    ///
+    /// An install that upgraded into per-account slots still has its only copy of the credentials in
+    /// the unscoped slots: step 1 wrote a scoped copy on the *next* sign-in, not at launch. Adopt
+    /// that copy into its owner's namespace on first read, otherwise the switcher stays empty until
+    /// the user signs in once by hand -- and "Add Another Apple ID" would overwrite the only copy
+    /// of the original account's credentials before it was ever saved.
+    public func accountsWithCredentials(
+        from identifiers: [String],
+        appleIDsByIdentifier: [String: String] = [:]
+    ) -> [String]
     {
-        return identifiers.filter { identifier in
-            let email = try? self.keychain.getString("appleIDEmailAddress.\(identifier)")
-            let password = try? self.keychain.getString("appleIDPassword.\(identifier)")
-            let token = try? self.keychain.getString("appleIDXcodeToken.\(identifier)")
-            return email != nil && (password != nil || token != nil)
+        self.adoptUnscopedCredentials(identifiers: identifiers, appleIDsByIdentifier: appleIDsByIdentifier)
+        return identifiers.filter { self.hasScopedCredentials(for: $0) }
+    }
+
+    private func hasScopedCredentials(for identifier: String) -> Bool
+    {
+        let email = try? self.keychain.getString("appleIDEmailAddress.\(identifier)")
+        let password = try? self.keychain.getString("appleIDPassword.\(identifier)")
+        let token = try? self.keychain.getString("appleIDXcodeToken.\(identifier)")
+        return email != nil && (password != nil || token != nil)
+    }
+
+    private func hasUnscopedCredentials() -> Bool
+    {
+        guard let email = try? self.keychain.getString("appleIDEmailAddress"), !email.isEmpty else { return false }
+        return (try? self.keychain.getString("appleIDPassword")) != nil
+            || (try? self.keychain.getString("appleIDXcodeToken")) != nil
+    }
+
+    /// Only adopt when the unscoped credentials can be tied to a specific account: adsid is the
+    /// account identifier Apple returned at sign-in, and the email is the Account row's appleID.
+    /// Guessing "the currently active one" would hand one account's credentials to another.
+    private func adoptUnscopedCredentials(identifiers: [String], appleIDsByIdentifier: [String: String])
+    {
+        guard self.hasUnscopedCredentials() else { return }
+
+        let adsid = try? self.keychain.getString("appleIDAdsid")
+        let email = try? self.keychain.getString("appleIDEmailAddress")
+        let owner = identifiers.first { identifier in
+            if identifier == adsid { return true }
+            guard let email, let appleID = appleIDsByIdentifier[identifier] else { return false }
+            return appleID.caseInsensitiveCompare(email) == .orderedSame
         }
+        guard let owner, !self.hasScopedCredentials(for: owner) else { return }
+
+        // adoptCredentials(for:) moves the scope to the account it just adopted. Listing accounts
+        // must not switch accounts, so put the previous scope back.
+        let scope = self.accountScope
+        self.adoptCredentials(for: owner)
+        self.accountScope = scope
+        debugLog("[Keychain] Adopted the existing unscoped credentials for account \(owner).")
     }
 
     /// Signing in to a second account writes the new credentials before Apple says who they belong to.
@@ -215,6 +349,31 @@ public class Keychain
 
         self.accountScope = accountIdentifier
         debugLog("[Keychain] Adopted sign-in credentials for account \(accountIdentifier).")
+    }
+
+    /// Read one account's credential directly from its namespace. Unlike the four public
+    /// properties, this never consults or changes `accountScope`, so refreshing an app owned by
+    /// another account can use its token while a different Apple ID stays active.
+    public func credential(_ key: AppleIDCredentialKey, forAccount identifier: String) -> String?
+    {
+        guard !identifier.isEmpty else { return nil }
+        if let scoped = try? self.keychain.getString("\(key.rawValue).\(identifier)") { return scoped }
+        // An install that has not adopted its credentials yet only has the unscoped copy.
+        if self.accountScope == nil { return try? self.keychain.getString(key.rawValue) }
+        return nil
+    }
+
+    /// Write one account's namespaced credential without moving the active scope. Used when a
+    /// portal session is renewed for an app that belongs to a non-active account.
+    public func setCredential(_ key: AppleIDCredentialKey, value: String?, forAccount identifier: String)
+    {
+        guard !identifier.isEmpty else { return }
+        let target = "\(key.rawValue).\(identifier)"
+        if let value {
+            try? self.keychain.set(value, key: target)
+        } else {
+            try? self.keychain.remove(target)
+        }
     }
 
     private func credential(for key: String) -> String?

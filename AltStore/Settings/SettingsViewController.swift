@@ -941,12 +941,22 @@ private extension SettingsViewController
         let context = DatabaseManager.shared.viewContext
         let request = Account.fetchRequest() as NSFetchRequest<Account>
         let accounts = ((try? context.fetch(request)) ?? []).sorted { $0.appleID < $1.appleID }
-        let usable = Set(Keychain.shared.accountsWithCredentials(from: accounts.map(\.identifier)))
+        let appleIDs = Dictionary(
+            accounts.map { ($0.identifier, $0.appleID) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        // Also the migration point for credentials an upgraded install still keeps in the
+        // unscoped slots: they have to be in a namespace before "Add Another Apple ID" clears
+        // the scope and overwrites them.
+        let usable = Set(Keychain.shared.accountsWithCredentials(
+            from: accounts.map(\.identifier),
+            appleIDsByIdentifier: appleIDs
+        ))
         let activeIdentifier = DatabaseManager.shared.activeAccount(in: context)?.identifier
 
         let sheet = UIAlertController(
             title: NSLocalizedString("Apple ID Accounts", comment: ""),
-            message: NSLocalizedString("Switching changes the account used for new installs and refreshes. Apps installed by another account stay on the device -- switch back before refreshing them.", comment: ""),
+            message: NSLocalizedString("Switching changes the Apple ID used for new installs. Refreshing an app automatically uses the Apple ID that installed it.", comment: ""),
             preferredStyle: .actionSheet
         )
 

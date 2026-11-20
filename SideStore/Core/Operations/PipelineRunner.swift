@@ -47,9 +47,11 @@ final class PipelineRunner: Sendable
     func performSingleOperation(_ operation: AppOperation,
                                 handler: PipelineExecutionHandler,
                                 dbContext: NSManagedObjectContext,
+                                accountScope: AuthAccountScope? = nil,
                                 completionHandler: @escaping (Result<InstalledApp, Error>) -> Void) -> RefreshGroup
     {
         let group = RefreshGroup(dbContext: dbContext)
+        group.accountScope = accountScope
         group.completionHandler = { (results) in
             do
             {
@@ -313,6 +315,10 @@ final class PipelineRunner: Sendable
     private func performPipeline(for operation: AppOperation, handler: PipelineExecutionHandler, group: RefreshGroup, operationsCount: Int = 1) async throws -> InstalledApp
     {
         let pipelineSteps = PipelineStepDefinition.steps(for: operation)
+        // Which Apple ID owns this app decides the portal session *and* the signing certificate.
+        // Resolving it before the context exists is what makes it possible to refresh two accounts'
+        // apps at once: each pipeline carries its own certificate instead of the global one.
+        let ownerScope = await self.accountScope(for: operation, group: group)
         let context = InstallAppOperationContext(
             pipelineSteps: pipelineSteps,
             bundleIdentifier: operation.bundleIdentifier,
@@ -320,7 +326,7 @@ final class PipelineRunner: Sendable
             sharedContext: group.sharedContext,
             handler: handler,
             additionalEntitlements: defaultEntitlements,
-            activeSigningCertificate: CertificateManager.shared.activeCertificate?.certificate
+            activeSigningCertificate: CertificateManager.shared.certificate(for: ownerScope)
         )
         context.isCellularRefreshGroup = group.isCellularRefreshGroup
         context.groupOperationsCount = operationsCount
@@ -366,15 +372,58 @@ final class PipelineRunner: Sendable
         
         let permissionsMode = UserDefaults.standard.permissionCheckingDisabled ? .none : permissionReviewMode
         let operationProgress = progress.progress(for: operation)
-        return try await PipelineExecutor.shared.executePipeline(
-            steps: pipelineSteps,
-            context: context,
-            operation: operation,
-            group: group,
-            downloadingApp: downloadingApp,
-            permissionsMode: permissionsMode,
-            operationProgress: operationProgress
-        )
+        return try await AuthAccountContext.$scope.withValue(ownerScope) {
+            try await PipelineExecutor.shared.executePipeline(
+                steps: pipelineSteps,
+                context: context,
+                operation: operation,
+                group: group,
+                downloadingApp: downloadingApp,
+                permissionsMode: permissionsMode,
+                operationProgress: operationProgress
+            )
+        }
+    }
+
+    /// Which Apple ID a pipeline runs as. Two rules, in order:
+    ///
+    /// 1. A scope chosen for the whole group wins. That is how the install sheet's "install this app
+    ///    with account B" answer reaches the pipeline, and it is why an install can name an account
+    ///    that is not the active one.
+    /// 2. Anything done to an app that is **already installed** runs as the account that installed
+    ///    it -- refresh, update, reinstall and resign alike. Those operations hand Apple the app's
+    ///    existing App ID and provisioning profile, so they are only valid for the owning team; using
+    ///    the active account would either fail or silently re-sign the app with a second account's
+    ///    certificate, which is exactly what a user with two Apple IDs must not have happen.
+    ///
+    /// A first-time install with no explicit choice returns nil, meaning "the active account".
+    private func accountScope(for operation: AppOperation, group: RefreshGroup) async -> AuthAccountScope?
+    {
+        if let scope = group.accountScope {
+            debugLog("[PipelineRunner] \(operation.rawValue) \(operation.bundleIdentifier) under the chosen account \(scope.accountIdentifier).")
+            return scope
+        }
+
+        guard operation.isBoundToInstalledApp else { return nil }
+
+        let bundleIdentifier = operation.bundleIdentifier
+        let scope: AuthAccountScope? = await group.dbContext.perform {
+            let request = InstalledApp.fetchRequest() as NSFetchRequest<InstalledApp>
+            request.predicate = NSPredicate(
+                format: "%K == %@",
+                #keyPath(InstalledApp.bundleIdentifier), bundleIdentifier
+            )
+            request.fetchLimit = 1
+            guard let app = try? group.dbContext.fetch(request).first,
+                  let team = app.team,
+                  let accountIdentifier = team.account?.identifier
+            else { return nil }
+            return AuthAccountScope(accountIdentifier: accountIdentifier, teamIdentifier: team.identifier)
+        }
+        if let scope {
+            debugLog("[PipelineRunner] \(operation.rawValue) \(bundleIdentifier) as its owner \(scope.accountIdentifier), team \(scope.teamIdentifier ?? "unknown").")
+        }
+        return scope
     }
 }
 

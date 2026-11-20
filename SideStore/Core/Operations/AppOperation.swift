@@ -99,4 +99,19 @@ enum AppOperation: CustomStringConvertible
         case .removeApp, .removeDeactivatedApp: return .remove
         }
     }
+
+    /// True when the operation signs an app that is **already on the device**. Those can only run as
+    /// the Apple ID that installed it: the App ID and provisioning profile in the bundle belong to
+    /// that team, so another account would fail, or worse, re-sign the app with its own certificate.
+    /// A first-time install is not bound -- it may create the App ID under whichever account the user
+    /// picked.
+    var isBoundToInstalledApp: Bool {
+        switch self
+        {
+        case .refresh, .update, .reinstall, .resign, .backup, .restore:
+            return true
+        case .install, .activate, .deactivate, .deleteApp, .removeApp, .removeDeactivatedApp:
+            return false
+        }
+    }
 }

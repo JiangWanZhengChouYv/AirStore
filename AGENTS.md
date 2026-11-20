@@ -68,14 +68,41 @@ Violations may lead to restrictions up to a permanent ban.
 - The product is still built as **`SideStore.app`** and packaged into **`AirStore.ipa`**; the
   user-facing name is `CFBundleDisplayName = AirStore`. `PRODUCT_NAME` in `Build.xcconfig` does not
   win — every target sets `PRODUCT_NAME = "$(TARGET_NAME)"`.
-- **Per-account credentials, step 1 only** (2026-11-14): the four Apple ID slots in `Keychain`
-  (`appleIDEmailAddress` / `Password` / `Adsid` / `XcodeToken`) read from `<key>.<accountIdentifier>`
-  when `UserDefaults["AirStoreActiveAccountScope"]` is set and fall back to the unscoped key
-  otherwise; a write goes to the scoped slot, and clearing removes both. `adoptCredentials(for:)`
-  copies a fresh sign-in into that account's namespace and moves the scope; the unscoped copies stay
-  on purpose so an older build still finds them. Nothing switches accounts yet: `AuthManager.session`
-  is still one global object, and install/refresh still use the active account rather than
-  `InstalledApp.appID → Team.account`.
+- **Multiple Apple IDs at once** (2026-11-14 → 2026-11-20). Several accounts hold credentials and
+  certificates simultaneously; there is no "one signed-in account" limitation any more.
+  - **Credential slots.** The four Apple ID slots in `Keychain` (`appleIDEmailAddress` / `Password` /
+    `Adsid` / `XcodeToken`) read from `<key>.<accountIdentifier>` when
+    `UserDefaults["AirStoreActiveAccountScope"]` is set and fall back to the unscoped key otherwise; a
+    write goes to the scoped slot, and clearing removes both. `adoptCredentials(for:)` copies a fresh
+    sign-in into that account's namespace and moves the scope; the unscoped copies stay on purpose so
+    an older build still finds them. `credential(_:forAccount:)` / `setCredential(_:value:forAccount:)`
+    read and write one namespace **without** touching `accountScope`, which is what lets a refresh run
+    as a non-active account.
+  - **The signing certificate is per account too** (2026-11-20). `signingCertificate` /
+    `signingCertificatePassword` follow the same scoped-slot-with-unscoped-fallback shape, and
+    `CertificateManager` keeps a dictionary keyed by account identifier
+    (`certificate(forAccount:)` / `setCertificate(_:forAccount:)`). `clearActiveCertificate()` clears
+    only the **active** account's slot: signing out of one Apple ID must not strip the certificate
+    another signed-in account still signs its apps with. Without this, the second certificate would
+    overwrite the first and every app of the first account would fail to refresh.
+  - **`AuthAccountContext`** is a `@TaskLocal` carrying `AuthAccountScope` (account identifier + the
+    exact team id) for one pipeline. `PipelineRunner` sets it around `executePipeline`, so concurrent
+    refreshes of two accounts' apps cannot see each other's credentials, and
+    `getAuthenticatedSession()` keys its `TaskChainCoalescer` by account instead of by a constant.
+  - **There is no global portal session.** `AuthManager.session` was removed: it was write-only and a
+    trap for exactly this feature. Every call rebuilds the session from the scoped keychain slots.
+  - **Which account a pipeline runs as** (`PipelineRunner.accountScope(for:group:)`), in order: a
+    scope set on the `RefreshGroup` wins (that is the future install-time picker's answer); otherwise
+    anything operating on an **already installed** app (`AppOperation.isBoundToInstalledApp` --
+    refresh, update, reinstall, resign, backup, restore) runs as that app's owner, read from
+    `InstalledApp.team.account`; a first-time install with no choice falls back to the active account.
+    That last rule is not a preference: an installed app's App ID and provisioning profile belong to
+    the team that made them, so another account could only fail or silently re-sign the app with the
+    wrong certificate.
+  - **Still to do:** the install-time Apple ID picker (and folding it into the existing
+    `InstallAppDialog` sheet next to "Run in AirBox", not a second alert), and checking **every**
+    signed-in account in the Account Status row instead of only the active one. Beware: presenting a
+    second alert while the first is still dismissing makes iOS drop it silently.
 - **Guide re-verified against the tree at `ce5d69ab`** (2026-11-14): bundle id, iOS 17.4, Swift 5
   mode, `PRODUCT_NAME = "$(TARGET_NAME)"`, four tabs in both `AltStore/iOS/Main.storyboard` and
   `AltStore/tvOS/Main.storyboard`, the six settings group ids (`account`, `appearance`, `refresh`,

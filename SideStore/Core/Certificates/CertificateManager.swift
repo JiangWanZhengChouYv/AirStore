@@ -33,9 +33,83 @@ public final class CertificateManager: @unchecked Sendable {
     private let metadataPrefix = "certMetadata_"
     
     public private(set) var activeCertificate: ActiveSigningCertificate?
+
+    /// Every signed-in account can hold its own certificate. `activeCertificate` above stays the
+    /// active Apple ID's, so existing callers are unchanged; this is what a pipeline working for a
+    /// *different* account reads, and it is keyed by account identifier.
+    private var certificatesByAccount: [String: ActiveSigningCertificate] = [:]
+    private let accountCacheLock = NSLock()
     
     private init() {
         _ = try? loadActiveCertificate()
+    }
+
+    // MARK: - Per-account certificates
+
+    /// One account's certificate, loading it from that account's keychain slots on first use.
+    /// Returns nil when the account has none, which is the normal state before its first install.
+    public func certificate(forAccount identifier: String) -> ActiveSigningCertificate? {
+        self.accountCacheLock.lock()
+        if let cached = self.certificatesByAccount[identifier] {
+            self.accountCacheLock.unlock()
+            return cached
+        }
+        self.accountCacheLock.unlock()
+
+        guard let stored = Keychain.shared.signingCertificate(forAccount: identifier) else { return nil }
+        guard let cert = try? Self.parse(stored.data, password: stored.password) else {
+            debugLog("[CertificateManager] certificate(forAccount: \(identifier)) could not decrypt the stored certificate.")
+            return nil
+        }
+        let active = ActiveSigningCertificate(certificate: cert, p12Data: stored.data, password: stored.password)
+
+        self.accountCacheLock.lock()
+        self.certificatesByAccount[identifier] = active
+        self.accountCacheLock.unlock()
+
+        debugLog("[CertificateManager] Loaded the certificate for account \(identifier) (serial: \(cert.serialNumber)).")
+        return active
+    }
+
+    /// Persist one account's certificate without disturbing the active one.
+    public func setCertificate(_ cert: ALTCertificate?, forAccount identifier: String) {
+        guard let cert else {
+            Keychain.shared.setSigningCertificate(nil, password: nil, forAccount: identifier)
+            self.accountCacheLock.lock()
+            self.certificatesByAccount[identifier] = nil
+            self.accountCacheLock.unlock()
+            return
+        }
+
+        let password = getPassword(for: cert)
+        guard let p12Data = try? Self.convert(cert, password: password) else {
+            debugLog("[CertificateManager] setCertificate(_:forAccount: \(identifier)) failed to export the p12.")
+            return
+        }
+
+        Keychain.shared.setSigningCertificate(p12Data, password: password, forAccount: identifier)
+        saveCertificate(cert)
+
+        let active = ActiveSigningCertificate(certificate: cert, p12Data: p12Data, password: password)
+        self.accountCacheLock.lock()
+        self.certificatesByAccount[identifier] = active
+        self.accountCacheLock.unlock()
+
+        debugLog("[CertificateManager] Stored the certificate for account \(identifier) (serial: \(cert.serialNumber)).")
+    }
+
+    /// The certificate a pipeline working for `scope` must sign with. Nil when no account is scoped,
+    /// which means "the globally active account" -- the behaviour every caller had before.
+    public func certificate(for scope: AuthAccountScope?) -> ALTCertificate? {
+        guard let scope else { return self.activeCertificate?.certificate }
+        return self.certificate(forAccount: scope.accountIdentifier)?.certificate
+    }
+
+    /// Drop the cached copies. Called on sign-out so the next sign-in cannot read stale ones.
+    public func clearAccountCertificates() {
+        self.accountCacheLock.lock()
+        self.certificatesByAccount.removeAll()
+        self.accountCacheLock.unlock()
     }
     
     public static func parse(_ data: Data, password: String?) throws -> ALTCertificate {
@@ -97,6 +171,15 @@ public final class CertificateManager: @unchecked Sendable {
                 saveCertificate(cert)
                 let active = ActiveSigningCertificate(certificate: cert, p12Data: p12Data, password: password)
                 self.activeCertificate = active
+                // `Keychain.shared.signingCertificate` wrote into whichever account namespace is
+                // current, so the cache has to record the same thing -- otherwise a refresh for that
+                // account would reload from disk while its sibling account still sees its own.
+                if let scope = Keychain.shared.accountScope
+                {
+                    self.accountCacheLock.lock()
+                    self.certificatesByAccount[scope] = active
+                    self.accountCacheLock.unlock()
+                }
                 debugLog("[CertificateManager] setActiveCertificate: Successfully stored certificate (serial: \(cert.serialNumber)).")
             } catch {
                 debugLog("[CertificateManager] setActiveCertificate failed to export/encrypt certificate: \(error)")
@@ -113,6 +196,15 @@ public final class CertificateManager: @unchecked Sendable {
     public func clearActiveCertificate() {
         debugLog("[CertificateManager] clearActiveCertificate: Clearing active certificate.")
         self.activeCertificate = nil
+        // Only the active account's slot: signing out of one Apple ID must not strip the certificate
+        // that another signed-in account still uses for its apps.
+        if let scope = Keychain.shared.accountScope
+        {
+            Keychain.shared.setSigningCertificate(nil, password: nil, forAccount: scope)
+            self.accountCacheLock.lock()
+            self.certificatesByAccount[scope] = nil
+            self.accountCacheLock.unlock()
+        }
         Keychain.shared.clearCertificates()
     }
     

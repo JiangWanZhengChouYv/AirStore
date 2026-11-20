@@ -29,6 +29,12 @@ final class RefreshGroup: NSObject
     private(set) var retainedContexts = Set<NSManagedObjectContext>()
     
     var activeTask: Task<Void, Never>?
+
+    /// The Apple ID every operation in this group runs as. Nil means "work it out per app": a
+    /// refresh reads the owner from the database, and a first install with no explicit choice uses
+    /// the active account. Set before the group starts; read once per pipeline.
+    var accountScope: AuthAccountScope?
+
     private let lock = NSLock()
     
     init(dbContext: NSManagedObjectContext, sharedContext: SharedPipelineContext = SharedPipelineContext())
