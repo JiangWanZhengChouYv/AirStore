@@ -36,9 +36,9 @@
     "installers": "安装器",
     "choose_build": "选择构建版本",
     "sidestore_stable": "AirStore（稳定版）",
-    "sidestore_nightly": "SideStore（每夜构建版）",
+    "sidestore_nightly": "AirStore（Nightly）",
     "livecontainer_sidestore_stable": "LiveContainer + SideStore（稳定版）",
-    "livecontainer_sidestore_nightly": "LiveContainer + SideStore（每夜构建版）",
+    "livecontainer_sidestore_nightly": "LiveContainer（Nightly）",
     "import_ipa": "导入 IPA",
     "settings": "设置",
     "must_be_logged_in": "您必须登录！",
@@ -52,7 +52,7 @@
     "installed_build": "已安装：{{version}}",
     "unknown_version": "未知",
     "not_installed": "此设备上未安装 AirStore。",
-    "latest_builds": "最新正式版：{{stable}} · 最新开发版：{{develop}}",
+    "latest_builds": "最新稳定版：{{stable}} · 最新开发版：{{develop}} · 最新 Nightly：{{nightly}}",
     "update_to_develop": "更新到最新开发版"
   },
   "apple_id": {

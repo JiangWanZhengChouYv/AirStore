@@ -653,7 +653,7 @@ jobs:
           if [ -f AirBox.ipa ]; then
             companion_args=(
               --companion-ipa AirBox.ipa
-              --companion-download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/AirBox-$VERSION.ipa"
+              --companion-download-url "https://as.mz0520.de5.net/dl/$GITHUB_REPOSITORY/develop-latest/AirBox-$VERSION.ipa"
               --companion-description "AirBox runs apps inside itself, so they do not use an App ID."
             )
           else
@@ -667,7 +667,7 @@ jobs:
             --ipa "$VERSION.ipa" \
             --bundle-id "$BUNDLE_ID" \
             --version "$VERSION" \
-            --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/develop-latest/$VERSION.ipa" \
+            --download-url "https://as.mz0520.de5.net/dl/$GITHUB_REPOSITORY/develop-latest/$VERSION.ipa" \
             --track develop \
             --description "Development build $VERSION from commit $SHORT_COMMIT." \
             --companion-bundle-id "$BUNDLE_ID.AirBox" \

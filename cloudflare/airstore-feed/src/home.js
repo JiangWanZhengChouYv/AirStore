@@ -89,6 +89,15 @@ export const homeHTML = String.raw`<!doctype html>
     padding: 6px 11px; border-radius: 9px; transition: color .2s, background .2s;
   }
   nav a:hover { color: var(--ink); background: rgba(255,255,255,.07); }
+  nav button.lang {
+    font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+    color: var(--ink); background: rgba(255,255,255,.08);
+    border: 1px solid var(--line); border-radius: 8px;
+    padding: 5px 10px; margin-right: 6px; cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  nav button.lang:hover { background: rgba(255,255,255,.16); }
+  nav button.lang:active { transform: scale(.94); }
   @media (max-width: 520px) { nav .links a:not(:last-child) { display: none; } }
 
   /* ---------- hero ---------- */
@@ -357,10 +366,11 @@ export const homeHTML = String.raw`<!doctype html>
       AirStore
     </div>
     <div class="links">
-      <a href="#features">功能</a>
-      <a href="#shots">截图</a>
-      <a href="#install">安装</a>
-      <a href="#changelog">更新</a>
+      <button class="lang" id="lang-btn" type="button" aria-label="Language">EN</button>
+      <a href="#features" data-i18n="nav.features">功能</a>
+      <a href="#shots" data-i18n="nav.screens">截图</a>
+      <a href="#install" data-i18n="nav.install">安装</a>
+      <a href="#changelog" data-i18n="nav.changelog">更新</a>
       <a href="https://github.com/JiangWanZhengChouYv/AirStore" target="_blank" rel="noopener">GitHub</a>
     </div>
   </nav>
@@ -369,168 +379,168 @@ export const homeHTML = String.raw`<!doctype html>
     <img class="icon" alt="AirStore" src="/gh/JiangWanZhengChouYv/AirStore@develop/AltStore/Resources/Icons.xcassets/AppIcon.appiconset/1024.png">
     <div>
       <h1>AirStore</h1>
-      <p class="tagline">用你自己的 Apple ID，在 iPhone 上侧载和续签 App。<br>不需要电脑，不需要 AltServer。</p>
-      <div class="status"><span class="dot" id="dot"></span><span id="status-text">正在读取源…</span></div>
+      <p class="tagline" data-i18n="hero.tagline">用你自己的 Apple ID，在 iPhone 上侧载和续签 App。<br>不需要电脑，不需要 AltServer。</p>
+      <div class="status"><span class="dot" id="dot"></span><span id="status-text" data-i18n="status.loading">正在读取源…</span></div>
     </div>
   </header>
 
   <div class="cta reveal">
     <a class="btn" href="#install">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.25 1.75a.75.75 0 0 1 1.5 0v7.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 0 1 1.06-1.06l2.22 2.22V1.75Z"/><path d="M2.5 11.5a.75.75 0 0 0-1.5 0v1.25A2.25 2.25 0 0 0 3.25 15h9.5A2.25 2.25 0 0 0 15 12.75V11.5a.75.75 0 0 0-1.5 0v1.25a.75.75 0 0 1-.75.75h-9.5a.75.75 0 0 1-.75-.75V11.5Z"/></svg>
-      怎么安装
+      <span data-i18n="cta.install">怎么安装</span>
     </a>
-    <a class="btn ghost" id="nightly-btn" href="#" target="_blank" rel="noopener">下载 Nightly</a>
-    <a class="btn ghost" href="https://github.com/JiangWanZhengChouYv/AirStore" target="_blank" rel="noopener">查看源码</a>
+    <a class="btn ghost" id="nightly-btn" href="#" target="_blank" rel="noopener" data-i18n="cta.nightly">下载 Nightly</a>
+    <a class="btn ghost" href="https://github.com/JiangWanZhengChouYv/AirStore" target="_blank" rel="noopener"><span data-i18n="cta.source">查看源码</span></a>
   </div>
 
   <section class="card reveal" id="builds">
-    <h2><span class="small">Channels</span>当前构建</h2>
+    <h2><span class="small">Channels</span><span data-i18n="builds.title">当前构建</span></h2>
     <div class="tracks" id="tracks">
       <div class="track"><span class="badge">…</span><span class="ver">读取中</span></div>
     </div>
   </section>
 
   <section class="card reveal" id="features">
-    <h2><span class="small">Why</span>它解决什么</h2>
+    <h2><span class="small">Why</span><span data-i18n="why.title">它解决什么</span></h2>
     <div class="grid">
       <div class="feat">
         <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div>
-        <h3>不需要电脑</h3>
-        <p>和 SideStore 一样全在本机完成。没有 AltServer，也没有「请连接至电脑」。</p>
+        <h3 data-i18n="why.1.t">不需要电脑</h3>
+        <p data-i18n="why.1.d">和 SideStore 一样全在本机完成。没有 AltServer，也没有「请连接至电脑」。</p>
       </div>
       <div class="feat">
         <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 9.3 8 10 4.6-.7 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></div>
-        <h3>绕过 -80045</h3>
-        <p>iOS 26.4+ 登录死循环已修。客户端身份与 Anisette 服务器一致，单次 MD 每一步都刷新。</p>
+        <h3 data-i18n="why.2.t">绕过 -80045</h3>
+        <p data-i18n="why.2.d">iOS 26.4+ 登录死循环已修。客户端身份与 Anisette 服务器一致，单次 MD 每一步都刷新。</p>
       </div>
       <div class="feat">
         <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 12h4l3 8 3-16 3 8h3"/></svg></div>
-        <h3>增量更新</h3>
-        <p>更新只下与你当前版本对应的补丁，不再重下整包。实测 8 KB 到 8 MB。</p>
+        <h3 data-i18n="why.3.t">增量更新</h3>
+        <p data-i18n="why.3.d">更新只下与你当前版本对应的补丁，不再重下整包。实测 8 KB 到 8 MB。</p>
       </div>
       <div class="feat">
         <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
-        <h3>移动数据可装</h3>
-        <p>侧载和续签都不要求 Wi-Fi。关掉 Wi-Fi 只走蜂窝，免费账号也能装成功。</p>
+        <h3 data-i18n="why.4.t">移动数据可装</h3>
+        <p data-i18n="why.4.d">侧载和续签都不要求 Wi-Fi。关掉 Wi-Fi 只走蜂窝，免费账号也能装成功。</p>
       </div>
       <div class="feat">
         <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/></svg></div>
-        <h3>AirBox 容器</h3>
-        <p>把 App 跑在容器里，不占免费账号那 3 个活跃名额，还能拿更高内存额度。</p>
+        <h3 data-i18n="why.5.t">AirBox 容器</h3>
+        <p data-i18n="why.5.d">把 App 跑在容器里，不占免费账号那 3 个活跃名额，还能拿更高内存额度。</p>
       </div>
       <div class="feat">
         <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3C9 6.5 9 17.5 12 21"/></svg></div>
-        <h3>中文界面</h3>
-        <p>简体中文完整本地化，配对文件与证书支持双向导入导出。</p>
+        <h3 data-i18n="why.6.t">中文界面</h3>
+        <p data-i18n="why.6.d">简体中文完整本地化，配对文件与证书支持双向导入导出。</p>
       </div>
     </div>
   </section>
 
   <section class="card reveal" id="shots">
-    <h2><span class="small">Screens</span>长什么样</h2>
+    <h2><span class="small">Screens</span><span data-i18n="screens.title">长什么样</span></h2>
     <div class="shots" id="shots-row">
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-appdetail.jpeg" alt="应用详情">
-        <figcaption>详情 · 版本与说明</figcaption>
+        <figcaption data-i18n="screens.1">详情 · 版本与说明</figcaption>
       </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-browse.jpeg" alt="浏览页">
-        <figcaption>浏览 · 精选与分类</figcaption>
+        <figcaption data-i18n="screens.2">浏览 · 精选与分类</figcaption>
       </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-myapps.jpeg" alt="我的 App">
-        <figcaption>我的 App · 续签倒计时</figcaption>
+        <figcaption data-i18n="screens.3">我的 App · 续签倒计时</figcaption>
       </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-settings.jpeg" alt="设置">
-        <figcaption>设置 · 账号与外观</figcaption>
+        <figcaption data-i18n="screens.4">设置 · 账号与外观</figcaption>
       </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-news.jpeg" alt="新闻">
-        <figcaption>新闻 · 更新动态</figcaption>
+        <figcaption data-i18n="screens.5">新闻 · 更新动态</figcaption>
       </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg" alt="源管理">
-        <figcaption>源 · 官方与第三方</figcaption>
+        <figcaption data-i18n="screens.6">源 · 官方与第三方</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="card reveal" id="install">
-    <h2><span class="small">Install</span>怎么装</h2>
+    <h2><span class="small">Install</span><span data-i18n="install.title">怎么装</span></h2>
     <ol class="steps">
-      <li><strong>准备签名环境。</strong>电脑上装 <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/helper-latest" target="_blank" rel="noopener" style="color:#bfdbfe">AirStore Helper</a>（macOS / Windows），用数据线连上 iPhone。</li>
-      <li><strong>选版本并安装。</strong>Helper 里选一台设备，把上面的 <code style="font-family:ui-monospace">AirStore.ipa</code> 装进去；它会顺带放好配对文件。</li>
-      <li><strong>打开 App 登录。</strong>用你自己的 Apple ID 登录（免费账号即可），按引导完成配对和证书。</li>
-      <li><strong>以后不用再连线。</strong>续签在手机上完成；想自动续签，按引导建一个「快捷指令」自动化，每 5–6 天跑一次。</li>
+      <li data-i18n="install.1"><strong>准备签名环境。</strong>电脑上装 <a href="https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/helper-latest" target="_blank" rel="noopener" style="color:#bfdbfe">AirStore Helper</a>（macOS / Windows），用数据线连上 iPhone。</li>
+      <li data-i18n="install.2"><strong>选版本并安装。</strong>Helper 里选一台设备，选中正式版 / Nightly / 开发版之一，装进去；它会顺带放好配对文件。</li>
+      <li data-i18n="install.3"><strong>打开 App 登录。</strong>用你自己的 Apple ID 登录（免费账号即可），按引导完成配对和证书。</li>
+      <li data-i18n="install.4"><strong>以后不用再连线。</strong>续签在手机上完成；想自动续签，按引导建一个「快捷指令」自动化，每 5–6 天跑一次。</li>
     </ol>
-    <p class="tagline" style="margin-top:16px;font-size:13px">
+    <p class="tagline" data-i18n="install.note" style="margin-top:16px;font-size:13px">
       需要 iOS 17.4 或更高。0.9.0 起 bundle id 变成 <code style="font-family:ui-monospace;font-size:12px;background:rgba(0,0,0,.35);padding:1px 5px;border-radius:5px;color:#cfe0ff">com.JiangWanZhengChouYv.AirStore</code>，
       和旧 AirStore / SideStore 是两个独立 App，不能覆盖安装 —— 迁移前先导出证书和配对文件。
     </p>
   </section>
 
   <section class="card reveal" id="changelog">
-    <h2><span class="small">Changelog</span>更新日志</h2>
+    <h2><span class="small">Changelog</span><span data-i18n="changelog.title">更新日志</span></h2>
     <div class="log" id="log">
       <details><summary>读取中…</summary></details>
     </div>
   </section>
 
   <section class="card reveal" id="news">
-    <h2><span class="small">News</span>动态</h2>
+    <h2><span class="small">News</span><span data-i18n="news.title">动态</span></h2>
     <div class="news" id="news-list">
       <div class="item"><p>读取中…</p></div>
     </div>
   </section>
 
   <section class="card reveal" id="source">
-    <h2><span class="small">Add source</span>添加到 AirStore</h2>
+    <h2><span class="small">Add source</span><span data-i18n="source.title">添加到 AirStore</span></h2>
     <div class="field">
       <span id="source-url">https://as.mz0520.de5.net/source/airstore-source.json</span>
-      <button class="copy" id="copy-btn" type="button">复制</button>
+      <button class="copy" id="copy-btn" type="button" data-i18n="source.copy">复制</button>
     </div>
-    <p class="tagline" style="margin-top:12px;font-size:13px">
+    <p class="tagline" data-i18n="source.hint" style="margin-top:12px;font-size:13px">
       设置 → 源 → 添加源。内置源已经指向这里，通常不用手动加。
     </p>
   </section>
 
   <section class="card reveal" id="faq">
-    <h2><span class="small">FAQ</span>常见问题</h2>
+    <h2><span class="small">FAQ</span><span data-i18n="faq.title">常见问题</span></h2>
     <div class="faq">
       <details>
-        <summary>一定要交钱吗？</summary>
-        <div class="body"><p>不用。免费 Apple ID 就够，代价是同时最多 3 个活跃 App、App ID 上限 10 个，证书 7 天要续一次。AirBox 里的 App 不占这 3 个名额。</p></div>
+        <summary data-i18n="faq.1.q">一定要交钱吗？</summary>
+        <div class="body" data-i18n="faq.1.a"><p>不用。免费 Apple ID 就够，代价是同时最多 3 个活跃 App、App ID 上限 10 个，证书 7 天要续一次。AirBox 里的 App 不占这 3 个名额。</p></div>
       </details>
       <details>
-        <summary>为什么装完打不开 / 闪一下就没？</summary>
-        <div class="body">
+        <summary data-i18n="faq.2.q">为什么装完打不开 / 闪一下就没？</summary>
+        <div class="body" data-i18n="faq.2.a">
           <p>最常见的是签名失效或安装包损坏（系统在 exec 阶段就拒绝了，不会留下崩溃报告）。用 Helper 覆盖安装一次通常就好，数据保留。</p>
           <p>如果还是不行，在 设置 → 隐私与安全性 → 分析与改进 → 分析数据 里搜 <code>SideStore</code>，把当天的 <code>.ips</code> 发到 Issue。</p>
         </div>
       </details>
       <details>
-        <summary>登录卡在 -80045 / 一直转圈？</summary>
-        <div class="body"><p>先在 设置 → 连接与签名 → Anisette 服务器 里看一眼服务器是不是绿的。列表里的红点表示那台服务器不可达，换一台或打开自动轮换再试。仍然失败就把日志导出来。</p></div>
+        <summary data-i18n="faq.3.q">登录卡在 -80045 / 一直转圈？</summary>
+        <div class="body" data-i18n="faq.3.a"><p>先在 设置 → 连接与签名 → Anisette 服务器 里看一眼服务器是不是绿的。列表里的红点表示那台服务器不可达，换一台或打开自动轮换再试。仍然失败就把日志导出来。</p></div>
       </details>
       <details>
-        <summary>更新会丢数据吗？</summary>
-        <div class="body"><p>不会。同一证书签名的覆盖安装是原地升级。换证书签的包才会装失败，那时才需要先导出证书和配对文件、卸载、重装、再导入。</p></div>
+        <summary data-i18n="faq.4.q">更新会丢数据吗？</summary>
+        <div class="body" data-i18n="faq.4.a"><p>不会。同一证书签名的覆盖安装是原地升级。换证书签的包才会装失败，那时才需要先导出证书和配对文件、卸载、重装、再导入。</p></div>
       </details>
       <details>
-        <summary>Nightly / 开发版有什么区别？</summary>
-        <div class="body"><p>开发版（develop）每次推送都出包，最快拿到新功能，也最可能带问题。Nightly 是每天一次的完整 Release 构建，更稳一些。正式版（stable）才是给日常使用的。</p></div>
+        <summary data-i18n="faq.5.q">Nightly / 开发版有什么区别？</summary>
+        <div class="body" data-i18n="faq.5.a"><p>开发版（develop）每次推送都出包，最快拿到新功能，也最可能带问题。Nightly 是每天一次的完整 Release 构建，更稳一些。正式版（stable）才是给日常使用的。</p></div>
       </details>
       <details>
-        <summary>隐私：这台服务器看到了什么？</summary>
-        <div class="body"><p>这是一个只读镜像：它按请求去 GitHub 取源文件和应用包再转发，不记录账号、不碰 Apple ID、不保存下载内容。App 的登录和签名全程在你手机上完成。</p></div>
+        <summary data-i18n="faq.6.q">隐私：这台服务器看到了什么？</summary>
+        <div class="body" data-i18n="faq.6.a"><p>这是一个只读镜像：它按请求去 GitHub 取源文件和应用包再转发，不记录账号、不碰 Apple ID、不保存下载内容。App 的登录和签名全程在你手机上完成。</p></div>
       </details>
     </div>
   </section>
 
   <footer class="reveal">
-    AirStore 是 <a href="https://github.com/SideStore/SideStore" target="_blank" rel="noopener">SideStore</a> 的 fork，<a href="https://github.com/JiangWanZhengChouYv/AirStore/blob/develop/LICENSE" target="_blank" rel="noopener">AGPL-3.0</a>。<br>
-    本站由 Cloudflare Worker 提供，实时读取 <code style="font-family:ui-monospace">develop-source</code> 分支，不做缓存。<br>
+    <span data-i18n="footer.license">AirStore 是 <a href="https://github.com/SideStore/SideStore" target="_blank" rel="noopener">SideStore</a> 的 fork，<a href="https://github.com/JiangWanZhengChouYv/AirStore/blob/develop/LICENSE" target="_blank" rel="noopener">AGPL-3.0</a>。</span><br>
+    <span data-i18n="footer.host">本站由 Cloudflare Worker 提供，实时读取 <code style="font-family:ui-monospace">develop-source</code> 分支，不做缓存。</span><br>
     <a href="/source/airstore-source.json">airstore-source.json</a> ·
     <a href="/source/default-sources.json">default-sources.json</a> ·
     <a href="/health">health</a>
@@ -546,6 +556,145 @@ export const homeHTML = String.raw`<!doctype html>
   const tracksEl = document.getElementById("tracks");
   const logEl = document.getElementById("log");
   const newsEl = document.getElementById("news-list");
+
+
+  // ---------- language ----------
+
+  // Chinese is the markup's own default, so a page whose script never runs still reads correctly.
+  // English is a table of replacements, applied by data-i18n key; the switch only rewrites text.
+  const EN = {
+    "nav.features": "Features",
+    "nav.screens": "Screens",
+    "nav.install": "Install",
+    "nav.changelog": "Updates",
+
+    "hero.tagline": "Sideload and refresh apps on your own iPhone with your own Apple ID.<br>No computer, no AltServer.",
+
+    "status.loading": "Reading the source…",
+    "status.online": "Online · {channels} channels · {versions} versions",
+    "status.offline": "Cannot read the source: {error}",
+
+    "cta.install": "How to install",
+    "cta.nightly": "Download Nightly",
+    "cta.source": "Source code",
+
+    "builds.title": "Current builds",
+    "builds.download": "Download",
+    "builds.empty": "The source lists no builds.",
+    "builds.failed": "Could not read right now. Try again shortly.",
+
+    "why.title": "What it solves",
+    "why.1.t": "No computer needed",
+    "why.1.d": "Everything happens on the phone, like SideStore. No AltServer, no \"connect to your computer\".",
+    "why.2.t": "Gets past -80045",
+    "why.2.d": "The iOS 26.4+ login loop is fixed: the client identity matches the Anisette server, and the single-use MD is refreshed at every step.",
+    "why.3.t": "Incremental updates",
+    "why.3.d": "An update downloads a patch for the build you have, not the whole package. Measured between 8 KB and 8 MB.",
+    "why.4.t": "Installs over mobile data",
+    "why.4.d": "Sideloading and refreshing do not require Wi-Fi. With Wi-Fi off and a free account, it still installs.",
+    "why.5.t": "The AirBox container",
+    "why.5.d": "Runs apps inside a container, so they do not spend one of a free account's three slots -- and gives them a higher memory ceiling.",
+    "why.6.t": "Chinese interface",
+    "why.6.d": "Fully localized to Simplified Chinese, with certificate and pairing-file import and export.",
+
+    "screens.title": "What it looks like",
+    "screens.1": "App detail · versions and notes",
+    "screens.2": "Browse · featured and categories",
+    "screens.3": "My Apps · resign countdown",
+    "screens.4": "Settings · account and appearance",
+    "screens.5": "News · release notes",
+    "screens.6": "Sources · official and third-party",
+
+    "install.title": "How to install",
+    "install.1": "<strong>Set up signing.</strong> Install <a href=\"https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/helper-latest\" target=\"_blank\" rel=\"noopener\" style=\"color:#bfdbfe\">AirStore Helper</a> (macOS / Windows) and plug the iPhone in.",
+    "install.2": "<strong>Pick a build and install.</strong> Choose the device, pick stable, Nightly or develop, and install. The Helper places the pairing file for you.",
+    "install.3": "<strong>Open the app and sign in.</strong> Use your own Apple ID (a free one is fine) and follow the prompts for pairing and the certificate.",
+    "install.4": "<strong>No cable after that.</strong> Resigning happens on the phone. For automatic renewal, follow the onboarding step that builds a Shortcuts automation and run it every 5–6 days.",
+    "install.note": "Requires iOS 17.4 or later. Since 0.9.0 the bundle id is <code style=\"font-family:ui-monospace;font-size:12px;background:rgba(0,0,0,.35);padding:1px 5px;border-radius:5px;color:#cfe0ff\">com.JiangWanZhengChouYv.AirStore</code>, so it is a separate app from the old AirStore / SideStore and cannot overwrite it -- export your certificate and pairing file before migrating.",
+
+    "changelog.title": "Changelog",
+    "changelog.empty": "No versions to show.",
+    "changelog.none": "This version ships without notes.",
+
+    "news.title": "News",
+    "news.empty": "Nothing posted yet.",
+
+    "source.title": "Add to AirStore",
+    "source.hint": "Settings → Sources → Add Source. The built-in source already points here, so this is rarely needed.",
+    "source.copy": "Copy",
+    "source.copied": "Copied",
+
+    "faq.title": "Common questions",
+    "faq.1.q": "Do I have to pay?",
+    "faq.1.a": "No. A free Apple ID is enough. The cost is 3 active apps at a time, a 10 App ID limit and a certificate that needs renewing every 7 days. Apps inside AirBox do not use those 3 slots.",
+    "faq.2.q": "It installs but will not open / flashes and closes?",
+    "faq.2.a": "That is almost always a broken signature or a damaged install: the system refuses it at exec time, so no crash report is written. An overwrite install from the Helper usually fixes it and keeps your data. If it does not, open Settings → Privacy & Security → Analytics & Improvements → Analytics Data, search for <code>SideStore</code>, and attach that day's <code>.ips</code> to an issue.",
+    "faq.3.q": "Sign-in is stuck at -80045 / spinning forever?",
+    "faq.3.a": "First check Settings → Connection & Signing → Anisette Servers: a red dot means that server is unreachable. Pick another one, or turn on automatic rotation and retry. If it still fails, export the log and attach it.",
+    "faq.4.q": "Will an update lose my data?",
+    "faq.4.a": "No. An overwrite install signed with the same certificate is an in-place upgrade. Only a package signed with a different certificate fails to install, and that is when you export the certificate and pairing file, uninstall, reinstall and import them back.",
+    "faq.5.q": "Nightly vs develop?",
+    "faq.5.a": "Develop is built on every push: newest features, highest chance of a problem. Nightly is a full Release build once a day, a bit steadier. Stable is the one meant for daily use.",
+    "faq.6.q": "Privacy: what does this server see?",
+    "faq.6.a": "It is a read-only mirror. It fetches the source file and app packages from GitHub per request and forwards them; it does not log accounts, never touches your Apple ID, and stores no downloads. Signing in and signing apps happen entirely on your phone.",
+
+    "footer.license": "AirStore is a fork of <a href=\"https://github.com/SideStore/SideStore\" target=\"_blank\" rel=\"noopener\">SideStore</a>, <a href=\"https://github.com/JiangWanZhengChouYv/AirStore/blob/develop/LICENSE\" target=\"_blank\" rel=\"noopener\">AGPL-3.0</a>.",
+    "footer.host": "This site is served by a Cloudflare Worker that reads the <code style=\"font-family:ui-monospace\">develop-source</code> branch per request, with no cache.",
+
+    "meta.title": "AirStore · sideload and refresh on your own phone",
+    "meta.description": "AirStore: sideload and refresh apps on your iPhone with your own Apple ID, no computer required."
+  };
+
+  // The markup's inline Chinese, captured once, so switching back needs no second table.
+  const ZH = {};
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    ZH[el.getAttribute("data-i18n")] = el.innerHTML;
+  });
+
+  const STORE_KEY = "airstore-lang";
+
+  const detect = () => {
+    // ?lang=en wins: a shared link should open in the language the sharer chose, whatever the
+    // reader's browser is set to.
+    const param = new URLSearchParams(location.search).get("lang");
+    if (param === "en" || param === "zh") return param;
+
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved === "en" || saved === "zh") return saved;
+    return (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
+  };
+
+  let lang = detect();
+  // The feed payload, kept so a language switch can re-render the parts that came from it.
+  let lastData = null;
+
+  const apply = (next) => {
+    lang = next;
+    const table = next === "en" ? EN : ZH;
+    document.documentElement.lang = next === "en" ? "en" : "zh-CN";
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      const value = table[key];
+      if (value == null) return;
+      // The FAQ answers contain markup in English and plain text in Chinese (or vice versa), so
+      // innerHTML is used for both: the table is ours, and no user input reaches it.
+      el.innerHTML = value;
+    });
+    const btn = document.getElementById("lang-btn");
+    btn.textContent = next === "en" ? "中文" : "EN";
+    localStorage.setItem(STORE_KEY, next);
+    const meta = next === "en" ? EN : null;
+    document.title = meta ? meta["meta.title"] : "AirStore · 在自己手机上侧载和续签";
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute("content", meta ? meta["meta.description"] : "AirStore：用你自己的 Apple ID，在 iPhone 上侧载和续签 App，不需要电脑。");
+    // The feed-derived strings were rendered before this ran, so re-render them in the new language.
+    if (lastData) render(lastData);
+    else statusText.textContent = table["status.loading"] || statusText.textContent;
+  };
+
+  document.getElementById("lang-btn").addEventListener("click", () => {
+    apply(lang === "en" ? "zh" : "en");
+  });
 
   const reveal = () => {
     document.querySelectorAll(".reveal").forEach((el, i) => {
@@ -580,9 +729,12 @@ export const homeHTML = String.raw`<!doctype html>
     return m ? base + " · " + m[2].slice(0, 4) + "-" + m[2].slice(4, 6) + "-" + m[2].slice(6, 8) + " " + m[3].slice(0, 2) + ":" + m[3].slice(2, 4) : String(v || "");
   };
 
+  const T = (key, fallback) => (lang === "en" ? EN[key] : fallback) || fallback;
+
   const render = data => {
+    lastData = data;
     const app = (data.apps || []).find(a => (a.bundleIdentifier || "").endsWith(".AirStore"));
-    if (!app) throw new Error("源里没有 AirStore 条目");
+    if (!app) throw new Error(T("builds.empty", "源里没有 AirStore 条目"));
 
     const channels = (app.releaseChannels || [])
       .filter(c => c.releases && c.releases.length)
@@ -598,14 +750,17 @@ export const homeHTML = String.raw`<!doctype html>
         '<span class="badge ' + esc(track) + '">' + esc(LABEL[track] || track) + "</span>" +
         '<span class="ver">' + esc(r.version) + "</span>" +
         '<span class="size">' + bytes(r.size) + "</span>" +
-        '<a href="' + esc(r.downloadURL) + '" target="_blank" rel="noopener">下载</a>' +
+        '<a href="' + esc(r.downloadURL) + '" target="_blank" rel="noopener">' + esc(T("builds.download", "下载")) + "</a>" +
         "</div>";
-    }).join("") || '<div class="track"><span class="ver">源里没有可用的构建</span></div>';
+    }).join("") || '<div class="track"><span class="ver">' + esc(T("builds.empty", "源里没有可用的构建")) + "</span></div>";
 
     const nightly = channels.find(c => c.track === "nightly");
     const nightlyBtn = document.getElementById("nightly-btn");
-    if (nightly) nightlyBtn.href = nightly.releases[0].downloadURL;
-    else nightlyBtn.remove();
+    if (nightly) {
+      nightlyBtn.href = nightly.releases[0].downloadURL;
+    } else {
+      nightlyBtn.remove();
+    }
 
     // Changelog: every version the feed carries, newest first.
     const versions = (app.versions || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -614,9 +769,9 @@ export const homeHTML = String.raw`<!doctype html>
         "<summary>" + esc(shortVersion(v.version)) +
           '<span class="when">' + esc(day(v.date)) + "</span>" +
         "</summary>" +
-        '<div class="body"><p>' + esc(v.localizedDescription || "此版本没有附带说明。") + "</p></div>" +
+        '<div class="body"><p>' + esc(v.localizedDescription || T("changelog.none", "此版本没有附带说明。")) + "</p></div>" +
       "</details>"
-    ).join("") || "<details><summary>没有可显示的版本</summary></details>";
+    ).join("") || '<details><summary>' + esc(T("changelog.empty", "没有可显示的版本")) + "</summary></details>";
 
     // News items the feed publishes.
     const news = (data.news || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -626,18 +781,24 @@ export const homeHTML = String.raw`<!doctype html>
         "<h3>" + esc(n.title) + "</h3>" +
         "<p>" + esc(n.caption) + "</p>" +
       "</div>"
-    ).join("") || '<div class="item"><p>暂无动态。</p></div>';
+    ).join("") || '<div class="item"><p>' + esc(T("news.empty", "暂无动态。")) + "</p></div>";
 
     dot.classList.add("ok");
-    statusText.textContent = "在线 · " + channels.length + " 个通道 · 共 " + versions.length + " 个版本";
+    const accent = channels.find(c => c.track === "develop") || channels[0];
+    if (accent) window.__accentVersion = accent.releases[0].version;
+    statusText.textContent = lang === "en"
+      ? EN["status.online"].replace("{channels}", channels.length).replace("{versions}", versions.length)
+      : "在线 · " + channels.length + " 个通道 · 共 " + versions.length + " 个版本";
   };
 
   const fail = error => {
     dot.classList.add("bad");
-    statusText.textContent = "读不到源：" + (error.message || error);
-    tracksEl.innerHTML = '<div class="track"><span class="ver">暂时无法读取，稍后重试。</span></div>';
-    logEl.innerHTML = "<details><summary>暂时无法读取</summary></details>";
-    newsEl.innerHTML = '<div class="item"><p>暂时无法读取动态。</p></div>';
+    statusText.textContent = lang === "en"
+      ? EN["status.offline"].replace("{error}", error.message || error)
+      : "读不到源：" + (error.message || error);
+    tracksEl.innerHTML = '<div class="track"><span class="ver">' + esc(T("builds.failed", "暂时无法读取，稍后重试。")) + "</span></div>";
+    logEl.innerHTML = "<details><summary>" + esc(T("builds.failed", "暂时无法读取")) + "</summary></details>";
+    newsEl.innerHTML = '<div class="item"><p>' + esc(T("builds.failed", "暂时无法读取动态。")) + "</p></div>";
   };
 
   fetch(FEED, { cache: "no-store" })
@@ -645,6 +806,9 @@ export const homeHTML = String.raw`<!doctype html>
     .then(render)
     .catch(fail)
     .finally(reveal);
+
+  // Apply the detected language first, then let the fetch fill in the feed-derived parts.
+  apply(lang);
 
   const copyBtn = document.getElementById("copy-btn");
   copyBtn.addEventListener("click", async () => {
@@ -659,10 +823,10 @@ export const homeHTML = String.raw`<!doctype html>
       sel.addRange(range);
       document.execCommand("copy");
     }
-    copyBtn.textContent = "已复制";
+    copyBtn.textContent = T("source.copied", "已复制");
     copyBtn.classList.add("done");
     setTimeout(() => {
-      copyBtn.textContent = "复制";
+      copyBtn.textContent = T("source.copy", "复制");
       copyBtn.classList.remove("done");
     }, 1600);
   });

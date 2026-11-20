@@ -107,42 +107,42 @@ pub async fn install_sidestore_operation(
     let op = Operation::new("install_sidestore".to_string(), &window);
     op.start("download")?;
     // TODO: Cache & check version to avoid re-downloading
-    let (filename, url): (String, String) = if develop {
-        let feed_url = "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json";
+
+    // `nightly` used to mean "SideStore's own nightly", from upstream's release, which is a different
+    // app and would replace AirStore rather than update it. It now selects this project's `nightly`
+    // channel: a full Release build published daily into the same feed, next to develop and stable.
+    let track = if develop {
+        Some("develop")
+    } else if nightly {
+        Some("nightly")
+    } else {
+        None
+    };
+
+    let (filename, url): (String, String) = if let Some(track) = track {
+        let feed_url = "https://as.mz0520.de5.net/source/airstore-source.json";
         let feed = reqwest::get(feed_url)
             .await
-            .map_err(|e| AppError::Download(format!("Could not read the develop feed: {e}")))?;
+            .map_err(|e| AppError::Download(format!("Could not read the AirStore feed: {e}")))?;
         let feed_body = feed
             .text()
             .await
-            .map_err(|e| AppError::Download(format!("Could not read the develop feed: {e}")))?;
+            .map_err(|e| AppError::Download(format!("Could not read the AirStore feed: {e}")))?;
         let json: serde_json::Value = serde_json::from_str(&feed_body)
-            .map_err(|e| AppError::Download(format!("Could not parse the develop feed: {e}")))?;
+            .map_err(|e| AppError::Download(format!("Could not parse the AirStore feed: {e}")))?;
         let download_url = json["apps"]
             .as_array()
             .and_then(|apps| apps.iter().find(|app| app["bundleIdentifier"] == "com.JiangWanZhengChouYv.AirStore"))
             .and_then(|app| app["releaseChannels"].as_array())
-            .and_then(|channels| channels.iter().find(|channel| channel["track"] == "develop"))
+            .and_then(|channels| channels.iter().find(|channel| channel["track"] == track))
             .and_then(|channel| channel["releases"][0]["downloadURL"].as_str())
             .map(str::to_string)
-            .ok_or_else(|| AppError::Download("The develop feed has no AirStore build".into()))?;
-        ("AirStore-develop.ipa".to_string(), download_url)
+            .ok_or_else(|| AppError::Download(format!("The feed has no AirStore {track} build")))?;
+        (format!("AirStore-{track}.ipa"), download_url)
     } else if live_container {
-        if nightly {
-            (
-                "LiveContainerSideStore-Nightly.ipa".to_string(),
-                "https://github.com/LiveContainer/LiveContainer/releases/download/nightly/LiveContainer+SideStore.ipa".to_string(),
-            )
-        } else {
-            (
-                "LiveContainerSideStore.ipa".to_string(),
-                "https://github.com/LiveContainer/LiveContainer/releases/latest/download/LiveContainer+SideStore.ipa".to_string(),
-            )
-        }
-    } else if nightly {
         (
-            "SideStore-Nightly.ipa".to_string(),
-            "https://github.com/SideStore/SideStore/releases/download/nightly/SideStore.ipa".to_string(),
+            "LiveContainerSideStore.ipa".to_string(),
+            "https://github.com/LiveContainer/LiveContainer/releases/latest/download/LiveContainer+SideStore.ipa".to_string(),
         )
     } else {
         (

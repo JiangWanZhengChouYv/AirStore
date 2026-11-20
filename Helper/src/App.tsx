@@ -62,7 +62,7 @@ function App() {
   // The Helper used to install AirStore without ever knowing which build was on the phone.
   const [deviceAirStore, setDeviceAirStore] = useState<InstalledAirStore | null>(null);
   const [latestReleases, setLatestReleases] = useState<
-    Partial<Record<"stable" | "develop", ReleaseInfo>>
+    Partial<Record<"stable" | "develop" | "nightly", ReleaseInfo>>
   >({});
   const [checkingHelperUpdate, setCheckingHelperUpdate] = useState(false);
   // Bumped after an install so the build shown for the device is read again.
@@ -111,7 +111,7 @@ function App() {
   }, [selectedDevice, deviceBuildKey]);
 
   useEffect(() => {
-    (["stable", "develop"] as const).forEach((track) => {
+    (["stable", "develop", "nightly"] as const).forEach((track) => {
       invoke<ReleaseInfo>("latest_airstore_release", { track })
         .then((release) =>
           setLatestReleases((old) => ({ ...old, [track]: release })),
@@ -432,8 +432,9 @@ function App() {
                   {t("app.latest_builds", {
                     stable: latestReleases.stable?.version ?? "–",
                     develop: latestReleases.develop?.version ?? "–",
+                    nightly: latestReleases.nightly?.version ?? "–",
                     defaultValue:
-                      "Latest stable: {{stable}} · Latest develop: {{develop}}",
+                      "Latest stable: {{stable}} · Latest develop: {{develop}} · Latest nightly: {{nightly}}",
                   })}
                 </p>
                 {deviceAirStore?.installed &&
@@ -485,6 +486,21 @@ function App() {
                   }}
                 >
                   {t("app.sidestore_develop")}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!ensuredLoggedIn() || !ensureSelectedDevice()) return;
+                    startOperation(installSideStoreOperation, {
+                      nightly: true,
+                      liveContainer: false,
+                      develop: false,
+                    }).catch((e) => {
+                      console.log(e.type);
+                      console.error(e.message);
+                    });
+                  }}
+                >
+                  {t("app.sidestore_nightly")}
                 </button>
                 <button
                   onClick={async () => {

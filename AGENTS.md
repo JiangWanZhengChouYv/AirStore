@@ -191,8 +191,17 @@ Style:
   `cloudflare/airstore-feed/src/home.js` (a template string, deployed with the Worker): hero, live
   channel list with download links, screenshots, install steps, changelog and news — all read from
   `/source/airstore-source.json` at load time so it cannot advertise a build the feed no longer
-  serves. It is the homepage URL on the GitHub repo; both READMEs link it and the install sections
-  point at it. Keep the page and `AppConstants.Sources.airStoreFeedURL` on the same host.
+  serves. The page is **bilingual**: Chinese is the markup's inline default (so it reads correctly
+  with JS blocked), `data-i18n` keys map to an `EN` table, the nav switch persists to localStorage,
+  and `?lang=en|zh` overrides for shared links.
+  - `home.js` is a `String.raw` template, so an escaped quote inside it is written **once** (`\"`) —
+    writing `\\"` emits two backslashes into the served script and is a syntax error. Verify with the
+    emit-and-`node --check` pass over the `<script>` body, not just `node --check` on the module.
+  - Every download URL the app is offered goes through the Worker (`/dl/OWNER/REPO/TAG/FILE`), and
+    `BundleDelta.patchURL` understands that shape as well as GitHub's, so an incremental update is
+    fetched from the same host that served its base package.
+  - It is the homepage URL on the GitHub repo; both READMEs link it and their install sections point
+    at it. Keep the page and `AppConstants.Sources.airStoreFeedURL` on the same host.
 - **Screenshots** live in `source/screenshots/` (1000px wide JPEG, 1260×2736 originals downscaled) and
   are listed in the feed's `screenshots.iphone` array, which is what the app's app page and the site
   both show: app detail, browse, my apps, settings, news, sources. `AppScreenshots` also accepts a bare

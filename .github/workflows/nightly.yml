@@ -315,7 +315,7 @@ jobs:
               --ipa AirStore.ipa \
               --bundle-id "$BUNDLE_ID" \
               --version "$MARKETING_VERSION" \
-              --download-url "https://github.com/$GITHUB_REPOSITORY/releases/download/nightly/AirStore.ipa" \
+              --download-url "https://as.mz0520.de5.net/dl/$GITHUB_REPOSITORY/nightly/AirStore.ipa" \
               --track nightly \
               --description "Nightly build $MARKETING_VERSION from commit $SHORT_COMMIT." \
               --out build/nightly-feed.json

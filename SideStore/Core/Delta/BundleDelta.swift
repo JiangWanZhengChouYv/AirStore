@@ -153,20 +153,46 @@ struct BundleDelta
     /// can ship a patch per retained base.
     static func patchURL(forPackageAt packageURL: URL, baseTag: String) -> URL?
     {
-        let marker = "/releases/download/"
-        guard packageURL.host?.hasSuffix("github.com") == true,
-              packageURL.pathExtension.lowercased() == "ipa",
-              let range = packageURL.path.range(of: marker) else { return nil }
-        
-        // Past the marker a release URL has exactly two parts left: the tag it belongs to and the
-        // asset itself. Anything else is not a package on a release, and inventing a URL from it
-        // would only hide the fact that this build has no patch.
-        let tail = packageURL.path[range.upperBound...].split(separator: "/")
+        guard packageURL.pathExtension.lowercased() == "ipa" else { return nil }
+
+        // Two shapes reach here: a package straight from GitHub, and the same package through the
+        // Worker, which rewrites `github.com/OWNER/REPO/releases/download/TAG/FILE` to
+        // `as.mz0520.de5.net/dl/OWNER/REPO/TAG/FILE`. Both leave exactly two components after the
+        // marker -- the tag and the asset -- so one parser covers them and the patch is fetched from
+        // whichever host served the package it has to match.
+        let tail: [Substring]
+        let prefix: String
+
+        let githubMarker = "/releases/download/"
+        let mirrorMarker = "/dl/"
+
+        if packageURL.host?.hasSuffix("github.com") == true,
+           let range = packageURL.path.range(of: githubMarker)
+        {
+            tail = packageURL.path[range.upperBound...].split(separator: "/")
+            prefix = String(packageURL.path[..<range.upperBound])
+        }
+        else if packageURL.host?.hasSuffix("as.mz0520.de5.net") == true,
+                let range = packageURL.path.range(of: mirrorMarker)
+        {
+            // /dl/OWNER/REPO/TAG/FILE -- the owner/repo pair belongs to the prefix, not the tail.
+            let parts = packageURL.path[range.upperBound...].split(separator: "/")
+            guard parts.count >= 4 else { return nil }
+            tail = Array(parts.suffix(from: 2))
+            prefix = String(packageURL.path[..<range.upperBound]) + parts[0] + "/" + parts[1] + "/"
+        }
+        else
+        {
+            return nil
+        }
+
+        // Anything else is not a package on a release, and inventing a URL from it would only hide
+        // the fact that this build has no patch.
         guard tail.count >= 2, let tag = tail.first, let fileName = tail.last else { return nil }
-        
+
         guard var components = URLComponents(url: packageURL, resolvingAgainstBaseURL: false) else { return nil }
         let stem = String(fileName.dropLast(packageURL.pathExtension.count + 1))
-        components.path = String(packageURL.path[..<range.upperBound]) + tag + "/" + stem + "-" + baseTag + ".patch"
+        components.path = prefix + tag + "/" + stem + "-" + baseTag + ".patch"
         return components.url
     }
     

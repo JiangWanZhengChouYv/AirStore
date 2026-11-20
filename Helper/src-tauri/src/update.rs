@@ -16,7 +16,9 @@ use crate::{
     error::AppError,
 };
 
-const SOURCE_FEED: &str = "https://raw.githubusercontent.com/JiangWanZhengChouYv/AirStore/develop-source/source/airstore-source.json";
+// Same Worker the app reads. It answers `no-store`, so the Helper can never show a build the phone
+// cannot also see, and raw.githubusercontent is blocked on enough networks to matter here.
+const SOURCE_FEED: &str = "https://as.mz0520.de5.net/source/airstore-source.json";
 const AIRSTORE_BUNDLE_ID: &str = "com.JiangWanZhengChouYv.AirStore";
 const HELPER_RELEASE_API: &str = "https://api.github.com/repos/JiangWanZhengChouYv/AirStore/releases/tags/helper-latest";
 const HELPER_RELEASE_PAGE: &str = "https://github.com/JiangWanZhengChouYv/AirStore/releases/tag/helper-latest";
@@ -116,7 +118,8 @@ pub async fn installed_airstore(
 }
 
 /// Latest AirStore build on the requested track, straight from the feed the phone subscribes to.
-/// Both tracks live in the same generated `develop-source` JSON.
+/// All three tracks (`stable`, `develop`, `nightly`) live in the same generated `develop-source` JSON,
+/// so the Helper needs no second source of truth -- it asks for the track it is about to install.
 #[tauri::command]
 pub async fn latest_airstore_release(track: String) -> Result<AirStoreRelease, AppError> {
     let client = http_client()?;

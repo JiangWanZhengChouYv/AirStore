@@ -37,9 +37,9 @@
     "installers": "Installers",
     "choose_build": "Choose a build",
     "sidestore_stable": "AirStore (Stable)",
-    "sidestore_nightly": "SideStore (Nightly)",
+    "sidestore_nightly": "AirStore (Nightly)",
     "livecontainer_sidestore_stable": "LiveContainer + SideStore (Stable)",
-    "livecontainer_sidestore_nightly": "LiveContainer + SideStore (Nightly)",
+    "livecontainer_sidestore_nightly": "LiveContainer (Nightly)",
     "import_ipa": "Import IPA",
     "settings": "Settings",
     "must_be_logged_in": "You must be logged in!",
@@ -53,7 +53,7 @@
     "installed_build": "Installed: {{version}}",
     "unknown_version": "unknown",
     "not_installed": "AirStore is not installed on this device.",
-    "latest_builds": "Latest stable: {{stable}} · Latest develop: {{develop}}",
+    "latest_builds": "Latest stable: {{stable}} · Latest develop: {{develop}} · Latest nightly: {{nightly}}",
     "update_to_develop": "Update to the latest develop build"
   },
   "apple_id": {
