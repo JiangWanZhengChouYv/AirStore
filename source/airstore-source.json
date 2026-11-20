@@ -69,13 +69,33 @@
       "screenshots": {
         "iphone": [
           {
-            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg",
-            "width": 1008,
-            "height": 2048
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-appdetail.jpeg",
+            "width": 1000,
+            "height": 2172
           },
           {
             "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-browse.jpeg",
             "width": 1020,
+            "height": 2048
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-myapps.jpeg",
+            "width": 1000,
+            "height": 2172
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-settings.jpeg",
+            "width": 1000,
+            "height": 2172
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-news.jpeg",
+            "width": 1000,
+            "height": 2172
+          },
+          {
+            "imageURL": "https://as.mz0520.de5.net/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg",
+            "width": 1008,
             "height": 2048
           }
         ]

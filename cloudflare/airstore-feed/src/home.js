@@ -428,10 +428,26 @@ export const homeHTML = String.raw`<!doctype html>
 
   <section class="card reveal" id="shots">
     <h2><span class="small">Screens</span>长什么样</h2>
-    <div class="shots">
+    <div class="shots" id="shots-row">
+      <figure>
+        <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-appdetail.jpeg" alt="应用详情">
+        <figcaption>详情 · 版本与说明</figcaption>
+      </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-browse.jpeg" alt="浏览页">
         <figcaption>浏览 · 精选与分类</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-myapps.jpeg" alt="我的 App">
+        <figcaption>我的 App · 续签倒计时</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-settings.jpeg" alt="设置">
+        <figcaption>设置 · 账号与外观</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-news.jpeg" alt="新闻">
+        <figcaption>新闻 · 更新动态</figcaption>
       </figure>
       <figure>
         <img loading="lazy" src="/gh/JiangWanZhengChouYv/AirStore@develop/source/screenshots/airstore-sources.jpeg" alt="源管理">

@@ -193,6 +193,10 @@ Style:
   `/source/airstore-source.json` at load time so it cannot advertise a build the feed no longer
   serves. It is the homepage URL on the GitHub repo; both READMEs link it and the install sections
   point at it. Keep the page and `AppConstants.Sources.airStoreFeedURL` on the same host.
+- **Screenshots** live in `source/screenshots/` (1000px wide JPEG, 1260×2736 originals downscaled) and
+  are listed in the feed's `screenshots.iphone` array, which is what the app's app page and the site
+  both show: app detail, browse, my apps, settings, news, sources. `AppScreenshots` also accepts a bare
+  array, but keep the `{ "iphone": [...] }` shape — it is what the decoder prefers.
 - **Recommended sources are curated here too** (maintainer, 2026-11-19). `source/default-sources.json`
   replaces `sidestore.io/default-sources`, which listed 19 entries — several dead (PokeMMO, UTM's old
   path) or unparseable strict JSON (Countdown, ThatStella, Mona), plus LiveContainer, which duplicates
