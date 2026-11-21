@@ -370,6 +370,24 @@ public extension UserDefaults
         self.registeredDeviceTeamIdentifiers = teams
     }
 
+    /// When the last live device check for this team failed. Apple answers a burst of portal calls
+    /// with an HTML 503 that then refuses sign-in for half an hour, so a failed check is not retried
+    /// for a while -- each attempt is a real request against that budget.
+    func lastDeviceCheckFailure(forTeam identifier: String) -> Date? {
+        self.deviceCheckFailures[identifier]
+    }
+
+    func setLastDeviceCheckFailure(_ date: Date?, forTeam identifier: String) {
+        var failures = self.deviceCheckFailures
+        if let date { failures[identifier] = date } else { failures.removeValue(forKey: identifier) }
+        self.deviceCheckFailures = failures
+    }
+
+    fileprivate var deviceCheckFailures: [String: Date] {
+        get { self.dictionary(forKey: #function) as? [String: Date] ?? [:] }
+        set { self.set(newValue, forKey: #function) }
+    }
+
     /// An install that upgraded from a single-account build has one plain `isDeviceRegistered` flag
     /// and no per-team record. Whoever the active account is, that flag was about it -- adopting it
     /// keeps the account from being asked to register a device Apple already has.

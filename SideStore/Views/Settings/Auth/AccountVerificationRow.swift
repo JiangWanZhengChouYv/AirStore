@@ -187,6 +187,16 @@ extension AccountVerificationRow {
                 : .completed
         }
 
+        // Each check is a live Apple portal call, and Apple throttles a burst of them with an HTML
+        // 503 that then blocks sign-in for half an hour. A failed attempt is not free, so a check
+        // that has already failed for this team in the last few minutes is not repeated -- opening
+        // Settings twice must not cost two requests.
+        if let lastFailure = UserDefaults.standard.lastDeviceCheckFailure(forTeam: team.identifier),
+           Date().timeIntervalSince(lastFailure) < Self.failedCheckCooldown {
+            verboseLog("[AccountVerificationRow] Skipping the device check for \(team.identifier): the last one failed \(Int(Date().timeIntervalSince(lastFailure)))s ago.")
+            return .actionRequired(certMissing: certMissing, deviceUnregistered: true)
+        }
+
         do {
             let devices = try await DeveloperPortalProxy.shared.fetchDevices(for: team, types: .all)
             let udid = try await fetchUDID()
@@ -202,11 +212,16 @@ extension AccountVerificationRow {
             return .actionRequired(certMissing: certMissing, deviceUnregistered: true)
         } catch {
             verboseLog("[AccountVerificationRow] verifyStatus error fetching devices for team \(team.identifier): \(error)")
+            UserDefaults.standard.setLastDeviceCheckFailure(Date(), forTeam: team.identifier)
             // A failed check is not "registered": saying so would hide the account behind a green
             // tick. Report the certificate half truthfully and let the device half stay pending.
             return .actionRequired(certMissing: certMissing, deviceUnregistered: true)
         }
     }
+
+    /// How long a failed device check is left alone. Long enough that opening Settings repeatedly
+    /// cannot build a burst, short enough that a genuinely fixed network is picked up on the next try.
+    private static let failedCheckCooldown: TimeInterval = 10 * 60
 
     /// Whether this account has a usable signing certificate. `accountIdentifier` is the account
     /// the certificate belongs to; nil means the active one.

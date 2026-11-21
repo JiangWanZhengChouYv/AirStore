@@ -127,6 +127,14 @@ Violations may lead to restrictions up to a permanent ban.
     settings row shows `combinedStatus(of:)`, and the "Account Status" alert lists each pending
     account by Apple ID with a "Fix <apple id>" action that scopes
     `resolvePendingActions(..., accountIdentifier:)` to it.
+  - **The status check is rate-limited on purpose** (2026-11-21). Every account it checks costs a
+    live portal request, and Apple answers a burst with an HTML **503** that then refuses sign-in for
+    10–30 minutes (`AppleFailure.throttledByApple` in SideSign explains it, but nothing retries its way
+    out). A check that failed for a team is therefore not repeated for
+    `AccountVerificationRow.failedCheckCooldown` (10 min), recorded per team in
+    `UserDefaults.lastDeviceCheckFailure(forTeam:)`. Opening Settings twice must not cost two requests.
+    If a 503 shows up after an update, it is Apple's throttle, not this code — waiting it out is the
+    only fix.
   - **Failures name the account.** `AppManager.owningAccountDescription(for:)` appends
     "Using Apple ID: …" through `NSError.appendingToLocalizedFailure(_:)` — only when more than one
     account exists, so single-account installs keep the plain message.
