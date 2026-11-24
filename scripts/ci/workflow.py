@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import shutil
 import subprocess
 import datetime
 from pathlib import Path
@@ -139,13 +140,24 @@ def clean_spm_cache():
 # BUILD
 # ----------------------------------------------------------
 
+def _formatter():
+    """The pipe stage that renders xcodebuild output.
+
+    `xcbeautify` is a formatter, not a build tool: a machine that does not have it should still
+    build, and lose only the pretty output -- failing the job over a missing formatter costs a
+    whole build (2026-11-24: the Mac mini runner had no xcbeautify and the nightly died on a step
+    that could not install it). `cat` keeps the log complete, just unfiltered.
+    """
+    return "xcbeautify --renderer github-actions" if shutil.which("xcbeautify") else "cat"
+
+
 def _archive(make_target):
     run("mkdir -p build/logs")
     try:
         run(
             "set -o pipefail && "
             f"NSUnbufferedIO=YES make -B {make_target} "
-            "2>&1 | tee -a build/logs/build.log | xcbeautify --renderer github-actions"
+            f"2>&1 | tee -a build/logs/build.log | {_formatter()}"
         )
     except subprocess.CalledProcessError:
         # xcbeautify's rendered output drops file paths; print the raw errors so a compiler
@@ -184,7 +196,7 @@ def tests_build():
     run("mkdir -p build/logs")
     run(
         "NSUnbufferedIO=YES make -B build-tests "
-        "2>&1 | tee -a build/logs/tests-build.log | xcbeautify --renderer github-actions"
+        f"2>&1 | tee -a build/logs/tests-build.log | {_formatter()}"
     )
 
 # ----------------------------------------------------------

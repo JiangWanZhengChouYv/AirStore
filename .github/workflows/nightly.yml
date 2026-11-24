@@ -94,11 +94,32 @@ jobs:
           fi
 
           echo "Installing:$missing"
+
+          # An Apple-silicon Mac whose runner is the x64 build runs this step under Rosetta, and brew
+          # refuses to install into /opt/homebrew from an x86_64 process ("Cannot install under
+          # Rosetta 2 in ARM default prefix"). Calling the native brew through `arch -arm64` is what
+          # makes the install work without asking the maintainer to reinstall the runner.
+          BREW=/opt/homebrew/bin/brew
+          [ -x "$BREW" ] || BREW=/usr/local/bin/brew
+          [ -x "$BREW" ] || BREW=$(command -v brew || true)
+
+          if [ -z "$BREW" ]; then
+            echo "::error::brew was not found in /opt/homebrew/bin, /usr/local/bin or PATH"
+            exit 1
+          fi
+
+          if [ "$(uname -m)" = "x86_64" ] && [ -x /opt/homebrew/bin/brew ]; then
+            echo "x86_64 process with an ARM Homebrew; installing through arch -arm64."
+            BREW_CMD="arch -arm64 $BREW"
+          else
+            BREW_CMD="$BREW"
+          fi
+
           HOMEBREW_NO_AUTO_UPDATE=1 \
           HOMEBREW_NO_INSTALL_CLEANUP=1 \
           HOMEBREW_NO_ENV_HINTS=1 \
           NONINTERACTIVE=1 \
-            perl -e 'alarm shift; exec @ARGV' 600 brew install $missing || true
+            perl -e 'alarm shift; exec @ARGV' 600 $BREW_CMD install $missing || true
 
           # Re-check rather than trusting brew's exit code: a missing tool has to fail the build here,
           # where the message names it, instead of surfacing as "ldid: command not found" much later.

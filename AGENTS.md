@@ -327,6 +327,15 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
   `NONINTERACTIVE=1` and a 600s `alarm` deadline. PATH covers **both** prefixes -- `/usr/local/bin`
   on an Intel Mac, `/opt/homebrew/bin` on Apple silicon -- because the runner service starts with
   neither. A tool that is still absent fails there, naming itself.
+  - The mini is **Apple silicon with the x64 runner build**, so the runner process executes under
+    Rosetta and reports `x86_64`; GitHub therefore labels it `X64`, not `ARM64`. brew refuses to
+    install into `/opt/homebrew` from an x86_64 process ("Cannot install under Rosetta 2 in ARM
+    default prefix"), so the step calls the native brew through `arch -arm64` when it detects that
+    combination. Reinstalling the runner from the **arm64** package removes the problem and makes
+    every build native; until then `arch -arm64` is what keeps the machine usable.
+  - `xcbeautify` is a **formatter, not a build tool**. `scripts/ci/workflow.py::_formatter()` falls
+    back to `cat` when it is absent, because failing a job over a missing formatter costs a whole
+    build for nothing.
 - On a self-hosted runner the cache steps are skipped (`if: runner.environment != 'self-hosted'`).
   That machine keeps `DerivedData` (CAS included), `SourcePackages`, `~/.cargo` and
   `Helper/src-tauri/target` on disk between runs, so a cache restore only costs download time -- and
