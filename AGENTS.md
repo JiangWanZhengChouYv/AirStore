@@ -317,6 +317,16 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
   `develop.yml` both read it, and nothing else does. To move the CI host again: add a label of its
   own to the runner (`gh api repos/:owner/:repo/actions/runners/<id>/labels -X POST -f 'labels[]=...'`)
   and point the variable at that label, rather than at `self-hosted`.
+- **`brew install` is guarded, not trusted** (2026-11-24). Both workflows used to call
+  `brew install ldid xcbeautify || (command -v ... && echo already installed)`, which assumed the
+  tools were already on the machine. That held for the M5 Pro and not for a fresh Mac mini: `brew`
+  is not on launchd's PATH at all, and a real install pays for a Homebrew index update that can hang
+  for the length of the job (2026-11-24 nightly sat on "Install the build tools" for 24 minutes and
+  had to be cancelled). The step now checks `command -v` **first** and exits without touching brew,
+  and only when something is missing does it run brew with `HOMEBREW_NO_AUTO_UPDATE=1`,
+  `NONINTERACTIVE=1` and a 600s `alarm` deadline. PATH covers **both** prefixes -- `/usr/local/bin`
+  on an Intel Mac, `/opt/homebrew/bin` on Apple silicon -- because the runner service starts with
+  neither. A tool that is still absent fails there, naming itself.
 - On a self-hosted runner the cache steps are skipped (`if: runner.environment != 'self-hosted'`).
   That machine keeps `DerivedData` (CAS included), `SourcePackages`, `~/.cargo` and
   `Helper/src-tauri/target` on disk between runs, so a cache restore only costs download time -- and

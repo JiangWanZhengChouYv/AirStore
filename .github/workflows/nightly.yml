@@ -71,14 +71,41 @@ jobs:
           )
           echo "should_skip=$SHOULD_SKIP" >> $GITHUB_OUTPUT
 
-      # Idempotent enough on the hosted image; on a self-hosted Mac these are already installed and
-      # `brew` is not on launchd's PATH unless env.sh puts it there.
+      # Cheap on a machine that already has them, survivable on one that does not -- see the step.
       - name: Install the build tools
         if: steps.build_gate.outputs.should_skip != 'true'
         run: |
-          brew install ldid xcbeautify || {
-            command -v ldid && command -v xcbeautify && echo "already installed; brew was not reachable"
-          }
+          # Both tools are usually already present on a self-hosted Mac, and asking brew for a package
+          # it already has still pays for an index update. A fresh runner -- a new Mac mini, say -- has
+          # neither, and `brew install` there can stall on the Homebrew update for the whole job, so:
+          # check first, never auto-update, and give brew a deadline it cannot outlive.
+          #
+          # Homebrew lives in /usr/local on an Intel Mac and /opt/homebrew on Apple silicon, and the
+          # runner service may start with neither on PATH.
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+          missing=""
+          command -v ldid >/dev/null 2>&1      || missing="$missing ldid"
+          command -v xcbeautify >/dev/null 2>&1 || missing="$missing xcbeautify"
+
+          if [ -z "$missing" ]; then
+            echo "ldid and xcbeautify are already installed; not touching brew."
+            exit 0
+          fi
+
+          echo "Installing:$missing"
+          HOMEBREW_NO_AUTO_UPDATE=1 \
+          HOMEBREW_NO_INSTALL_CLEANUP=1 \
+          HOMEBREW_NO_ENV_HINTS=1 \
+          NONINTERACTIVE=1 \
+            perl -e 'alarm shift; exec @ARGV' 600 brew install $missing || true
+
+          # Re-check rather than trusting brew's exit code: a missing tool has to fail the build here,
+          # where the message names it, instead of surfacing as "ldid: command not found" much later.
+          for tool in $missing; do
+            command -v "$tool" >/dev/null 2>&1 || { echo "::error::$tool is not installed and brew could not provide it"; exit 1; }
+          done
+          echo "Build tools ready."
 
       # --------------------------------------------------
       # runtime env setup
