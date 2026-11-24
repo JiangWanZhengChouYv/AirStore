@@ -19,12 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.9.1-develop-202611241136.261-7280faf",
-          "date": "2026-11-24T11:46:50Z",
-          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611241136.261-7280faf.ipa",
-          "size": 37151417,
-          "sha256": "dda3631ff642fd3bb41d7c40a57bc646e0ebe96040895c2f6173d6ab41ac28bb",
-          "localizedDescription": "Development build 0.9.1-develop-202611241136.261-7280faf from commit 7280faf."
+          "version": "0.9.1-develop-202611241152.262-db571b0",
+          "date": "2026-11-24T11:54:39Z",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611241152.262-db571b0.ipa",
+          "size": 37151315,
+          "sha256": "3eb266653674cbbddb9d67dfc6446b685028a8215c57ce6c3ac1361fb107f18c",
+          "localizedDescription": "Development build 0.9.1-develop-202611241152.262-db571b0 from commit db571b0."
         },
         {
           "version": "0.9.0",
@@ -64,12 +64,12 @@
           "track": "develop",
           "releases": [
             {
-              "version": "0.9.1-develop-202611241136.261-7280faf",
-              "date": "2026-11-24T11:46:50Z",
-              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611241136.261-7280faf.ipa",
-              "size": 37151417,
-              "sha256": "dda3631ff642fd3bb41d7c40a57bc646e0ebe96040895c2f6173d6ab41ac28bb",
-              "localizedDescription": "Development build 0.9.1-develop-202611241136.261-7280faf from commit 7280faf."
+              "version": "0.9.1-develop-202611241152.262-db571b0",
+              "date": "2026-11-24T11:54:39Z",
+              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611241152.262-db571b0.ipa",
+              "size": 37151315,
+              "sha256": "3eb266653674cbbddb9d67dfc6446b685028a8215c57ce6c3ac1361fb107f18c",
+              "localizedDescription": "Development build 0.9.1-develop-202611241152.262-db571b0 from commit db571b0."
             }
           ]
         },
