@@ -19,6 +19,14 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
+          "version": "0.9.1-nightly-202611241140.50-7280faf3",
+          "date": "2026-11-24T11:43:26Z",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
+          "size": 37041408,
+          "sha256": "f50ab3873f802442765139a6a370227957af927f0315d26cd6b3b22a6d8447fa",
+          "localizedDescription": "Nightly build 0.9.1-nightly-202611241140.50-7280faf3 from commit 7280faf3."
+        },
+        {
           "version": "0.9.1-nightly-202611240901.46-de0f444c",
           "date": "2026-11-24T09:04:50Z",
           "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
@@ -72,12 +80,12 @@
           "track": "nightly",
           "releases": [
             {
-              "version": "0.9.1-nightly-202611240901.46-de0f444c",
-              "date": "2026-11-24T09:04:50Z",
+              "version": "0.9.1-nightly-202611241140.50-7280faf3",
+              "date": "2026-11-24T11:43:26Z",
               "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
-              "size": 37045521,
-              "sha256": "44d8352cdaa2cd5346fa731701ed711aea1d0c72c9974db5429f51a5e8963792",
-              "localizedDescription": "Nightly build 0.9.1-nightly-202611240901.46-de0f444c from commit de0f444c."
+              "size": 37041408,
+              "sha256": "f50ab3873f802442765139a6a370227957af927f0315d26cd6b3b22a6d8447fa",
+              "localizedDescription": "Nightly build 0.9.1-nightly-202611241140.50-7280faf3 from commit 7280faf3."
             }
           ]
         },
