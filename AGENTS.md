@@ -309,8 +309,14 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
   must never leave a stale package on the release.
 - A manual run defaults to `app_only: true`, so `workflow_dispatch` rebuilds the store alone.
 - The three macOS jobs take `runs-on` from the `prepare` job's `runner` output: a manual `runner`
-  input wins, then the `MACOS_RUNNER` repository variable, then `macos-26`. Register a self-hosted
-  runner and set `MACOS_RUNNER=self-hosted` to use it.
+  input wins, then the `MACOS_RUNNER` repository variable, then `macos-26`.
+- **`MACOS_RUNNER` names one runner, not `self-hosted`** (2026-11-24). Two runners are registered --
+  `MarkdeMacBook-Pro` (`ARM64`) and `MarkdeMac-mini` (`X64`) -- and `self-hosted` matches **both**, so
+  whichever is awake takes the job and a build can land on either machine. The variable is therefore
+  set to the mini's own `macmini` label, which only that runner carries; `nightly.yml` and
+  `develop.yml` both read it, and nothing else does. To move the CI host again: add a label of its
+  own to the runner (`gh api repos/:owner/:repo/actions/runners/<id>/labels -X POST -f 'labels[]=...'`)
+  and point the variable at that label, rather than at `self-hosted`.
 - On a self-hosted runner the cache steps are skipped (`if: runner.environment != 'self-hosted'`).
   That machine keeps `DerivedData` (CAS included), `SourcePackages`, `~/.cargo` and
   `Helper/src-tauri/target` on disk between runs, so a cache restore only costs download time -- and
