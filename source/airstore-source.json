@@ -19,28 +19,12 @@
       "localizedDescription": "AirStore is a SideStore fork. Apple ID sign-in works on iOS 26.4 and above: the client identity sent to Apple matches the Anisette server that mints the headers, single-use X-Apple-I-MD is refreshed at every step, and the default server is backed by a real Windows ADI. JIT works as of 0.8.2 on iOS 17.4 and later - StikJIT is built in, no separate debugger app needed.",
       "versions": [
         {
-          "version": "0.9.1-nightly-202611241140.50-7280faf3",
-          "date": "2026-11-24T11:43:26Z",
-          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
-          "size": 37041408,
-          "sha256": "f50ab3873f802442765139a6a370227957af927f0315d26cd6b3b22a6d8447fa",
-          "localizedDescription": "Nightly build 0.9.1-nightly-202611241140.50-7280faf3 from commit 7280faf3."
-        },
-        {
-          "version": "0.9.1-nightly-202611240901.46-de0f444c",
-          "date": "2026-11-24T09:04:50Z",
-          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
-          "size": 37045521,
-          "sha256": "44d8352cdaa2cd5346fa731701ed711aea1d0c72c9974db5429f51a5e8963792",
-          "localizedDescription": "Nightly build 0.9.1-nightly-202611240901.46-de0f444c from commit de0f444c."
-        },
-        {
-          "version": "0.9.1-develop-202611210000.259-de0f444",
-          "date": "2026-11-21T00:02:59Z",
-          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611210000.259-de0f444.ipa",
-          "size": 37154508,
-          "sha256": "aa17f80d3513c2dbfce4de02de6f6192faf71a6453169236b3a69b69c7ca1960",
-          "localizedDescription": "Development build 0.9.1-develop-202611210000.259-de0f444 from commit de0f444."
+          "version": "0.9.1-develop-202611241136.261-7280faf",
+          "date": "2026-11-24T11:46:50Z",
+          "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611241136.261-7280faf.ipa",
+          "size": 37151417,
+          "sha256": "dda3631ff642fd3bb41d7c40a57bc646e0ebe96040895c2f6173d6ab41ac28bb",
+          "localizedDescription": "Development build 0.9.1-develop-202611241136.261-7280faf from commit 7280faf."
         },
         {
           "version": "0.9.0",
@@ -77,28 +61,15 @@
       ],
       "releaseChannels": [
         {
-          "track": "nightly",
-          "releases": [
-            {
-              "version": "0.9.1-nightly-202611241140.50-7280faf3",
-              "date": "2026-11-24T11:43:26Z",
-              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
-              "size": 37041408,
-              "sha256": "f50ab3873f802442765139a6a370227957af927f0315d26cd6b3b22a6d8447fa",
-              "localizedDescription": "Nightly build 0.9.1-nightly-202611241140.50-7280faf3 from commit 7280faf3."
-            }
-          ]
-        },
-        {
           "track": "develop",
           "releases": [
             {
-              "version": "0.9.1-develop-202611210000.259-de0f444",
-              "date": "2026-11-21T00:02:59Z",
-              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611210000.259-de0f444.ipa",
-              "size": 37154508,
-              "sha256": "aa17f80d3513c2dbfce4de02de6f6192faf71a6453169236b3a69b69c7ca1960",
-              "localizedDescription": "Development build 0.9.1-develop-202611210000.259-de0f444 from commit de0f444."
+              "version": "0.9.1-develop-202611241136.261-7280faf",
+              "date": "2026-11-24T11:46:50Z",
+              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/develop-latest/0.9.1-develop-202611241136.261-7280faf.ipa",
+              "size": 37151417,
+              "sha256": "dda3631ff642fd3bb41d7c40a57bc646e0ebe96040895c2f6173d6ab41ac28bb",
+              "localizedDescription": "Development build 0.9.1-develop-202611241136.261-7280faf from commit 7280faf."
             }
           ]
         },
@@ -112,6 +83,19 @@
               "size": 30244721,
               "sha256": "91f8ebf67352f2297c32f5bdfe13d8864a78a7408a4eb10a75328a9a3c550970",
               "localizedDescription": "0.9.0: AirStore now signs with its own bundle id (com.JiangWanZhengChouYv.AirStore), so this build installs as a separate app: export your certificate and pairing file, uninstall the old build, install this one, then import them back. Onboarding gains a Container Mode step that installs AirBox and runs apps without using an App ID; the Open action now wakes AirBox and launches the staged guest without the debugger spin. JIT, incremental updates and cellular installs are unchanged."
+            }
+          ]
+        },
+        {
+          "track": "nightly",
+          "releases": [
+            {
+              "version": "0.9.1-nightly-202611241140.50-7280faf3",
+              "date": "2026-11-24T11:43:26Z",
+              "downloadURL": "https://as.mz0520.de5.net/dl/JiangWanZhengChouYv/AirStore/nightly/AirStore.ipa",
+              "size": 37041408,
+              "sha256": "f50ab3873f802442765139a6a370227957af927f0315d26cd6b3b22a6d8447fa",
+              "localizedDescription": "Nightly build 0.9.1-nightly-202611241140.50-7280faf3 from commit 7280faf3."
             }
           ]
         }
