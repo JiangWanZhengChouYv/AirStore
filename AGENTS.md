@@ -333,7 +333,7 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
   the 10 GB Actions cache budget is better spent on hosted runs, which start from nothing.
 - `nightly.yml` reads the same `MACOS_RUNNER` variable (it has no `prepare` job, so there is no
   per-run override), skips its package cache and the `setup-xcode` download there, and asserts the
-  installed Xcode instead. `brew install` falls back to "already present" for the same reason.
+  installed Xcode instead.
 - On a self-hosted runner `actions/checkout` is **skipped entirely** in the two Xcode jobs; a
   `Refresh the existing checkout` step does `git fetch --depth=1 $GITHUB_SHA` + `git reset --hard` +
   `git submodule update` in the work tree the previous run left behind (3s measured, against 4m38s
