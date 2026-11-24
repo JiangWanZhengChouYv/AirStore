@@ -815,7 +815,10 @@ private struct AutoRefreshStep: View {
                 Text(NSLocalizedString("Set Up Automatic Refresh", comment: ""))
                     .font(.system(size: 28, weight: .bold))
 
-                Text(NSLocalizedString("AirStore no longer keeps itself awake in the background, so your battery lasts longer. Use a Shortcuts automation to refresh your apps every 5–6 days instead — a free account's signing certificate lasts 7 days.", comment: ""))
+                Text(NSLocalizedString(
+                    "AirStore no longer keeps itself awake in the background, so your battery lasts longer. Use a Shortcuts automation to refresh your apps every 5–6 days instead — a free account's signing certificate lasts 7 days.",
+                    comment: ""
+                ))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

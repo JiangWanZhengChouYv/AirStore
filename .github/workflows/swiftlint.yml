@@ -4,10 +4,10 @@ name: SwiftLint
 # already compete for macOS runners -- a develop build sat queued and got cancelled four times --
 # and a style check has no business waiting behind them for an hour to print the same number.
 #
-# It is expected to be red. Default rules with no .swiftlint.yml put the error-severity count in
-# the hundreds, and they are coming down a batch at a time; the badge tracks the slope, not a
-# gate on any single pull request. Warnings are reported but never fail the job, because there are
-# fourteen thousand of them and that argument is not happening in a diff.
+# Error-severity violations are at **zero** (2026-11-24) and this job is now a gate: a new error
+# fails it. Warnings stay reported and never fail the job -- there are fifteen thousand of them, and
+# that argument is not happening in a diff. Do not raise a threshold in .swiftlint.yml to clear a
+# violation: the six that were left were line_length, and wrapping the call fixed every one.
 
 on:
   push:

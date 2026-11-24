@@ -232,6 +232,16 @@ Build target rule (maintainer, 2026-11-19): **speed is for `develop` only.**
 Style:
 - Swift: 4 spaces, UTF-8, LF (`.editorconfig`); SwiftLint errors must be zero (warnings are tolerated,
   but do not add new long-line/type-length violations casually).
+  - **SwiftLint is at zero errors and now gates the PR** (2026-11-24). The last six were all
+    `line_length` at the 260 threshold: five were `SettingsRow` calls in `SettingsHomeView` (long
+    argument lists) and one was a 210-character `NSLocalizedString` in `OnboardingView` whose line
+    only went over because of the indentation around it. Wrapping the calls fixed every one -- do
+    **not** raise the threshold in `.swiftlint.yml`, and keep the key a literal so string extraction
+    still sees it. Verify with the same image CI uses:
+    `docker run --rm -v "$PWD":/work -w /work ghcr.io/realm/swiftlint:0.65.1 swiftlint lint --quiet AltStore SideStore Shared SideBackup AltWidget AirBox`.
+    `line_length` honours `ignores_comments` and `ignores_interpolated_strings`, so a long line with
+    `\(…)` or a leading `//` is not a violation; the remaining over-long literals each carry an
+    explicit `// swiftlint:disable:next line_length`.
 - Use Swift Concurrency (`async`/`await`, `Task`) over GCD/completion handlers in new code.
 - Do not reformat unrelated lines. Keep comments sparse and about *why*, not *what*.
 

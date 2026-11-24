@@ -282,6 +282,20 @@ struct SettingsHomeView: View {
         }
     }
 
+    /// The way back to another saved Apple ID. One property, because the row is offered both when an
+    /// account is signed in and when none is -- signing out keeps the other accounts, so the way back
+    /// has to stay visible either way.
+    private var switchAccountRow: SettingsRow {
+        SettingsRow(
+            "account.switch",
+            title: NSLocalizedString("Switch Apple ID", comment: ""),
+            subtitle: NSLocalizedString("Use another saved account for new installs.", comment: ""),
+            symbol: "person.2.circle",
+            tint: .blue,
+            kind: .link(.switchAccount)
+        )
+    }
+
     private var groups: [SettingsGroup] {
         let accountRows: [SettingsRow]
         if self.state.isAuthenticated {
@@ -290,7 +304,7 @@ struct SettingsHomeView: View {
                 SettingsRow("account.email", title: NSLocalizedString("Email", comment: ""), symbol: "envelope", kind: .text(self.state.appleID ?? "—")),
                 SettingsRow("account.type", title: NSLocalizedString("Type", comment: ""), symbol: "person.2", kind: .text(self.state.teamType ?? "—")),
                 SettingsRow("account.actions", title: NSLocalizedString("Account Status", comment: ""), subtitle: self.accountStatusSubtitle, symbol: "checkmark.shield", tint: .green, kind: .link(.resolveAccount)),
-                SettingsRow("account.switch", title: NSLocalizedString("Switch Apple ID", comment: ""), subtitle: NSLocalizedString("Use another saved account for new installs.", comment: ""), symbol: "person.2.circle", tint: .blue, kind: .link(.switchAccount)),
+                self.switchAccountRow,
                 SettingsRow("account.signout", title: NSLocalizedString("Sign Out", comment: ""), symbol: "rectangle.portrait.and.arrow.right", tint: .red, kind: .link(.signOut))
             ]
         } else {
@@ -298,14 +312,28 @@ struct SettingsHomeView: View {
                 SettingsRow("account.signin", title: NSLocalizedString("Sign in with Apple ID", comment: ""), subtitle: NSLocalizedString("Sign in to download apps from AirStore.", comment: ""), symbol: "person.crop.circle.badge.plus", kind: .link(.signIn)),
                 // Signing out keeps the other saved accounts, so the way back has to stay visible
                 // when this one is not signed in.
-                SettingsRow("account.switch", title: NSLocalizedString("Switch Apple ID", comment: ""), subtitle: NSLocalizedString("Use another saved account for new installs.", comment: ""), symbol: "person.2.circle", tint: .blue, kind: .link(.switchAccount))
+                self.switchAccountRow
             ]
         }
 
         let appLimitAvailable = UserDefaults.standard.isCowExploitSupported || !ProcessInfo().sparseRestorePatched
         var refreshRows: [SettingsRow] = [
-            SettingsRow("refresh.background", title: NSLocalizedString("Background Refresh", comment: ""), subtitle: NSLocalizedString("Refresh apps automatically when connected to Wi-Fi.", comment: ""), symbol: "arrow.triangle.2.circlepath", tint: .blue, kind: .toggle(self.$backgroundRefresh)),
-            SettingsRow("refresh.idle", title: NSLocalizedString("Disable Idle Timeout", comment: ""), subtitle: NSLocalizedString("Keep the device awake during a refresh or install.", comment: ""), symbol: "moon.zzz", tint: .indigo, kind: .toggle(self.$noIdleTimeout)),
+            SettingsRow(
+                "refresh.background",
+                title: NSLocalizedString("Background Refresh", comment: ""),
+                subtitle: NSLocalizedString("Refresh apps automatically when connected to Wi-Fi.", comment: ""),
+                symbol: "arrow.triangle.2.circlepath",
+                tint: .blue,
+                kind: .toggle(self.$backgroundRefresh)
+            ),
+            SettingsRow(
+                "refresh.idle",
+                title: NSLocalizedString("Disable Idle Timeout", comment: ""),
+                subtitle: NSLocalizedString("Keep the device awake during a refresh or install.", comment: ""),
+                symbol: "moon.zzz",
+                tint: .indigo,
+                kind: .toggle(self.$noIdleTimeout)
+            ),
             SettingsRow("refresh.siri", title: NSLocalizedString("Allow Siri To Refresh Apps…", comment: ""), symbol: "waveform", tint: .purple, kind: .link(.siriShortcut))
         ]
         if appLimitAvailable {
@@ -323,7 +351,17 @@ struct SettingsHomeView: View {
         }
         refreshRows.append(contentsOf: [
             SettingsRow("refresh.beta", title: NSLocalizedString("Enable Beta Updates", comment: ""), symbol: "testtube.2", tint: .pink, kind: .toggle(self.$betaUpdates)),
-            SettingsRow("refresh.track", title: NSLocalizedString("Beta Updates Track", comment: ""), symbol: "flag", tint: .pink, kind: .menu(current: self.betaTrack, options: ReleaseTrackType.betaTracks.map(\.rawValue), select: { self.router.send(.betaTrack($0)) }))
+            SettingsRow(
+                "refresh.track",
+                title: NSLocalizedString("Beta Updates Track", comment: ""),
+                symbol: "flag",
+                tint: .pink,
+                kind: .menu(
+                    current: self.betaTrack,
+                    options: ReleaseTrackType.betaTracks.map(\.rawValue),
+                    select: { self.router.send(.betaTrack($0)) }
+                )
+            )
         ])
 
         return [
