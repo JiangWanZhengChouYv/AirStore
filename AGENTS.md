@@ -310,6 +310,12 @@ Runner economy (added 2026-11-13/14, all in `.github/workflows/develop.yml` and
 - A manual run defaults to `app_only: true`, so `workflow_dispatch` rebuilds the store alone.
 - The three macOS jobs take `runs-on` from the `prepare` job's `runner` output: a manual `runner`
   input wins, then the `MACOS_RUNNER` repository variable, then `macos-26`.
+- **The label lives on the runner, so re-registering loses it** (2026-11-24). `MACOS_RUNNER` is a
+  label, not a runner name: reinstalling the runner (as happened when the mini moved from the x64 to
+  the **arm64** package) creates a fresh registration with only the default labels, and the job then
+  queues forever because nothing matches. Re-add it after any reinstall:
+  `gh api repos/:owner/:repo/actions/runners/<id>/labels -X POST -f 'labels[]=macmini'`. The mini now
+  reports `ARM64` like the Pro, so `X64` is no longer a way to tell them apart either.
 - **`MACOS_RUNNER` names one runner, not `self-hosted`** (2026-11-24). Two runners are registered --
   `MarkdeMacBook-Pro` (`ARM64`) and `MarkdeMac-mini` (`X64`) -- and `self-hosted` matches **both**, so
   whichever is awake takes the job and a build can land on either machine. The variable is therefore

@@ -74,3 +74,28 @@ public enum InstallAccountChoices {
         }
     }
 }
+
+extension MyAppsViewController {
+
+    /// The Apple ID that installed an app which is already on the device. Reinstalling and updating
+    /// have to keep it: the App ID and provisioning profile in the bundle belong to that team, so a
+    /// different account could only fail or re-sign the app with the wrong certificate. Only a first
+    /// install gets to choose.
+    ///
+    /// Lives here rather than in MyAppsViewController, which is at its line-count limit.
+    func installedAccount(for storeApp: StoreApp) -> InstallAccountChoice? {
+        guard let installedApp = storeApp.installedApp else { return nil }
+        return self.installAccountChoice(for: installedApp)
+    }
+
+    func installAccountChoice(for installedApp: InstalledApp) -> InstallAccountChoice? {
+        guard let team = installedApp.team,
+              let identifier = team.account?.identifier
+        else { return nil }
+        return InstallAccountChoice(
+            scope: AuthAccountScope(accountIdentifier: identifier, teamIdentifier: team.identifier),
+            appleID: team.account?.appleID ?? identifier,
+            teamName: team.name
+        )
+    }
+}

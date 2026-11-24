@@ -1317,24 +1317,6 @@ private extension MyAppsViewController
         }
     }
     
-    /// The account (and team) that installed this app, if it is on the device. Reinstalling and
-    /// updating have to keep it -- only a first install gets to choose.
-    private func installedAccount(for storeApp: StoreApp) -> InstallAccountChoice? {
-        guard let installedApp = storeApp.installedApp else { return nil }
-        return installAccountChoice(for: installedApp)
-    }
-
-    private func installAccountChoice(for installedApp: InstalledApp) -> InstallAccountChoice? {
-        guard let team = installedApp.team,
-              let identifier = team.account?.identifier
-        else { return nil }
-        return InstallAccountChoice(
-            scope: AuthAccountScope(accountIdentifier: identifier, teamIdentifier: team.identifier),
-            appleID: team.account?.appleID ?? identifier,
-            teamName: team.name
-        )
-    }
-
     func reinstallFromSource(_ storeApp: StoreApp)
     {
         InstallAppDialog.present(storeApp: storeApp, from: self) { [weak self] account in
